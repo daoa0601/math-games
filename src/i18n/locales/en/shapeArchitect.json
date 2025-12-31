@@ -1,5 +1,6 @@
 {
     "title": "Shape Architect",
+    "rules": "Fill the target shape using Tetris-style pieces. Drag or click to place pieces, and use the rotate button (or press R) to turn them. All target cells must be filled to win.",
     "level": "Level",
     "piecesLeft": "Pieces Left",
     "rotation": "Rotation",

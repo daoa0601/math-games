@@ -1,5 +1,6 @@
 {
     "title": "Kiến Trúc Sư Hình Khối",
+    "rules": "Lấp đầy hình mục tiêu bằng các mảnh ghép Tetris. Kéo thả hoặc nhấp để đặt mảnh, và dùng nút xoay (hoặc nhấn R) để xoay. Tất cả ô mục tiêu phải được lấp đầy để thắng.",
     "level": "Màn",
     "piecesLeft": "Mảnh còn lại",
     "rotation": "Xoay",

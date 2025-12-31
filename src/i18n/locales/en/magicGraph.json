@@ -1,5 +1,6 @@
 {
     "title": "Magic Graph",
+    "rules": "Place numbers in the circles so that every line adds up to the same target sum. Each number can only be used once.",
     "targetSum": "Target Sum",
     "puzzle": "Puzzle",
     "progress": "Progress",

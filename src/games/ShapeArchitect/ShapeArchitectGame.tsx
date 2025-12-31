@@ -335,6 +335,12 @@ export function ShapeArchitectGame() {
                         onChange={handleDifficultyChange}
                     />
 
+                    {/* Game Rules */}
+                    <div className="game-rules">
+                        <span className="game-rules__icon">📜</span>
+                        <p className="game-rules__text">{t('rules')}</p>
+                    </div>
+
                     {/* Score Display */}
                     {totalScore > 0 && (
                         <div className="score-display">

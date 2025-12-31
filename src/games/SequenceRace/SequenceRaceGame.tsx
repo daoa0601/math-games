@@ -213,6 +213,12 @@ export function SequenceRaceGame() {
                     />
                 )}
 
+                {/* Game Rules */}
+                <div className="game-rules">
+                    <span className="game-rules__icon">📜</span>
+                    <p className="game-rules__text">{t('rules')}</p>
+                </div>
+
                 {/* Preset Games */}
                 <div className="level-selector">
                     {filteredGames.map((game) => (

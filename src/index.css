@@ -312,6 +312,30 @@ h3 { font-size: 1.5rem; }
   outline-offset: 2px;
 }
 
+/* Game Rules */
+.game-rules {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  background: linear-gradient(135deg, hsla(250, 84%, 54%, 0.1), hsla(170, 75%, 41%, 0.1));
+  border: 1px solid hsla(250, 84%, 54%, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.game-rules__icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.game-rules__text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
 /* High Contrast Toggle */
 .high-contrast-toggle {
   display: flex;

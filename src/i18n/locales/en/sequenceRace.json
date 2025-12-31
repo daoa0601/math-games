@@ -1,5 +1,6 @@
 {
     "title": "Sequence Sprinter",
+    "rules": "Race to reach the target number! On your turn, choose a number from the sequence to add to your position. The first player to reach or pass the target wins.",
     "target": "Target",
     "position": "Position",
     "turn": "Turn",

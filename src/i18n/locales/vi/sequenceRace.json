@@ -1,5 +1,6 @@
 {
     "title": "Đua Dãy Số",
+    "rules": "Đua để đạt số mục tiêu! Trong lượt của bạn, chọn một số từ dãy số để cộng vào vị trí. Người chơi đầu tiên đạt hoặc vượt qua mục tiêu sẽ thắng.",
     "target": "Mục tiêu",
     "position": "Vị trí",
     "turn": "Lượt",

@@ -1,5 +1,6 @@
 {
     "title": "Đồ Thị Ma Thuật",
+    "rules": "Đặt các số vào các vòng tròn sao cho mỗi đường thẳng đều có cùng tổng mục tiêu. Mỗi số chỉ được dùng một lần.",
     "targetSum": "Tổng mục tiêu",
     "puzzle": "Câu đố",
     "progress": "Tiến độ",

@@ -347,6 +347,12 @@ export function MagicGraphGame() {
                     onChange={handleDifficultyChange}
                 />
 
+                {/* Game Rules */}
+                <div className="game-rules">
+                    <span className="game-rules__icon">📜</span>
+                    <p className="game-rules__text">{t('rules')}</p>
+                </div>
+
                 {/* Level Selector */}
                 <div className="level-selector">
                     {filteredTemplates.map((template, index) => (
