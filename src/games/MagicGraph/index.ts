@@ -1,0 +1,1 @@
+export { MagicGraphGame } from './MagicGraphGame';

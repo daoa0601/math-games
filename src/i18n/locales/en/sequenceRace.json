@@ -1,0 +1,88 @@
+{
+    "title": "Sequence Sprinter",
+    "target": "Target",
+    "position": "Position",
+    "turn": "Turn",
+    "yourTurn": "Your Turn! Choose a step to add to your position.",
+    "aiThinking": "AI is thinking...",
+    "aiTurn": "AI Turn",
+    "you": "You",
+    "ai": "AI",
+    "gameStart": "Game starts! Make your move.",
+    "gameNames": {
+        "countTo10": "Count to 10",
+        "countTo15": "Count to 15",
+        "powersOf2": "Powers of 2",
+        "fibonacciRace": "Fibonacci Race",
+        "binarySprint": "Binary Sprint",
+        "primeTime": "Prime Time",
+        "squareRace": "Square Race",
+        "goldenRatio": "Golden Ratio"
+    },
+    "sequences": {
+        "arithmetic": {
+            "name": "Counting Numbers",
+            "description": "Add 1 to get the next number"
+        },
+        "geometric": {
+            "name": "Powers of 2",
+            "description": "Multiply by 2 to get the next number"
+        },
+        "fibonacci": {
+            "name": "Fibonacci Sequence",
+            "description": "Add the previous two numbers"
+        },
+        "prime": {
+            "name": "Prime Numbers",
+            "description": "Numbers only divisible by 1 and themselves"
+        },
+        "square": {
+            "name": "Perfect Squares",
+            "description": "Numbers that are n × n"
+        },
+        "triangular": {
+            "name": "Triangular Numbers",
+            "description": "Sum of first n natural numbers"
+        },
+        "powers3": {
+            "name": "Powers of 3",
+            "description": "Multiply by 3 to get the next number"
+        }
+    },
+    "gameOver": {
+        "youWin": "You Win!",
+        "aiWins": "AI Wins!",
+        "player1Wins": "Player 1 Wins!",
+        "player2Wins": "Player 2 Wins!",
+        "greatStrategy": "Great strategy!",
+        "betterLuck": "Better luck next time!",
+        "goodGame": "Good game!"
+    },
+    "hints": {
+        "goodMove": "Good Move!",
+        "learningMoment": "Learning Moment",
+        "optimalPlay": "Optimal play: Taking {{move}} would have been stronger.",
+        "sequence": "Sequence: {{name}}",
+        "positionAnalysis": "Position Analysis",
+        "winningStrategy": "You have a winning strategy from here!",
+        "aiAdvantage": "The AI has the advantage. Play carefully!",
+        "gameTheoryTip": {
+            "title": "Game Theory Tip",
+            "message": "This is a Nim-like game. Try to reach \"safe\" positions that force your opponent into bad moves."
+        },
+        "mathTip": {
+            "title": "Math Tip for Next Time",
+            "nimExplanation": "In Nim-like games, try to find \"winning positions\" - positions where no matter what the opponent does, you can always respond to maintain your advantage."
+        },
+        "sequenceTip": "Sequence Tip",
+        "formula": "Formula:"
+    },
+    "player1": "Player 1",
+    "player2": "Player 2",
+    "player1Turn": "Player 1's Turn!",
+    "player2Turn": "Player 2's Turn!",
+    "mode": {
+        "vsAI": "vs AI",
+        "twoPlayer": "Two Players"
+    }
+}

@@ -1,0 +1,116 @@
+{
+    "title": "Kiến Trúc Sư Hình Khối",
+    "level": "Màn",
+    "piecesLeft": "Mảnh còn lại",
+    "rotation": "Xoay",
+    "controls": {
+        "rotate": "Xoay",
+        "rotateTitle": "Xoay mảnh 90° (hiện tại {{current}}°)",
+        "undoTitle": "Hoàn tác mảnh cuối (xóa khỏi lưới)"
+    },
+    "instructions": {
+        "selectPiece": "Chọn một mảnh Tetris bên dưới, rồi nhấp vào lưới để đặt.",
+        "placePiece": "Nhấp vào ô mục tiêu để đặt {{piece}}. Dùng nút xoay để xoay."
+    },
+    "errors": {
+        "selectFirst": "Chọn một mảnh trước!",
+        "cannotPlace": "Không thể đặt ở đây - mảnh chồng lên hoặc vượt ra ngoài mục tiêu!"
+    },
+    "allPiecesPlaced": "Đã đặt hết các mảnh!",
+    "levelNames": {
+        "square4x4": "Hình vuông 4x4",
+        "longStrip": "Dải dài",
+        "tFormation": "Hình chữ T",
+        "rectangle": "Hình chữ nhật",
+        "plusSign": "Dấu cộng",
+        "staircase": "Cầu thang",
+        "hShape": "Hình chữ H",
+        "tetrisMaster": "Bậc thầy Tetris",
+        "allSeven": "Đủ Bảy",
+        "pentominoChallenge": "Thử thách Pentomino",
+        "ultimate": "Đỉnh cao",
+        "random": "Ngẫu nhiên {{count}} Mảnh"
+    },
+    "pieceNames": {
+        "iBlock": "Khối I",
+        "oBlock": "Khối O",
+        "tBlock": "Khối T",
+        "sBlock": "Khối S",
+        "zBlock": "Khối Z",
+        "jBlock": "Khối J",
+        "lBlock": "Khối L",
+        "fPento": "Pento F",
+        "pPento": "Pento P",
+        "uPento": "Pento U",
+        "wPento": "Pento W",
+        "iPento": "Pento I",
+        "lPento": "Pento L",
+        "nPento": "Pento N",
+        "tPento": "Pento T",
+        "vPento": "Pento V",
+        "xPento": "Pento X",
+        "yPento": "Pento Y",
+        "zPento": "Pento Z"
+    },
+    "win": {
+        "title": "Hoàn thành Câu đố!",
+        "message": "Bạn đã lấp đầy hình hoàn hảo!",
+        "geometryInsight": {
+            "title": "Kiến thức Hình học",
+            "message": "Bạn đã dùng tư duy không gian để ghép các mảnh. Kỹ năng này rất quan trọng trong kiến trúc, kỹ thuật và lập trình!"
+        }
+    },
+    "hints": {
+        "rotationTip": "Thử xoay mảnh ghép bằng nút này hoặc nhấn R!",
+        "tetrominoTip": {
+            "title": "Mẹo về Tetromino",
+            "message": "Mỗi mảnh che đúng 4 ô vuông. Tổng diện tích mục tiêu luôn là bội của 4!"
+        },
+        "strategy": {
+            "title": "Chiến thuật",
+            "message": "Điền các góc trước - chúng có ít vị trí hợp lệ, giúp đơn giản hóa các bước sau."
+        },
+        "spatialThinking": {
+            "title": "Tư duy Không gian",
+            "message": "Tập hình dung xoay các mảnh trong đầu trước khi nhấp. Điều này rèn luyện kỹ năng tư duy không gian!"
+        },
+        "failure": {
+            "spatialReasoning": {
+                "title": "Tư duy Không gian",
+                "tip": "Thử hình dung mỗi mảnh sẽ trông như thế nào khi xoay trước khi đặt."
+            },
+            "fillCornersFirst": {
+                "title": "Điền Góc Trước",
+                "tip": "Các góc có ít vị trí hợp lệ, nên điền sớm để giảm độ phức tạp."
+            },
+            "areaConservation": {
+                "title": "Bảo toàn Diện tích",
+                "tip": "Tổng diện tích các mảnh luôn bằng diện tích mục tiêu. Dùng điều này để kiểm tra lời giải."
+            },
+            "rotationMatters": {
+                "title": "Xoay là Quan trọng",
+                "tip": "Hầu hết các mảnh Tetris có thể đặt ở 4 hướng khác nhau. Thử hết các hướng!"
+            }
+        }
+    },
+    "mode2D": "Chế độ 2D",
+    "mode3D": "Chế độ 3D",
+    "editor": {
+        "title": "Trình Tạo Màn Chơi",
+        "instructions": "Nhấp và kéo để vẽ hình mục tiêu, sau đó chọn các mảnh để sử dụng",
+        "width": "Rộng",
+        "height": "Cao",
+        "fillAll": "Tô Đầy",
+        "clearAll": "Xóa",
+        "selectPieces": "Chọn Mảnh",
+        "targetCells": "Ô mục tiêu",
+        "pieceCells": "Ô các mảnh",
+        "cancel": "Hủy",
+        "play": "Chơi Màn",
+        "customLevel": "Màn Tùy Chỉnh",
+        "noTargetCells": "Vẽ ít nhất một ô mục tiêu",
+        "noPiecesSelected": "Chọn ít nhất một mảnh",
+        "pieceMismatch": "Các mảnh có {{pieces}} ô nhưng mục tiêu có {{cells}} ô",
+        "openEditor": "Tạo Tùy Chỉnh"
+    }
+}

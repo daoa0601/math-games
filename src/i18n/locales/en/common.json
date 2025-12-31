@@ -1,0 +1,68 @@
+{
+    "appTitle": "Math Gymnasium",
+    "appSubtitle": "Choose a game to train your brain!",
+    "backToGames": "Back to Games",
+    "difficulty": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard",
+        "master": "Master",
+        "grandmaster": "Grandmaster"
+    },
+    "difficultyEmoji": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard",
+        "master": "Master"
+    },
+    "buttons": {
+        "reset": "Reset",
+        "nextPuzzle": "Next Puzzle",
+        "nextLevel": "Next Level",
+        "random": "Random",
+        "needHelp": "Need Help?",
+        "hideHints": "Hide Hints",
+        "rotate": "Rotate",
+        "restart": "Restart",
+        "playAgain": "Play Again",
+        "newGame": "New Game",
+        "tryAgain": "Try Again",
+        "skip": "Skip",
+        "skipPuzzle": "Skip Puzzle",
+        "skipLevel": "Skip Level",
+        "randomLevel": "Random Level"
+    },
+    "timer": {
+        "timeUp": "Time's Up!",
+        "practiceMessage": "Don't worry - practice makes perfect!"
+    },
+    "stats": {
+        "time": "Time",
+        "moves": "Moves",
+        "nodes": "Nodes",
+        "pieces": "Pieces",
+        "score": "Score"
+    },
+    "games": {
+        "magicGraph": {
+            "title": "Magic Graph",
+            "description": "Fill nodes with numbers so every line sums to the target. Use logic and deduction to solve!",
+            "tags": ["Addition", "Logic", "Graphs"]
+        },
+        "sequenceRace": {
+            "title": "Sequence Sprinter",
+            "description": "Race to reach the target number! Choose your steps wisely—each number can only be used once.",
+            "tags": ["Strategy", "Game Theory"]
+        },
+        "shapeArchitect": {
+            "title": "Shape Architect",
+            "description": "Fill the ghost shape with blocks. Rotate, place, and solve spatial puzzles in 2D and 3D!",
+            "tags": ["Geometry", "Spatial"]
+        }
+    },
+    "generating": "Generating...",
+    "generatingPuzzle": "Generating puzzle... (may take a few seconds)",
+    "availableNumbers": "Available numbers:",
+    "completePreviousLevel": "Complete previous level to unlock",
+    "best": "Best"
+}

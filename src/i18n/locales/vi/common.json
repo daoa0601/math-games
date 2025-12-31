@@ -1,0 +1,68 @@
+{
+    "appTitle": "Phòng Gym Toán Học",
+    "appSubtitle": "Chọn một trò chơi để rèn luyện trí não!",
+    "backToGames": "Quay lại Trò chơi",
+    "difficulty": {
+        "easy": "Dễ",
+        "medium": "Trung bình",
+        "hard": "Khó",
+        "master": "Bậc thầy",
+        "grandmaster": "Đại kiện tướng"
+    },
+    "difficultyEmoji": {
+        "easy": "Dễ",
+        "medium": "Trung bình",
+        "hard": "Khó",
+        "master": "Bậc thầy"
+    },
+    "buttons": {
+        "reset": "Đặt lại",
+        "nextPuzzle": "Câu đố tiếp",
+        "nextLevel": "Màn tiếp",
+        "random": "Ngẫu nhiên",
+        "needHelp": "Cần trợ giúp?",
+        "hideHints": "Ẩn gợi ý",
+        "rotate": "Xoay",
+        "restart": "Chơi lại",
+        "playAgain": "Chơi lại",
+        "newGame": "Ván mới",
+        "tryAgain": "Thử lại",
+        "skip": "Bỏ qua",
+        "skipPuzzle": "Bỏ qua câu đố",
+        "skipLevel": "Bỏ qua màn",
+        "randomLevel": "Màn ngẫu nhiên"
+    },
+    "timer": {
+        "timeUp": "Hết giờ!",
+        "practiceMessage": "Đừng lo - luyện tập nhiều sẽ giỏi hơn!"
+    },
+    "stats": {
+        "time": "Thời gian",
+        "moves": "Số bước",
+        "nodes": "Số nút",
+        "pieces": "Số mảnh",
+        "score": "Điểm"
+    },
+    "games": {
+        "magicGraph": {
+            "title": "Đồ Thị Ma Thuật",
+            "description": "Điền số vào các nút sao cho mỗi đường có tổng bằng mục tiêu. Sử dụng logic và suy luận!",
+            "tags": ["Phép cộng", "Logic", "Đồ thị"]
+        },
+        "sequenceRace": {
+            "title": "Đua Dãy Số",
+            "description": "Đua để đạt số mục tiêu! Chọn bước đi khôn ngoan—mỗi số chỉ dùng được một lần.",
+            "tags": ["Chiến thuật", "Lý thuyết trò chơi"]
+        },
+        "shapeArchitect": {
+            "title": "Kiến Trúc Sư Hình Khối",
+            "description": "Lấp đầy hình bóng bằng các khối. Xoay, đặt và giải các câu đố không gian 2D và 3D!",
+            "tags": ["Hình học", "Không gian"]
+        }
+    },
+    "generating": "Đang tạo...",
+    "generatingPuzzle": "Đang tạo câu đố... (có thể mất vài giây)",
+    "availableNumbers": "Các số có sẵn:",
+    "completePreviousLevel": "Hoàn thành màn trước để mở khóa",
+    "best": "Tốt nhất"
+}

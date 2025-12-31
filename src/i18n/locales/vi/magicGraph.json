@@ -1,0 +1,133 @@
+{
+    "title": "Đồ Thị Ma Thuật",
+    "targetSum": "Tổng mục tiêu",
+    "puzzle": "Câu đố",
+    "progress": "Tiến độ",
+    "hint": "Gợi ý",
+    "allLinesSameValue": "Tất cả các đường có cùng tổng",
+    "revealTargetSum": "Hiện tổng mục tiêu (bỏ cuộc)",
+    "undo": "Hoàn tác",
+    "redo": "Làm lại",
+    "goal": "Mục tiêu",
+    "minimize": "Tối thiểu hóa",
+    "maximize": "Tối đa hóa",
+    "validRange": "Phạm vi hợp lệ",
+    "yourSum": "Tổng của bạn",
+    "minimum": "Nhỏ nhất",
+    "maximum": "Lớn nhất",
+    "puzzleNames": {
+        "lineOfThree": "Đường thẳng 3 điểm",
+        "cross": "Hình chữ thập",
+        "magicTriangle": "Tam giác Ma thuật",
+        "letterM": "Chữ M",
+        "fivePointStar": "Ngôi sao 5 cánh",
+        "diamond": "Hình thoi",
+        "magicSquare": "Ô vuông Ma thuật 3×3"
+    },
+    "win": {
+        "title": "Giải xong!",
+        "message": "Tất cả các đường đều có tổng {{sum}}!",
+        "mathInsight": "Kiến thức Toán: Bạn đã dùng {{nodeCount}} số trên {{lineCount}} đường!",
+        "grandmaster": {
+            "optimal": "Lời giải Tối ưu!",
+            "valid": "Lời giải Hợp lệ",
+            "tryAgain": "Bạn có thể tìm lời giải tốt hơn không?"
+        }
+    },
+    "hints": {
+        "auditor": {
+            "title": "Vi phạm Ràng buộc",
+            "singleLine": "1 đường không thể đạt tổng mục tiêu với các số còn lại. Tìm đường đỏ nhấp nháy!",
+            "multipleLines": "{{count}} đường không thể đạt tổng mục tiêu. Có thể bạn cần quay lại và thử cách khác."
+        },
+        "starter": {
+            "title": "Bước đi Tốt nhất",
+            "subtext": "Tìm nút sáng màu xanh lá!"
+        },
+        "algebraist": {
+            "title": "Trợ giúp Đại số"
+        },
+        "concept": {
+            "additionBasics": {
+                "title": "Cơ bản Phép cộng",
+                "message": "Tất cả các số trên một đường phải cộng lại bằng tổng mục tiêu. Thử các thứ tự khác nhau!"
+            },
+            "sharedNumbers": {
+                "title": "Số dùng chung",
+                "message": "Nút ở giữa xuất hiện trong CẢ HAI đường. Số này được tính hai lần!"
+            },
+            "magicConstant": {
+                "title": "Hằng số Ma thuật",
+                "message": "Trong tam giác ma thuật, tổng tất cả số ÷ 3 + (tổng các góc) = mục tiêu × 3"
+            },
+            "magicConstantFormula": {
+                "title": "Công thức Hằng số Ma thuật",
+                "message": "Với ô vuông ma thuật 3×3 từ 1-9: Tổng = n(n²+1)/2 = 3(10)/2 = 15"
+            },
+            "intersectionPoints": {
+                "title": "Điểm Giao nhau",
+                "message": "Các nút nơi nhiều đường gặp nhau là chìa khóa - chúng ảnh hưởng nhiều tổng cùng lúc!"
+            }
+        },
+        "strategy": {
+            "centerFirst": {
+                "title": "Ô giữa Trước",
+                "message": "Thử đặt số ở giữa (3) vào tâm. Tại sao điều này có thể đúng?"
+            },
+            "centerNumber": {
+                "title": "Số ở Tâm",
+                "message": "Tâm của ô vuông ma thuật 3×3 luôn là 5 (số ở giữa)!"
+            },
+            "workOutward": {
+                "title": "Làm từ trong ra",
+                "message": "Bắt đầu từ các nút dùng chung và mở rộng ra các cạnh."
+            }
+        },
+        "progress": {
+            "checkWork": {
+                "title": "Kiểm tra Lại",
+                "message": "Đường đỏ nghĩa là tổng sai. Thử xóa một số và thay thế."
+            },
+            "whereToStart": {
+                "title": "Bắt đầu từ đâu?",
+                "message": "Tìm các nút xuất hiện trong nhiều đường - đây là các vị trí quan trọng!"
+            },
+            "buildFromKnowns": {
+                "title": "Xây từ những gì Biết",
+                "message": "Chọn một đường có một số ô đã điền. Tính xem cần bao nhiêu để đạt tổng."
+            },
+            "almostThere": {
+                "title": "Sắp xong rồi!",
+                "message": "Dùng đại số: nếu một đường gần đầy, số còn thiếu = mục tiêu - tổng hiện tại."
+            }
+        }
+    },
+    "picker": {
+        "chooseNumber": "Chọn một số",
+        "noNumbersAvailable": "Không còn số nào"
+    },
+    "editor": {
+        "title": "Trình Tạo Câu Đố",
+        "instructions": "Tạo cấu trúc đồ thị riêng và sinh câu đố từ đó",
+        "addMode": "Thêm Nút",
+        "connectMode": "Nối",
+        "deleteMode": "Xóa",
+        "createLine": "Tạo Đường",
+        "nodesSelected": "nút",
+        "availableNumbers": "Các số có sẵn",
+        "nodes": "Nút",
+        "lines": "Đường",
+        "numbers": "Số",
+        "clearAll": "Xóa Hết",
+        "cancel": "Hủy",
+        "generate": "Sinh Câu Đố",
+        "customPuzzle": "Câu Đố Tùy Chỉnh",
+        "selectAtLeastTwo": "Chọn ít nhất 2 nút để tạo đường",
+        "lineExists": "Đường này đã tồn tại",
+        "needMoreNodes": "Thêm ít nhất 2 nút",
+        "needLines": "Tạo ít nhất 1 đường",
+        "notEnoughNumbers": "Cần ít nhất số lượng số bằng số nút",
+        "noSolutionFound": "Không tìm thấy lời giải. Thử các số hoặc cấu trúc khác.",
+        "openEditor": "Tạo Tùy Chỉnh"
+    }
+}

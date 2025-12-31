@@ -1,0 +1,1436 @@
+/* ========================================
+   Magic Graph - Component Styles
+   ======================================== */
+
+.puzzle-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xl);
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Puzzle Info */
+.puzzle-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+    background: var(--bg-card);
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid hsla(250, 84%, 54%, 0.2);
+}
+
+.puzzle-info__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.puzzle-info__label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.puzzle-info__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+/* SVG Board */
+.puzzle-board {
+    background: var(--bg-surface);
+    border-radius: var(--radius-xl);
+    border: 2px solid hsla(250, 84%, 54%, 0.3);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Lines */
+.puzzle-line {
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke var(--transition-fast);
+}
+
+.puzzle-line--incomplete {
+    stroke: var(--color-grey);
+}
+
+.puzzle-line--correct {
+    stroke: var(--color-success);
+    filter: drop-shadow(0 0 6px var(--color-success));
+}
+
+.puzzle-line--incorrect {
+    stroke: var(--color-error);
+    filter: drop-shadow(0 0 6px var(--color-error));
+}
+
+.puzzle-line--overflow {
+    stroke: var(--color-warning);
+    filter: drop-shadow(0 0 6px var(--color-warning));
+}
+
+/* Auditor: Impossible lines (constraint violation) */
+.puzzle-line--impossible {
+    stroke: var(--color-error) !important;
+    stroke-dasharray: 8 4;
+    animation: impossiblePulse 1s ease-in-out infinite;
+}
+
+@keyframes impossiblePulse {
+    0%, 100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 8px var(--color-error));
+    }
+    50% {
+        opacity: 0.6;
+        filter: drop-shadow(0 0 4px var(--color-error));
+    }
+}
+
+/* Nodes */
+.puzzle-node {
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+.puzzle-node:hover {
+    transform: scale(1.1);
+}
+
+.puzzle-node:focus {
+    outline: none;
+}
+
+.puzzle-node:focus-visible .puzzle-node__circle {
+    stroke: var(--color-accent);
+    stroke-width: 4;
+    filter: drop-shadow(0 0 8px var(--color-accent-glow));
+}
+
+.puzzle-node--fixed {
+    cursor: default;
+}
+
+.puzzle-node__circle {
+    fill: var(--bg-card);
+    stroke: var(--color-primary);
+    stroke-width: 3;
+    transition: all var(--transition-fast);
+}
+
+.puzzle-node--fixed .puzzle-node__circle {
+    fill: var(--color-primary-dark);
+    stroke: var(--color-primary-light);
+}
+
+.puzzle-node--empty .puzzle-node__circle {
+    stroke-dasharray: 4 4;
+}
+
+.puzzle-node--selected .puzzle-node__circle {
+    stroke: var(--color-accent);
+    stroke-width: 4;
+    filter: drop-shadow(0 0 8px var(--color-accent-glow));
+}
+
+/* Starter: Recommended node (fewest options) */
+.puzzle-node--recommended .puzzle-node__circle {
+    stroke: var(--color-success);
+    stroke-width: 4;
+    animation: recommendedPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes recommendedPulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 8px var(--color-success));
+        stroke-width: 4;
+    }
+    50% {
+        filter: drop-shadow(0 0 16px var(--color-success));
+        stroke-width: 5;
+    }
+}
+
+.puzzle-node__text {
+    fill: var(--text-primary);
+    font-size: 20px;
+    font-weight: 700;
+    font-family: var(--font-sans);
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Number Inventory */
+.number-inventory {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid hsla(250, 84%, 54%, 0.2);
+}
+
+.number-chip {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-primary);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.number-chip:hover:not(.number-chip--used):not(.number-chip--selected) {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+}
+
+.number-chip--selected {
+    background: var(--color-primary);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 12px var(--color-accent-glow);
+    transform: scale(1.1);
+}
+
+.number-chip--used {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-style: dashed;
+}
+
+/* Actions */
+.puzzle-actions {
+    display: flex;
+    gap: var(--space-md);
+}
+
+/* Win State */
+.win-overlay {
+    position: fixed;
+    inset: 0;
+    background: hsla(230, 25%, 10%, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xl);
+    z-index: 100;
+    animation: fadeIn 0.3s ease;
+}
+
+.win-overlay__title {
+    font-size: 3rem;
+    background: linear-gradient(135deg, var(--color-success), var(--color-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.win-overlay__message {
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Level Selector */
+.level-selector {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.level-btn {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-card);
+    border: 1px solid hsla(250, 84%, 54%, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.level-btn:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+}
+
+.level-btn--active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--text-primary);
+}
+
+/* Difficulty Selector */
+.difficulty-selector {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.difficulty-btn {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-card);
+    border: 1px solid hsla(250, 84%, 54%, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.difficulty-btn:hover {
+    background: var(--bg-card-hover);
+}
+
+.difficulty-btn--active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--text-primary);
+}
+
+.difficulty-btn--easy {
+    border-left: 3px solid var(--color-success);
+}
+
+.difficulty-btn--medium {
+    border-left: 3px solid var(--color-warning);
+}
+
+.difficulty-btn--hard {
+    border-left: 3px solid var(--color-error);
+}
+
+/* Hint Toggle */
+.hint-toggle {
+    font-size: 0.9rem;
+}
+
+/* Hints Panel */
+.hints-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    width: 100%;
+    padding: var(--space-lg);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid hsla(250, 84%, 54%, 0.2);
+}
+
+.hint-card {
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--color-primary);
+    background: var(--bg-surface);
+}
+
+.hint-card h4 {
+    margin: 0 0 var(--space-xs) 0;
+    font-size: 0.9rem;
+    color: var(--color-accent);
+}
+
+.hint-card p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.hint-card--concept {
+    border-left-color: var(--color-success);
+}
+
+.hint-card--concept h4 {
+    color: var(--color-success);
+}
+
+.hint-card--strategy {
+    border-left-color: var(--color-warning);
+}
+
+.hint-card--strategy h4 {
+    color: var(--color-warning);
+}
+
+.hint-card--specific {
+    border-left-color: var(--color-primary);
+}
+
+.hint-card--progress {
+    border-left-color: var(--color-accent);
+    background: hsla(45, 100%, 51%, 0.1);
+}
+
+.hint-card--progress h4 {
+    color: var(--color-accent);
+}
+
+/* Auditor hint (constraint violation warning) */
+.hint-card--auditor {
+    border-left-color: var(--color-error);
+    background: hsla(0, 84%, 60%, 0.15);
+    animation: auditorPulse 2s ease-in-out infinite;
+}
+
+.hint-card--auditor h4 {
+    color: var(--color-error);
+}
+
+@keyframes auditorPulse {
+    0%, 100% {
+        background: hsla(0, 84%, 60%, 0.15);
+    }
+    50% {
+        background: hsla(0, 84%, 60%, 0.25);
+    }
+}
+
+/* Starter hint (best next move) */
+.hint-card--starter {
+    border-left-color: var(--color-success);
+    background: hsla(145, 84%, 40%, 0.15);
+}
+
+.hint-card--starter h4 {
+    color: var(--color-success);
+}
+
+.hint-card__subtext {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: var(--space-xs);
+}
+
+/* Algebraist hint (equations and deductions) */
+.hint-card--algebraist {
+    border-left-color: var(--color-primary);
+    background: hsla(250, 84%, 54%, 0.15);
+}
+
+.hint-card--algebraist h4 {
+    color: var(--color-primary-light);
+}
+
+.algebra-hint {
+    margin-top: var(--space-sm);
+    padding-top: var(--space-sm);
+    border-top: 1px solid hsla(250, 84%, 54%, 0.2);
+}
+
+.algebra-hint:first-of-type {
+    margin-top: var(--space-xs);
+    padding-top: 0;
+    border-top: none;
+}
+
+.algebra-equation {
+    display: block;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    background: hsla(0, 0%, 0%, 0.3);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-xs);
+}
+
+.algebra-explanation {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Win Overlay Tip */
+.win-overlay__tip {
+    max-width: 400px;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    padding: var(--space-md);
+    background: hsla(250, 84%, 54%, 0.1);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--color-primary);
+}
+
+/* Custom Number Input */
+.custom-number-input {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid hsla(250, 84%, 54%, 0.2);
+}
+
+.custom-number-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.custom-number-field {
+    width: 80px;
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--bg-surface);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.custom-number-field:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 8px var(--color-accent-glow);
+}
+
+.btn--small {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.85rem;
+}
+
+/* Generating Overlay */
+.generating-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-xl);
+    background: hsla(250, 84%, 54%, 0.1);
+    border-radius: var(--radius-lg);
+    border: 2px dashed var(--color-primary);
+}
+
+.generating-spinner {
+    font-size: 3rem;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.generating-overlay p {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ========================================
+   Timer Display
+   ======================================== */
+
+.timer {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--bg-card);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--color-primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    transition: all var(--transition-fast);
+}
+
+.timer__icon {
+    font-size: 1.5rem;
+}
+
+.timer__value {
+    font-family: monospace;
+    min-width: 60px;
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.timer__pulse {
+    animation: pulse 0.5s ease infinite;
+    color: var(--color-error);
+}
+
+/* Timer warning states */
+.timer--warning {
+    border-color: var(--color-warning);
+    background: hsla(45, 100%, 51%, 0.1);
+}
+
+.timer--warning .timer__value {
+    color: var(--color-warning);
+}
+
+.timer--critical {
+    border-color: var(--color-error);
+    background: hsla(0, 84%, 60%, 0.2);
+    animation: shake 0.5s ease infinite;
+}
+
+.timer--critical .timer__value {
+    color: var(--color-error);
+    animation: pulse 0.5s ease infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-3px);
+    }
+
+    75% {
+        transform: translateX(3px);
+    }
+}
+
+/* Board wrapper with urgency effects */
+.board-wrapper {
+    position: relative;
+    transition: all var(--transition-fast);
+}
+
+.board-wrapper--urgent {
+    animation: urgentPulse 1s ease infinite;
+}
+
+.board-wrapper--urgent .puzzle-board {
+    border-color: var(--color-error);
+    box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.4);
+}
+
+@keyframes urgentPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+/* Glowing target sum */
+.puzzle-info__value--glow {
+    text-shadow: 0 0 10px var(--color-accent-glow);
+    animation: glow 2s ease infinite;
+}
+
+@keyframes glow {
+
+    0%,
+    100% {
+        text-shadow: 0 0 10px var(--color-accent-glow);
+    }
+
+    50% {
+        text-shadow: 0 0 20px var(--color-accent-glow), 0 0 30px var(--color-accent-glow);
+    }
+}
+
+/* Time Up Overlay */
+.time-up-overlay {
+    position: fixed;
+    inset: 0;
+    background: hsla(0, 50%, 10%, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xl);
+    z-index: 100;
+    animation: fadeIn 0.3s ease;
+}
+
+.time-up-overlay__title {
+    font-size: 3rem;
+    color: var(--color-error);
+    animation: shake 0.5s ease 3;
+}
+
+.time-up-overlay__message {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+}
+
+/* Enhanced Win Overlay */
+.win-overlay__confetti {
+    font-size: 4rem;
+    animation: bounce 0.5s ease infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.win-overlay__stats {
+    display: flex;
+    gap: var(--space-xl);
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-md) var(--space-lg);
+    background: hsla(250, 84%, 54%, 0.2);
+    border-radius: var(--radius-lg);
+}
+
+.stat__value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+.stat__label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.btn--large {
+    padding: var(--space-md) var(--space-xl);
+    font-size: 1.25rem;
+}
+
+/* Master Difficulty Styles */
+.difficulty-btn--master {
+    border-left: 3px solid var(--color-accent);
+    background: linear-gradient(135deg, hsla(280, 84%, 40%, 0.3), hsla(250, 84%, 54%, 0.3));
+}
+
+.difficulty-btn--master.difficulty-btn--active {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    border-color: var(--color-accent);
+}
+
+/* Mystery Value (Hidden Target Sum) */
+.puzzle-info__value--mystery {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.mystery-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    animation: mysteryPulse 2s ease infinite;
+    text-shadow: 0 0 15px var(--color-accent-glow);
+}
+
+@keyframes mysteryPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+}
+
+/* Tiny button for reveal */
+.btn--tiny {
+    padding: var(--space-xs);
+    font-size: 0.75rem;
+    min-width: auto;
+    border-radius: var(--radius-sm);
+}
+
+.btn--ghost {
+    background: transparent;
+    border: 1px solid hsla(250, 84%, 54%, 0.3);
+    color: var(--text-muted);
+    opacity: 0.6;
+    transition: all var(--transition-fast);
+}
+
+.btn--ghost:hover {
+    opacity: 1;
+    background: hsla(250, 84%, 54%, 0.2);
+    border-color: var(--color-primary);
+}
+
+/* Master mode hint item */
+.puzzle-info__item--hint {
+    border-left: 2px solid var(--color-accent);
+    padding-left: var(--space-sm);
+}
+
+.puzzle-info__value--small {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+/* Number Picker Popup */
+.number-picker {
+    position: fixed;
+    z-index: 200;
+    transform: translate(-50%, -100%);
+    margin-top: -10px;
+    background: var(--bg-card);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.4);
+    min-width: 180px;
+    animation: pickerSlideIn 0.2s ease;
+}
+
+@keyframes pickerSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -90%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -100%);
+    }
+}
+
+.number-picker__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid hsla(250, 84%, 54%, 0.2);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.number-picker__close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color var(--transition-fast);
+}
+
+.number-picker__close:hover {
+    color: var(--color-error);
+}
+
+.number-picker__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    gap: var(--space-xs);
+    padding: var(--space-md);
+}
+
+.number-picker__option {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-primary);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.number-picker__option:hover {
+    background: var(--color-primary);
+    transform: scale(1.1);
+    box-shadow: 0 0 12px var(--color-accent-glow);
+}
+
+.number-picker__option--current {
+    border-color: var(--color-accent);
+    background: hsla(45, 100%, 51%, 0.2);
+}
+
+.number-picker__clear {
+    width: 100%;
+    padding: var(--space-sm);
+    background: hsla(0, 84%, 60%, 0.2);
+    border: none;
+    border-top: 1px solid hsla(250, 84%, 54%, 0.2);
+    color: var(--color-error);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background var(--transition-fast);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.number-picker__clear:hover {
+    background: hsla(0, 84%, 60%, 0.4);
+}
+
+.number-picker__empty {
+    padding: var(--space-md);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* Number Inventory Wrapper */
+.number-inventory-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.inventory-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ========================================
+   Mobile Touch Optimization
+   ======================================== */
+
+/* Touch device detection - larger touch targets */
+@media (pointer: coarse) {
+    .puzzle-node {
+        /* Increase touch target size for SVG nodes */
+    }
+
+    .puzzle-node__circle {
+        /* Nodes already 24px radius = 48px diameter, which is good */
+    }
+
+    .number-chip {
+        min-width: 52px;
+        min-height: 52px;
+    }
+
+    .number-picker__option {
+        min-width: 48px;
+        min-height: 48px;
+    }
+
+    .difficulty-btn,
+    .level-btn {
+        min-height: 44px;
+        padding: var(--space-md) var(--space-lg);
+    }
+
+    .btn {
+        min-height: 48px;
+    }
+
+    /* Disable hover effects on touch - they stick after tap */
+    .puzzle-node:hover {
+        transform: none;
+    }
+
+    .number-chip:hover:not(.number-chip--used):not(.number-chip--selected) {
+        transform: none;
+    }
+
+    .number-picker__option:hover {
+        transform: none;
+    }
+
+    /* Active states for touch feedback */
+    .puzzle-node:active:not(.puzzle-node--fixed) {
+        transform: scale(1.15);
+    }
+
+    .number-chip:active:not(.number-chip--used) {
+        transform: scale(0.95);
+    }
+
+    .number-picker__option:active {
+        transform: scale(0.95);
+        background: var(--color-primary);
+    }
+}
+
+/* Small screens - responsive layout */
+@media (max-width: 600px) {
+    .puzzle-container {
+        gap: var(--space-lg);
+        padding: var(--space-sm);
+    }
+
+    .puzzle-info {
+        flex-wrap: wrap;
+        gap: var(--space-md);
+        padding: var(--space-md);
+    }
+
+    .number-inventory {
+        gap: var(--space-sm);
+        padding: var(--space-sm);
+    }
+
+    .number-chip {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+    }
+
+    .difficulty-selector {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .level-selector {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .puzzle-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .hints-panel {
+        padding: var(--space-md);
+    }
+
+    .hint-card {
+        padding: var(--space-sm);
+    }
+
+    .win-overlay__stats {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    /* Number picker adjustments for mobile */
+    .number-picker {
+        min-width: 200px;
+        max-width: 90vw;
+    }
+
+    .number-picker__grid {
+        grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+    .puzzle-board {
+        width: 280px;
+        height: 240px;
+    }
+
+    .number-chip {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+/* ========================================
+   Grandmaster Mode Styles
+   ======================================== */
+
+/* Optimization goal toggle */
+.optimization-toggle {
+    display: flex;
+    gap: var(--space-xs);
+    background: var(--bg-surface);
+    padding: var(--space-xs);
+    border-radius: var(--radius-md);
+    border: 1px solid hsla(250, 84%, 54%, 0.2);
+}
+
+.opt-btn {
+    padding: var(--space-xs) var(--space-sm);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.opt-btn:hover {
+    background: hsla(250, 84%, 54%, 0.1);
+    color: var(--text-primary);
+}
+
+.opt-btn--active {
+    background: var(--color-accent);
+    color: white;
+    box-shadow: 0 2px 8px hsla(250, 84%, 54%, 0.4);
+}
+
+.opt-btn--active:hover {
+    background: var(--color-accent-light);
+}
+
+/* Valid range display */
+.puzzle-info__item--goal,
+.puzzle-info__item--range {
+    flex-direction: column;
+    align-items: center;
+}
+
+.puzzle-info__value--range {
+    font-family: var(--font-mono, monospace);
+    background: var(--bg-surface);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: 1.1rem;
+}
+
+/* Win overlay for grandmaster */
+.win-overlay--optimal {
+    border: 2px solid var(--color-gold, #ffd700);
+    box-shadow: 0 0 40px hsla(51, 100%, 50%, 0.3);
+}
+
+.win-overlay__message--feedback {
+    font-size: 1.1rem;
+    padding: var(--space-md);
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    margin: var(--space-md) 0;
+}
+
+.win-overlay__tip--try-again {
+    color: var(--color-warning);
+}
+
+.win-overlay__actions {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Mobile adjustments for grandmaster */
+@media (max-width: 480px) {
+    .optimization-toggle {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .opt-btn {
+        text-align: center;
+    }
+}
+
+/* ========================================
+   Topology Editor
+   ======================================== */
+.topology-editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.topology-editor__header {
+    text-align: center;
+}
+
+.topology-editor__header h3 {
+    margin: 0 0 var(--space-xs) 0;
+    color: var(--text-primary);
+}
+
+.topology-editor__instructions {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.topology-editor__modes {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-surface);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mode-btn:hover {
+    border-color: var(--color-primary);
+}
+
+.mode-btn--active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.topology-editor__canvas {
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    border: 2px dashed var(--color-border);
+    cursor: crosshair;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Editor nodes */
+.editor-node {
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.editor-node:hover {
+    transform: scale(1.1);
+}
+
+.editor-node__circle {
+    fill: var(--bg-card);
+    stroke: var(--color-primary);
+    stroke-width: 3;
+    transition: all 0.2s ease;
+}
+
+.editor-node--selected .editor-node__circle {
+    fill: var(--color-primary);
+    stroke: var(--color-accent);
+}
+
+.editor-node--dragging {
+    cursor: grabbing;
+}
+
+.editor-node--dragging .editor-node__circle {
+    stroke: var(--color-accent);
+    stroke-width: 4;
+}
+
+.editor-node--deletable:hover .editor-node__circle {
+    fill: hsla(0, 84%, 60%, 0.3);
+    stroke: var(--color-danger);
+}
+
+.editor-node__label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    fill: var(--text-primary);
+    pointer-events: none;
+    user-select: none;
+}
+
+.editor-node--selected .editor-node__label {
+    fill: white;
+}
+
+/* Editor lines */
+.editor-line {
+    stroke: var(--color-primary);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: all 0.2s ease;
+}
+
+.editor-line--preview {
+    stroke: var(--color-accent);
+    stroke-dasharray: 8 4;
+    opacity: 0.7;
+}
+
+.editor-line--deletable {
+    cursor: pointer;
+}
+
+.editor-line--deletable:hover {
+    stroke: var(--color-danger);
+    stroke-width: 6;
+}
+
+.editor-action-btn {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.editor-action-btn:hover {
+    background: var(--color-primary-dark);
+}
+
+.topology-editor__numbers {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.topology-editor__numbers label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.topology-editor__numbers input {
+    flex: 1;
+    padding: var(--space-sm);
+    background: var(--bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.topology-editor__numbers input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.topology-editor__stats {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.topology-editor__error {
+    padding: var(--space-sm) var(--space-md);
+    background: hsla(0, 84%, 60%, 0.15);
+    border-left: 4px solid var(--color-danger);
+    border-radius: var(--radius-sm);
+    color: var(--color-danger);
+    font-size: 0.85rem;
+}
+
+.topology-editor__actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.topology-editor__actions .btn {
+    padding: var(--space-sm) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.topology-editor__actions .btn--primary {
+    background: var(--color-success);
+    color: white;
+}
+
+.topology-editor__actions .btn--primary:hover:not(:disabled) {
+    background: hsl(145, 70%, 35%);
+}
+
+.topology-editor__actions .btn--primary:disabled {
+    background: var(--color-border);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+.topology-editor__actions .btn--secondary {
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.topology-editor__actions .btn--secondary:hover {
+    border-color: var(--color-primary);
+    color: var(--text-primary);
+}
+
+/* Mobile adjustments for editor */
+@media (max-width: 480px) {
+    .topology-editor {
+        padding: var(--space-md);
+    }
+
+    .topology-editor__modes {
+        flex-direction: column;
+    }
+
+    .mode-btn {
+        padding: var(--space-xs) var(--space-sm);
+        font-size: 0.8rem;
+    }
+
+    .topology-editor__numbers {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

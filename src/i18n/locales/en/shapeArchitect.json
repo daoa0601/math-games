@@ -1,0 +1,116 @@
+{
+    "title": "Shape Architect",
+    "level": "Level",
+    "piecesLeft": "Pieces Left",
+    "rotation": "Rotation",
+    "controls": {
+        "rotate": "Rotate",
+        "rotateTitle": "Rotate piece 90° (currently {{current}}°)",
+        "undoTitle": "Undo last piece (remove from grid)"
+    },
+    "instructions": {
+        "selectPiece": "Select a Tetris piece from below, then click on the grid to place it.",
+        "placePiece": "Click a target cell to place {{piece}}. Use rotate button to turn."
+    },
+    "errors": {
+        "selectFirst": "Select a piece first!",
+        "cannotPlace": "Cannot place here - piece overlaps or extends outside target!"
+    },
+    "allPiecesPlaced": "All pieces placed!",
+    "levelNames": {
+        "square4x4": "4x4 Square",
+        "longStrip": "Long Strip",
+        "tFormation": "T-Formation",
+        "rectangle": "Rectangle",
+        "plusSign": "Plus Sign",
+        "staircase": "Staircase",
+        "hShape": "H-Shape",
+        "tetrisMaster": "Tetris Master",
+        "allSeven": "All Seven",
+        "pentominoChallenge": "Pentomino Challenge",
+        "ultimate": "Ultimate",
+        "random": "Random {{count}} Pieces"
+    },
+    "pieceNames": {
+        "iBlock": "I-Block",
+        "oBlock": "O-Block",
+        "tBlock": "T-Block",
+        "sBlock": "S-Block",
+        "zBlock": "Z-Block",
+        "jBlock": "J-Block",
+        "lBlock": "L-Block",
+        "fPento": "F-Pento",
+        "pPento": "P-Pento",
+        "uPento": "U-Pento",
+        "wPento": "W-Pento",
+        "iPento": "I-Pento",
+        "lPento": "L-Pento",
+        "nPento": "N-Pento",
+        "tPento": "T-Pento",
+        "vPento": "V-Pento",
+        "xPento": "X-Pento",
+        "yPento": "Y-Pento",
+        "zPento": "Z-Pento"
+    },
+    "win": {
+        "title": "Puzzle Complete!",
+        "message": "You filled the shape perfectly!",
+        "geometryInsight": {
+            "title": "Geometry Insight",
+            "message": "You used spatial reasoning to tessellate pieces. This skill is essential in architecture, engineering, and coding!"
+        }
+    },
+    "hints": {
+        "rotationTip": "Try rotating pieces with this button or press R!",
+        "tetrominoTip": {
+            "title": "Tetromino Tip",
+            "message": "Each piece covers exactly 4 squares. The total target area is always a multiple of 4!"
+        },
+        "strategy": {
+            "title": "Strategy",
+            "message": "Fill corners first - they have fewer valid placements, which simplifies later decisions."
+        },
+        "spatialThinking": {
+            "title": "Spatial Thinking",
+            "message": "Practice mentally rotating pieces before clicking. This builds spatial reasoning skills!"
+        },
+        "failure": {
+            "spatialReasoning": {
+                "title": "Spatial Reasoning",
+                "tip": "Try visualizing how each piece would look rotated before placing it."
+            },
+            "fillCornersFirst": {
+                "title": "Fill Corners First",
+                "tip": "Corners have fewer valid placements, so fill them early to reduce complexity."
+            },
+            "areaConservation": {
+                "title": "Area Conservation",
+                "tip": "The total area of all pieces always equals the target area. Use this to verify your solution."
+            },
+            "rotationMatters": {
+                "title": "Rotation Matters",
+                "tip": "Most Tetris pieces can be placed in 4 different orientations. Experiment with all of them!"
+            }
+        }
+    },
+    "mode2D": "2D Mode",
+    "mode3D": "3D Mode",
+    "editor": {
+        "title": "Custom Level Editor",
+        "instructions": "Click and drag to draw the target shape, then select pieces to use",
+        "width": "Width",
+        "height": "Height",
+        "fillAll": "Fill All",
+        "clearAll": "Clear",
+        "selectPieces": "Select Pieces",
+        "targetCells": "Target cells",
+        "pieceCells": "Piece cells",
+        "cancel": "Cancel",
+        "play": "Play Level",
+        "customLevel": "Custom Level",
+        "noTargetCells": "Draw at least one target cell",
+        "noPiecesSelected": "Select at least one piece",
+        "pieceMismatch": "Pieces have {{pieces}} cells but target has {{cells}} cells",
+        "openEditor": "Create Custom"
+    }
+}

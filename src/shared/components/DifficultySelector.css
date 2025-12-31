@@ -1,0 +1,47 @@
+.difficulty-selector {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.difficulty-btn {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-card);
+    border: 1px solid hsla(250, 84%, 54%, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.difficulty-btn:hover {
+    background: var(--bg-card-hover);
+}
+
+.difficulty-btn--active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--text-primary);
+}
+
+.difficulty-btn--easy {
+    border-left: 3px solid var(--color-success);
+}
+
+.difficulty-btn--medium {
+    border-left: 3px solid var(--color-warning);
+}
+
+.difficulty-btn--hard {
+    border-left: 3px solid var(--color-error);
+}
+
+.difficulty-btn--master {
+    border-left: 3px solid var(--color-accent);
+    background: linear-gradient(135deg, hsla(280, 84%, 40%, 0.3), hsla(250, 84%, 54%, 0.3));
+}
+
+.difficulty-btn--master.difficulty-btn--active {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    border-color: var(--color-accent);
+}
