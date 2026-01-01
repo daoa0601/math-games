@@ -485,7 +485,12 @@ export function ShapeArchitectGame() {
         <DndContext onDragEnd={handleDragEnd} collisionDetection={pointerWithin}>
             <GameLayout
                 title={t('title')}
-                headerRight={<SoundToggle />}
+                headerRight={
+                    <>
+                        <HelpButton gameId="shape-architect" onShowTutorial={() => setShowTutorial(true)} />
+                        <SoundToggle />
+                    </>
+                }
             >
                 <div className="shape-container">
                     {/* Daily Challenge Badge */}
