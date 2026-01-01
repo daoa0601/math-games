@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import type { Line, LineWithStatus, GraphNode } from '../logic/types';
 import { getLineStatus } from '../logic/solver';
 
@@ -15,6 +16,8 @@ interface PuzzleBoardProps {
     onNodeClick: (event: NodeClickEvent) => void;
     impossibleLineIds?: Set<string>; // Lines that cannot reach target sum
     recommendedNodeId?: string | null; // Node with fewest options (Starter hint)
+    justPlacedNodeId?: string | null; // Node that was just placed (for sparkle animation)
+    isCompleted?: boolean; // Puzzle solved - triggers constellation reveal animation
 }
 
 const BOARD_WIDTH = 320;
@@ -31,6 +34,8 @@ export function PuzzleBoard({
     onNodeClick,
     impossibleLineIds,
     recommendedNodeId,
+    justPlacedNodeId,
+    isCompleted,
 }: PuzzleBoardProps) {
     // Calculate line statuses
     const lineStatuses: LineWithStatus[] = lines.map((line) =>
@@ -78,15 +83,60 @@ export function PuzzleBoard({
         }
         if (isEmpty) {
             return isRecommended
-                ? `Empty node, recommended starting position. Click to place a number`
-                : `Empty node. Click to place a number`;
+                ? `Empty node, recommended starting position. Press Enter or Space to place a number`
+                : `Empty node. Press Enter or Space to place a number`;
         }
-        return `Node with value ${value}. Click to change`;
+        return `Node with value ${value}. Press Enter or Space to change`;
     };
+
+    // Get list of interactive (non-fixed) node IDs for keyboard navigation
+    const interactiveNodeIds = nodes.filter((n) => !n.isFixed).map((n) => n.id);
+
+    // Handle keyboard navigation between nodes
+    const handleNodeKeyDown = useCallback(
+        (e: React.KeyboardEvent, nodeId: string, pos: { x: number; y: number }) => {
+            const currentIndex = interactiveNodeIds.indexOf(nodeId);
+
+            // Handle arrow key navigation
+            let nextIndex = currentIndex;
+            switch (e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                    nextIndex = (currentIndex + 1) % interactiveNodeIds.length;
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    nextIndex = (currentIndex - 1 + interactiveNodeIds.length) % interactiveNodeIds.length;
+                    break;
+                case 'Enter':
+                case ' ': {
+                    e.preventDefault();
+                    const rect = (e.currentTarget.closest('svg') as SVGSVGElement)?.getBoundingClientRect();
+                    const screenPosition = rect
+                        ? { x: rect.left + pos.x, y: rect.top + pos.y }
+                        : { x: 0, y: 0 };
+                    onNodeClick({ nodeId, screenPosition });
+                    return;
+                }
+                default:
+                    return; // Don't prevent default for other keys
+            }
+
+            if (nextIndex !== currentIndex) {
+                e.preventDefault();
+                const nextNodeId = interactiveNodeIds[nextIndex];
+                const nextNode = document.querySelector(
+                    `[data-node-id="${nextNodeId}"]`
+                ) as HTMLElement;
+                nextNode?.focus();
+            }
+        },
+        [interactiveNodeIds, onNodeClick]
+    );
 
     return (
         <svg
-            className="puzzle-board"
+            className={`puzzle-board${isCompleted ? ' puzzle-board--completed' : ''}`}
             width={BOARD_WIDTH}
             height={BOARD_HEIGHT}
             viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`}
@@ -97,6 +147,22 @@ export function PuzzleBoard({
             <desc>
                 An interactive graph puzzle where you place numbers on nodes so that each line sums to the target.
             </desc>
+
+            {/* SVG Pattern definitions for accessibility */}
+            <defs>
+                {/* Fixed node pattern - radial dots (star-like) */}
+                <pattern id="pattern-fixed" width="8" height="8" patternUnits="userSpaceOnUse">
+                    <circle cx="4" cy="4" r="1.5" fill="hsla(45, 100%, 70%, 0.6)" />
+                </pattern>
+                {/* Filled (player-placed) node pattern - diagonal lines */}
+                <pattern id="pattern-filled" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                    <line x1="0" y1="0" x2="0" y2="6" stroke="hsla(270, 70%, 80%, 0.4)" strokeWidth="1.5" />
+                </pattern>
+                {/* Empty node pattern - subtle grid */}
+                <pattern id="pattern-empty" width="6" height="6" patternUnits="userSpaceOnUse">
+                    <path d="M 6 0 L 0 0 0 6" fill="none" stroke="hsla(200, 60%, 60%, 0.3)" strokeWidth="0.5" />
+                </pattern>
+            </defs>
 
             {/* Render lines first (behind nodes) */}
             {lineStatuses.map((line) => (
@@ -119,6 +185,7 @@ export function PuzzleBoard({
                 const isSelected = node.id === selectedNodeId;
 
                 const isRecommended = node.id === recommendedNodeId && isEmpty;
+                const isJustPlaced = node.id === justPlacedNodeId;
 
                 const nodeClass = [
                     'puzzle-node',
@@ -126,6 +193,7 @@ export function PuzzleBoard({
                     isEmpty && 'puzzle-node--empty',
                     isSelected && 'puzzle-node--selected',
                     isRecommended && 'puzzle-node--recommended',
+                    isJustPlaced && 'puzzle-node--just-placed',
                 ]
                     .filter(Boolean)
                     .join(' ');
@@ -140,25 +208,20 @@ export function PuzzleBoard({
                     onNodeClick({ nodeId: node.id, screenPosition });
                 };
 
-                // Handle keyboard activation (Enter or Space)
-                const handleKeyDown = (e: React.KeyboardEvent) => {
-                    if (isFixed) return;
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        const rect = (e.currentTarget.closest('svg') as SVGSVGElement)?.getBoundingClientRect();
-                        const screenPosition = rect
-                            ? { x: rect.left + pos.x, y: rect.top + pos.y }
-                            : { x: 0, y: 0 };
-                        onNodeClick({ nodeId: node.id, screenPosition });
-                    }
-                };
+                // Determine which pattern to use for accessibility
+                const patternId = isFixed
+                    ? 'pattern-fixed'
+                    : isEmpty
+                        ? 'pattern-empty'
+                        : 'pattern-filled';
 
                 return (
                     <g
                         key={node.id}
+                        data-node-id={node.id}
                         className={nodeClass}
                         onClick={handleClick}
-                        onKeyDown={handleKeyDown}
+                        onKeyDown={(e) => handleNodeKeyDown(e, node.id, pos)}
                         tabIndex={isFixed ? -1 : 0}
                         role={isFixed ? 'img' : 'button'}
                         aria-label={getNodeAriaLabel(node, value)}
@@ -169,6 +232,16 @@ export function PuzzleBoard({
                             cx={pos.x}
                             cy={pos.y}
                             r={NODE_RADIUS}
+                        />
+                        {/* Pattern overlay for accessibility - distinguishes node types beyond color */}
+                        <circle
+                            className="puzzle-node__pattern"
+                            cx={pos.x}
+                            cy={pos.y}
+                            r={NODE_RADIUS - 2}
+                            fill={`url(#${patternId})`}
+                            pointerEvents="none"
+                            aria-hidden="true"
                         />
                         {!isEmpty && (
                             <text
