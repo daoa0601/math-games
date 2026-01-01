@@ -5,6 +5,7 @@
  */
 
 export { Tutorial } from './Tutorial';
+export { TutorialStep } from './TutorialStep';
 export { TutorialTooltip, type TooltipPosition, type TutorialTooltipProps } from './TutorialTooltip';
 export { TutorialSpotlight } from './TutorialSpotlight';
 export { useTutorialContext, TutorialContext } from './TutorialContext';

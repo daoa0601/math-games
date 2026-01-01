@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext } from 'react';
 import { useTutorial } from '../../hooks/useTutorial';
 
 type TutorialContextValue = ReturnType<typeof useTutorial> & {

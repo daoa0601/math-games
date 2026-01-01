@@ -1,4 +1,4 @@
-import { useState, useMemo, ReactNode, useEffect } from 'react';
+import { useState, useMemo, useEffect, type ReactNode } from 'react';
 import { useTutorial } from '../../hooks/useTutorial';
 import { TutorialContext } from './TutorialContext';
 import './Tutorial.css';

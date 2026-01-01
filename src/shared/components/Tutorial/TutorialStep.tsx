@@ -20,7 +20,7 @@
  * ```
  */
 
-import { ReactNode, useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useTutorialContext } from './TutorialContext';
 
 // ═══════════════════════════════════════════════════════════════════
