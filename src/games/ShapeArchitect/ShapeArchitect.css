@@ -25,16 +25,16 @@
         /* Wood grain - fine, natural texture */
         repeating-linear-gradient(90deg,
             transparent 0px,
-            hsla(30, 20%, 40%, 0.03) 1px,
+            var(--game-build-wood-grain) 1px,
             transparent 2px,
             transparent 20px),
         /* Base wood - warm, rich tones */
         linear-gradient(180deg,
-            hsl(32, 35%, 82%) 0%,
-            hsl(28, 30%, 75%) 100%);
+            var(--game-build-wood-light) 0%,
+            var(--game-build-wood-mid) 100%);
     padding: var(--space-lg);
     border-radius: var(--radius-xl);
-    border: 3px solid hsl(30, 40%, 55%);
+    border: 3px solid var(--game-build-wood-dark);
     box-shadow:
         inset 0 2px 4px hsla(0, 0%, 100%, 0.5),
         inset 0 -2px 4px hsla(30, 40%, 30%, 0.1),
@@ -52,15 +52,15 @@
         /* Wood grain - fine, natural texture */
         repeating-linear-gradient(90deg,
             transparent 0px,
-            hsla(30, 20%, 40%, 0.03) 1px,
+            var(--game-build-wood-grain) 1px,
             transparent 2px,
             transparent 20px),
         /* Base wood - warm, rich tones */
         linear-gradient(180deg,
-            hsl(32, 35%, 82%) 0%,
-            hsl(28, 30%, 75%) 100%);
+            var(--game-build-wood-light) 0%,
+            var(--game-build-wood-mid) 100%);
     border-radius: var(--radius-xl);
-    border: 3px solid hsl(30, 40%, 55%);
+    border: 3px solid var(--game-build-wood-dark);
     box-shadow:
         inset 0 2px 4px hsla(0, 0%, 100%, 0.5),
         inset 0 -2px 4px hsla(30, 40%, 30%, 0.1),
@@ -76,7 +76,7 @@
     padding: var(--space-xs);
     background: var(--bg-card);
     border-radius: var(--radius-md);
-    border: 1px solid hsla(250, 84%, 54%, 0.2);
+    border: 1px solid var(--accent-purple-medium);
 }
 
 .view-mode-toggle__btn {
@@ -96,7 +96,7 @@
 
 .view-mode-toggle__btn:hover {
     color: var(--text-primary);
-    background: hsla(250, 84%, 54%, 0.1);
+    background: var(--accent-purple-light);
 }
 
 .view-mode-toggle__btn--active {
@@ -129,14 +129,14 @@
 .grid-cell--target {
     background:
         /* Blueprint grid pattern */
-        linear-gradient(hsla(200, 70%, 55%, 0.12) 1px, transparent 1px),
-        linear-gradient(90deg, hsla(200, 70%, 55%, 0.12) 1px, transparent 1px),
+        linear-gradient(var(--game-build-blueprint-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--game-build-blueprint-grid) 1px, transparent 1px),
         /* Blueprint paper base */
         linear-gradient(180deg,
-            hsla(200, 75%, 94%, 0.95) 0%,
-            hsla(200, 70%, 92%, 0.95) 100%);
+            var(--game-build-blueprint-light) 0%,
+            var(--game-build-blueprint-light) 100%);
     background-size: 12px 12px, 12px 12px, 100% 100%;
-    border: 2px dashed hsl(200, 65%, 55%);
+    border: 2px dashed var(--game-build-blueprint);
     border-radius: 4px;
     animation: sa-blueprintTargetPulse 2.5s ease-in-out infinite;
 }
@@ -175,7 +175,7 @@
     box-shadow:
         inset 0 1px 0 hsla(0, 0%, 100%, 0.4),
         inset 0 -2px 0 hsla(0, 0%, 0%, 0.15),
-        0 2px 4px hsla(0, 0%, 0%, 0.1);
+        0 2px 4px var(--black-10);
 }
 
 /* Snap into place animation with wobble */
@@ -213,7 +213,7 @@
     position: absolute;
     inset: -6px;
     border-radius: 50%;
-    border: 2px solid hsla(35, 50%, 60%, 0.4);
+    border: 2px solid var(--game-build-block-border);
     animation: sa-dustRing 0.4s ease-out forwards;
     pointer-events: none;
 }
@@ -285,7 +285,7 @@
     padding: var(--space-lg);
     background: var(--bg-card);
     border-radius: var(--radius-lg);
-    border: 1px solid hsla(250, 84%, 54%, 0.2);
+    border: 1px solid var(--accent-purple-medium);
     min-height: 100px;
 }
 
@@ -445,7 +445,7 @@
     font-size: 0.8rem;
     color: var(--text-muted);
     padding: var(--space-xs) var(--space-sm);
-    background: hsla(250, 84%, 54%, 0.1);
+    background: var(--accent-purple-light);
     border-radius: var(--radius-sm);
     white-space: nowrap;
 }
@@ -472,7 +472,7 @@
     background: var(--bg-card);
     padding: var(--space-md) var(--space-xl);
     border-radius: var(--radius-lg);
-    border: 1px solid hsla(250, 84%, 54%, 0.2);
+    border: 1px solid var(--accent-purple-medium);
 }
 
 .level-info__item {
@@ -499,7 +499,7 @@
     color: var(--text-secondary);
     font-size: 0.95rem;
     padding: var(--space-sm) var(--space-lg);
-    background: hsla(250, 84%, 54%, 0.1);
+    background: var(--accent-purple-light);
     border-radius: var(--radius-md);
 }
 
@@ -519,7 +519,7 @@
 .shape-win-overlay {
     position: fixed;
     inset: 0;
-    background: hsla(230, 25%, 10%, 0.95);
+    background: var(--overlay-modal);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -681,9 +681,9 @@
     max-width: 450px;
     text-align: center;
     padding: var(--space-lg);
-    background: hsla(250, 84%, 54%, 0.1);
+    background: var(--accent-purple-light);
     border-radius: var(--radius-lg);
-    border: 1px solid hsla(250, 84%, 54%, 0.3);
+    border: 1px solid var(--accent-purple-strong);
 }
 
 .math-insight h4 {
@@ -1085,12 +1085,8 @@
    Workshop Rotary Dials
    ======================================== */
 
-/* Axis color variables */
-:root {
-    --axis-x-color: #ef4444;
-    --axis-y-color: #22c55e;
-    --axis-z-color: #3b82f6;
-}
+/* Axis color variables - now using tokens from colors.css */
+/* Note: --axis-x-color, --axis-y-color, --axis-z-color are defined in colors.css */
 
 .rotation-controls {
     display: flex;
@@ -1153,7 +1149,7 @@
     background:
         /* Dial face gradient */
         radial-gradient(ellipse 80% 60% at 50% 20%,
-            hsla(0, 0%, 100%, 0.3) 0%,
+            var(--white-30) 0%,
             transparent 50%
         ),
         linear-gradient(180deg,
@@ -1199,7 +1195,7 @@
     transform: translateY(1px);
     box-shadow:
         inset 0 2px 4px hsla(0, 0%, 0%, 0.15),
-        0 1px 2px hsla(0, 0%, 0%, 0.1);
+        0 1px 2px var(--black-10);
 }
 
 .rotation-dial--active {
