@@ -1,0 +1,19 @@
+.tutorial-container {
+  position: relative;
+}
+
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.tutorial-spotlight {
+  position: absolute;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+  border-radius: var(--radius-md);
+  z-index: 1001;
+  pointer-events: auto;
+}
