@@ -34,8 +34,7 @@ export default defineConfig({
           'i18n-vendor': ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
           // three.js - large, only used by ShapeArchitect (minified by plugin)
           'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-          // DnD kit - only used by ShapeArchitect
-          'dnd-vendor': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+          // REMOVED: dnd-vendor - now bundles with ShapeArchitect chunk
         },
       },
     },
