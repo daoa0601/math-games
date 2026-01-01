@@ -28,16 +28,33 @@ src/
 │   └── ShapeArchitect/     # Voxel-based geometry puzzle
 ├── shared/
 │   ├── components/         # Reusable UI components
+│   │   ├── ui/             # Primitives: Button, Timer, ProgressRing
+│   │   ├── layout/         # Layout: GameLayout, GameCard, DashboardTabs
 │   │   ├── gamification/   # StatsDisplay, AchievementToast, RankUpOverlay
-│   │   ├── icons/          # Custom SVG game icons
-│   │   └── ...             # Button, GameCard, Timer, etc.
+│   │   ├── DailyChallenge/ # DailyChallenge, DailyChallengeBanner
+│   │   ├── Tutorial/       # Tutorial overlay system
+│   │   └── icons/          # Custom SVG game icons
 │   ├── contexts/           # PlayerContext (stats, rank, achievements)
-│   ├── hooks/              # useGameTimer, useGameRewards
-│   ├── services/           # player.ts, rank.ts, achievements.ts
-│   └── utils/              # storage.ts, audio.ts
+│   ├── hooks/              # Categorized hooks with barrel exports
+│   │   ├── game/           # useGameTimer, useGameRewards, useGameKeyboard
+│   │   ├── accessibility/  # useFocusTrap, useAnnounce, useHighContrast
+│   │   ├── gestures/       # useSwipe, usePinchZoom, useDragScroll
+│   │   └── useTutorial.ts  # Cross-cutting tutorial hook
+│   ├── schemas/            # Zod schemas (extracted from utils)
+│   │   ├── playerProfile.schema.ts
+│   │   ├── daily.schema.ts
+│   │   └── storage.schema.ts
+│   ├── services/           # player.ts, rank.ts, achievements.ts, daily.ts
+│   └── utils/              # storage.ts, audio.ts, TypedStorage
 ├── i18n/                   # Internationalization (EN/VI)
 └── pages/
-    └── Dashboard.tsx       # Game selector with player profile
+    └── Dashboard/          # Tabbed dashboard with folder structure
+        ├── Dashboard.tsx   # Main component with tab state
+        ├── CompactHeader.tsx
+        └── tabs/           # Tab panel components
+            ├── PlayTab.tsx
+            ├── StatsTab.tsx
+            └── AchievementsTab.tsx
 ```
 
 ### Path Aliases
@@ -71,6 +88,28 @@ Games are lazy-loaded in `App.tsx`:
 - MagicGraph: ~20KB
 - SequenceRace: ~40KB
 - ShapeArchitect: ~370KB (includes three.js)
+
+### Dashboard Tabs
+
+The Dashboard uses a tabbed layout with three views:
+
+| Tab | Component | Content |
+|-----|-----------|---------|
+| Play | `PlayTab` | Game grid + DailyChallengeBanner |
+| Stats | `StatsTab` | Overall stats, rank progress, per-game breakdown |
+| Achievements | `AchievementsTab` | Full gallery by category |
+
+```typescript
+import { DashboardTabs, type DashboardTabId } from '@/shared/components/layout';
+
+const [activeTab, setActiveTab] = useState<DashboardTabId>('play');
+```
+
+Key features:
+- **CompactHeader**: Rank badge, player name, streak, and settings controls
+- **Tab animations**: Fade-in with `prefers-reduced-motion` support
+- **Responsive**: Icons-only on mobile (<600px), full labels on tablet+
+- **Accessible**: Proper `tablist`/`tab`/`tabpanel` ARIA roles
 
 ---
 

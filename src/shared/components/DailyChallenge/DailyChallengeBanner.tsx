@@ -30,11 +30,13 @@ export function DailyChallengeBanner({ countdown, className = '' }: DailyChallen
 
   // Convert Map to Set of completed game IDs
   const completedGames = useMemo(() => {
-    return new Set(
-      Array.from(completions.entries())
-        .filter(([_, completion]) => completion !== null)
-        .map(([gameId]) => gameId)
-    );
+    const completed: StorageGameId[] = [];
+    completions.forEach((completion, gameId) => {
+      if (completion !== null) {
+        completed.push(gameId);
+      }
+    });
+    return new Set(completed);
   }, [completions]);
 
   return (
