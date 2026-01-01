@@ -1,12 +1,13 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, PersonalBestIndicator } from '../../shared/components';
+import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, PersonalBestIndicator, HelpButton } from '../../shared/components';
 import { useGameTimer, useGameRewards, useSwipeNavigation, useAnnounce } from '../../shared/hooks';
 import { usePlayer } from '../../shared/contexts';
 import { playSound, showConfetti } from '../../shared/utils';
 import { isDailyCompleted, completeDailyChallenge } from '../../shared/services/daily';
-import { PuzzleBoard, NumberInventory, NumberPicker, TopologyEditor } from './components';
+import { shouldShowTutorial } from '@/shared/services/tutorialProgress';
+import { PuzzleBoard, NumberInventory, NumberPicker, TopologyEditor, MagicGraphTutorial } from './components';
 import type { PuzzleConfig, Difficulty, OptimizationGoal } from './logic/types';
 import { generatePuzzle, isPuzzleSolved, getLineStatus, findImpossibleLines, findBestStartingNode, deriveAlgebraicHints, findOptimalSums, checkOptimalSolution, calculateSumSearchRange } from './logic/solver';
 import { puzzleTemplates, getHints, getProgressHint, createRandomBasePuzzle } from './logic/puzzles';
@@ -47,6 +48,11 @@ export function MagicGraphGame() {
 
     // Practice mode from player preferences
     const [practiceMode, setPracticeMode] = useState(profile.preferences.practiceMode);
+
+    // Tutorial state
+    const [showTutorial, setShowTutorial] = useState(() =>
+        shouldShowTutorial('magic-graph')
+    );
 
     // Generate initial puzzle once and derive both states from it
     const [puzzle, setPuzzle] = useState<PuzzleConfig>(() => {
@@ -457,7 +463,12 @@ export function MagicGraphGame() {
     return (
         <GameLayout
             title={t('title')}
-            headerRight={<SoundToggle />}
+            headerRight={
+                <>
+                    <HelpButton gameId="magic-graph" onShowTutorial={() => setShowTutorial(true)} />
+                    <SoundToggle />
+                </>
+            }
         >
             <div className="puzzle-container">
                 {/* Daily Challenge Badge */}
@@ -864,6 +875,11 @@ export function MagicGraphGame() {
                     delay={index * 500}
                 />
             ))}
+
+            {/* Tutorial */}
+            {showTutorial && (
+                <MagicGraphTutorial onComplete={() => setShowTutorial(false)} />
+            )}
         </GameLayout>
     );
 }

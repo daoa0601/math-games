@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { DndContext, pointerWithin } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
-import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, PersonalBestIndicator } from '../../shared/components';
+import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, PersonalBestIndicator, HelpButton } from '../../shared/components';
 import { useGameTimer, useGameRewards, useSwipe, useSwipeNavigation, useAnnounce } from '../../shared/hooks';
 import { usePlayer } from '../../shared/contexts';
 import { playSound, showConfetti } from '../../shared/utils';
 import { isDailyCompleted, completeDailyChallenge } from '../../shared/services/daily';
-import { GridBoard, GridBoard3D, PieceInventory, LevelEditor, CameraPresetButtons, RotationControls, LayerControls } from './components';
+import { shouldShowTutorial } from '@/shared/services/tutorialProgress';
+import { GridBoard, GridBoard3D, PieceInventory, LevelEditor, CameraPresetButtons, RotationControls, LayerControls, ShapeArchitectTutorial } from './components';
 import type { CameraPreset } from './components/CameraPresetButtons';
 import type { GameState, Position3D, Piece, LevelConfig, Rotation3D, RotationAxis } from './logic/types';
 import { DEFAULT_ROTATION } from './logic/types';
@@ -63,6 +64,11 @@ export function ShapeArchitectGame() {
         return !localStorage.getItem('shape-architect-rotated');
     });
     const [justPlacedPositions, setJustPlacedPositions] = useState<Set<string>>(new Set());
+
+    // Tutorial state
+    const [showTutorial, setShowTutorial] = useState(() =>
+        shouldShowTutorial('shape-architect')
+    );
 
     // Get total score (re-computed when progressVersion changes)
     // progressVersion is intentionally used as a trigger to force re-computation after level completion
@@ -843,6 +849,14 @@ export function ShapeArchitectGame() {
                         delay={index * 500}
                     />
                 ))}
+
+                {/* Tutorial */}
+                {showTutorial && (
+                    <ShapeArchitectTutorial
+                        onComplete={() => setShowTutorial(false)}
+                        is3DMode={viewMode === '3d'}
+                    />
+                )}
             </GameLayout>
         </DndContext>
     );

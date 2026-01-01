@@ -20,12 +20,14 @@ import {
   SoundToggle,
   GameOverlay,
   PersonalBestIndicator,
+  HelpButton,
 } from '@/shared/components';
 import { useGameTimer, useGameRewards, useSwipeNavigation, useAnnounce } from '@/shared/hooks';
 import { usePlayer } from '@/shared/contexts';
 import { playSound, showConfetti } from '@/shared/utils';
 import { isDailyCompleted, completeDailyChallenge } from '@/shared/services/daily';
-import { RaceTrack, StepCards, HistoryLog, SequenceInfoBadge } from './components';
+import { shouldShowTutorial } from '@/shared/services/tutorialProgress';
+import { RaceTrack, StepCards, HistoryLog, SequenceInfoBadge, SequenceRaceTutorial } from './components';
 import { useSequenceRaceState, useAIOpponent, useHintSystem } from './hooks';
 import { applyMove, isHumanTurn } from './logic/engine';
 import { getDailySequenceRaceConfig } from './logic/seededGenerator';
@@ -43,6 +45,11 @@ export function SequenceRaceGame() {
   const isDailyMode = searchParams.get('daily') === 'true';
   const [dailyCompleted, setDailyCompleted] = useState(() => isDailyMode && isDailyCompleted('sequence-race'));
   const dailyConfigRef = useRef(isDailyMode ? getDailySequenceRaceConfig() : null);
+
+  // Tutorial state
+  const [showTutorial, setShowTutorial] = useState(() =>
+    shouldShowTutorial('sequence-race')
+  );
 
   // ─────────────────────────────────────────────────────────────────
   // Player and Rewards
@@ -340,7 +347,15 @@ export function SequenceRaceGame() {
   // ─────────────────────────────────────────────────────────────────
 
   return (
-    <GameLayout title={t('title')} headerRight={<SoundToggle />}>
+    <GameLayout
+      title={t('title')}
+      headerRight={
+        <>
+          <HelpButton gameId="sequence-race" onShowTutorial={() => setShowTutorial(true)} />
+          <SoundToggle />
+        </>
+      }
+    >
       <div className="sequence-container">
         {/* Daily Challenge Badge */}
         {isDailyMode && (
@@ -652,6 +667,11 @@ export function SequenceRaceGame() {
           delay={index * 500}
         />
       ))}
+
+      {/* Tutorial */}
+      {showTutorial && (
+        <SequenceRaceTutorial onComplete={() => setShowTutorial(false)} />
+      )}
     </GameLayout>
   );
 }
