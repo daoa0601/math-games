@@ -1,26 +1,24 @@
-# Deploy to GitHub Pages
-name: Deploy to GitHub Pages
+name: Build and Deploy
 
 on:
-  # Runs on pushes to main branch
   push:
-    branches: ['main']
-
-  # Allows manual trigger from Actions tab
+    branches: [main]
   workflow_dispatch:
 
-# Sets permissions for GITHUB_TOKEN to deploy to Pages
 permissions:
   contents: read
   pages: write
   id-token: write
+  packages: write
 
-# Allow only one concurrent deployment
 concurrency:
-  group: 'pages'
+  group: "deploy"
   cancel-in-progress: true
 
 jobs:
+  # ─────────────────────────────────────────────────────────
+  # Build job - shared by all deploy targets
+  # ─────────────────────────────────────────────────────────
   build:
     runs-on: ubuntu-latest
     steps:
@@ -30,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -45,18 +43,74 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Upload artifact
+      - name: Upload dist for Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: ./dist
 
-  deploy:
+      - name: Upload dist for Docker
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: ./dist
+          retention-days: 1
+
+  # ─────────────────────────────────────────────────────────
+  # Deploy to GitHub Pages (primary)
+  # ─────────────────────────────────────────────────────────
+  deploy-pages:
+    needs: build
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # ─────────────────────────────────────────────────────────
+  # Build and push Docker image (for self-hosted)
+  # ─────────────────────────────────────────────────────────
+  build-docker:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: ./dist
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./deploy/Dockerfile.ci
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
