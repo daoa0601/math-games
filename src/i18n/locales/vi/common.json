@@ -209,10 +209,38 @@
         "skipToGame": "Bỏ qua đến khu vực trò chơi"
     },
     "tutorial": {
-        "next": "Tiep",
-        "previous": "Quay lai",
-        "skip": "Bo qua huong dan",
-        "finish": "Hoan thanh",
-        "stepOf": "Buoc {{current}} / {{total}}"
+        "next": "Tiếp",
+        "previous": "Quay lại",
+        "skip": "Bỏ qua hướng dẫn",
+        "finish": "Hoàn thành",
+        "stepOf": "Bước {{current}} / {{total}}"
+    },
+    "magicGraph": {
+        "tutorial": {
+            "step1Title": "Chào mừng đến với Đồ Thị Ma Thuật!",
+            "step1": "Đặt các số vào các nút sao cho mỗi đường có tổng bằng số ma thuật hiển thị ở trên.",
+            "step2Title": "Số Cố Định",
+            "step2": "Các nút vàng đã có sẵn số. Bạn không thể thay đổi chúng!",
+            "step3Title": "Đặt Số",
+            "step3": "Nhấn vào bất kỳ nút trống nào để xem các số có sẵn, sau đó chọn một số để đặt.",
+            "step4Title": "Kiểm Tra Kết Quả",
+            "step4": "Các đường chuyển sang màu xanh khi tổng đúng. Hoàn thành tất cả các đường để thắng!",
+            "step5Title": "Cần Trợ Giúp?",
+            "step5": "Dùng nút Hoàn tác để rút lại bước đi. Chúc may mắn!"
+        }
+    },
+    "sequenceRace": {
+        "tutorial": {
+            "step1Title": "Chao mung den voi Dua Day So!",
+            "step1": "Dua voi AI de dat so muc tieu truoc!",
+            "step2Title": "Duong Dua",
+            "step2": "Ban bat dau o vi tri 0. Muc tieu duoc hien thi o vach dich.",
+            "step3Title": "Thuc Hien Nuoc Di",
+            "step3": "Chon mot the buoc de di chuyen. Moi the cho thay ban se di bao nhieu o.",
+            "step4Title": "Lan Luot",
+            "step4": "Ban va AI thay phien nhau. Quan sat nuoc di cua AI va len ke hoach chien thuat!",
+            "step5Title": "Chien Thang",
+            "step5": "Hay la nguoi dau tien dat dung so muc tieu de thang!"
+        }
     }
 }

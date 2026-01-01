@@ -214,5 +214,35 @@
         "skip": "Skip Tutorial",
         "finish": "Finish",
         "stepOf": "Step {{current}} of {{total}}"
+    },
+    "magicGraph": {
+        "tutorial": {
+            "step1Title": "Welcome to Magic Graph!",
+            "step1": "Place numbers on the nodes so that each line adds up to the magic sum shown at the top.",
+            "step2Title": "Fixed Numbers",
+            "step2": "Golden nodes already have numbers. You cannot change these!",
+            "step3Title": "Placing Numbers",
+            "step3": "Click any empty node to see available numbers, then select one to place it.",
+            "step4Title": "Check Your Work",
+            "step4": "Lines turn green when they add up correctly. Complete all lines to win!",
+            "step5Title": "Need Help?",
+            "step5": "Use Undo to take back moves. Good luck!"
+        }
+    },
+    "shapeArchitect": {
+        "tutorial": {
+            "step1Title": "Welcome to Shape Architect!",
+            "step1": "Build the target shape using the puzzle pieces in your inventory.",
+            "step2Title": "Target Shape",
+            "step2": "The blue grid shows where you need to place pieces.",
+            "step3Title": "Your Pieces",
+            "step3": "Select a piece from your inventory to place it on the grid.",
+            "step4Title": "Rotating Pieces",
+            "step4": "Press R or use the rotation buttons to rotate the selected piece.",
+            "step5Title": "Placing Pieces",
+            "step5": "Click on the grid to place your piece. Pieces snap to valid positions.",
+            "step6Title": "3D Mode",
+            "step6": "Switch to 3D view for complex puzzles. Use camera buttons to change angle."
+        }
     }
 }
