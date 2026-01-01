@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  math-games:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    ports:
+      - "3000:80"
+    volumes:
+      # Optional: mount dist for quick iteration without rebuild
+      # - ../dist:/usr/share/nginx/html:ro
