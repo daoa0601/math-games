@@ -1,8 +1,8 @@
 # Dependencies - installed inside container
 node_modules
 
-# Build output - built inside container
-dist
+# Note: dist is NOT ignored because Dockerfile.ci needs it
+# (Dockerfile builds its own dist inside the container)
 
 # Development files
 .git
