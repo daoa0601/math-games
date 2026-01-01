@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { threeMinifier } from '@yushijinhun/three-minifier-rollup'
+import viteCompression from 'vite-plugin-compression'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -10,6 +11,9 @@ export default defineConfig({
     // Expected reduction: ~40-60% of three.js bundle size
     { ...threeMinifier(), enforce: 'pre' },
     react(),
+    // Pre-compress assets for faster serving
+    viteCompression({ algorithm: 'gzip' }),
+    viteCompression({ algorithm: 'brotliCompress', ext: '.br' }),
   ],
   // Base path for GitHub Pages deployment
   base: '/math-games/',
