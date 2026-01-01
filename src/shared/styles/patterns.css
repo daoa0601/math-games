@@ -1,0 +1,361 @@
+/* ========================================
+   Visual Patterns for Color Alternatives
+   Accessibility: WCAG 1.4.1 Use of Color
+   ======================================== */
+
+/* ----------------------------------------
+   Pattern Variables
+   Customizable via CSS custom properties
+   ---------------------------------------- */
+
+:root {
+  /* Pattern sizing */
+  --pattern-size-sm: 4px;
+  --pattern-size-md: 8px;
+  --pattern-size-lg: 12px;
+
+  /* Pattern opacity for overlays */
+  --pattern-opacity: 0.3;
+
+  /* Pattern colors (uses currentColor by default) */
+  --pattern-color: currentColor;
+}
+
+/* ----------------------------------------
+   Base Pattern Mixins (via classes)
+   Apply these alongside color classes
+   ---------------------------------------- */
+
+/* Dots Pattern - Small circles */
+.pattern-dots {
+  background-image: radial-gradient(
+    circle,
+    var(--pattern-color) 1px,
+    transparent 1px
+  );
+  background-size: var(--pattern-size-md) var(--pattern-size-md);
+}
+
+.pattern-dots--sm {
+  background-size: var(--pattern-size-sm) var(--pattern-size-sm);
+}
+
+.pattern-dots--lg {
+  background-size: var(--pattern-size-lg) var(--pattern-size-lg);
+}
+
+/* Lines Pattern - Diagonal stripes */
+.pattern-lines {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    var(--pattern-color) 3px,
+    var(--pattern-color) 4px
+  );
+}
+
+.pattern-lines--horizontal {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    var(--pattern-color) 3px,
+    var(--pattern-color) 4px
+  );
+}
+
+.pattern-lines--vertical {
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 3px,
+    var(--pattern-color) 3px,
+    var(--pattern-color) 4px
+  );
+}
+
+/* Grid Pattern - Crosshatch */
+.pattern-grid {
+  background-image: linear-gradient(
+      var(--pattern-color) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, var(--pattern-color) 1px, transparent 1px);
+  background-size: var(--pattern-size-md) var(--pattern-size-md);
+}
+
+/* Diagonal Grid Pattern */
+.pattern-diagonal-grid {
+  background-image: repeating-linear-gradient(
+      45deg,
+      var(--pattern-color),
+      var(--pattern-color) 1px,
+      transparent 1px,
+      transparent 6px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      var(--pattern-color),
+      var(--pattern-color) 1px,
+      transparent 1px,
+      transparent 6px
+    );
+}
+
+/* Checkerboard Pattern */
+.pattern-checkerboard {
+  background-image: repeating-conic-gradient(
+    var(--pattern-color) 0% 25%,
+    transparent 0% 50%
+  );
+  background-size: var(--pattern-size-lg) var(--pattern-size-lg);
+}
+
+/* Waves Pattern */
+.pattern-waves {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    var(--pattern-color) 4px,
+    var(--pattern-color) 5px,
+    transparent 5px,
+    transparent 9px
+  );
+}
+
+/* Triangles Pattern */
+.pattern-triangles {
+  background-image: linear-gradient(
+      135deg,
+      var(--pattern-color) 25%,
+      transparent 25%
+    ),
+    linear-gradient(225deg, var(--pattern-color) 25%, transparent 25%);
+  background-size: var(--pattern-size-lg) var(--pattern-size-lg);
+  background-position:
+    0 0,
+    calc(var(--pattern-size-lg) / 2) 0;
+}
+
+/* ----------------------------------------
+   Pattern Overlays
+   For use with pseudo-elements
+   ---------------------------------------- */
+
+.has-pattern {
+  position: relative;
+}
+
+.has-pattern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--pattern-opacity);
+  border-radius: inherit;
+}
+
+/* Dots overlay */
+.has-pattern--dots::before {
+  background-image: radial-gradient(
+    circle,
+    hsla(0, 0%, 0%, 0.5) 1px,
+    transparent 1px
+  );
+  background-size: var(--pattern-size-md) var(--pattern-size-md);
+}
+
+/* Lines overlay */
+.has-pattern--lines::before {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    hsla(0, 0%, 0%, 0.4) 3px,
+    hsla(0, 0%, 0%, 0.4) 4px
+  );
+}
+
+/* Grid overlay */
+.has-pattern--grid::before {
+  background-image: linear-gradient(hsla(0, 0%, 0%, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, hsla(0, 0%, 0%, 0.3) 1px, transparent 1px);
+  background-size: var(--pattern-size-md) var(--pattern-size-md);
+}
+
+/* ----------------------------------------
+   Game-Specific Pattern Assignments
+   ---------------------------------------- */
+
+/* ShapeArchitect - Piece color patterns */
+.piece-pattern-1 {
+  /* Red pieces - dots */
+  --pattern-color: hsla(0, 0%, 100%, 0.4);
+}
+
+.piece-pattern-1::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background-image: radial-gradient(
+    circle,
+    hsla(0, 0%, 100%, 0.5) 2px,
+    transparent 2px
+  );
+  background-size: 8px 8px;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.piece-pattern-2 {
+  /* Blue pieces - horizontal lines */
+}
+
+.piece-pattern-2::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    hsla(0, 0%, 100%, 0.4) 3px,
+    hsla(0, 0%, 100%, 0.4) 5px
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.piece-pattern-3 {
+  /* Green pieces - diagonal lines */
+}
+
+.piece-pattern-3::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    hsla(0, 0%, 100%, 0.4) 3px,
+    hsla(0, 0%, 100%, 0.4) 5px
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.piece-pattern-4 {
+  /* Yellow pieces - grid */
+}
+
+.piece-pattern-4::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background-image: linear-gradient(hsla(0, 0%, 0%, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, hsla(0, 0%, 0%, 0.15) 1px, transparent 1px);
+  background-size: 6px 6px;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.piece-pattern-5 {
+  /* Purple pieces - checkerboard */
+}
+
+.piece-pattern-5::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background-image: repeating-conic-gradient(
+    hsla(0, 0%, 100%, 0.25) 0% 25%,
+    transparent 0% 50%
+  );
+  background-size: 8px 8px;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* MagicGraph - Node type patterns */
+.node-pattern-fixed {
+  /* Fixed nodes - star burst pattern */
+}
+
+.node-pattern-fixed::after {
+  content: '★';
+  position: absolute;
+  font-size: 0.5em;
+  color: hsla(45, 100%, 70%, 0.6);
+  pointer-events: none;
+}
+
+.node-pattern-empty {
+  /* Empty nodes - dashed circle (already via stroke-dasharray) */
+}
+
+.node-pattern-placed {
+  /* Placed nodes - solid fill (no extra pattern needed) */
+}
+
+/* SequenceRace - Player indicators */
+.player-pattern-1 {
+  /* Player 1 - circle shape indicator */
+  position: relative;
+}
+
+.player-pattern-1::before {
+  content: '';
+  position: absolute;
+  inset: 25%;
+  border: 2px solid hsla(0, 0%, 100%, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.player-pattern-2 {
+  /* Player 2 / AI - diamond shape indicator */
+  position: relative;
+}
+
+.player-pattern-2::before {
+  content: '';
+  position: absolute;
+  inset: 25%;
+  border: 2px solid hsla(0, 0%, 100%, 0.5);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+/* ----------------------------------------
+   High Contrast Pattern Overrides
+   Stronger patterns in high contrast mode
+   ---------------------------------------- */
+
+.high-contrast .has-pattern::before,
+.high-contrast [class*='piece-pattern-']::after,
+.high-contrast [class*='player-pattern-']::before {
+  opacity: 0.5;
+}
+
+.high-contrast .pattern-dots,
+.high-contrast .pattern-lines,
+.high-contrast .pattern-grid {
+  --pattern-color: hsla(0, 0%, 0%, 0.6);
+}
+
+/* ----------------------------------------
+   Reduced Motion - Static patterns only
+   ---------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  [class*='pattern-'],
+  .has-pattern::before,
+  [class*='piece-pattern-']::after,
+  [class*='player-pattern-']::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}

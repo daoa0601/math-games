@@ -52,3 +52,6 @@ Thumbs.db
 
 # Optional: Debug files
 *.pem
+
+*storybook.log
+storybook-static

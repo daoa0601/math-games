@@ -1,20 +1,28 @@
-import React, { useMemo, useCallback, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { useMemo, useCallback, Suspense, useRef, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
-import type { CellState, Piece, Position3D, PlacedPiece } from '../logic/types';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import * as THREE from 'three';
+import type { CellState, Piece, Position3D, PlacedPiece, Rotation3D } from '../logic/types';
 import { getPieceWorldPositions, isInBounds } from '../logic/engine';
 import { Voxel } from './Voxel';
+import { GridFloor } from './GridFloor';
+import { useThreeCleanup } from '../hooks';
+import { CAMERA_PRESETS, type CameraPreset } from './CameraPresetButtons';
 
 interface GridBoard3DProps {
     grid: CellState[][][];
     gridSize: [number, number, number];
     selectedPiece: Piece | null;
-    rotation: number;
+    rotation: Rotation3D;
     placedPieces: PlacedPiece[];
     levelPieces: Piece[];
     onCellClick: (position: Position3D) => void;
     hoverPosition?: Position3D | null;
     onCellHover?: (position: Position3D | null) => void;
+    cameraPreset?: CameraPreset;
+    /** Maximum visible z-layer (for layer slicing). Layers above this are hidden. */
+    maxVisibleLayer?: number;
 }
 
 /**
@@ -31,15 +39,20 @@ export function GridBoard3D({
     onCellClick,
     hoverPosition,
     onCellHover,
+    cameraPreset = 'isometric',
+    maxVisibleLayer,
 }: GridBoard3DProps) {
     const [width, height, depth] = gridSize;
 
-    // Center offset for the grid
-    const centerOffset: [number, number, number] = [
+    // If maxVisibleLayer is not set, show all layers
+    const effectiveMaxLayer = maxVisibleLayer ?? (depth - 1);
+
+    // Center offset for the grid (memoized to avoid dependency instability)
+    const centerOffset = useMemo<[number, number, number]>(() => [
         -width / 2 + 0.5,
         -height / 2 + 0.5,
         -depth / 2 + 0.5,
-    ];
+    ], [width, height, depth]);
 
     // Build a map of cell positions to colors based on placed pieces
     const cellColorMap = useMemo(() => {
@@ -101,6 +114,9 @@ export function GridBoard3D({
         for (let x = 0; x < width; x++) {
             for (let y = 0; y < height; y++) {
                 for (let z = 0; z < depth; z++) {
+                    // Skip layers above the visibility threshold
+                    if (z > effectiveMaxLayer) continue;
+
                     const cell = grid[x][y][z];
                     const posKey = `${x},${y},${z}`;
                     const position: [number, number, number] = [
@@ -162,43 +178,133 @@ export function GridBoard3D({
         cellColorMap,
         handleCellClick,
         handleCellHover,
+        effectiveMaxLayer,
     ]);
 
     return (
         <div className="grid-board-3d" onPointerLeave={() => onCellHover?.(null)}>
-            <Canvas>
+            <Canvas shadows>
                 <Suspense fallback={null}>
-                    {/* Camera positioned for isometric-like view */}
-                    <PerspectiveCamera makeDefault position={[8, 6, 8]} fov={50} />
-
-                    {/* Lighting */}
-                    <ambientLight intensity={0.5} />
-                    <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-                    <pointLight position={[-10, -10, -5]} intensity={0.3} />
-
-                    {/* Environment for nice reflections */}
-                    <Environment preset="studio" />
-
-                    {/* Grid floor for reference */}
-                    <gridHelper
-                        args={[Math.max(width, height, depth) + 2, Math.max(width, height, depth) + 2]}
-                        position={[0, centerOffset[1] - 0.5, 0]}
-                    />
-
-                    {/* Render all voxels */}
-                    {voxels}
-
-                    {/* Orbit controls for navigation */}
-                    <OrbitControls
-                        enablePan={true}
-                        enableZoom={true}
-                        enableRotate={true}
-                        minDistance={5}
-                        maxDistance={20}
-                        target={[0, 0, 0]}
+                    <Scene3DContent
+                        voxels={voxels}
+                        centerOffset={centerOffset}
+                        gridSize={[width, height, depth]}
+                        cameraPreset={cameraPreset}
                     />
                 </Suspense>
             </Canvas>
         </div>
+    );
+}
+
+/**
+ * Camera animation component that smoothly transitions between presets
+ */
+function CameraAnimator({ preset }: { preset: CameraPreset }) {
+    const { camera } = useThree();
+    const controlsRef = useRef<OrbitControlsImpl>(null);
+    const targetPosition = useRef(new THREE.Vector3(...CAMERA_PRESETS[preset].position));
+    const targetLookAt = useRef(new THREE.Vector3(...CAMERA_PRESETS[preset].target));
+
+    useEffect(() => {
+        targetPosition.current.set(...CAMERA_PRESETS[preset].position);
+        targetLookAt.current.set(...CAMERA_PRESETS[preset].target);
+    }, [preset]);
+
+    useFrame(() => {
+        // Smoothly interpolate camera position
+        camera.position.lerp(targetPosition.current, 0.08);
+
+        // Update controls target for orbit
+        if (controlsRef.current) {
+            controlsRef.current.target.lerp(targetLookAt.current, 0.08);
+            controlsRef.current.update();
+        }
+    });
+
+    return (
+        <OrbitControls
+            ref={controlsRef}
+            enablePan={true}
+            enableZoom={true}
+            enableRotate={true}
+            minDistance={5}
+            maxDistance={25}
+        />
+    );
+}
+
+/**
+ * Inner scene component that uses the Three.js cleanup hook.
+ * Must be a child of Canvas to access the Three.js context.
+ */
+function Scene3DContent({
+    voxels,
+    centerOffset,
+    gridSize,
+    cameraPreset,
+}: {
+    voxels: React.ReactNode[];
+    centerOffset: [number, number, number];
+    gridSize: [number, number, number];
+    cameraPreset: CameraPreset;
+}) {
+    // Cleanup Three.js resources on unmount to prevent GPU memory leaks
+    useThreeCleanup();
+
+    return (
+        <>
+            {/* Camera positioned for isometric-like view */}
+            <PerspectiveCamera makeDefault position={[8, 6, 8]} fov={50} />
+
+            {/* Lighting - Enhanced for 3D depth */}
+            <ambientLight intensity={0.4} />
+
+            {/* Key light with shadows */}
+            <directionalLight
+                position={[10, 10, 5]}
+                intensity={1.2}
+                castShadow
+                shadow-mapSize-width={2048}
+                shadow-mapSize-height={2048}
+                shadow-bias={-0.0001}
+                shadow-camera-left={-10}
+                shadow-camera-right={10}
+                shadow-camera-top={10}
+                shadow-camera-bottom={-10}
+            />
+
+            {/* Fill light (cool blue tint for depth) */}
+            <directionalLight position={[-5, 5, -5]} intensity={0.4} color="#b4d4ff" />
+
+            {/* Rim light (warm for edge definition) */}
+            <pointLight position={[0, -3, 8]} intensity={0.5} color="#ffe4b5" />
+
+            {/* Environment for nice reflections */}
+            <Environment preset="studio" />
+
+            {/* Shadow-receiving ground plane */}
+            <mesh
+                position={[0, centerOffset[1] - 0.5, 0]}
+                rotation={[-Math.PI / 2, 0, 0]}
+                receiveShadow
+            >
+                <planeGeometry args={[20, 20]} />
+                <shadowMaterial opacity={0.2} />
+            </mesh>
+
+            {/* Grid floor with coordinate labels */}
+            <GridFloor
+                gridSize={gridSize}
+                centerOffset={centerOffset}
+                showCoordinates={true}
+            />
+
+            {/* Render all voxels */}
+            {voxels}
+
+            {/* Camera animation and orbit controls */}
+            <CameraAnimator preset={cameraPreset} />
+        </>
     );
 }

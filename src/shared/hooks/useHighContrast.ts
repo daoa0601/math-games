@@ -3,8 +3,7 @@
 // ========================================
 
 import { useState, useEffect, useCallback } from 'react';
-
-const STORAGE_KEY = 'math-games-high-contrast';
+import { HIGH_CONTRAST_KEY } from '../constants';
 
 /**
  * Hook to manage high contrast mode for accessibility.
@@ -14,7 +13,7 @@ export function useHighContrast() {
     const [isHighContrast, setIsHighContrast] = useState(() => {
         // Initialize from localStorage or system preference
         if (typeof window !== 'undefined') {
-            const stored = localStorage.getItem(STORAGE_KEY);
+            const stored = localStorage.getItem(HIGH_CONTRAST_KEY);
             if (stored !== null) {
                 return stored === 'true';
             }
@@ -40,7 +39,7 @@ export function useHighContrast() {
 
         const handler = (e: MediaQueryListEvent) => {
             // Only update if user hasn't set a preference
-            if (localStorage.getItem(STORAGE_KEY) === null) {
+            if (localStorage.getItem(HIGH_CONTRAST_KEY) === null) {
                 setIsHighContrast(e.matches);
             }
         };
@@ -53,14 +52,14 @@ export function useHighContrast() {
     const toggleHighContrast = useCallback(() => {
         setIsHighContrast(prev => {
             const newValue = !prev;
-            localStorage.setItem(STORAGE_KEY, String(newValue));
+            localStorage.setItem(HIGH_CONTRAST_KEY, String(newValue));
             return newValue;
         });
     }, []);
 
     // Set high contrast mode explicitly
     const setHighContrast = useCallback((enabled: boolean) => {
-        localStorage.setItem(STORAGE_KEY, String(enabled));
+        localStorage.setItem(HIGH_CONTRAST_KEY, String(enabled));
         setIsHighContrast(enabled);
     }, []);
 

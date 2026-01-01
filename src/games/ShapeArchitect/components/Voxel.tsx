@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import type { Mesh } from 'three';
+import type { Mesh, BoxGeometry } from 'three';
 
 interface VoxelProps {
     position: [number, number, number];
@@ -27,6 +27,15 @@ export function Voxel({
 }: VoxelProps) {
     const meshRef = useRef<Mesh>(null);
     const [hovered, setHovered] = useState(false);
+    // Store geometry in state to avoid accessing ref during render
+    const [geometry, setGeometry] = useState<BoxGeometry | null>(null);
+
+    // Capture geometry after mount (refs are only available after render)
+    useEffect(() => {
+        if (meshRef.current?.geometry) {
+            setGeometry(meshRef.current.geometry as BoxGeometry);
+        }
+    }, []);
 
     // Animate preview blocks
     useFrame((state) => {
@@ -52,10 +61,15 @@ export function Voxel({
         return 1;
     };
 
+    // Solid blocks cast shadows, all blocks receive shadows
+    const shouldCastShadow = !isTarget && !isPreview;
+
     return (
         <mesh
             ref={meshRef}
             position={position}
+            castShadow={shouldCastShadow}
+            receiveShadow
             onClick={(e) => {
                 e.stopPropagation();
                 onClick?.();
@@ -74,10 +88,10 @@ export function Voxel({
                 opacity={getOpacity()}
                 wireframe={isTarget && !hovered}
             />
-            {/* Add edge highlight for filled blocks */}
-            {!isTarget && !isPreview && (
+            {/* Add edge highlight for filled blocks (only after geometry is available) */}
+            {!isTarget && !isPreview && geometry && (
                 <lineSegments>
-                    <edgesGeometry args={[meshRef.current?.geometry]} />
+                    <edgesGeometry args={[geometry]} />
                     <lineBasicMaterial color="#ffffff" transparent opacity={0.3} />
                 </lineSegments>
             )}

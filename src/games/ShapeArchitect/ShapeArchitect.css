@@ -1,5 +1,6 @@
 /* ========================================
    Shape Architect - Component Styles
+   "Building Workshop" Theme
    ======================================== */
 
 .shape-container {
@@ -11,26 +12,71 @@
     max-width: 800px;
 }
 
-/* Grid Board */
+/* ========================================
+   Workshop Workbench Background
+   ======================================== */
+
+/* Grid Board - Warm wooden workbench */
 .grid-board {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    background: var(--bg-surface);
+    background:
+        /* Subtle wood grain texture */
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 40px,
+            hsla(30, 40%, 35%, 0.03) 40px,
+            hsla(30, 40%, 35%, 0.03) 42px
+        ),
+        repeating-linear-gradient(
+            0deg,
+            transparent 0px,
+            transparent 80px,
+            hsla(30, 30%, 40%, 0.02) 80px,
+            hsla(30, 30%, 40%, 0.02) 82px
+        ),
+        /* Base wood gradient */
+        linear-gradient(180deg,
+            hsl(35, 35%, 88%) 0%,
+            hsl(32, 32%, 82%) 50%,
+            hsl(30, 30%, 78%) 100%);
     padding: var(--space-lg);
     border-radius: var(--radius-xl);
-    border: 2px solid hsla(250, 84%, 54%, 0.3);
-    box-shadow: var(--shadow-lg);
+    border: 3px solid hsl(30, 40%, 55%);
+    box-shadow:
+        var(--shadow-lg),
+        inset 0 2px 4px hsla(30, 40%, 70%, 0.3),
+        inset 0 -2px 4px hsla(30, 30%, 30%, 0.1),
+        0 4px 12px hsla(30, 30%, 20%, 0.15);
 }
 
-/* 3D Grid Board */
+/* 3D Grid Board - Same workbench styling */
 .grid-board-3d {
-    width: 400px;
-    height: 350px;
-    background: var(--bg-surface);
+    width: min(600px, 90vw);
+    aspect-ratio: 4 / 3;
+    min-height: 350px;
+    max-height: 70vh;
+    background:
+        /* Wood grain */
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 40px,
+            hsla(30, 40%, 35%, 0.03) 40px,
+            hsla(30, 40%, 35%, 0.03) 42px
+        ),
+        linear-gradient(180deg,
+            hsl(35, 35%, 88%) 0%,
+            hsl(32, 32%, 82%) 50%,
+            hsl(30, 30%, 78%) 100%);
     border-radius: var(--radius-xl);
-    border: 2px solid hsla(250, 84%, 54%, 0.3);
-    box-shadow: var(--shadow-lg);
+    border: 3px solid hsl(30, 40%, 55%);
+    box-shadow:
+        var(--shadow-lg),
+        inset 0 2px 4px hsla(30, 40%, 70%, 0.3),
+        0 4px 12px hsla(30, 30%, 20%, 0.15);
     overflow: hidden;
 }
 
@@ -83,28 +129,92 @@
     position: relative;
 }
 
+/* Empty cells - light cream workbench surface */
 .grid-cell--empty {
-    background: var(--bg-card);
-    border: 1px dashed hsla(0, 0%, 100%, 0.1);
+    background: hsla(35, 30%, 95%, 0.6);
+    border: 1px dashed hsla(30, 20%, 60%, 0.3);
     cursor: default;
 }
 
+/* Target cells - Blueprint paper with grid pattern */
 .grid-cell--target {
-    background: hsla(250, 84%, 54%, 0.15);
-    border: 2px dashed var(--color-primary);
-    animation: targetPulse 2s ease-in-out infinite;
+    background:
+        /* Blueprint grid pattern */
+        linear-gradient(hsla(200, 70%, 55%, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, hsla(200, 70%, 55%, 0.12) 1px, transparent 1px),
+        /* Blueprint paper base */
+        linear-gradient(180deg,
+            hsla(200, 75%, 94%, 0.95) 0%,
+            hsla(200, 70%, 92%, 0.95) 100%);
+    background-size: 12px 12px, 12px 12px, 100% 100%;
+    border: 2px dashed hsl(200, 65%, 55%);
+    animation: sa-blueprintPulse 2.5s ease-in-out infinite;
 }
 
 .grid-cell--target:hover {
-    background: hsla(250, 84%, 54%, 0.3);
-    border-color: var(--color-primary-light);
+    background:
+        linear-gradient(hsla(200, 70%, 55%, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, hsla(200, 70%, 55%, 0.2) 1px, transparent 1px),
+        linear-gradient(180deg,
+            hsla(200, 80%, 90%, 0.98) 0%,
+            hsla(200, 75%, 88%, 0.98) 100%);
+    background-size: 12px 12px, 12px 12px, 100% 100%;
+    border-color: hsl(200, 70%, 50%);
     transform: scale(1.05);
+    box-shadow: 0 0 8px hsla(200, 70%, 50%, 0.3);
 }
 
+/* Filled cells - Wooden block appearance */
 .grid-cell--filled {
     border: none;
-    box-shadow: inset 0 -3px 0 hsla(0, 0%, 0%, 0.2);
+    box-shadow:
+        inset 0 -3px 0 hsla(0, 0%, 0%, 0.25),
+        inset 0 1px 0 hsla(0, 0%, 100%, 0.3),
+        0 2px 4px hsla(0, 0%, 0%, 0.1);
+    border-radius: var(--radius-sm);
 }
+
+/* Snap into place animation with wobble */
+.grid-cell--just-placed {
+    animation: sa-snapPlaceWobble 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* snapPlaceWobble animation now in shared/styles/animations.css as sa-snapPlaceWobble */
+
+/* ========================================
+   Enhanced Construction Dust Effect
+   ======================================== */
+
+.grid-cell--dust-effect {
+    position: relative;
+}
+
+/* Primary dust cloud - multiple gradients */
+.grid-cell--dust-effect::after {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 30% 40%, hsla(35, 60%, 70%, 0.5) 0%, transparent 40%),
+        radial-gradient(circle at 70% 60%, hsla(30, 50%, 65%, 0.4) 0%, transparent 35%),
+        radial-gradient(circle at 50% 50%, hsla(35, 50%, 60%, 0.3) 0%, transparent 60%);
+    animation: sa-dustBurst 0.5s ease-out forwards;
+    pointer-events: none;
+}
+
+/* Secondary dust ring */
+.grid-cell--dust-effect::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid hsla(35, 50%, 60%, 0.4);
+    animation: sa-dustRing 0.4s ease-out forwards;
+    pointer-events: none;
+}
+
+/* dustBurst, dustRing, blueprintPulse animations now in shared/styles/animations.css as sa-* */
 
 .grid-cell--preview {
     opacity: 0.6;
@@ -136,15 +246,21 @@
     border: 2px solid var(--color-primary) !important;
 }
 
-@keyframes targetPulse {
-
-    0%,
-    100% {
-        opacity: 1;
+/* Reduced motion: disable workshop animations */
+@media (prefers-reduced-motion: reduce) {
+    .grid-cell--target {
+        animation: none;
     }
 
-    50% {
-        opacity: 0.7;
+    .grid-cell--just-placed {
+        animation: none;
+        transform: scale(1);
+    }
+
+    .grid-cell--dust-effect::after,
+    .grid-cell--dust-effect::before {
+        animation: none;
+        display: none;
     }
 }
 
@@ -291,6 +407,26 @@
     50% { transform: translateX(-50%) translateY(-4px); }
 }
 
+/* Swipe hint for mobile rotation */
+.swipe-hint {
+    display: none;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    padding: var(--space-xs) var(--space-sm);
+    background: hsla(250, 84%, 54%, 0.1);
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+}
+
+/* Show swipe hint only on touch devices */
+@media (pointer: coarse) {
+    .swipe-hint {
+        display: flex;
+        align-items: center;
+        gap: var(--space-xs);
+    }
+}
+
 .rotation-display {
     font-size: 0.875rem;
     color: var(--text-muted);
@@ -369,72 +505,8 @@
     background-clip: text;
 }
 
-/* Difficulty Selector */
-.difficulty-selector {
-    display: flex;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-md);
-}
-
-.difficulty-btn {
-    padding: var(--space-sm) var(--space-md);
-    background: var(--bg-card);
-    border: 1px solid hsla(250, 84%, 54%, 0.3);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.difficulty-btn:hover {
-    background: var(--bg-card-hover);
-}
-
-.difficulty-btn--active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: var(--text-primary);
-}
-
-.difficulty-btn--easy {
-    border-left: 3px solid var(--color-success);
-}
-
-.difficulty-btn--medium {
-    border-left: 3px solid var(--color-warning);
-}
-
-.difficulty-btn--hard {
-    border-left: 3px solid var(--color-error);
-}
-
-/* Level Selector */
-.level-selector {
-    display: flex;
-    gap: var(--space-sm);
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.level-btn {
-    padding: var(--space-sm) var(--space-md);
-    background: var(--bg-card);
-    border: 1px solid hsla(250, 84%, 54%, 0.3);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.level-btn:hover {
-    background: var(--bg-card-hover);
-}
-
-.level-btn--active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: var(--text-primary);
-}
+/* Difficulty & Level Selectors - use shared styles from game-common.css */
+/* Game-specific extensions only */
 
 .level-btn--completed {
     border-color: var(--color-success);
@@ -476,75 +548,8 @@
     color: var(--color-accent);
 }
 
-/* Hint Toggle */
-.hint-toggle {
-    font-size: 0.9rem;
-}
-
-/* Hints Panel */
-.hints-panel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    width: 100%;
-    padding: var(--space-lg);
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    border: 1px solid hsla(250, 84%, 54%, 0.2);
-}
-
-.hint-card {
-    padding: var(--space-md);
-    border-radius: var(--radius-md);
-    border-left: 4px solid var(--color-primary);
-    background: var(--bg-surface);
-}
-
-.hint-card h4 {
-    margin: 0 0 var(--space-xs) 0;
-    font-size: 0.9rem;
-    color: var(--color-accent);
-}
-
-.hint-card p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-}
-
-.hint-card--concept {
-    border-left-color: var(--color-success);
-}
-
-.hint-card--concept h4 {
-    color: var(--color-success);
-}
-
-.hint-card--strategy {
-    border-left-color: var(--color-warning);
-}
-
-.hint-card--strategy h4 {
-    color: var(--color-warning);
-}
-
-.hint-card--spatial {
-    border-left-color: var(--color-primary);
-}
-
-.hint-card--spatial h4 {
-    color: var(--color-primary-light);
-}
-
-.hint-card--progress {
-    border-left-color: var(--color-accent);
-    background: hsla(45, 100%, 51%, 0.1);
-}
-
-.hint-card--progress h4 {
-    color: var(--color-accent);
-}
+/* Hints Panel - use shared styles from hints.css */
+/* All hint variants (concept, strategy, spatial, progress) now in hints.css */
 
 /* Math Insight */
 .math-insight {
@@ -577,86 +582,8 @@
     gap: var(--space-md);
 }
 
-/* ========================================
-   Timer
-   ======================================== */
-
-.timer {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-lg);
-    background: var(--bg-card);
-    border-radius: var(--radius-full);
-    border: 2px solid var(--color-primary);
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.timer__icon {
-    font-size: 1.5rem;
-}
-
-.timer__value {
-    font-family: monospace;
-    min-width: 60px;
-    text-align: center;
-}
-
-.timer__pulse {
-    animation: pulse 0.5s ease infinite;
-    color: var(--color-error);
-}
-
-.timer--warning {
-    border-color: var(--color-warning);
-    background: hsla(45, 100%, 51%, 0.1);
-}
-
-.timer--warning .timer__value {
-    color: var(--color-warning);
-}
-
-.timer--critical {
-    border-color: var(--color-error);
-    background: hsla(0, 84%, 60%, 0.2);
-    animation: shake 0.5s ease infinite;
-}
-
-.timer--critical .timer__value {
-    color: var(--color-error);
-    animation: pulse 0.5s ease infinite;
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 0.7;
-        transform: scale(1.1);
-    }
-}
-
-@keyframes shake {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-3px);
-    }
-
-    75% {
-        transform: translateX(3px);
-    }
-}
+/* Timer - use shared styles from game-common.css */
+/* Timer variants and animations (pulse, shake) in game-common.css */
 
 /* Board wrapper urgency */
 .board-wrapper {
@@ -674,17 +601,7 @@
     animation: glow 2s ease infinite;
 }
 
-@keyframes glow {
-
-    0%,
-    100% {
-        text-shadow: 0 0 10px var(--color-accent-glow);
-    }
-
-    50% {
-        text-shadow: 0 0 20px var(--color-accent-glow), 0 0 30px var(--color-accent-glow);
-    }
-}
+/* Using shared animations: glow, bounce from animations.css */
 
 /* Win Overlay Emoji */
 .win-overlay__emoji {
@@ -692,91 +609,8 @@
     animation: bounce 0.5s ease infinite;
 }
 
-@keyframes bounce {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-/* Win Stats */
-.win-overlay__stats {
-    display: flex;
-    gap: var(--space-xl);
-}
-
-.stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: var(--space-md) var(--space-lg);
-    background: hsla(250, 84%, 54%, 0.2);
-    border-radius: var(--radius-lg);
-}
-
-.stat__value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-accent);
-}
-
-.stat__label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
-/* Failure Hint */
-.failure-hint {
-    max-width: 450px;
-    text-align: center;
-    padding: var(--space-lg);
-    background: hsla(45, 100%, 51%, 0.1);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-warning);
-    border-left: 4px solid var(--color-warning);
-}
-
-.failure-hint h4 {
-    margin: 0 0 var(--space-sm) 0;
-    color: var(--color-warning);
-}
-
-.failure-hint p {
-    margin: 0;
-    color: var(--text-secondary);
-    line-height: 1.5;
-}
-
-/* Time Up Overlay */
-.time-up-overlay {
-    position: fixed;
-    inset: 0;
-    background: hsla(0, 50%, 10%, 0.95);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-xl);
-    z-index: 100;
-    animation: fadeIn 0.3s ease;
-}
-
-.time-up-overlay__title {
-    font-size: 3rem;
-    color: var(--color-error);
-    animation: shake 0.5s ease 3;
-}
-
-.time-up-overlay__message {
-    font-size: 1.25rem;
-    color: var(--text-secondary);
-}
+/* Win Stats, Failure Hint, Time Up Overlay - use shared styles from game-common.css */
+/* .win-overlay__stats, .stat, .failure-hint, .time-up-overlay are defined in game-common.css */
 
 /* ========================================
    Mobile Touch Optimization
@@ -847,6 +681,12 @@
         padding: var(--space-md);
     }
 
+    .grid-board-3d {
+        width: 95vw;
+        min-height: 280px;
+        max-height: 60vh;
+    }
+
     .grid-cell {
         width: 40px;
         height: 40px;
@@ -902,6 +742,460 @@
     .piece-preview-cell {
         width: 10px;
         height: 10px;
+    }
+}
+
+/* ========================================
+   3D View Controls Container
+   Wraps camera presets and layer controls
+   ======================================== */
+
+.view-3d-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+@media (max-width: 600px) {
+    .view-3d-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* ========================================
+   Camera Preset Controls
+   Workshop Control Panel Style
+   ======================================== */
+
+.camera-presets {
+    display: flex;
+    gap: 2px;
+    padding: 6px;
+    background:
+        /* Wood grain texture */
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 20px,
+            hsla(30, 40%, 35%, 0.04) 20px,
+            hsla(30, 40%, 35%, 0.04) 21px
+        ),
+        /* Base wood color */
+        linear-gradient(180deg,
+            hsl(32, 35%, 82%) 0%,
+            hsl(30, 32%, 76%) 100%
+        );
+    border-radius: var(--radius-lg);
+    border: 2px solid hsl(30, 35%, 60%);
+    box-shadow:
+        /* Outer shadow */
+        0 4px 12px hsla(30, 30%, 20%, 0.2),
+        /* Inner highlight */
+        inset 0 1px 0 hsla(40, 50%, 90%, 0.5),
+        /* Inner shadow */
+        inset 0 -2px 4px hsla(30, 30%, 30%, 0.1);
+}
+
+.camera-preset__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 14px 8px;
+    min-width: 52px;
+    background:
+        /* Button surface gradient */
+        linear-gradient(180deg,
+            hsl(35, 25%, 95%) 0%,
+            hsl(32, 20%, 90%) 50%,
+            hsl(30, 18%, 86%) 100%
+        );
+    border: 1px solid hsla(30, 30%, 50%, 0.3);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: hsl(30, 25%, 35%);
+    position: relative;
+
+    /* Embossed button effect */
+    box-shadow:
+        inset 0 1px 0 hsla(40, 40%, 100%, 0.6),
+        inset 0 -1px 2px hsla(30, 30%, 40%, 0.1),
+        0 2px 4px hsla(30, 30%, 20%, 0.15);
+}
+
+.camera-preset__btn:hover {
+    background:
+        linear-gradient(180deg,
+            hsl(38, 30%, 97%) 0%,
+            hsl(35, 25%, 93%) 50%,
+            hsl(32, 22%, 88%) 100%
+        );
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 hsla(40, 40%, 100%, 0.7),
+        inset 0 -1px 2px hsla(30, 30%, 40%, 0.08),
+        0 4px 8px hsla(30, 30%, 20%, 0.2);
+}
+
+.camera-preset__btn:active {
+    transform: translateY(1px);
+    box-shadow:
+        inset 0 2px 4px hsla(30, 30%, 30%, 0.2),
+        0 1px 2px hsla(30, 30%, 20%, 0.1);
+}
+
+.camera-preset__btn--active {
+    background:
+        /* Active amber glow */
+        linear-gradient(180deg,
+            hsl(45, 95%, 70%) 0%,
+            hsl(42, 90%, 58%) 50%,
+            hsl(38, 85%, 52%) 100%
+        );
+    color: hsl(30, 50%, 18%);
+    border-color: hsl(38, 70%, 45%);
+    box-shadow:
+        inset 0 1px 0 hsla(50, 100%, 80%, 0.5),
+        inset 0 -1px 2px hsla(35, 80%, 30%, 0.2),
+        0 2px 8px hsla(45, 90%, 50%, 0.4),
+        0 0 16px hsla(45, 90%, 55%, 0.2);
+}
+
+.camera-preset__btn--active:hover {
+    background:
+        linear-gradient(180deg,
+            hsl(46, 95%, 72%) 0%,
+            hsl(43, 92%, 60%) 50%,
+            hsl(40, 88%, 54%) 100%
+        );
+}
+
+.camera-preset__icon {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.camera-preset__label {
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 1;
+}
+
+.camera-preset__shortcut {
+    position: absolute;
+    top: 3px;
+    right: 4px;
+    font-size: 0.55rem;
+    font-weight: 600;
+    color: hsla(30, 20%, 40%, 0.5);
+    font-family: var(--font-body);
+}
+
+.camera-preset__btn--active .camera-preset__shortcut {
+    color: hsla(30, 40%, 25%, 0.6);
+}
+
+/* Touch-friendly sizing */
+@media (pointer: coarse) {
+    .camera-preset__btn {
+        min-width: 56px;
+        min-height: 56px;
+        padding: 12px 16px 10px;
+    }
+
+    .camera-preset__icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .camera-preset__label {
+        font-size: 0.7rem;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .camera-preset__btn {
+        transition: none;
+    }
+
+    .camera-preset__btn:hover,
+    .camera-preset__btn:active {
+        transform: none;
+    }
+}
+
+/* Mobile layout */
+@media (max-width: 600px) {
+    .camera-presets {
+        padding: 4px;
+        gap: 2px;
+    }
+
+    .camera-preset__btn {
+        min-width: 48px;
+        padding: 8px 10px 6px;
+    }
+
+    .camera-preset__icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .camera-preset__shortcut {
+        display: none;
+    }
+}
+
+/* ========================================
+   3D Rotation Controls
+   Workshop Rotary Dials
+   ======================================== */
+
+/* Axis color variables */
+:root {
+    --axis-x-color: #ef4444;
+    --axis-y-color: #22c55e;
+    --axis-z-color: #3b82f6;
+}
+
+.rotation-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 6px 10px;
+    background:
+        /* Brushed metal texture */
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 2px,
+            hsla(220, 10%, 50%, 0.03) 2px,
+            hsla(220, 10%, 50%, 0.03) 3px
+        ),
+        /* Base metal gradient */
+        linear-gradient(180deg,
+            hsl(220, 12%, 88%) 0%,
+            hsl(220, 10%, 82%) 50%,
+            hsl(220, 8%, 78%) 100%
+        );
+    border-radius: var(--radius-lg);
+    border: 2px solid hsl(220, 10%, 65%);
+    box-shadow:
+        0 3px 10px hsla(220, 20%, 20%, 0.15),
+        inset 0 1px 0 hsla(0, 0%, 100%, 0.4),
+        inset 0 -1px 2px hsla(220, 20%, 30%, 0.1);
+}
+
+.rotation-controls--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.rotation-controls__label {
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: hsl(220, 15%, 45%);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    padding: 4px 0;
+}
+
+.rotation-controls__dials {
+    display: flex;
+    gap: 4px;
+}
+
+.rotation-dial {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 10px 6px;
+    min-width: 52px;
+    background:
+        /* Dial face gradient */
+        radial-gradient(ellipse 80% 60% at 50% 20%,
+            hsla(0, 0%, 100%, 0.3) 0%,
+            transparent 50%
+        ),
+        linear-gradient(180deg,
+            hsl(0, 0%, 96%) 0%,
+            hsl(0, 0%, 92%) 40%,
+            hsl(0, 0%, 88%) 100%
+        );
+    border: 2px solid;
+    border-color: hsla(0, 0%, 50%, 0.2);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+    color: var(--dial-color, hsl(220, 15%, 40%));
+
+    /* Embossed dial effect */
+    box-shadow:
+        inset 0 1px 0 hsla(0, 0%, 100%, 0.7),
+        inset 0 -1px 2px hsla(0, 0%, 0%, 0.08),
+        0 2px 6px hsla(0, 0%, 0%, 0.12);
+}
+
+.rotation-dial:hover {
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 20%,
+            hsla(0, 0%, 100%, 0.5) 0%,
+            transparent 50%
+        ),
+        linear-gradient(180deg,
+            hsl(0, 0%, 98%) 0%,
+            hsl(0, 0%, 94%) 40%,
+            hsl(0, 0%, 90%) 100%
+        );
+    border-color: var(--dial-color);
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 hsla(0, 0%, 100%, 0.8),
+        inset 0 -1px 2px hsla(0, 0%, 0%, 0.06),
+        0 4px 10px hsla(0, 0%, 0%, 0.18);
+}
+
+.rotation-dial:active {
+    transform: translateY(1px);
+    box-shadow:
+        inset 0 2px 4px hsla(0, 0%, 0%, 0.15),
+        0 1px 2px hsla(0, 0%, 0%, 0.1);
+}
+
+.rotation-dial--active {
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 20%,
+            hsla(0, 0%, 100%, 0.4) 0%,
+            transparent 50%
+        ),
+        linear-gradient(180deg,
+            color-mix(in srgb, var(--dial-color) 25%, white) 0%,
+            color-mix(in srgb, var(--dial-color) 35%, white) 40%,
+            color-mix(in srgb, var(--dial-color) 45%, white) 100%
+        );
+    border-color: var(--dial-color);
+    box-shadow:
+        inset 0 1px 0 hsla(0, 0%, 100%, 0.5),
+        inset 0 -1px 2px hsla(0, 0%, 0%, 0.1),
+        0 2px 8px color-mix(in srgb, var(--dial-color) 40%, transparent);
+}
+
+.rotation-dial__face {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.rotation-dial__icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.rotation-dial__axis {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+
+.rotation-dial__angle {
+    font-family: var(--font-body);
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: hsl(220, 10%, 50%);
+    background: hsla(220, 10%, 90%, 0.5);
+    padding: 1px 4px;
+    border-radius: 3px;
+    min-width: 28px;
+    text-align: center;
+}
+
+.rotation-dial--active .rotation-dial__angle {
+    background: hsla(0, 0%, 100%, 0.5);
+    color: var(--dial-color);
+    font-weight: 600;
+}
+
+.rotation-dial__shortcut {
+    position: absolute;
+    top: 2px;
+    right: 3px;
+    font-size: 0.5rem;
+    font-weight: 600;
+    color: hsla(220, 10%, 40%, 0.4);
+    font-family: var(--font-body);
+}
+
+/* Touch-friendly sizing */
+@media (pointer: coarse) {
+    .rotation-dial {
+        min-width: 56px;
+        min-height: 60px;
+        padding: 10px 12px 8px;
+    }
+
+    .rotation-dial__icon {
+        width: 22px;
+        height: 22px;
+    }
+
+    .rotation-dial__axis {
+        font-size: 0.75rem;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .rotation-dial {
+        transition: none;
+    }
+
+    .rotation-dial:hover,
+    .rotation-dial:active {
+        transform: none;
+    }
+}
+
+/* Mobile layout */
+@media (max-width: 600px) {
+    .rotation-controls {
+        padding: 4px 8px;
+    }
+
+    .rotation-controls__label {
+        display: none;
+    }
+
+    .rotation-dial {
+        min-width: 48px;
+        padding: 6px 8px 5px;
+    }
+
+    .rotation-dial__icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .rotation-dial__shortcut {
+        display: none;
     }
 }
 
@@ -1151,5 +1445,224 @@
 
     .level-editor__piece-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ========================================
+   Layer Visibility Controls
+   Workshop Depth Gauge aesthetic
+   ======================================== */
+
+.layer-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+    background:
+        /* Brushed metal base */
+        linear-gradient(135deg,
+            hsl(32, 20%, 92%) 0%,
+            hsl(30, 18%, 88%) 50%,
+            hsl(28, 16%, 85%) 100%
+        );
+    border-radius: var(--radius-lg);
+    border: 2px solid hsl(30, 35%, 60%);
+    box-shadow:
+        0 4px 12px hsla(30, 30%, 20%, 0.2),
+        inset 0 1px 0 hsla(40, 50%, 90%, 0.5),
+        inset 0 -2px 4px hsla(30, 30%, 30%, 0.1);
+    min-width: 160px;
+}
+
+.layer-controls--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.layer-controls__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: hsl(30, 25%, 35%);
+}
+
+.layer-controls__icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.layer-controls__title {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.layer-controls__slider-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.layer-controls__label {
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: hsl(30, 20%, 45%);
+    min-width: 14px;
+    text-align: center;
+}
+
+.layer-controls__slider {
+    flex: 1;
+    height: 8px;
+    -webkit-appearance: none;
+    appearance: none;
+    background:
+        linear-gradient(180deg,
+            hsl(30, 15%, 75%) 0%,
+            hsl(28, 12%, 80%) 50%,
+            hsl(30, 15%, 75%) 100%
+        );
+    border-radius: 4px;
+    border: 1px solid hsla(30, 30%, 50%, 0.4);
+    box-shadow:
+        inset 0 1px 3px hsla(30, 30%, 30%, 0.2);
+    cursor: pointer;
+}
+
+.layer-controls__slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background:
+        radial-gradient(circle at 30% 30%,
+            hsl(45, 95%, 70%) 0%,
+            hsl(42, 90%, 55%) 60%,
+            hsl(38, 85%, 45%) 100%
+        );
+    border-radius: 50%;
+    border: 2px solid hsl(38, 70%, 45%);
+    box-shadow:
+        0 2px 6px hsla(30, 50%, 20%, 0.3),
+        inset 0 1px 2px hsla(50, 100%, 90%, 0.4);
+    cursor: grab;
+    transition: transform 0.15s ease;
+}
+
+.layer-controls__slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+.layer-controls__slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(0.95);
+}
+
+.layer-controls__slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background:
+        radial-gradient(circle at 30% 30%,
+            hsl(45, 95%, 70%) 0%,
+            hsl(42, 90%, 55%) 60%,
+            hsl(38, 85%, 45%) 100%
+        );
+    border-radius: 50%;
+    border: 2px solid hsl(38, 70%, 45%);
+    box-shadow:
+        0 2px 6px hsla(30, 50%, 20%, 0.3),
+        inset 0 1px 2px hsla(50, 100%, 90%, 0.4);
+    cursor: grab;
+    transition: transform 0.15s ease;
+}
+
+.layer-controls__display {
+    text-align: center;
+}
+
+.layer-controls__current {
+    display: inline-block;
+    padding: 4px 12px;
+    background:
+        linear-gradient(180deg,
+            hsl(35, 20%, 96%) 0%,
+            hsl(32, 15%, 92%) 100%
+        );
+    border-radius: var(--radius-sm);
+    border: 1px solid hsla(30, 30%, 50%, 0.25);
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: hsl(30, 30%, 30%);
+    box-shadow:
+        inset 0 1px 0 hsla(40, 40%, 100%, 0.6),
+        0 1px 2px hsla(30, 30%, 20%, 0.1);
+}
+
+.layer-controls__buttons {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.layer-controls__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background:
+        linear-gradient(180deg,
+            hsl(35, 25%, 95%) 0%,
+            hsl(32, 20%, 90%) 50%,
+            hsl(30, 18%, 86%) 100%
+        );
+    border: 1px solid hsla(30, 30%, 50%, 0.3);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: hsl(30, 25%, 40%);
+    transition: all 0.15s ease;
+    box-shadow:
+        inset 0 1px 0 hsla(40, 40%, 100%, 0.6),
+        0 1px 3px hsla(30, 30%, 20%, 0.15);
+}
+
+.layer-controls__btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.layer-controls__btn:hover:not(:disabled) {
+    background:
+        linear-gradient(180deg,
+            hsl(38, 30%, 97%) 0%,
+            hsl(35, 25%, 93%) 100%
+        );
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 hsla(40, 40%, 100%, 0.7),
+        0 2px 6px hsla(30, 30%, 20%, 0.2);
+}
+
+.layer-controls__btn:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow:
+        inset 0 1px 3px hsla(30, 30%, 30%, 0.2);
+}
+
+.layer-controls__btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .layer-controls__slider::-webkit-slider-thumb,
+    .layer-controls__btn {
+        transition: none;
     }
 }

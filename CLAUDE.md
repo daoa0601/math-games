@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with this repository.
 
 ## Commands
 
@@ -15,140 +15,220 @@ npm run test:coverage # Run tests with coverage report
 
 ## Architecture
 
-This is a React + TypeScript SPA for educational math games targeting primary to middle school students. It uses Vite for bundling and react-router-dom for navigation.
+React + TypeScript SPA for educational math games (primary to middle school). Uses Vite bundling and react-router-dom navigation.
 
 ### Project Structure
 
 ```
 src/
-├── games/              # Each game is a self-contained module
-│   ├── MagicGraph/     # Graph-based number placement puzzle
-│   │   ├── logic/      # Solver, puzzles, types
-│   │   ├── components/ # UI components
-│   │   └── hooks/      # useHistory (undo/redo)
-│   ├── SequenceRace/   # Turn-based strategy game vs AI
-│   └── ShapeArchitect/ # Voxel-based geometry puzzle
+├── App.tsx                 # Routes with React.lazy code splitting
+├── games/                  # Each game is a self-contained module
+│   ├── MagicGraph/         # Graph-based number placement puzzle
+│   ├── SequenceRace/       # Turn-based strategy game vs AI
+│   └── ShapeArchitect/     # Voxel-based geometry puzzle
 ├── shared/
-│   ├── components/     # GameLayout, GameCard, LanguageSwitcher
-│   └── utils/          # storage.ts, audio.ts
-├── i18n/               # Internationalization (EN/VI)
-│   └── locales/        # Translation JSON files
-└── pages/              # Dashboard (game selector)
+│   ├── components/         # Reusable UI components
+│   │   ├── gamification/   # StatsDisplay, AchievementToast, RankUpOverlay
+│   │   ├── icons/          # Custom SVG game icons
+│   │   └── ...             # Button, GameCard, Timer, etc.
+│   ├── contexts/           # PlayerContext (stats, rank, achievements)
+│   ├── hooks/              # useGameTimer, useGameRewards
+│   ├── services/           # player.ts, rank.ts, achievements.ts
+│   └── utils/              # storage.ts, audio.ts
+├── i18n/                   # Internationalization (EN/VI)
+└── pages/
+    └── Dashboard.tsx       # Game selector with player profile
 ```
+
+### Path Aliases
+
+Use path aliases for all imports from `src/`:
+
+```typescript
+// Preferred:
+import { GameLayout } from '@/shared/components';
+import { useGameTimer } from '@/shared/hooks';
+
+// Instead of:
+import { GameLayout } from '../../shared/components';
+```
+
+Configured in `tsconfig.app.json` and `vite.config.ts`.
 
 ### Game Module Pattern
 
 Each game follows this structure:
 - `logic/` - Pure TypeScript game engine (types, solver/engine, presets)
 - `components/` - React UI components specific to the game
+- `hooks/` - Game-specific React hooks (e.g., useThreeCleanup)
 - `[GameName]Game.tsx` - Main game component with state management
 - `index.ts` - Barrel export
 
-### Game Engines
+### Code Splitting
 
-**MagicGraph** (`logic/solver.ts`):
-- Recursive backtracking constraint solver for graph puzzles
-- `solve()` finds valid number assignments where each line sums to target
-- `generatePuzzle()` creates unique-solution puzzles by solve→mask→validate
+Games are lazy-loaded in `App.tsx`:
+- Core bundle: ~1MB (React, router, i18n, shared)
+- MagicGraph: ~20KB
+- SequenceRace: ~40KB
+- ShapeArchitect: ~370KB (includes three.js)
 
-**SequenceRace** (`logic/engine.ts`):
-- Minimax AI with memoization for "Race to N" game
-- `getAIMove()` returns optimal/random moves based on difficulty
-- `analyzePosition()` determines if current player has winning strategy
+---
 
-**ShapeArchitect** (`logic/engine.ts`):
-- 3D voxel grid system (0=empty, 1=target, 2=filled)
-- `canPlacePiece()` validates piece placement with collision detection
-- `rotatePieceLayout()` handles 90° rotations around Z axis
+## Progression System
 
-### Key Patterns
+### Counter-Based Stats (No XP)
 
-- Game state is managed with React hooks (useState, useMemo, useCallback)
-- Logic modules are pure functions - no React dependencies
-- Visual feedback uses "traffic light" status system (incomplete/correct/incorrect/overflow)
-- Drag-and-drop via @dnd-kit/core and @dnd-kit/sortable
+Players progress through simple counters, not points:
+- `totalGamesPlayed` - Any timed game completion
+- `totalPuzzlesSolved` - MagicGraph & ShapeArchitect solves
+- `totalWins` - SequenceRace wins
 
-### Storage Service (`shared/utils/storage.ts`)
+### Rank System
 
-Cross-game persistence using localStorage with a shared namespace:
+Ranks are based on games played + puzzles solved:
 
-```typescript
-import { completeLevel, isLevelUnlocked, isLevelCompleted, getBestTime, getTotalScore, getGlobalStats, resetProgress } from '@/shared/utils';
+| Rank | Games | Solves |
+|------|-------|--------|
+| Beginner | 0 | 0 |
+| Learner | 5 | 3 |
+| Apprentice | 15 | 10 |
+| Intermediate | 30 | 20 |
+| Advanced | 60 | 40 |
+| Expert | 100 | 75 |
+| Master | 200 | 150 |
+| Grandmaster | 500 | 300 |
 
-// Mark level complete and unlock next
-completeLevel('magic-graph', 'level_1', 45, 'level_2');
+### Practice Mode
 
-// Check level status
-isLevelUnlocked('magic-graph', 'level_2', 'level_1'); // true if first level or unlocked
-isLevelCompleted('magic-graph', 'level_1'); // true if completed
+Practice mode = **zero tracking**. No stats, no achievements, no progress saved.
+Use practice mode purely for learning without pressure.
 
-// Get stats
-getBestTime('magic-graph', 'level_1'); // 45 or null
-getTotalScore('magic-graph'); // cumulative score for one game
-getGlobalStats(); // { totalScore, gamesPlayed, levelsCompleted } across all games
+### Achievements (10 total)
 
-// Reset
-resetProgress('magic-graph'); // clear all progress for a game
-```
+- Global: first_steps, all_games, streak_30, grandmaster
+- MagicGraph: first_solve, grandmaster
+- SequenceRace: first_victory, hard_winner
+- ShapeArchitect: first_build, master_architect
 
-Storage key format: `math-games-{game-id}` (e.g., `math-games-magic-graph`)
+---
 
-### Audio Service (`shared/utils/audio.ts`)
+## Key Patterns
 
-Sound effects using Howler.js with lazy loading and localStorage persistence:
+### Performance
+- **React.memo**: Applied to `GameCard` and frequently-rendered components
+- **useMemo**: Dashboard memoizes progress calculations
+- **useCallback**: All context actions wrapped
+- **Lazy initialization**: `useState(() => getPlayerProfile())` for localStorage
+- **Code splitting**: Games loaded on-demand
+- **Three.js cleanup**: `useThreeCleanup()` hook prevents GPU memory leaks
 
-```typescript
-import { playSound, toggleSound, isSoundEnabled } from '@/shared/utils';
+### TypedStorage with Zod
 
-// Play sound effects
-playSound('place');   // Piece/number placement
-playSound('error');   // Invalid action
-playSound('win');     // Victory fanfare
-playSound('click');   // UI interaction
-
-// Toggle sounds on/off (persisted to localStorage)
-toggleSound(false);   // Disable sounds
-isSoundEnabled();     // Check if sounds enabled
-```
-
-Sound files location: `public/sounds/` (see `SOUNDS.md` for specifications)
-
-### Internationalization (`src/i18n/`)
-
-Bilingual support using react-i18next:
+Use `TypedStorage` for localStorage operations with runtime validation:
 
 ```typescript
-import { useTranslation } from 'react-i18next';
+import { TypedStorage, PlayerProfileSchema } from '@/shared/utils';
 
-const { t } = useTranslation('magicGraph');
-t('hints.auditor'); // Get translated string
+const storage = new TypedStorage(
+  'player-profile',
+  PlayerProfileSchema,
+  createDefaultProfile()
+);
+
+const profile = storage.get(); // Always returns valid data
+storage.set({ ...profile, streak: 5 }); // Validates before storing
 ```
 
-- **Languages:** English (en), Vietnamese (vi)
-- **Default:** Vietnamese
-- **Persistence:** Language preference saved to `localStorage` (`math-games-lang`)
-- **Namespaces:** `common`, `magicGraph`, `sequenceRace`, `shapeArchitect`
-- **UI Toggle:** `LanguageSwitcher` component in header
+See `docs/adr/0002-typed-storage-zod.md` for details.
 
-### Undo/Redo Hook (`games/MagicGraph/hooks/useHistory.ts`)
+### Three.js Memory Management
 
-Generic history management hook with keyboard shortcuts:
+For 3D scenes (ShapeArchitect), use the cleanup hook:
 
 ```typescript
-import { useHistory } from './hooks/useHistory';
-
-const { current, set, undo, redo, canUndo, canRedo, reset } = useHistory(initialState);
-
-// Keyboard shortcuts: Ctrl+Z (undo), Ctrl+Y or Ctrl+Shift+Z (redo)
+function Scene3DContent() {
+  useThreeCleanup(); // Must be inside Canvas
+  return <>{/* scene content */}</>;
+}
 ```
 
-- Max history depth: 50 entries
-- Used by MagicGraph for tracking number placements
+This disposes geometries, materials, and textures on unmount.
 
-## Implementation Status
+### Toast Staggering
+```tsx
+{toastQueue.map((achievement, index) => (
+  <AchievementToast key={achievement.id} delay={index * 500} ... />
+))}
+```
 
-See `TASKS.md` for current progress.
+### Sound Throttling
+Module-level cooldown (2s) prevents audio chaos with multiple toasts.
 
-**Completed:** Core engines, puzzle generation, hint systems (Auditor/Starter/Algebraist), storage service, audio infrastructure, i18n (EN/VI), undo/redo, win animations, 74 unit tests.
+### CSS
+- Global design system in `src/index.css`
+- Component-specific CSS colocated
+- BEM naming: `.achievement-toast__icon`
+- CSS variables: `--color-primary`, `--space-md`
 
-**Remaining:** Web Worker for solver, 3D mode, custom editors, two-player mode, mobile optimization, accessibility.
+### Animations
+Each game has a distinct visual theme with CSS-only animations:
+
+**MagicGraph** - "Mystical Constellation"
+- Starfield background with twinkling stars
+- Golden glow on fixed nodes (`starGlow`)
+- Shimmer on completed lines (`lineShimmer`)
+- Particle burst on placement (`particleExpand` via `drop-shadow`)
+- Constellation reveal on win (`constellationReveal`)
+
+**SequenceRace** - "Track & Field"
+- CSS stick figures replace emoji runners
+- Running animation: arm swing, leg stride, body lean
+- Victory/defeat poses
+- Multi-particle dust trail
+
+**ShapeArchitect** - "Building Workshop"
+- Wood grain workbench background
+- Blueprint grid on target cells
+- Snap wobble animation (`snapPlaceWobble`)
+- Dust burst with ring effect
+
+**Animation Performance:**
+- All animations use GPU-composited properties: `transform`, `opacity`, `filter`
+- SVG particles created via multi-directional `drop-shadow()` filters
+- Reduced motion: All games respect `@media (prefers-reduced-motion: reduce)`
+
+---
+
+## Internationalization
+
+Bilingual (EN/VI) via react-i18next. Default: Vietnamese.
+
+```typescript
+const { t } = useTranslation();
+t('ranks.intermediate');  // "Intermediate" or "Trung cấp"
+```
+
+---
+
+## Design System
+
+### Colors
+```css
+--color-primary: hsl(12, 90%, 62%)    /* Warm Coral */
+--color-secondary: hsl(174, 65%, 42%) /* Soft Teal */
+--color-accent: hsl(45, 100%, 55%)    /* Sunny Yellow */
+--color-magic: hsl(270, 75%, 60%)     /* Magic Purple */
+--color-success: hsl(145, 65%, 42%)   /* Leafy Green */
+```
+
+### Typography
+- Display: 'Quicksand' (titles, headings)
+- Body: 'Nunito' (text, buttons)
+
+---
+
+## Documentation
+
+- `docs/ARCHITECTURE.md` - System overview, patterns, dependencies
+- `docs/adr/` - Architectural Decision Records
+- `SPRINT.md` - Current sprint planning and backlog

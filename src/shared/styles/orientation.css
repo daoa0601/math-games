@@ -1,0 +1,236 @@
+/**
+ * Orientation-Specific Styles
+ *
+ * Handles landscape and portrait layouts for mobile devices.
+ * These rules complement the main breakpoint system.
+ *
+ * Usage:
+ * - Portrait: Content stacks vertically
+ * - Landscape on mobile: Compact header, horizontal layouts
+ */
+
+/* ========================================
+   Landscape Mode - Mobile Phones
+   ======================================== */
+
+/**
+ * Landscape phones have limited vertical space.
+ * Optimize for horizontal layouts and compact UI.
+ */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Compact game header in landscape */
+  .game-header {
+    padding: var(--space-xs) var(--space-md);
+    flex-wrap: nowrap;
+    gap: var(--space-sm);
+  }
+
+  .game-header__title {
+    font-size: var(--text-base);
+    width: auto;
+  }
+
+  .game-header__actions {
+    width: auto;
+    gap: var(--space-xs);
+  }
+
+  /* Reduce vertical padding on game container */
+  .game-container {
+    padding: var(--space-sm);
+  }
+
+  /* Horizontal layout for game content when appropriate */
+  .game-content--landscape {
+    flex-direction: row;
+    gap: var(--space-md);
+  }
+
+  /* Compact overlays in landscape */
+  .game-overlay {
+    padding: var(--space-md);
+  }
+
+  .game-overlay__emoji {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  .game-overlay__title {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-xs);
+  }
+
+  .game-overlay__stats {
+    margin: var(--space-sm) 0;
+  }
+
+  /* Compact rank up overlay */
+  .rank-up-modal {
+    padding: var(--space-md);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .rank-up-modal__title {
+    font-size: var(--text-lg);
+  }
+
+  .rank-up-modal__transition {
+    margin: var(--space-sm) 0;
+  }
+
+  /* Hide some decorative elements to save space */
+  .rank-up-modal__stars {
+    display: none;
+  }
+
+  /* Compact dashboard header */
+  .dashboard__header {
+    margin-bottom: var(--space-md);
+  }
+
+  .dashboard__title {
+    font-size: var(--text-xl);
+  }
+
+  /* Horizontal game grid in landscape */
+  .game-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-md);
+  }
+}
+
+/* ========================================
+   Portrait Mode - Common Adjustments
+   ======================================== */
+
+/**
+ * Portrait mode prioritizes vertical stacking.
+ * Ensure adequate spacing between stacked elements.
+ */
+@media (orientation: portrait) {
+  /* Stack game content vertically */
+  .game-content {
+    flex-direction: column;
+  }
+
+  /* Ensure game controls are easily reachable at bottom */
+  .game-controls--portrait {
+    position: sticky;
+    bottom: 0;
+    padding: var(--space-md);
+    background: var(--bg-surface);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* ========================================
+   Very Short Landscape (e.g., iPhone SE landscape)
+   ======================================== */
+
+@media (orientation: landscape) and (max-height: 400px) {
+  .game-header {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  /* Minimal header for very constrained heights */
+  .game-header__title {
+    font-size: var(--text-sm);
+  }
+
+  .game-container {
+    padding: var(--space-xs);
+  }
+
+  /* Hide non-essential elements */
+  .game-rules {
+    display: none;
+  }
+
+  /* Smaller buttons */
+  .btn {
+    padding: 8px 14px;
+    font-size: var(--text-xs);
+  }
+
+  .btn--large {
+    padding: 10px 18px;
+    font-size: var(--text-sm);
+  }
+}
+
+/* ========================================
+   Tall Portrait (e.g., modern phones)
+   ======================================== */
+
+/**
+ * Take advantage of extra vertical space in tall phones.
+ */
+@media (orientation: portrait) and (min-height: 800px) and (max-width: 480px) {
+  .dashboard {
+    padding: var(--space-xl);
+  }
+
+  .dashboard__header {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .game-grid {
+    gap: var(--space-xl);
+  }
+
+  /* More breathing room in game overlays */
+  .game-overlay {
+    padding: var(--space-2xl);
+  }
+
+  .game-overlay__stats {
+    gap: var(--space-xl);
+  }
+}
+
+/* ========================================
+   Tablet Landscape
+   ======================================== */
+
+@media (orientation: landscape) and (min-width: 768px) and (max-width: 1024px) {
+  /* Side-by-side layouts work well on tablet landscape */
+  .game-content--tablet-landscape {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  /* Centered overlays with max width */
+  .game-overlay {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
+
+/* ========================================
+   Safe Area Insets (Notch/Home Indicator)
+   ======================================== */
+
+/**
+ * Handle safe areas for devices with notches or home indicators.
+ * Uses env() function with fallback values.
+ */
+@supports (padding: env(safe-area-inset-top)) {
+  .game-container {
+    padding-top: max(var(--space-lg), env(safe-area-inset-top));
+    padding-bottom: max(var(--space-lg), env(safe-area-inset-bottom));
+    padding-left: max(var(--space-lg), env(safe-area-inset-left));
+    padding-right: max(var(--space-lg), env(safe-area-inset-right));
+  }
+
+  @media (orientation: landscape) {
+    /* Extra padding on sides for landscape notch devices */
+    .game-header {
+      padding-left: max(var(--space-md), env(safe-area-inset-left));
+      padding-right: max(var(--space-md), env(safe-area-inset-right));
+    }
+  }
+}

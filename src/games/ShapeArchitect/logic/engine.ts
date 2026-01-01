@@ -2,7 +2,8 @@
 // Shape Architect - Voxel Engine
 // ========================================
 
-import type { CellState, Position3D, Piece, LevelConfig, GameState, PlacedPiece } from './types';
+import type { CellState, Position3D, Piece, LevelConfig, GameState, PlacedPiece, Rotation3D, RotationAxis } from './types';
+import { DEFAULT_ROTATION } from './types';
 
 /**
  * Create an empty 3D grid
@@ -44,29 +45,119 @@ export function isInBounds(pos: Position3D, size: [number, number, number]): boo
     );
 }
 
+// ========================================
+// 3D Rotation System
+// ========================================
+
 /**
- * Rotate piece layout by 90 degrees (2D rotation around Z axis)
+ * Normalize angle to valid rotation value (0, 90, 180, 270)
+ */
+export function normalizeAngle(angle: number): number {
+    return ((angle % 360) + 360) % 360;
+}
+
+/**
+ * Create a rotation by adding 90 degrees to a specific axis
+ */
+export function rotateBy90OnAxis(rotation: Rotation3D, axis: RotationAxis): Rotation3D {
+    return {
+        x: axis === 'x' ? normalizeAngle(rotation.x + 90) : rotation.x,
+        y: axis === 'y' ? normalizeAngle(rotation.y + 90) : rotation.y,
+        z: axis === 'z' ? normalizeAngle(rotation.z + 90) : rotation.z,
+    };
+}
+
+/**
+ * Rotate a single position 90 degrees around the X-axis (pitch)
+ * Transformation: (x, y, z) -> (x, -z, y)
+ */
+function rotatePositionAroundX(pos: Position3D): Position3D {
+    return { x: pos.x, y: -pos.z, z: pos.y };
+}
+
+/**
+ * Rotate a single position 90 degrees around the Y-axis (yaw)
+ * Transformation: (x, y, z) -> (z, y, -x)
+ */
+function rotatePositionAroundY(pos: Position3D): Position3D {
+    return { x: pos.z, y: pos.y, z: -pos.x };
+}
+
+/**
+ * Rotate a single position 90 degrees around the Z-axis (roll)
+ * Transformation: (x, y, z) -> (-y, x, z)
+ */
+function rotatePositionAroundZ(pos: Position3D): Position3D {
+    return { x: -pos.y, y: pos.x, z: pos.z };
+}
+
+/**
+ * Normalize layout to have minimum coordinates at origin (0,0,0)
+ */
+function normalizeLayout(layout: Position3D[]): Position3D[] {
+    if (layout.length === 0) return layout;
+
+    const minX = Math.min(...layout.map((p) => p.x));
+    const minY = Math.min(...layout.map((p) => p.y));
+    const minZ = Math.min(...layout.map((p) => p.z));
+
+    return layout.map((pos) => ({
+        x: pos.x - minX,
+        y: pos.y - minY,
+        z: pos.z - minZ,
+    }));
+}
+
+/**
+ * Rotate piece layout using full 3D rotation (Rotation3D).
+ * Applies rotations in order: X -> Y -> Z
+ */
+export function rotatePieceLayout3D(layout: Position3D[], rotation: Rotation3D): Position3D[] {
+    let result = [...layout];
+
+    // X-axis rotation (pitch)
+    const xTimes = (normalizeAngle(rotation.x) / 90) % 4;
+    for (let i = 0; i < xTimes; i++) {
+        result = result.map(rotatePositionAroundX);
+    }
+
+    // Y-axis rotation (yaw)
+    const yTimes = (normalizeAngle(rotation.y) / 90) % 4;
+    for (let i = 0; i < yTimes; i++) {
+        result = result.map(rotatePositionAroundY);
+    }
+
+    // Z-axis rotation (roll)
+    const zTimes = (normalizeAngle(rotation.z) / 90) % 4;
+    for (let i = 0; i < zTimes; i++) {
+        result = result.map(rotatePositionAroundZ);
+    }
+
+    // Normalize to positive coordinates
+    return normalizeLayout(result);
+}
+
+/**
+ * Legacy function: Rotate piece layout by 90 degrees (2D rotation around Z axis)
+ * Preserves z-coordinate (only normalizes x and y)
+ * @deprecated Use rotatePieceLayout3D with Rotation3D instead
  */
 export function rotatePieceLayout(layout: Position3D[], rotation: number): Position3D[] {
     const times = (rotation / 90) % 4;
     let result = [...layout];
 
     for (let i = 0; i < times; i++) {
-        result = result.map((pos) => ({
-            x: -pos.y,
-            y: pos.x,
-            z: pos.z,
-        }));
+        result = result.map(rotatePositionAroundZ);
     }
 
-    // Normalize to positive coordinates
+    // Normalize only x and y to positive coordinates (preserve z)
     const minX = Math.min(...result.map((p) => p.x));
     const minY = Math.min(...result.map((p) => p.y));
 
     return result.map((pos) => ({
         x: pos.x - minX,
         y: pos.y - minY,
-        z: pos.z,
+        z: pos.z, // Preserve original z coordinate for 2D rotation
     }));
 }
 
@@ -76,9 +167,9 @@ export function rotatePieceLayout(layout: Position3D[], rotation: number): Posit
 export function getPieceWorldPositions(
     piece: Piece,
     position: Position3D,
-    rotation: number
+    rotation: Rotation3D
 ): Position3D[] {
-    const rotatedLayout = rotatePieceLayout(piece.layout, rotation);
+    const rotatedLayout = rotatePieceLayout3D(piece.layout, rotation);
     return rotatedLayout.map((local) => ({
         x: position.x + local.x,
         y: position.y + local.y,
@@ -95,7 +186,7 @@ export function canPlacePiece(
     grid: CellState[][][],
     piece: Piece,
     position: Position3D,
-    rotation: number,
+    rotation: Rotation3D,
     gridSize: [number, number, number]
 ): boolean {
     const worldPositions = getPieceWorldPositions(piece, position, rotation);
@@ -133,7 +224,7 @@ export function findNearestValidPosition(
     grid: CellState[][][],
     piece: Piece,
     attemptedPosition: Position3D,
-    rotation: number,
+    rotation: Rotation3D,
     gridSize: [number, number, number],
     maxSearchRadius: number = 2
 ): Position3D | null {
@@ -175,7 +266,7 @@ export function placePiece(
     grid: CellState[][][],
     piece: Piece,
     position: Position3D,
-    rotation: number
+    rotation: Rotation3D
 ): CellState[][][] {
     const newGrid = grid.map((plane) => plane.map((row) => [...row]));
     const worldPositions = getPieceWorldPositions(piece, position, rotation);
@@ -238,7 +329,7 @@ export function createGameState(level: LevelConfig): GameState {
         placedPieces: [],
         remainingPieces: [...level.pieces],
         selectedPieceId: null,
-        rotation: 0,
+        rotation: { ...DEFAULT_ROTATION },
         isSolved: false,
     };
 }
@@ -275,7 +366,7 @@ export function tryPlacePiece(
     const newPlaced: PlacedPiece = {
         pieceId: piece.id,
         position: finalPosition,
-        rotation: state.rotation,
+        rotation: { ...state.rotation },
         color: piece.color,
     };
 
@@ -287,7 +378,7 @@ export function tryPlacePiece(
         placedPieces: [...state.placedPieces, newPlaced],
         remainingPieces: newRemaining,
         selectedPieceId: null,
-        rotation: 0,
+        rotation: { ...DEFAULT_ROTATION },
         isSolved,
     };
 }

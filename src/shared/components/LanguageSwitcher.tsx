@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { LANGUAGE_KEY } from '../constants';
 
 export function LanguageSwitcher() {
     const { i18n } = useTranslation();
@@ -6,7 +7,7 @@ export function LanguageSwitcher() {
     const toggleLanguage = () => {
         const newLang = i18n.language === 'vi' ? 'en' : 'vi';
         i18n.changeLanguage(newLang);
-        localStorage.setItem('math-games-lang', newLang);
+        localStorage.setItem(LANGUAGE_KEY, newLang);
     };
 
     return (

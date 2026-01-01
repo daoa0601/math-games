@@ -1,0 +1,226 @@
+/**
+ * GameOverlay Styles
+ *
+ * Shared overlay component for game end states.
+ * Follows the design system with BEM naming.
+ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   BASE OVERLAY
+   ═══════════════════════════════════════════════════════════════════ */
+
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-xl);
+  z-index: 100;
+  animation: overlayFadeIn 0.3s ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EMOJI
+   ═══════════════════════════════════════════════════════════════════ */
+
+.game-overlay__emoji {
+  font-size: 4rem;
+  margin-bottom: var(--space-md);
+  animation: emojiPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+}
+
+@keyframes emojiPop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TITLE
+   ═══════════════════════════════════════════════════════════════════ */
+
+.game-overlay__title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  margin: 0 0 var(--space-sm);
+  text-align: center;
+}
+
+.game-overlay__title--win {
+  color: var(--color-success);
+  text-shadow: 0 0 20px hsla(145, 65%, 42%, 0.5);
+}
+
+.game-overlay__title--lose {
+  color: var(--color-primary);
+}
+
+.game-overlay__title--timeUp {
+  color: var(--color-warning);
+  text-shadow: 0 0 20px hsla(45, 100%, 55%, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MESSAGE
+   ═══════════════════════════════════════════════════════════════════ */
+
+.game-overlay__message {
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0 0 var(--space-md);
+  max-width: 300px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HINT
+   ═══════════════════════════════════════════════════════════════════ */
+
+.game-overlay__hint {
+  background: hsla(270, 50%, 30%, 0.4);
+  border: 1px solid hsla(270, 50%, 50%, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+  max-width: 350px;
+  text-align: left;
+}
+
+.game-overlay__hint h4 {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--color-magic);
+  margin: 0 0 var(--space-xs);
+}
+
+.game-overlay__hint p {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-xs);
+  line-height: 1.5;
+}
+
+.game-overlay__hint p:last-child {
+  margin-bottom: 0;
+}
+
+.game-overlay__hint code {
+  background: hsla(0, 0%, 0%, 0.3);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+  font-size: var(--text-xs);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.game-overlay__stats {
+  display: flex;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-lg);
+}
+
+.game-overlay__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.game-overlay__stat-value {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.game-overlay__stat-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ACTIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.game-overlay__actions {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .game-overlay {
+    animation: none;
+  }
+
+  .game-overlay__emoji {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+  .game-overlay {
+    padding: var(--space-lg);
+  }
+
+  .game-overlay__emoji {
+    font-size: 3rem;
+  }
+
+  .game-overlay__title {
+    font-size: var(--text-xl);
+  }
+
+  .game-overlay__stats {
+    gap: var(--space-lg);
+  }
+
+  .game-overlay__hint {
+    max-width: 100%;
+  }
+
+  .game-overlay__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .game-overlay__actions .btn {
+    width: 100%;
+  }
+}

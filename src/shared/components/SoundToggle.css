@@ -1,0 +1,130 @@
+/* ============================================
+   SoundToggle Component
+   ============================================
+   A compact, animated sound toggle for game headers.
+   ============================================ */
+
+.sound-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-full);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px hsla(220, 25%, 10%, 0.06);
+}
+
+.sound-toggle:hover {
+    transform: scale(1.08);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    box-shadow: 0 4px 12px hsla(12, 90%, 50%, 0.15);
+}
+
+.sound-toggle:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.sound-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Sound ON state */
+.sound-toggle--on {
+    background: var(--color-primary-bg);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.sound-toggle--on:hover {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* Sound OFF state */
+.sound-toggle--off {
+    opacity: 0.7;
+}
+
+.sound-toggle--off:hover {
+    opacity: 1;
+}
+
+/* SVG Icon */
+.sound-toggle__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.sound-toggle__svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Sound waves animation */
+.sound-wave {
+    opacity: 0.8;
+    transform-origin: center;
+}
+
+.sound-wave--1 {
+    animation: sound-wave-pulse 1.5s ease-in-out infinite;
+}
+
+.sound-wave--2 {
+    animation: sound-wave-pulse 1.5s ease-in-out infinite;
+    animation-delay: 0.2s;
+}
+
+@keyframes sound-wave-pulse {
+    0%, 100% {
+        opacity: 0.4;
+        stroke-width: 2;
+    }
+    50% {
+        opacity: 1;
+        stroke-width: 2.5;
+    }
+}
+
+/* Disable animation on hover (prepare for mute) */
+.sound-toggle--on:hover .sound-wave {
+    animation: none;
+    opacity: 0.5;
+}
+
+/* ============================================
+   Reduced Motion Support
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    .sound-toggle,
+    .sound-wave {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 480px) {
+    .sound-toggle {
+        width: 36px;
+        height: 36px;
+    }
+
+    .sound-toggle__icon {
+        width: 18px;
+        height: 18px;
+    }
+}

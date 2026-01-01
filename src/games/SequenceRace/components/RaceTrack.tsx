@@ -1,11 +1,49 @@
-import type { SequenceState } from '../logic/types';
+import { useEffect, useState, useRef } from 'react';
+import type { SequenceState, GameMode } from '../logic/types';
 
 interface RaceTrackProps {
     state: SequenceState;
+    gameMode: GameMode;
+    isAIThinking?: boolean;
+    aiReaction?: 'confident' | 'worried' | 'neutral';
 }
 
-export function RaceTrack({ state }: RaceTrackProps) {
-    const { target, currentPosition } = state;
+// CSS Stick Figure Component
+function StickFigure() {
+    return (
+        <div className="stick-figure">
+            <div className="stick-figure__head" />
+            <div className="stick-figure__body" />
+            <div className="stick-figure__arms">
+                <div className="stick-figure__arm stick-figure__arm--left" />
+                <div className="stick-figure__arm stick-figure__arm--right" />
+            </div>
+            <div className="stick-figure__legs">
+                <div className="stick-figure__leg stick-figure__leg--left" />
+                <div className="stick-figure__leg stick-figure__leg--right" />
+            </div>
+        </div>
+    );
+}
+
+export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral' }: RaceTrackProps) {
+    const { target, currentPosition, gameOver, winner } = state;
+    const prevPositionRef = useRef(currentPosition);
+    const [isMoving, setIsMoving] = useState(false);
+
+    // Detect movement and trigger animation
+    useEffect(() => {
+        if (currentPosition !== prevPositionRef.current) {
+            // This setState is intentional for animation triggers (not a cascading render)
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setIsMoving(true);
+            prevPositionRef.current = currentPosition;
+
+            // Clear moving state after animation completes
+            const timer = setTimeout(() => setIsMoving(false), 400);
+            return () => clearTimeout(timer);
+        }
+    }, [currentPosition]);
 
     // Calculate position percentage
     const positionPercent = (currentPosition / target) * 100;
@@ -42,14 +80,46 @@ export function RaceTrack({ state }: RaceTrackProps) {
 
                 {/* Player Avatar */}
                 <div
-                    className="player-avatar"
+                    className={`player-avatar player-avatar--player player-avatar--stick-figure ${
+                        isMoving ? 'player-avatar--moving' : ''
+                    } ${
+                        gameOver && winner === 'player' ? 'player-avatar--winner' : ''
+                    } ${
+                        gameOver && winner !== 'player' && winner !== null ? 'player-avatar--loser' : ''
+                    }`}
                     style={{ left: `${positionPercent}%` }}
+                    aria-label={gameMode === 'two-player' ? 'Shared player position' : 'Your runner'}
                 >
-                    🏃
+                    <StickFigure />
                 </div>
 
+                {/* AI Opponent (only in vs-ai mode) */}
+                {gameMode === 'vs-ai' && (
+                    <div
+                        className={`player-avatar player-avatar--ai player-avatar--stick-figure ${
+                            isAIThinking ? 'player-avatar--thinking' : ''
+                        } ${
+                            gameOver && winner === 'ai' ? 'player-avatar--winner' : ''
+                        } ${
+                            gameOver && winner === 'player' ? 'player-avatar--loser' : ''
+                        }`}
+                        style={{ left: `${positionPercent}%` }}
+                        aria-label="AI opponent"
+                    >
+                        <StickFigure />
+                        {/* AI Reaction Bubble */}
+                        {!gameOver && (
+                            <span className={`ai-reaction ai-reaction--${aiReaction}`}>
+                                {aiReaction === 'confident' && '😏'}
+                                {aiReaction === 'worried' && '😰'}
+                                {aiReaction === 'neutral' && (isAIThinking ? '🤔' : '')}
+                            </span>
+                        )}
+                    </div>
+                )}
+
                 {/* Target Flag */}
-                <div className="target-flag">🏁</div>
+                <div className={`target-flag ${gameOver ? 'target-flag--finished' : ''}`}>🏁</div>
             </div>
 
             {/* Position Display */}

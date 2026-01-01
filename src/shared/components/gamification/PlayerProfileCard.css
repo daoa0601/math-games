@@ -1,0 +1,259 @@
+/**
+ * Player Profile Card Styles
+ * Dashboard profile section with rank, stats, and achievements
+ */
+
+.player-profile-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MAIN SECTION (Rank Badge + Name)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.player-profile-card__main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-shrink: 0;
+}
+
+.player-profile-card__rank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,
+    var(--bg-elevated) 0%,
+    var(--bg-soft) 100%
+  );
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.player-profile-card__rank-icon {
+  font-size: 1.5rem;
+}
+
+.player-profile-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.player-profile-card__name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.player-profile-card__name:hover {
+  color: var(--color-primary);
+}
+
+.player-profile-card__edit-icon {
+  font-size: var(--text-sm);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.player-profile-card__name:hover .player-profile-card__edit-icon {
+  opacity: 1;
+}
+
+.player-profile-card__name-input {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--bg-elevated);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  outline: none;
+  min-width: 120px;
+  max-width: 200px;
+}
+
+.player-profile-card__title {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PROGRESS SECTION (Stats + Rank Progress)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.player-profile-card__progress {
+  flex: 1;
+  min-width: 150px;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.player-profile-card__stats-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+}
+
+.player-profile-card__stat {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.player-profile-card__stat-divider {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.player-profile-card__rank-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.player-profile-card__progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.player-profile-card__progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg,
+    var(--color-secondary) 0%,
+    var(--color-primary) 100%
+  );
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+.player-profile-card__progress-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   META SECTION (Streak + Achievements)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.player-profile-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-shrink: 0;
+}
+
+.player-profile-card__streak {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  cursor: default;
+}
+
+.player-profile-card__streak-icon {
+  font-size: var(--text-lg);
+}
+
+.player-profile-card__streak-count {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: hsl(25, 100%, 50%);
+}
+
+.player-profile-card__achievements {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.player-profile-card__achievement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: var(--text-lg);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  cursor: default;
+  transition: transform 0.2s ease;
+}
+
+.player-profile-card__achievement:hover {
+  transform: scale(1.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .player-profile-card {
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+
+  .player-profile-card__main {
+    width: 100%;
+  }
+
+  .player-profile-card__progress {
+    width: 100%;
+    max-width: none;
+    order: 3;
+  }
+
+  .player-profile-card__meta {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-profile-card__rank {
+    width: 40px;
+    height: 40px;
+  }
+
+  .player-profile-card__rank-icon {
+    font-size: 1.25rem;
+  }
+
+  .player-profile-card__name {
+    font-size: var(--text-base);
+  }
+
+  .player-profile-card__achievements {
+    display: none;
+  }
+}

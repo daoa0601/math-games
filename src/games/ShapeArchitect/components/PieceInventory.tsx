@@ -1,18 +1,19 @@
 import { useDraggable } from '@dnd-kit/core';
-import type { Piece } from '../logic/types';
+import type { Piece, Rotation3D } from '../logic/types';
+import { getExplicitPattern } from '@/shared/utils';
 
 interface PieceInventoryProps {
     pieces: Piece[];
     selectedPieceId: string | null;
     onSelectPiece: (pieceId: string) => void;
-    rotation: number;
+    rotation: Rotation3D;
 }
 
 interface DraggablePieceProps {
     piece: Piece;
     isSelected: boolean;
     onSelect: () => void;
-    rotation: number;
+    rotation: Rotation3D;
 }
 
 function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePieceProps) {
@@ -42,6 +43,9 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
         }
         : undefined;
 
+    // Get pattern class for this piece's color
+    const patternClass = getExplicitPattern(piece.color);
+
     return (
         <div
             ref={setNodeRef}
@@ -51,13 +55,13 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
             {...listeners}
             {...attributes}
         >
-            <div className="piece-preview">
+            <div className="piece-preview" aria-label={`${piece.name} piece`}>
                 {[...previewGrid].reverse().map((row, y) => (
                     <div key={y} className="piece-preview-row">
                         {row.map((filled, x) => (
                             <div
                                 key={x}
-                                className={`piece-preview-cell ${filled ? '' : 'piece-preview-cell--empty'}`}
+                                className={`piece-preview-cell ${filled ? patternClass : 'piece-preview-cell--empty'}`}
                                 style={{ backgroundColor: filled ? piece.color : undefined }}
                             />
                         ))}

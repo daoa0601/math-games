@@ -4,6 +4,8 @@
 // No external audio files required
 // ========================================
 
+import { SOUND_ENABLED_KEY } from '../constants';
+
 /**
  * Available sound effect names
  */
@@ -14,9 +16,6 @@ let audioContext: AudioContext | null = null;
 
 // Global sound enabled state
 let soundEnabled = true;
-
-// Local storage key for persistence
-const SOUND_ENABLED_KEY = 'math-games-sound-enabled';
 
 // Global volume (0.0 to 1.0)
 let globalVolume = 0.5;
@@ -248,6 +247,7 @@ export function isSoundEnabled(): boolean {
  * Set volume for a specific sound (no-op for Web Audio API version)
  * Kept for API compatibility
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function setSoundVolume(_name: SoundName, _volume: number): void {
     // Individual sound volumes not supported in this implementation
     // Use setGlobalVolume instead

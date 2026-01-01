@@ -2,7 +2,11 @@
 // Shared Storage Service for Cross-Game Persistence
 // ========================================
 
-export type GameId = 'magic-graph' | 'sequence-race' | 'shape-architect';
+import { getGameProgressKey } from '../constants';
+import { type StorageGameId, STORAGE_GAME_IDS } from '../types';
+
+// Re-export for backwards compatibility
+export type GameId = StorageGameId;
 
 export interface LevelProgress {
     levelId: string;
@@ -27,13 +31,11 @@ interface StoredGameProgress {
     lastPlayed: string | null;
 }
 
-const STORAGE_PREFIX = 'math-games';
-
 /**
  * Get storage key for a game
  */
 function getStorageKey(gameId: GameId): string {
-    return `${STORAGE_PREFIX}-${gameId}`;
+    return getGameProgressKey(gameId);
 }
 
 /**
@@ -192,7 +194,7 @@ export function getGlobalStats(): {
     gamesPlayed: number;
     levelsCompleted: number;
 } {
-    const gameIds: GameId[] = ['magic-graph', 'sequence-race', 'shape-architect'];
+    const gameIds = STORAGE_GAME_IDS;
 
     let totalScore = 0;
     let gamesPlayed = 0;
@@ -208,4 +210,103 @@ export function getGlobalStats(): {
     }
 
     return { totalScore, gamesPlayed, levelsCompleted };
+}
+
+// ============================================================================
+// Personal Best Detection
+// ============================================================================
+
+export interface PersonalBestResult {
+    /** Whether this is a new personal best time */
+    isNewBest: boolean;
+    /** Previous best time (null if first completion) */
+    previousBest: number | null;
+    /** Current completion time */
+    currentTime: number;
+    /** Time improvement in seconds (positive = faster, negative = slower) */
+    improvement: number | null;
+}
+
+/**
+ * Check if a time would be a personal best for a level.
+ * Use this before completing to show preview, or after completing for result.
+ */
+export function checkPersonalBest(
+    gameId: GameId,
+    levelId: string,
+    timeSeconds: number
+): PersonalBestResult {
+    const previousBest = getBestTime(gameId, levelId);
+    const isNewBest = previousBest === null || timeSeconds < previousBest;
+    const improvement = previousBest !== null ? previousBest - timeSeconds : null;
+
+    return {
+        isNewBest,
+        previousBest,
+        currentTime: timeSeconds,
+        improvement,
+    };
+}
+
+/**
+ * Complete a level and return personal best information.
+ * This is a wrapper around completeLevel that includes PB detection.
+ */
+export function completeLevelWithPB(
+    gameId: GameId,
+    levelId: string,
+    timeSeconds: number,
+    nextLevelId?: string
+): { progress: GameProgress; personalBest: PersonalBestResult } {
+    // Check PB before updating (to get previous best)
+    const personalBest = checkPersonalBest(gameId, levelId, timeSeconds);
+
+    // Complete the level (updates storage)
+    const progress = completeLevel(gameId, levelId, timeSeconds, nextLevelId);
+
+    return { progress, personalBest };
+}
+
+/**
+ * Get all personal bests for a game (for leaderboard display)
+ */
+export function getAllBestTimes(gameId: GameId): Array<{
+    levelId: string;
+    bestTime: number;
+    completedAt: string | null;
+}> {
+    const progress = getProgress(gameId);
+    const results: Array<{ levelId: string; bestTime: number; completedAt: string | null }> = [];
+
+    progress.completedLevels.forEach((level) => {
+        if (level.bestTime !== null) {
+            results.push({
+                levelId: level.levelId,
+                bestTime: level.bestTime,
+                completedAt: level.completedAt,
+            });
+        }
+    });
+
+    // Sort by best time (fastest first)
+    return results.sort((a, b) => a.bestTime - b.bestTime);
+}
+
+/**
+ * Get game-wide best time (fastest across all levels)
+ */
+export function getGameFastestTime(gameId: GameId): number | null {
+    const allTimes = getAllBestTimes(gameId);
+    return allTimes.length > 0 ? allTimes[0].bestTime : null;
+}
+
+/**
+ * Get average best time across all completed levels
+ */
+export function getGameAverageTime(gameId: GameId): number | null {
+    const allTimes = getAllBestTimes(gameId);
+    if (allTimes.length === 0) return null;
+
+    const total = allTimes.reduce((sum, t) => sum + t.bestTime, 0);
+    return Math.round(total / allTimes.length);
 }

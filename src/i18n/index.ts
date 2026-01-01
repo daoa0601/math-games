@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { LANGUAGE_KEY } from '../shared/constants';
 
 // Import English translations
 import commonEn from './locales/en/common.json';
@@ -15,7 +16,7 @@ import sequenceRaceVi from './locales/vi/sequenceRace.json';
 import shapeArchitectVi from './locales/vi/shapeArchitect.json';
 
 // Check for saved language preference
-const savedLang = localStorage.getItem('math-games-lang');
+const savedLang = localStorage.getItem(LANGUAGE_KEY);
 
 i18n
     .use(LanguageDetector)
@@ -44,7 +45,7 @@ i18n
         },
         detection: {
             order: ['localStorage', 'navigator'],
-            lookupLocalStorage: 'math-games-lang',
+            lookupLocalStorage: LANGUAGE_KEY,
             caches: ['localStorage'],
         },
     });

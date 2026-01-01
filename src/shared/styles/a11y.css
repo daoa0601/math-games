@@ -1,0 +1,281 @@
+/* ========================================
+   Accessibility Utilities
+   WCAG AA Compliance Helpers
+   ======================================== */
+
+/* ----------------------------------------
+   Screen Reader Only
+   Visually hidden but accessible to screen readers
+   ---------------------------------------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focusable variant - becomes visible on focus */
+.sr-only-focusable:focus,
+.sr-only-focusable:active {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* ----------------------------------------
+   Skip Link
+   Skip to main content for keyboard users
+   ---------------------------------------- */
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-tooltip);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-primary);
+  color: var(--text-on-primary);
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-decoration: none;
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: var(--space-md);
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------
+   Live Regions
+   For dynamic content announcements
+   ---------------------------------------- */
+
+.live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Polite announcements (non-urgent) */
+.live-region--polite {
+  /* aria-live="polite" set in HTML */
+}
+
+/* Assertive announcements (urgent) */
+.live-region--assertive {
+  /* aria-live="assertive" set in HTML */
+}
+
+/* ----------------------------------------
+   Focus Utilities
+   Enhanced focus indicators
+   ---------------------------------------- */
+
+/* Focus ring variable for consistency */
+:root {
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+  --focus-ring-color: var(--color-accent);
+  --focus-ring-style: solid;
+}
+
+/* Enhanced focus visible styling */
+.focus-visible:focus-visible,
+*:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Focus within for container highlighting */
+.focus-within:focus-within {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Remove default focus for mouse users */
+.focus-visible:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ----------------------------------------
+   Reduced Motion
+   Already in index.css, but utility class version
+   ---------------------------------------- */
+
+.reduce-motion {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* ----------------------------------------
+   High Contrast Utilities
+   ---------------------------------------- */
+
+/* Force high contrast borders */
+.hc-border {
+  border: 2px solid currentColor !important;
+}
+
+/* Force high contrast text */
+.hc-text {
+  color: var(--text-primary) !important;
+}
+
+/* ----------------------------------------
+   Touch Target Sizing
+   Minimum 44x44px for WCAG compliance
+   ---------------------------------------- */
+
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Larger touch target (48px) */
+.touch-target--lg {
+  min-width: 48px;
+  min-height: 48px;
+}
+
+/* ----------------------------------------
+   Text Alternatives
+   For images and icons
+   ---------------------------------------- */
+
+/* Decorative image marker */
+.decorative {
+  /* Use with aria-hidden="true" and alt="" */
+}
+
+/* Icon with label */
+.icon-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.icon-label__icon {
+  flex-shrink: 0;
+}
+
+.icon-label__text {
+  /* Visible label text */
+}
+
+/* ----------------------------------------
+   Loading States
+   Accessible loading indicators
+   ---------------------------------------- */
+
+.loading {
+  position: relative;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: hsla(0, 0%, 100%, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Announce loading to screen readers */
+.loading[aria-busy="true"]::before {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip: rect(0, 0, 0, 0);
+}
+
+/* ----------------------------------------
+   Error States
+   Accessible error messaging
+   ---------------------------------------- */
+
+.error-message {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  margin-top: var(--space-xs);
+}
+
+.error-message::before {
+  content: '⚠ ';
+}
+
+/* Link error to input with aria-describedby */
+.input--error {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 2px hsla(0, 70%, 58%, 0.2);
+}
+
+/* ----------------------------------------
+   Form Accessibility
+   ---------------------------------------- */
+
+/* Required field indicator */
+.required::after {
+  content: ' *';
+  color: var(--color-error);
+}
+
+/* Fieldset reset with accessibility */
+.fieldset-reset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.fieldset-reset legend {
+  padding: 0;
+  margin-bottom: var(--space-sm);
+  font-weight: 700;
+}
+
+/* ----------------------------------------
+   Dialog/Modal Accessibility
+   ---------------------------------------- */
+
+/* Modal backdrop */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: hsla(0, 0%, 0%, 0.5);
+  z-index: var(--z-modal-backdrop);
+}
+
+/* Modal focus trap indicator (for debugging) */
+.focus-trap-active {
+  /* Applied to body when focus trap is active */
+}
+
+/* Prevent body scroll when modal open */
+.modal-open {
+  overflow: hidden;
+}

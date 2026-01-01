@@ -1,0 +1,234 @@
+/**
+ * Player Context
+ *
+ * Provides global player state and actions across the app.
+ * Internally split into two contexts for performance:
+ * - PlayerStateContext: State that changes frequently
+ * - PlayerAPIContext: Stable action functions
+ *
+ * @see docs/adr/0003-context-splitting.md
+ */
+
+import { useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import {
+  type PlayerProfile,
+  type PlayerPreferences,
+  type PlayerStats,
+  getPlayerProfile,
+  updateDisplayName as updateDisplayNameService,
+  updatePreferences as updatePreferencesService,
+  updateStreak as updateStreakService,
+  updateStats as updateStatsService,
+  recordPlaySession,
+  unlockAchievement as unlockAchievementService,
+  isFirstPlayToday,
+} from '../services/player';
+import {
+  getRankInfo,
+  getNextRank,
+  getRankProgress,
+} from '../services/rank';
+import {
+  type Achievement,
+  type AchievementContext,
+  checkAchievements,
+  getAchievementById,
+} from '../services/achievements';
+
+// Import split contexts (hooks are exported from usePlayerHooks.ts)
+import { PlayerStateContext, type PlayerState } from './PlayerStateContext';
+import {
+  PlayerAPIContext,
+  type PlayerAPI,
+  type StatsUpdateResult,
+  type AchievementResult,
+  type StreakResult,
+} from './PlayerAPIContext';
+
+// Hooks are exported from ./usePlayerHooks.ts for Fast Refresh compatibility
+// Re-export types for convenience
+export type { PlayerState } from './PlayerStateContext';
+export type { PlayerAPI, StatsUpdateResult, AchievementResult, StreakResult } from './PlayerAPIContext';
+export type { PlayerContextValue } from './usePlayerHooks';
+
+// ═══════════════════════════════════════════════════════════════════
+// PROVIDER
+// ═══════════════════════════════════════════════════════════════════
+
+interface PlayerProviderProps {
+  children: ReactNode;
+}
+
+export function PlayerProvider({ children }: PlayerProviderProps) {
+  // ─────────────────────────────────────────────────────────────────
+  // State
+  // ─────────────────────────────────────────────────────────────────
+
+  const [profile, setProfile] = useState<PlayerProfile>(() => getPlayerProfile());
+  const [loading, setLoading] = useState(true);
+
+  // Use ref to access latest profile in stable callbacks
+  const profileRef = useRef(profile);
+  profileRef.current = profile;
+
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
+  // ─────────────────────────────────────────────────────────────────
+  // Derived state (memoized)
+  // ─────────────────────────────────────────────────────────────────
+
+  const currentRank = profile.rank;
+  const currentRankInfo = useMemo(() => getRankInfo(currentRank), [currentRank]);
+  const nextRank = useMemo(() => getNextRank(currentRank), [currentRank]);
+  const rankProgress = useMemo(
+    () => getRankProgress(profile.stats, currentRank),
+    [profile.stats, currentRank]
+  );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const isFirstPlayOfDay = useMemo(() => isFirstPlayToday(), [profile.lastPlayedDate]);
+
+  // ─────────────────────────────────────────────────────────────────
+  // State context value (changes frequently)
+  // ─────────────────────────────────────────────────────────────────
+
+  const stateValue: PlayerState = useMemo(() => ({
+    profile,
+    loading,
+    currentRank,
+    currentRankInfo,
+    nextRank,
+    rankProgress,
+    isFirstPlayOfDay,
+  }), [
+    profile,
+    loading,
+    currentRank,
+    currentRankInfo,
+    nextRank,
+    rankProgress,
+    isFirstPlayOfDay,
+  ]);
+
+  // ─────────────────────────────────────────────────────────────────
+  // API functions (stable references via useCallback)
+  // ─────────────────────────────────────────────────────────────────
+
+  const refreshProfile = useCallback(() => {
+    setProfile(getPlayerProfile());
+  }, []);
+
+  const updateDisplayName = useCallback((name: string) => {
+    const updated = updateDisplayNameService(name);
+    setProfile(updated);
+  }, []);
+
+  const updatePreferences = useCallback((preferences: Partial<PlayerPreferences>) => {
+    const updated = updatePreferencesService(preferences);
+    setProfile(updated);
+  }, []);
+
+  const checkStreak = useCallback((): StreakResult => {
+    const { profile: updated, streakMaintained, isNewStreak } = updateStreakService();
+    setProfile(updated);
+    return { streakMaintained, isNewStreak };
+  }, []);
+
+  const recordPlay = useCallback(() => {
+    const updated = recordPlaySession();
+    setProfile(updated);
+  }, []);
+
+  const updateStats = useCallback((updates: Partial<PlayerStats>): StatsUpdateResult => {
+    const { profile: updated, rankedUp, previousRank, newRank } = updateStatsService(updates);
+    setProfile(updated);
+    return { rankedUp, previousRank, newRank };
+  }, []);
+
+  const checkAndUnlockAchievements = useCallback((context: AchievementContext): AchievementResult => {
+    // Use ref to get latest profile without dependency
+    const currentProfile = profileRef.current;
+
+    const enrichedContext: AchievementContext = {
+      ...context,
+      streak: currentProfile.streak,
+      currentRank: currentProfile.rank,
+      gamesPlayedByType: {
+        magicGraph: currentProfile.stats.magicGraphSolved,
+        sequenceRace: currentProfile.stats.sequenceRaceWins,
+        shapeArchitect: currentProfile.stats.shapeArchitectBuilt,
+      },
+    };
+
+    const newAchievementIds = checkAchievements(enrichedContext, currentProfile.achievements);
+
+    const newAchievements: Achievement[] = [];
+    newAchievementIds.forEach((id) => {
+      const { isNew } = unlockAchievementService(id);
+      if (isNew) {
+        const achievement = getAchievementById(id);
+        if (achievement) {
+          newAchievements.push(achievement);
+        }
+      }
+    });
+
+    if (newAchievements.length > 0) {
+      setProfile(getPlayerProfile());
+    }
+
+    return { newAchievements };
+  }, []);
+
+  const hasAchievement = useCallback((id: string): boolean => {
+    return profileRef.current.achievements.includes(id);
+  }, []);
+
+  const getRecentAchievements = useCallback((count = 3): Achievement[] => {
+    const recentIds = profileRef.current.achievements.slice(-count).reverse();
+    return recentIds
+      .map((id) => getAchievementById(id))
+      .filter((a): a is Achievement => a !== undefined);
+  }, []);
+
+  // ─────────────────────────────────────────────────────────────────
+  // API context value (stable - never causes re-renders)
+  // ─────────────────────────────────────────────────────────────────
+
+  const apiValue: PlayerAPI = useMemo(() => ({
+    refreshProfile,
+    updateDisplayName,
+    updatePreferences,
+    checkStreak,
+    recordPlay,
+    updateStats,
+    checkAndUnlockAchievements,
+    hasAchievement,
+    getRecentAchievements,
+  }), [
+    refreshProfile,
+    updateDisplayName,
+    updatePreferences,
+    checkStreak,
+    recordPlay,
+    updateStats,
+    checkAndUnlockAchievements,
+    hasAchievement,
+    getRecentAchievements,
+  ]);
+
+  // ─────────────────────────────────────────────────────────────────
+  // Render with nested providers
+  // ─────────────────────────────────────────────────────────────────
+
+  return (
+    <PlayerStateContext.Provider value={stateValue}>
+      <PlayerAPIContext.Provider value={apiValue}>
+        {children}
+      </PlayerAPIContext.Provider>
+    </PlayerStateContext.Provider>
+  );
+}
+
+// usePlayer hook is exported from ./usePlayerHooks.ts for Fast Refresh compatibility

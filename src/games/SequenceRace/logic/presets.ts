@@ -25,14 +25,15 @@ export function generateSequence(type: SequenceType, length: number): number[] {
         case 'geometric':
             // 1, 2, 4, 8, 16... (multiply by 2)
             return Array.from({ length }, (_, i) => Math.pow(2, i));
-        case 'fibonacci':
+        case 'fibonacci': {
             // 1, 1, 2, 3, 5, 8... (add previous two)
             const fib = [1, 1];
             for (let i = 2; i < length; i++) {
                 fib.push(fib[i - 1] + fib[i - 2]);
             }
             return fib.slice(0, length);
-        case 'prime':
+        }
+        case 'prime': {
             // 2, 3, 5, 7, 11... (prime numbers)
             const primes: number[] = [];
             let n = 2;
@@ -41,6 +42,7 @@ export function generateSequence(type: SequenceType, length: number): number[] {
                 n++;
             }
             return primes;
+        }
         case 'square':
             // 1, 4, 9, 16, 25... (perfect squares)
             return Array.from({ length }, (_, i) => (i + 1) * (i + 1));
@@ -223,7 +225,6 @@ export const presetGames: GameConfig[] = [
 export function generateRandomConfig(difficulty: 'easy' | 'medium' | 'hard'): GameConfig {
     let sequenceTypes: SequenceType[];
     let poolSize: number;
-    let target: number;
 
     switch (difficulty) {
         case 'easy':
@@ -247,7 +248,7 @@ export function generateRandomConfig(difficulty: 'easy' | 'medium' | 'hard'): Ga
     const maxStep = Math.max(...stepPool);
     const minTarget = maxStep * 2;
     const maxTarget = stepPool.reduce((a, b) => a + b, 0);
-    target = minTarget + Math.floor(Math.random() * (maxTarget - minTarget));
+    const target = minTarget + Math.floor(Math.random() * (maxTarget - minTarget));
 
     return {
         id: `random_${Date.now()}`,

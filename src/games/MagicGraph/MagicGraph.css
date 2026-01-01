@@ -41,13 +41,44 @@
     color: var(--color-accent);
 }
 
-/* SVG Board */
+/* ========================================
+   Mystical Constellation Theme
+   ======================================== */
+
+/* SVG Board - Dark starfield background */
 .puzzle-board {
-    background: var(--bg-surface);
+    background:
+        /* Twinkling stars layer */
+        radial-gradient(1px 1px at 20px 30px, hsla(45, 100%, 90%, 0.9) 50%, transparent),
+        radial-gradient(1px 1px at 60px 80px, hsla(45, 100%, 85%, 0.8) 50%, transparent),
+        radial-gradient(1.5px 1.5px at 100px 40px, hsla(200, 100%, 90%, 0.9) 50%, transparent),
+        radial-gradient(1px 1px at 150px 90px, hsla(270, 100%, 90%, 0.7) 50%, transparent),
+        radial-gradient(1px 1px at 200px 60px, hsla(45, 100%, 85%, 0.8) 50%, transparent),
+        radial-gradient(1.5px 1.5px at 250px 30px, hsla(200, 100%, 85%, 0.9) 50%, transparent),
+        radial-gradient(1px 1px at 80px 150px, hsla(45, 100%, 90%, 0.7) 50%, transparent),
+        radial-gradient(1px 1px at 180px 180px, hsla(270, 100%, 85%, 0.8) 50%, transparent),
+        radial-gradient(1.5px 1.5px at 280px 140px, hsla(45, 100%, 90%, 0.9) 50%, transparent),
+        radial-gradient(1px 1px at 40px 220px, hsla(200, 100%, 90%, 0.7) 50%, transparent),
+        radial-gradient(1px 1px at 120px 250px, hsla(45, 100%, 85%, 0.8) 50%, transparent),
+        radial-gradient(1.5px 1.5px at 220px 210px, hsla(270, 100%, 90%, 0.9) 50%, transparent),
+        /* Deep space gradient */
+        radial-gradient(ellipse at 30% 20%, hsla(270, 60%, 15%, 1) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 80%, hsla(220, 50%, 12%, 1) 0%, transparent 50%),
+        linear-gradient(135deg,
+            hsl(250, 50%, 8%) 0%,
+            hsl(270, 45%, 10%) 35%,
+            hsl(240, 50%, 8%) 65%,
+            hsl(260, 45%, 6%) 100%);
     border-radius: var(--radius-xl);
-    border: 2px solid hsla(250, 84%, 54%, 0.3);
-    box-shadow: var(--shadow-lg);
+    border: 2px solid hsla(270, 80%, 50%, 0.4);
+    box-shadow:
+        var(--shadow-lg),
+        inset 0 0 60px hsla(270, 60%, 20%, 0.3),
+        0 0 30px hsla(270, 60%, 30%, 0.2);
+    animation: mg-starfieldTwinkle 4s ease-in-out infinite;
 }
+
+/* Using shared animation: mg-starfieldTwinkle from animations.css */
 
 /* Lines */
 .puzzle-line {
@@ -60,10 +91,17 @@
     stroke: var(--color-grey);
 }
 
+/* Constellation line - shimmer effect when correct */
 .puzzle-line--correct {
-    stroke: var(--color-success);
-    filter: drop-shadow(0 0 6px var(--color-success));
+    stroke: hsl(145, 80%, 55%);
+    filter:
+        drop-shadow(0 0 4px hsl(145, 80%, 50%))
+        drop-shadow(0 0 8px hsl(145, 70%, 45%))
+        drop-shadow(0 0 16px hsla(145, 80%, 50%, 0.5));
+    animation: mg-lineShimmer 2s ease-in-out infinite;
 }
+
+/* Using shared animation: mg-lineShimmer from animations.css */
 
 .puzzle-line--incorrect {
     stroke: var(--color-error);
@@ -79,19 +117,10 @@
 .puzzle-line--impossible {
     stroke: var(--color-error) !important;
     stroke-dasharray: 8 4;
-    animation: impossiblePulse 1s ease-in-out infinite;
+    animation: mg-impossiblePulse 1s ease-in-out infinite;
 }
 
-@keyframes impossiblePulse {
-    0%, 100% {
-        opacity: 1;
-        filter: drop-shadow(0 0 8px var(--color-error));
-    }
-    50% {
-        opacity: 0.6;
-        filter: drop-shadow(0 0 4px var(--color-error));
-    }
-}
+/* Using shared animation: mg-impossiblePulse from animations.css */
 
 /* Nodes */
 .puzzle-node {
@@ -117,53 +146,289 @@
     cursor: default;
 }
 
+/* Constellation star nodes */
 .puzzle-node__circle {
-    fill: var(--bg-card);
-    stroke: var(--color-primary);
+    fill: hsla(250, 40%, 15%, 0.9);
+    stroke: hsla(270, 70%, 65%, 0.8);
     stroke-width: 3;
     transition: all var(--transition-fast);
+    filter:
+        drop-shadow(0 0 3px hsla(270, 80%, 60%, 0.5))
+        drop-shadow(0 0 6px hsla(270, 70%, 50%, 0.3));
 }
 
+/* Fixed nodes - Bright golden stars (main constellation points) */
 .puzzle-node--fixed .puzzle-node__circle {
-    fill: var(--color-primary-dark);
-    stroke: var(--color-primary-light);
+    fill: hsla(45, 90%, 25%, 0.9);
+    stroke: hsl(45, 100%, 70%);
+    stroke-width: 3;
+    filter:
+        drop-shadow(0 0 4px hsl(45, 100%, 60%))
+        drop-shadow(0 0 10px hsla(45, 100%, 55%, 0.7))
+        drop-shadow(0 0 20px hsla(45, 100%, 50%, 0.4));
+    animation: mg-starGlow 3s ease-in-out infinite;
 }
 
+/* Using shared animation: mg-starGlow from animations.css */
+
+/* Empty nodes - Dim awaiting stars */
 .puzzle-node--empty .puzzle-node__circle {
     stroke-dasharray: 4 4;
+    stroke: hsla(200, 60%, 60%, 0.6);
+    filter:
+        drop-shadow(0 0 2px hsla(200, 70%, 60%, 0.3))
+        drop-shadow(0 0 4px hsla(200, 60%, 50%, 0.2));
 }
 
+/* Selected node - Bright magical glow */
 .puzzle-node--selected .puzzle-node__circle {
-    stroke: var(--color-accent);
+    stroke: hsl(270, 90%, 70%);
     stroke-width: 4;
-    filter: drop-shadow(0 0 8px var(--color-accent-glow));
+    fill: hsla(270, 60%, 25%, 0.9);
+    filter:
+        drop-shadow(0 0 6px hsl(270, 90%, 65%))
+        drop-shadow(0 0 12px hsla(270, 80%, 60%, 0.8))
+        drop-shadow(0 0 24px hsla(270, 70%, 55%, 0.5));
+    animation: mg-selectedPulse 1.5s ease-in-out infinite;
 }
 
-/* Starter: Recommended node (fewest options) */
+/* Using shared animation: mg-selectedPulse from animations.css */
+
+/* Starter: Recommended node - Guiding star (cyan glow) */
 .puzzle-node--recommended .puzzle-node__circle {
-    stroke: var(--color-success);
+    stroke: hsl(180, 90%, 60%);
     stroke-width: 4;
-    animation: recommendedPulse 1.5s ease-in-out infinite;
+    fill: hsla(180, 60%, 20%, 0.9);
+    filter:
+        drop-shadow(0 0 6px hsl(180, 90%, 55%))
+        drop-shadow(0 0 12px hsla(180, 80%, 50%, 0.7))
+        drop-shadow(0 0 20px hsla(180, 70%, 45%, 0.4));
+    animation: guidingStarPulse 1.5s ease-in-out infinite;
 }
 
-@keyframes recommendedPulse {
+@keyframes guidingStarPulse {
     0%, 100% {
-        filter: drop-shadow(0 0 8px var(--color-success));
+        filter:
+            drop-shadow(0 0 6px hsl(180, 90%, 55%))
+            drop-shadow(0 0 12px hsla(180, 80%, 50%, 0.7))
+            drop-shadow(0 0 20px hsla(180, 70%, 45%, 0.4));
         stroke-width: 4;
     }
     50% {
-        filter: drop-shadow(0 0 16px var(--color-success));
+        filter:
+            drop-shadow(0 0 10px hsl(180, 100%, 65%))
+            drop-shadow(0 0 18px hsla(180, 90%, 55%, 0.8))
+            drop-shadow(0 0 28px hsla(180, 80%, 50%, 0.5));
         stroke-width: 5;
     }
 }
 
+/* Node text - light color for dark constellation background */
 .puzzle-node__text {
-    fill: var(--text-primary);
+    fill: hsl(0, 0%, 95%);
     font-size: 20px;
     font-weight: 700;
     font-family: var(--font-sans);
     user-select: none;
     pointer-events: none;
+    text-shadow: 0 0 4px hsla(0, 0%, 0%, 0.5);
+}
+
+.puzzle-node--fixed .puzzle-node__text {
+    fill: hsl(45, 100%, 95%);
+    text-shadow: 0 0 6px hsla(45, 100%, 50%, 0.5);
+}
+
+/* ========================================
+   Sparkle Particle Effect on Placement
+   ======================================== */
+
+/* Container for sparkle effect - applied to placed nodes */
+.puzzle-node--just-placed .puzzle-node__circle {
+    animation: starBurst 0.5s ease-out forwards;
+}
+
+@keyframes starBurst {
+    0% {
+        filter:
+            drop-shadow(0 0 8px hsl(45, 100%, 70%))
+            drop-shadow(0 0 20px hsla(45, 100%, 60%, 0.9))
+            drop-shadow(0 0 40px hsla(45, 100%, 55%, 0.7));
+        transform: scale(1.2);
+    }
+    100% {
+        filter:
+            drop-shadow(0 0 4px hsl(45, 100%, 60%))
+            drop-shadow(0 0 10px hsla(45, 100%, 55%, 0.7))
+            drop-shadow(0 0 20px hsla(45, 100%, 50%, 0.4));
+        transform: scale(1);
+    }
+}
+
+/* Sparkle particles using SVG-adjacent pseudo-approach via wrapper */
+.puzzle-node--just-placed {
+    position: relative;
+}
+
+/* Enhanced particle burst using multi-directional drop-shadows */
+.puzzle-node--just-placed .puzzle-node__circle {
+    animation: starBurst 0.5s ease-out forwards, particleExpand 0.6s ease-out forwards;
+}
+
+@keyframes particleExpand {
+    0% {
+        filter:
+            drop-shadow(0 0 8px hsl(45, 100%, 70%))
+            drop-shadow(0 -12px 0 hsla(45, 100%, 70%, 0.9))
+            drop-shadow(8px -8px 0 hsla(45, 100%, 70%, 0.8))
+            drop-shadow(12px 0 0 hsla(45, 100%, 70%, 0.9))
+            drop-shadow(8px 8px 0 hsla(45, 100%, 70%, 0.8))
+            drop-shadow(0 12px 0 hsla(45, 100%, 70%, 0.9))
+            drop-shadow(-8px 8px 0 hsla(45, 100%, 70%, 0.8))
+            drop-shadow(-12px 0 0 hsla(45, 100%, 70%, 0.9))
+            drop-shadow(-8px -8px 0 hsla(45, 100%, 70%, 0.8));
+    }
+    50% {
+        filter:
+            drop-shadow(0 0 12px hsl(45, 100%, 70%))
+            drop-shadow(0 -22px 0 hsla(45, 100%, 70%, 0.6))
+            drop-shadow(16px -16px 0 hsla(45, 100%, 70%, 0.5))
+            drop-shadow(22px 0 0 hsla(45, 100%, 70%, 0.6))
+            drop-shadow(16px 16px 0 hsla(45, 100%, 70%, 0.5))
+            drop-shadow(0 22px 0 hsla(45, 100%, 70%, 0.6))
+            drop-shadow(-16px 16px 0 hsla(45, 100%, 70%, 0.5))
+            drop-shadow(-22px 0 0 hsla(45, 100%, 70%, 0.6))
+            drop-shadow(-16px -16px 0 hsla(45, 100%, 70%, 0.5));
+    }
+    100% {
+        filter:
+            drop-shadow(0 0 4px hsl(45, 100%, 60%))
+            drop-shadow(0 0 0 transparent)
+            drop-shadow(0 0 0 transparent)
+            drop-shadow(0 0 0 transparent)
+            drop-shadow(0 0 0 transparent)
+            drop-shadow(0 0 0 transparent)
+            drop-shadow(0 0 0 transparent)
+            drop-shadow(0 0 0 transparent)
+            drop-shadow(0 0 0 transparent);
+    }
+}
+
+/* ========================================
+   Constellation Reveal Animation (Win State)
+   ======================================== */
+
+/* Apply to puzzle board when game is won */
+.puzzle-board--completed {
+    animation: constellationReveal 1.5s ease-out forwards;
+}
+
+@keyframes constellationReveal {
+    0% {
+        filter: brightness(1);
+    }
+    30% {
+        filter: brightness(1.3);
+    }
+    60% {
+        filter: brightness(1.1) drop-shadow(0 0 20px hsla(145, 80%, 50%, 0.5));
+    }
+    100% {
+        filter: brightness(1.05) drop-shadow(0 0 30px hsla(145, 80%, 50%, 0.3));
+    }
+}
+
+/* All lines glow brighter on completion */
+.puzzle-board--completed .puzzle-line--correct {
+    animation: lineGlowUp 1s ease-out forwards;
+}
+
+@keyframes lineGlowUp {
+    0% {
+        stroke-width: 4;
+        filter:
+            drop-shadow(0 0 4px hsl(145, 80%, 50%))
+            drop-shadow(0 0 8px hsl(145, 70%, 45%));
+    }
+    50% {
+        stroke-width: 6;
+        filter:
+            drop-shadow(0 0 8px hsl(145, 90%, 60%))
+            drop-shadow(0 0 16px hsl(145, 80%, 55%))
+            drop-shadow(0 0 32px hsla(145, 80%, 50%, 0.8));
+    }
+    100% {
+        stroke-width: 5;
+        filter:
+            drop-shadow(0 0 6px hsl(145, 80%, 55%))
+            drop-shadow(0 0 12px hsl(145, 70%, 50%))
+            drop-shadow(0 0 24px hsla(145, 80%, 50%, 0.5));
+    }
+}
+
+/* Fixed star nodes pulse on completion */
+.puzzle-board--completed .puzzle-node--fixed .puzzle-node__circle {
+    animation: starPulseComplete 1.2s ease-out forwards;
+}
+
+@keyframes starPulseComplete {
+    0%, 100% {
+        filter:
+            drop-shadow(0 0 4px hsl(45, 100%, 60%))
+            drop-shadow(0 0 10px hsla(45, 100%, 55%, 0.7))
+            drop-shadow(0 0 20px hsla(45, 100%, 50%, 0.4));
+    }
+    50% {
+        filter:
+            drop-shadow(0 0 10px hsl(45, 100%, 80%))
+            drop-shadow(0 0 20px hsla(45, 100%, 70%, 0.9))
+            drop-shadow(0 0 40px hsla(45, 100%, 60%, 0.6));
+    }
+}
+
+/* Reduced motion: disable animations */
+@media (prefers-reduced-motion: reduce) {
+    .puzzle-board {
+        animation: none;
+    }
+
+    .puzzle-board--completed {
+        animation: none;
+        filter: none;
+    }
+
+    .puzzle-line--correct {
+        animation: none;
+    }
+
+    .puzzle-board--completed .puzzle-line--correct {
+        animation: none;
+    }
+
+    .puzzle-node--fixed .puzzle-node__circle {
+        animation: none;
+    }
+
+    .puzzle-board--completed .puzzle-node--fixed .puzzle-node__circle {
+        animation: none;
+    }
+
+    .puzzle-node--selected .puzzle-node__circle {
+        animation: none;
+    }
+
+    .puzzle-node--just-placed .puzzle-node__circle {
+        animation: none;
+        transform: scale(1);
+    }
+
+    .puzzle-node--recommended .puzzle-node__circle {
+        animation: none;
+    }
+
+    .puzzle-line--impossible {
+        animation: none;
+    }
 }
 
 /* Number Inventory */
@@ -253,215 +518,14 @@
     }
 }
 
-/* Level Selector */
+/* Level & Difficulty Selectors - use shared styles from game-common.css */
+/* Game-specific margin adjustment */
 .level-selector {
-    display: flex;
-    gap: var(--space-sm);
     margin-bottom: var(--space-lg);
 }
 
-.level-btn {
-    padding: var(--space-sm) var(--space-md);
-    background: var(--bg-card);
-    border: 1px solid hsla(250, 84%, 54%, 0.3);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.level-btn:hover {
-    background: var(--bg-card-hover);
-    color: var(--text-primary);
-}
-
-.level-btn--active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: var(--text-primary);
-}
-
-/* Difficulty Selector */
-.difficulty-selector {
-    display: flex;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-md);
-}
-
-.difficulty-btn {
-    padding: var(--space-sm) var(--space-md);
-    background: var(--bg-card);
-    border: 1px solid hsla(250, 84%, 54%, 0.3);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.difficulty-btn:hover {
-    background: var(--bg-card-hover);
-}
-
-.difficulty-btn--active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: var(--text-primary);
-}
-
-.difficulty-btn--easy {
-    border-left: 3px solid var(--color-success);
-}
-
-.difficulty-btn--medium {
-    border-left: 3px solid var(--color-warning);
-}
-
-.difficulty-btn--hard {
-    border-left: 3px solid var(--color-error);
-}
-
-/* Hint Toggle */
-.hint-toggle {
-    font-size: 0.9rem;
-}
-
-/* Hints Panel */
-.hints-panel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    width: 100%;
-    padding: var(--space-lg);
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    border: 1px solid hsla(250, 84%, 54%, 0.2);
-}
-
-.hint-card {
-    padding: var(--space-md);
-    border-radius: var(--radius-md);
-    border-left: 4px solid var(--color-primary);
-    background: var(--bg-surface);
-}
-
-.hint-card h4 {
-    margin: 0 0 var(--space-xs) 0;
-    font-size: 0.9rem;
-    color: var(--color-accent);
-}
-
-.hint-card p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-}
-
-.hint-card--concept {
-    border-left-color: var(--color-success);
-}
-
-.hint-card--concept h4 {
-    color: var(--color-success);
-}
-
-.hint-card--strategy {
-    border-left-color: var(--color-warning);
-}
-
-.hint-card--strategy h4 {
-    color: var(--color-warning);
-}
-
-.hint-card--specific {
-    border-left-color: var(--color-primary);
-}
-
-.hint-card--progress {
-    border-left-color: var(--color-accent);
-    background: hsla(45, 100%, 51%, 0.1);
-}
-
-.hint-card--progress h4 {
-    color: var(--color-accent);
-}
-
-/* Auditor hint (constraint violation warning) */
-.hint-card--auditor {
-    border-left-color: var(--color-error);
-    background: hsla(0, 84%, 60%, 0.15);
-    animation: auditorPulse 2s ease-in-out infinite;
-}
-
-.hint-card--auditor h4 {
-    color: var(--color-error);
-}
-
-@keyframes auditorPulse {
-    0%, 100% {
-        background: hsla(0, 84%, 60%, 0.15);
-    }
-    50% {
-        background: hsla(0, 84%, 60%, 0.25);
-    }
-}
-
-/* Starter hint (best next move) */
-.hint-card--starter {
-    border-left-color: var(--color-success);
-    background: hsla(145, 84%, 40%, 0.15);
-}
-
-.hint-card--starter h4 {
-    color: var(--color-success);
-}
-
-.hint-card__subtext {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    font-style: italic;
-    margin-top: var(--space-xs);
-}
-
-/* Algebraist hint (equations and deductions) */
-.hint-card--algebraist {
-    border-left-color: var(--color-primary);
-    background: hsla(250, 84%, 54%, 0.15);
-}
-
-.hint-card--algebraist h4 {
-    color: var(--color-primary-light);
-}
-
-.algebra-hint {
-    margin-top: var(--space-sm);
-    padding-top: var(--space-sm);
-    border-top: 1px solid hsla(250, 84%, 54%, 0.2);
-}
-
-.algebra-hint:first-of-type {
-    margin-top: var(--space-xs);
-    padding-top: 0;
-    border-top: none;
-}
-
-.algebra-equation {
-    display: block;
-    font-family: 'Fira Code', 'Consolas', monospace;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-accent);
-    background: hsla(0, 0%, 0%, 0.3);
-    padding: var(--space-xs) var(--space-sm);
-    border-radius: var(--radius-sm);
-    margin-bottom: var(--space-xs);
-}
-
-.algebra-explanation {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin: 0;
-}
+/* Hints Panel - use shared styles from hints.css */
+/* All hint variants (concept, strategy, auditor, starter, algebraist) now in hints.css */
 
 /* Win Overlay Tip */
 .win-overlay__tip {
@@ -545,89 +609,8 @@
     margin: 0;
 }
 
-/* ========================================
-   Timer Display
-   ======================================== */
-
-.timer {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-lg);
-    background: var(--bg-card);
-    border-radius: var(--radius-full);
-    border: 2px solid var(--color-primary);
-    font-size: 1.25rem;
-    font-weight: 700;
-    transition: all var(--transition-fast);
-}
-
-.timer__icon {
-    font-size: 1.5rem;
-}
-
-.timer__value {
-    font-family: monospace;
-    min-width: 60px;
-    text-align: center;
-    color: var(--text-primary);
-}
-
-.timer__pulse {
-    animation: pulse 0.5s ease infinite;
-    color: var(--color-error);
-}
-
-/* Timer warning states */
-.timer--warning {
-    border-color: var(--color-warning);
-    background: hsla(45, 100%, 51%, 0.1);
-}
-
-.timer--warning .timer__value {
-    color: var(--color-warning);
-}
-
-.timer--critical {
-    border-color: var(--color-error);
-    background: hsla(0, 84%, 60%, 0.2);
-    animation: shake 0.5s ease infinite;
-}
-
-.timer--critical .timer__value {
-    color: var(--color-error);
-    animation: pulse 0.5s ease infinite;
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 0.7;
-        transform: scale(1.1);
-    }
-}
-
-@keyframes shake {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-3px);
-    }
-
-    75% {
-        transform: translateX(3px);
-    }
-}
+/* Timer Display - use shared styles from game-common.css */
+/* Timer variants (warning, critical) and animations (pulse, shake) in game-common.css */
 
 /* Board wrapper with urgency effects */
 .board-wrapper {
@@ -644,17 +627,7 @@
     box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.4);
 }
 
-@keyframes urgentPulse {
-
-    0%,
-    100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.02);
-    }
-}
+/* Using shared animation: urgentPulse from animations.css */
 
 /* Glowing target sum */
 .puzzle-info__value--glow {
@@ -662,86 +635,18 @@
     animation: glow 2s ease infinite;
 }
 
-@keyframes glow {
+/* Using shared animation: glow from animations.css */
 
-    0%,
-    100% {
-        text-shadow: 0 0 10px var(--color-accent-glow);
-    }
+/* Time Up Overlay, Win Overlay Stats - use shared styles from game-common.css */
+/* .time-up-overlay, .win-overlay__stats, .stat are defined in game-common.css */
 
-    50% {
-        text-shadow: 0 0 20px var(--color-accent-glow), 0 0 30px var(--color-accent-glow);
-    }
-}
-
-/* Time Up Overlay */
-.time-up-overlay {
-    position: fixed;
-    inset: 0;
-    background: hsla(0, 50%, 10%, 0.95);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-xl);
-    z-index: 100;
-    animation: fadeIn 0.3s ease;
-}
-
-.time-up-overlay__title {
-    font-size: 3rem;
-    color: var(--color-error);
-    animation: shake 0.5s ease 3;
-}
-
-.time-up-overlay__message {
-    font-size: 1.25rem;
-    color: var(--text-secondary);
-}
-
-/* Enhanced Win Overlay */
+/* Enhanced Win Overlay - game-specific confetti animation */
 .win-overlay__confetti {
     font-size: 4rem;
     animation: bounce 0.5s ease infinite;
 }
 
-@keyframes bounce {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-.win-overlay__stats {
-    display: flex;
-    gap: var(--space-xl);
-}
-
-.stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: var(--space-md) var(--space-lg);
-    background: hsla(250, 84%, 54%, 0.2);
-    border-radius: var(--radius-lg);
-}
-
-.stat__value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-accent);
-}
-
-.stat__label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
+/* Using shared animation: bounce from animations.css */
 
 .btn--large {
     padding: var(--space-md) var(--space-xl);
@@ -770,20 +675,11 @@
     font-size: 2rem;
     font-weight: 700;
     color: var(--color-accent);
-    animation: mysteryPulse 2s ease infinite;
+    animation: mg-mysteryPulse 2s ease infinite;
     text-shadow: 0 0 15px var(--color-accent-glow);
 }
 
-@keyframes mysteryPulse {
-    0%, 100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 0.6;
-        transform: scale(1.1);
-    }
-}
+/* Using shared animation: mg-mysteryPulse from animations.css */
 
 /* Tiny button for reveal */
 .btn--tiny {

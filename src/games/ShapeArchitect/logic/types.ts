@@ -13,6 +13,25 @@ export interface Position3D {
     z: number;
 }
 
+/**
+ * 3D rotation angles (Euler angles).
+ * Each axis can be 0, 90, 180, or 270 degrees.
+ * - x: Pitch (rotation around X-axis, tilting forward/back)
+ * - y: Yaw (rotation around Y-axis, spinning left/right)
+ * - z: Roll (rotation around Z-axis, 2D rotation on floor plane)
+ */
+export interface Rotation3D {
+    x: number;  // 0, 90, 180, 270
+    y: number;  // 0, 90, 180, 270
+    z: number;  // 0, 90, 180, 270
+}
+
+/** Default rotation (no rotation applied) */
+export const DEFAULT_ROTATION: Rotation3D = { x: 0, y: 0, z: 0 };
+
+/** Rotation axis type for single-axis rotation operations */
+export type RotationAxis = 'x' | 'y' | 'z';
+
 export interface Piece {
     id: string;
     name: string;
@@ -23,7 +42,7 @@ export interface Piece {
 export interface PlacedPiece {
     pieceId: string;
     position: Position3D;
-    rotation: number; // 0, 90, 180, 270 degrees
+    rotation: Rotation3D; // 3D rotation (x, y, z axes)
     color: string; // Store the piece color for display
 }
 
@@ -43,6 +62,6 @@ export interface GameState {
     placedPieces: PlacedPiece[];
     remainingPieces: Piece[];
     selectedPieceId: string | null;
-    rotation: number;
+    rotation: Rotation3D; // Current rotation for piece being placed
     isSolved: boolean;
 }

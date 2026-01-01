@@ -15,7 +15,11 @@ import {
     validateLevelVolume,
     validateAllLevels,
 } from '../engine';
-import type { Position3D, Piece, LevelConfig, PlacedPiece } from '../types';
+import type { Position3D, Piece, LevelConfig, PlacedPiece, Rotation3D } from '../types';
+import { DEFAULT_ROTATION } from '../types';
+
+// Helper to create Rotation3D from z-axis rotation (for 2D rotation compatibility)
+const rot = (z: number): Rotation3D => ({ x: 0, y: 0, z });
 
 // ========================================
 // Test Fixtures
@@ -273,7 +277,7 @@ describe('getPieceWorldPositions', () => {
         const piece = createTestPiece();
         const position: Position3D = { x: 2, y: 3, z: 1 };
 
-        const worldPositions = getPieceWorldPositions(piece, position, 0);
+        const worldPositions = getPieceWorldPositions(piece, position, rot(0));
 
         expect(worldPositions).toContainEqual({ x: 2, y: 3, z: 1 });
         expect(worldPositions).toContainEqual({ x: 3, y: 3, z: 1 });
@@ -283,7 +287,7 @@ describe('getPieceWorldPositions', () => {
         const piece = createTestPiece();
         const position: Position3D = { x: 1, y: 1, z: 0 };
 
-        const worldPositions = getPieceWorldPositions(piece, position, 90);
+        const worldPositions = getPieceWorldPositions(piece, position, rot(90));
 
         // After 90 rotation: horizontal becomes vertical
         expect(worldPositions.length).toBe(2);
@@ -295,7 +299,7 @@ describe('getPieceWorldPositions', () => {
         const piece = createLPiece();
         const position: Position3D = { x: 0, y: 0, z: 0 };
 
-        const worldPositions = getPieceWorldPositions(piece, position, 0);
+        const worldPositions = getPieceWorldPositions(piece, position, rot(0));
 
         expect(worldPositions.length).toBe(3);
     });
@@ -311,7 +315,7 @@ describe('canPlacePiece', () => {
         const grid = initializeGrid(level);
         const piece = createTestPiece();
 
-        const canPlace = canPlacePiece(grid, piece, { x: 0, y: 0, z: 0 }, 0, level.gridSize);
+        const canPlace = canPlacePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0), level.gridSize);
 
         expect(canPlace).toBe(true);
     });
@@ -322,7 +326,7 @@ describe('canPlacePiece', () => {
         const piece = createTestPiece();
 
         // Placing at edge would put second block out of bounds
-        const canPlace = canPlacePiece(grid, piece, { x: 2, y: 0, z: 0 }, 0, level.gridSize);
+        const canPlace = canPlacePiece(grid, piece, { x: 2, y: 0, z: 0 }, rot(0), level.gridSize);
 
         expect(canPlace).toBe(false);
     });
@@ -335,7 +339,7 @@ describe('canPlacePiece', () => {
         const piece = createTestPiece(); // Two-block piece
 
         // Second block extends into empty cell - allowed with flexible placement
-        const canPlace = canPlacePiece(grid, piece, { x: 0, y: 0, z: 0 }, 0, level.gridSize);
+        const canPlace = canPlacePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0), level.gridSize);
 
         expect(canPlace).toBe(true); // At least one voxel on target
     });
@@ -349,7 +353,7 @@ describe('canPlacePiece', () => {
         const piece = createTestPiece(); // Two-block piece at [0,0], [1,0]
 
         // Placing at x=2 means both blocks are on empty cells
-        const canPlace = canPlacePiece(grid, piece, { x: 2, y: 0, z: 0 }, 0, level.gridSize);
+        const canPlace = canPlacePiece(grid, piece, { x: 2, y: 0, z: 0 }, rot(0), level.gridSize);
 
         expect(canPlace).toBe(false); // No voxels on target
     });
@@ -361,10 +365,10 @@ describe('canPlacePiece', () => {
         const piece2 = createTestPiece({ id: 'piece2' });
 
         // Place first piece
-        grid = placePiece(grid, piece1, { x: 0, y: 0, z: 0 }, 0);
+        grid = placePiece(grid, piece1, { x: 0, y: 0, z: 0 }, rot(0));
 
         // Try to place second piece on same position
-        const canPlace = canPlacePiece(grid, piece2, { x: 0, y: 0, z: 0 }, 0, level.gridSize);
+        const canPlace = canPlacePiece(grid, piece2, { x: 0, y: 0, z: 0 }, rot(0), level.gridSize);
 
         expect(canPlace).toBe(false);
     });
@@ -382,10 +386,10 @@ describe('canPlacePiece', () => {
 
         // Horizontal piece extends into empty cell - allowed with flexible placement
         // (at least one voxel on target)
-        expect(canPlacePiece(grid, piece, { x: 0, y: 0, z: 0 }, 0, level.gridSize)).toBe(true);
+        expect(canPlacePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0), level.gridSize)).toBe(true);
 
         // Vertical rotation fits perfectly on both targets
-        expect(canPlacePiece(grid, piece, { x: 0, y: 0, z: 0 }, 90, level.gridSize)).toBe(true);
+        expect(canPlacePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(90), level.gridSize)).toBe(true);
     });
 
     it('requires at least one voxel on target for valid placement', () => {
@@ -400,7 +404,7 @@ describe('canPlacePiece', () => {
         const piece = createTestPiece(); // Horizontal piece at [0,0], [1,0]
 
         // Placing at x=2 means no voxels touch target
-        expect(canPlacePiece(grid, piece, { x: 2, y: 0, z: 0 }, 0, level.gridSize)).toBe(false);
+        expect(canPlacePiece(grid, piece, { x: 2, y: 0, z: 0 }, rot(0), level.gridSize)).toBe(false);
     });
 });
 
@@ -414,7 +418,7 @@ describe('placePiece', () => {
         const grid = initializeGrid(level);
         const piece = createTestPiece();
 
-        const newGrid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, 0);
+        const newGrid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0));
 
         expect(newGrid[0][0][0]).toBe(2);
         expect(newGrid[1][0][0]).toBe(2);
@@ -425,7 +429,7 @@ describe('placePiece', () => {
         const grid = initializeGrid(level);
         const piece = createTestPiece();
 
-        const newGrid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, 0);
+        const newGrid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0));
 
         expect(newGrid).not.toBe(grid);
         expect(grid[0][0][0]).toBe(1); // Original unchanged
@@ -442,7 +446,7 @@ describe('placePiece', () => {
         const grid = initializeGrid(level);
         const piece = createTestPiece();
 
-        const newGrid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, 90);
+        const newGrid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(90));
 
         expect(newGrid[0][0][0]).toBe(2);
         expect(newGrid[0][1][0]).toBe(2);
@@ -460,14 +464,14 @@ describe('removePieceFromGrid', () => {
         const piece = createTestPiece();
 
         // Place piece
-        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, 0);
+        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0));
         expect(grid[0][0][0]).toBe(2);
 
         // Remove piece with targetVoxels
         const placedPiece: PlacedPiece = {
             pieceId: piece.id,
             position: { x: 0, y: 0, z: 0 },
-            rotation: 0,
+            rotation: rot(0),
             color: piece.color,
         };
         const newGrid = removePieceFromGrid(grid, piece, placedPiece, level.targetVoxels);
@@ -485,12 +489,12 @@ describe('removePieceFromGrid', () => {
         const piece = createTestPiece(); // Two-block piece
 
         // Place piece (extends into empty cell with flexible placement)
-        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, 0);
+        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0));
 
         const placedPiece: PlacedPiece = {
             pieceId: piece.id,
             position: { x: 0, y: 0, z: 0 },
-            rotation: 0,
+            rotation: rot(0),
             color: piece.color,
         };
         const newGrid = removePieceFromGrid(grid, piece, placedPiece, level.targetVoxels);
@@ -504,12 +508,12 @@ describe('removePieceFromGrid', () => {
         let grid = initializeGrid(level);
         const piece = createTestPiece();
 
-        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, 0);
+        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0));
 
         const placedPiece: PlacedPiece = {
             pieceId: piece.id,
             position: { x: 0, y: 0, z: 0 },
-            rotation: 0,
+            rotation: rot(0),
             color: piece.color,
         };
         const newGrid = removePieceFromGrid(grid, piece, placedPiece, level.targetVoxels);
@@ -530,13 +534,13 @@ describe('removePieceFromGrid', () => {
         const piece = createTestPiece();
 
         // Place with rotation
-        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, 90);
+        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(90));
 
         // Remove with same rotation
         const placedPiece: PlacedPiece = {
             pieceId: piece.id,
             position: { x: 0, y: 0, z: 0 },
-            rotation: 90,
+            rotation: rot(90),
             color: piece.color,
         };
         const newGrid = removePieceFromGrid(grid, piece, placedPiece, level.targetVoxels);
@@ -556,7 +560,7 @@ describe('checkSolved', () => {
         let grid = initializeGrid(level);
         const piece = createTestPiece();
 
-        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, 0);
+        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0));
 
         expect(checkSolved(grid, level.targetVoxels)).toBe(true);
     });
@@ -572,7 +576,7 @@ describe('checkSolved', () => {
         let grid = initializeGrid(level);
         const piece = createTestPiece(); // Only 2 blocks
 
-        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, 0);
+        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0));
 
         expect(checkSolved(grid, level.targetVoxels)).toBe(false);
     });
@@ -597,7 +601,7 @@ describe('checkSolved', () => {
         const piece = createTestPiece();
 
         // Fill only first two
-        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, 0);
+        grid = placePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0));
 
         expect(checkSolved(grid, level.targetVoxels)).toBe(false);
     });
@@ -643,7 +647,7 @@ describe('createGameState', () => {
         const state = createGameState(level);
 
         expect(state.selectedPieceId).toBeNull();
-        expect(state.rotation).toBe(0);
+        expect(state.rotation).toEqual(DEFAULT_ROTATION);
         expect(state.isSolved).toBe(false);
     });
 });
@@ -695,7 +699,7 @@ describe('tryPlacePiece', () => {
         expect(result!.placedPieces).toHaveLength(1);
         expect(result!.remainingPieces).toHaveLength(0);
         expect(result!.selectedPieceId).toBeNull();
-        expect(result!.rotation).toBe(0);
+        expect(result!.rotation).toEqual(DEFAULT_ROTATION);
     });
 
     it('sets isSolved when puzzle completed', () => {
@@ -736,7 +740,7 @@ describe('tryPlacePiece', () => {
         });
         const state = createGameState(level);
         state.selectedPieceId = level.pieces[0].id;
-        state.rotation = 90; // Rotated piece fits vertical target
+        state.rotation = rot(90); // Rotated piece fits vertical target
 
         const result = tryPlacePiece(state, { x: 0, y: 0, z: 0 });
 
@@ -744,7 +748,7 @@ describe('tryPlacePiece', () => {
         const placed = result!.placedPieces[0];
         expect(placed.pieceId).toBe(level.pieces[0].id);
         expect(placed.position).toEqual({ x: 0, y: 0, z: 0 });
-        expect(placed.rotation).toBe(90);
+        expect(placed.rotation).toEqual(rot(90));
         expect(placed.color).toBe(level.pieces[0].color);
     });
 });
