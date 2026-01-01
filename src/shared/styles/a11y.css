@@ -37,9 +37,16 @@
    Skip to main content for keyboard users
    ---------------------------------------- */
 
+.skip-links {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: var(--z-tooltip);
+}
+
 .skip-link {
   position: absolute;
-  top: -100%;
+  top: -9999px;
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-tooltip);
