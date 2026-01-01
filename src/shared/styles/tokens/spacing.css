@@ -1,0 +1,46 @@
+/* ========================================
+   Playful Premium Design System - Spacing
+   Consistent spacing scale for layout
+   ======================================== */
+
+:root {
+  /* ---- Spacing Scale ---- */
+
+  --space-xs: 0.25rem;   /* 4px */
+  --space-sm: 0.5rem;    /* 8px */
+  --space-md: 1rem;      /* 16px */
+  --space-lg: 1.5rem;    /* 24px */
+  --space-xl: 2rem;      /* 32px */
+  --space-2xl: 3rem;     /* 48px */
+  --space-3xl: 4rem;     /* 64px */
+
+  /* ---- Border Radius ---- */
+
+  --radius-sm: 0.5rem;   /* 8px */
+  --radius-md: 0.75rem;  /* 12px */
+  --radius-lg: 1rem;     /* 16px */
+  --radius-xl: 1.25rem;  /* 20px */
+  --radius-2xl: 1.5rem;  /* 24px */
+  --radius-full: 9999px;
+
+  /* ---- Z-Index Scale ---- */
+
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal-backdrop: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+
+  /* ---- Tutorial Layering ---- */
+  /* Tutorial sits between modal and toast in the hierarchy */
+
+  --z-tutorial-backdrop: 450;
+  --z-tutorial-spotlight: 451;
+  --z-tutorial-tooltip: 452;
+
+  /* ---- Accessibility ---- */
+
+  --touch-target-min: 44px;
+}
