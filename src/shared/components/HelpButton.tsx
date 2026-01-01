@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from './Button';
+import { Button } from '@/shared/components/ui';
 import { resetTutorialProgress } from '../services/tutorialProgress';
 
 interface HelpButtonProps {

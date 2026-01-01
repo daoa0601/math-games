@@ -3,7 +3,7 @@
 // ========================================
 
 import { useState, useEffect, useCallback } from 'react';
-import { HIGH_CONTRAST_KEY } from '../constants';
+import { HIGH_CONTRAST_KEY } from '@/shared/constants';
 
 /**
  * Hook to manage high contrast mode for accessibility.

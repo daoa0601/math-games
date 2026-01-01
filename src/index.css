@@ -1,10 +1,13 @@
 /* ========================================
-   Math Gymnasium - Design System v2.0
-   "Magical Classroom" Theme
+   Math Gymnasium - Design System v3.0
+   "Playful Premium" Theme
    ======================================== */
 
-/* Google Fonts - Playful & Readable */
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
+/* Google Fonts - Quicksand for display, Inter for body */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap');
+
+/* Design Tokens */
+@import './shared/styles/tokens/index.css';
 
 /* Shared Game Styles */
 @import './shared/styles/game-common.css';
@@ -17,223 +20,13 @@
 @import './shared/styles/orientation.css';
 
 /* ========================================
-   CSS Variables - Design Tokens
+   Additional CSS Variables
+   (Core tokens are in ./shared/styles/tokens/)
    ======================================== */
 
-:root {
-  /* ---- Color Palette: "Learning Joy" ---- */
-
-  /* Primary - Warm Coral (Energy, Enthusiasm) */
-  --color-primary: hsl(12, 90%, 62%);
-  --color-primary-light: hsl(12, 95%, 72%);
-  --color-primary-dark: hsl(12, 85%, 48%);
-  --color-primary-bg: hsl(12, 90%, 96%);
-
-  /* Secondary - Soft Teal (Calm, Focus) */
-  --color-secondary: hsl(174, 65%, 42%);
-  --color-secondary-light: hsl(174, 70%, 55%);
-  --color-secondary-dark: hsl(174, 65%, 32%);
-  --color-secondary-bg: hsl(174, 60%, 95%);
-
-  /* Accent - Sunny Yellow (Achievement, Celebration) */
-  /* Note: Yellow has poor contrast on white - use on dark backgrounds or as decorative only */
-  --color-accent: hsl(45, 100%, 50%);      /* Decorative use only (was 55%) */
-  --color-accent-light: hsl(45, 100%, 65%);
-  --color-accent-dark: hsl(45, 100%, 35%); /* ~4.5:1 on white - use for text (was 42%) */
-  --color-accent-glow: hsla(45, 100%, 50%, 0.5);
-
-  /* Magic Purple - Special moments */
-  --color-magic: hsl(270, 75%, 60%);
-  --color-magic-light: hsl(270, 80%, 75%);
-  --color-magic-dark: hsl(270, 70%, 45%);
-  --color-magic-bg: hsl(270, 60%, 96%);
-
-  /* Gold - Achievements & Stars */
-  /* Similar to yellow - use dark variant for text, base for decorative elements */
-  --color-gold: hsl(42, 100%, 45%);        /* Decorative use (was 50%) */
-  --color-gold-light: hsl(42, 100%, 60%);  /* Decorative only (was 65%) */
-  --color-gold-dark: hsl(42, 100%, 32%);   /* ~5.5:1 on white - use for text (was 38%) */
-
-  /* ---- Status Colors ---- */
-
-  /* Success - Leafy Green */
-  --color-success: hsl(145, 65%, 42%);
-  --color-success-light: hsl(145, 70%, 88%);
-  --color-success-dark: hsl(145, 65%, 32%);
-  --color-success-glow: hsla(145, 65%, 42%, 0.4);
-
-  /* Warning - Friendly Amber */
-  /* Darkened for WCAG AA text contrast on white backgrounds */
-  --color-warning: hsl(38, 95%, 38%);      /* ~4.5:1 on white - passes AA (was 50%) */
-  --color-warning-light: hsl(38, 95%, 90%);
-  --color-warning-dark: hsl(38, 95%, 30%); /* ~6.5:1 on white (was 38%) */
-
-  /* Error - Soft Coral (not aggressive) */
-  /* Adjusted for better contrast while keeping warm tone */
-  --color-error: hsl(0, 70%, 45%);         /* ~5.5:1 on white - passes AA (was 58%) */
-  --color-error-light: hsl(0, 70%, 92%);
-  --color-error-dark: hsl(0, 70%, 38%);    /* ~7:1 on white (was 45%) */
-
-  /* Progress - Calm Blue */
-  /* Slightly darkened for text use */
-  --color-progress: hsl(210, 75%, 45%);    /* ~5:1 on white - passes AA (was 55%) */
-  --color-progress-light: hsl(210, 75%, 90%);
-
-  /* Grey Scale */
-  /* Adjusted for WCAG AA compliance when used as text on white */
-  --color-grey: hsl(220, 10%, 43%);        /* ~5.0:1 on white - passes AA (was 55%) */
-  --color-grey-light: hsl(220, 10%, 65%);  /* Decorative only, not for text (was 75%) */
-  --color-grey-dark: hsl(220, 10%, 32%);   /* ~8:1 on white - passes AA (was 35%) */
-
-  /* ---- Game-Specific Colors ---- */
-
-  /* MagicGraph - Mystical Purple/Gold */
-  --game-magic-primary: hsl(270, 75%, 60%);
-  --game-magic-secondary: hsl(45, 100%, 55%);
-  --game-magic-bg: linear-gradient(135deg, hsl(270, 40%, 15%) 0%, hsl(250, 45%, 20%) 50%, hsl(270, 35%, 12%) 100%);
-
-  /* SequenceRace - Energetic Orange/Blue */
-  --game-race-primary: hsl(24, 95%, 55%);
-  --game-race-secondary: hsl(210, 85%, 55%);
-  --game-race-bg: linear-gradient(180deg, hsl(200, 80%, 85%) 0%, hsl(140, 60%, 80%) 100%);
-
-  /* ShapeArchitect - Creative Pink/Mint */
-  --game-build-primary: hsl(340, 82%, 62%);
-  --game-build-secondary: hsl(160, 65%, 45%);
-  --game-build-bg: linear-gradient(135deg, hsl(45, 30%, 95%) 0%, hsl(200, 20%, 94%) 100%);
-
-  /* Player Colors */
-  /* Adjusted for WCAG AA text contrast */
-  --color-player1: hsl(145, 65%, 38%);     /* ~5:1 on white (was 42%) */
-  --color-player2: hsl(24, 95%, 45%);      /* ~5:1 on white (was 55%) */
-  --color-ai: hsl(0, 70%, 45%);            /* ~5.5:1 on white (was 58%) */
-
-  /* ---- Backgrounds - Light Mode ---- */
-
-  --bg-base: hsl(40, 35%, 97%);
-  --bg-surface: hsl(0, 0%, 100%);
-  --bg-card: hsl(0, 0%, 100%);
-  --bg-card-hover: hsl(40, 25%, 98%);
-  --bg-elevated: hsl(0, 0%, 100%);
-
-  /* Subtle texture pattern (noise) */
-  --bg-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-
-  /* ---- Text Colors ---- */
-  /* WCAG AA requires 4.5:1 for normal text, 3:1 for large text */
-
-  --text-primary: hsl(220, 25%, 18%);      /* ~12:1 on white - passes AA */
-  --text-secondary: hsl(220, 15%, 38%);    /* ~6.5:1 on white - passes AA (was 40%) */
-  --text-muted: hsl(220, 10%, 43%);        /* ~5.0:1 on white - passes AA (was 55%) */
-  --text-on-primary: hsl(0, 0%, 100%);
-  --text-on-dark: hsl(0, 0%, 98%);
-
-  /* ---- Typography ---- */
-
-  --font-display: 'Quicksand', 'Comic Sans MS', cursive;
-  --font-body: 'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-
-  /* Type Scale */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.5rem;
-  --text-2xl: 2rem;
-  --text-3xl: 2.5rem;
-  --text-4xl: 3.5rem;
-
-  /* ---- Spacing ---- */
-
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 3rem;
-  --space-3xl: 4rem;
-
-  /* ---- Border Radius ---- */
-
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-2xl: 2rem;
-  --radius-full: 9999px;
-
-  /* ---- Shadows - Soft & Playful ---- */
-
-  --shadow-sm: 0 2px 4px hsla(220, 25%, 10%, 0.08);
-  --shadow-md: 0 4px 12px hsla(220, 25%, 10%, 0.1);
-  --shadow-lg: 0 8px 24px hsla(220, 25%, 10%, 0.12);
-  --shadow-xl: 0 16px 48px hsla(220, 25%, 10%, 0.15);
-
-  /* 3D Button Shadow */
-  --shadow-button: 0 4px 0 0 var(--color-primary-dark);
-  --shadow-button-hover: 0 6px 0 0 var(--color-primary-dark);
-  --shadow-button-active: 0 2px 0 0 var(--color-primary-dark);
-
-  /* Glow Effects */
-  --shadow-glow-primary: 0 0 20px hsla(12, 90%, 62%, 0.3);
-  --shadow-glow-success: 0 0 20px hsla(145, 65%, 42%, 0.3);
-  --shadow-glow-magic: 0 0 20px hsla(270, 75%, 60%, 0.3);
-  --shadow-glow-gold: 0 0 20px hsla(45, 100%, 55%, 0.4);
-
-  /* Card Shadow with Color Hint */
-  --shadow-card:
-    0 4px 6px -1px hsla(220, 25%, 10%, 0.08),
-    0 2px 4px -1px hsla(220, 25%, 10%, 0.04);
-  --shadow-card-hover:
-    0 20px 25px -5px hsla(220, 25%, 10%, 0.1),
-    0 10px 10px -5px hsla(220, 25%, 10%, 0.04);
-
-  /* ---- Transitions ---- */
-
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 400ms ease;
-  --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  /* Easing Functions */
-  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-snap: cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  /* ---- Z-Index Scale ---- */
-
-  --z-base: 0;
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-modal-backdrop: 300;
-  --z-modal: 400;
-  --z-toast: 500;
-  --z-tooltip: 600;
-
-  /* ---- Accessibility ---- */
-
-  /* Focus ring for consistent keyboard navigation visibility */
-  --color-focus-ring: hsl(210, 100%, 50%);
-  --focus-ring-width: 3px;
-  --focus-ring-offset: 2px;
-
-  /* Minimum touch target size (WCAG 2.2 Level AA) */
-  --touch-target-min: 44px;
-
-  /* ---- Responsive Breakpoints (reference values) ---- */
-  /*
-   * Breakpoint Reference (used in media queries):
-   * - Tablet: 1024px (iPad landscape, small laptops)
-   * - Mobile: 480px (phones)
-   * - Small: 360px (small phones)
-   *
-   * Usage: @media (max-width: 1024px) { }
-   *        @media (max-width: 480px) { }
-   *        @media (max-width: 360px) { }
-   */
-}
+/* Note: All design tokens (colors, typography, shadows, motion, spacing)
+   are now defined in src/shared/styles/tokens/
+   This section contains only layout-specific overrides */
 
 /* ========================================
    Reset & Base Styles
@@ -275,41 +68,8 @@ body {
 }
 
 /* ========================================
-   Typography
+   Typography (Base styles in tokens/typography.css)
    ======================================== */
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
-}
-
-h1 { font-size: var(--text-3xl); }
-h2 { font-size: var(--text-2xl); }
-h3 { font-size: var(--text-xl); }
-h4 { font-size: var(--text-lg); }
-
-p {
-  line-height: 1.7;
-  color: var(--text-secondary);
-}
-
-/* Gradient Text */
-.text-gradient {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-magic));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient--gold {
-  background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold), var(--color-gold-dark));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
 
 /* ========================================
    Dashboard Layout
@@ -378,47 +138,44 @@ p {
 }
 
 /* ========================================
-   Game Card - "Toy Box" Style
+   Game Card - Playful Premium Style
    ======================================== */
 
 .game-card {
-  background: var(--bg-card);
-  border-radius: var(--radius-2xl);
-  padding: var(--space-xl);
-  border: 3px solid transparent;
+  background: linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(220, 20%, 99%) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  border: 1px solid hsla(220, 20%, 10%, 0.06);
   position: relative;
   overflow: visible;
   cursor: pointer;
   text-decoration: none;
   display: block;
+  box-shadow: var(--shadow-card);
 
-  /* 3D toy-like effect */
-  box-shadow:
-    var(--shadow-card),
-    0 6px 0 0 hsla(220, 25%, 10%, 0.06);
-
-  transition:
-    transform var(--transition-bounce),
-    box-shadow var(--transition-normal),
-    border-color var(--transition-normal);
+  transition: all 350ms var(--spring-gentle);
 }
 
 .game-card::before {
   content: '';
   position: absolute;
-  inset: -3px;
-  border-radius: calc(var(--radius-2xl) + 3px);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-magic));
-  z-index: -1;
+  inset: 0;
+  border-radius: var(--radius-xl);
+  padding: 1px;
+  background: linear-gradient(135deg, hsla(12, 70%, 58%, 0.4), hsla(174, 50%, 45%, 0.4));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
   opacity: 0;
-  transition: opacity var(--transition-normal);
+  transition: opacity 350ms var(--spring-gentle);
 }
 
 .game-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow:
-    var(--shadow-card-hover),
-    0 12px 0 0 hsla(220, 25%, 10%, 0.04);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .game-card:hover::before {
@@ -426,7 +183,7 @@ p {
 }
 
 .game-card:active {
-  transform: translateY(-4px) scale(1.01);
+  transform: translateY(-2px);
 }
 
 .game-card__icon {
@@ -439,7 +196,7 @@ p {
   font-size: 3rem;
   background: linear-gradient(135deg, var(--color-primary-bg), var(--color-magic-bg));
   border-radius: var(--radius-xl);
-  transition: transform var(--transition-bounce);
+  transition: transform 350ms var(--spring-gentle);
 }
 
 .game-card:hover .game-card__icon {
@@ -524,7 +281,7 @@ p {
 }
 
 /* ========================================
-   Buttons - "Squishy" 3D Style
+   Buttons - Playful Premium Style
    ======================================== */
 
 .btn {
@@ -532,72 +289,59 @@ p {
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  padding: 14px 28px;
+  padding: 12px 24px;
   font-family: var(--font-display);
   font-size: var(--text-base);
-  font-weight: 700;
-  border-radius: var(--radius-lg);
+  font-weight: 600;
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
   text-decoration: none;
   position: relative;
+  min-height: 44px;
 
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
+  transition: all 200ms var(--spring-snappy);
 }
 
 .btn:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 3px var(--surface-page), 0 0 0 5px var(--color-primary);
 }
 
 /* Primary Button */
 .btn--primary {
-  background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary));
+  background: linear-gradient(180deg, hsl(12, 70%, 62%) 0%, hsl(12, 70%, 55%) 100%);
   color: var(--text-on-primary);
-  box-shadow:
-    0 4px 0 0 var(--color-primary-dark),
-    0 6px 12px -2px hsla(12, 90%, 40%, 0.35);
+  box-shadow: var(--shadow-button-primary);
 }
 
 .btn--primary:hover {
   transform: translateY(-2px);
-  box-shadow:
-    0 6px 0 0 var(--color-primary-dark),
-    0 10px 20px -2px hsla(12, 90%, 40%, 0.4);
+  box-shadow: var(--shadow-button-primary-hover);
 }
 
 .btn--primary:active {
-  transform: translateY(2px);
-  box-shadow:
-    0 2px 0 0 var(--color-primary-dark),
-    0 4px 8px -2px hsla(12, 90%, 40%, 0.3);
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--shadow-button-primary);
 }
 
 /* Secondary Button */
 .btn--secondary {
-  background: var(--bg-card);
+  background: var(--surface-card);
   color: var(--text-primary);
-  border: 2px solid hsla(220, 25%, 10%, 0.1);
-  box-shadow:
-    0 4px 0 0 hsla(220, 25%, 10%, 0.08),
-    var(--shadow-sm);
+  border: 1px solid hsla(220, 20%, 10%, 0.06);
+  box-shadow: var(--shadow-button-secondary);
 }
 
 .btn--secondary:hover {
   transform: translateY(-2px);
   border-color: var(--color-primary);
-  box-shadow:
-    0 6px 0 0 hsla(220, 25%, 10%, 0.06),
-    var(--shadow-md);
+  box-shadow: var(--shadow-md);
 }
 
 .btn--secondary:active {
-  transform: translateY(2px);
-  box-shadow:
-    0 2px 0 0 hsla(220, 25%, 10%, 0.08),
-    var(--shadow-sm);
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--shadow-button-secondary);
 }
 
 /* Ghost Button */
@@ -605,6 +349,7 @@ p {
   background: transparent;
   color: var(--text-secondary);
   padding: 10px 20px;
+  transition: all 200ms var(--spring-snappy);
 }
 
 .btn--ghost:hover {
@@ -612,27 +357,33 @@ p {
   color: var(--text-primary);
 }
 
+.btn--ghost:active {
+  transform: scale(0.98);
+}
+
 /* Success Button */
 .btn--success {
   background: linear-gradient(180deg, var(--color-success), var(--color-success-dark));
   color: var(--text-on-primary);
-  box-shadow:
-    0 4px 0 0 hsl(145, 65%, 25%),
-    0 6px 12px -2px hsla(145, 65%, 30%, 0.35);
+  box-shadow: var(--shadow-glow-success);
+  transition: all 200ms var(--spring-snappy);
+}
+
+.btn--success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px hsla(145, 65%, 42%, 0.4);
+}
+
+.btn--success:active {
+  transform: translateY(0) scale(0.98);
 }
 
 /* Small Button */
 .btn--small {
   padding: 8px 16px;
   font-size: var(--text-sm);
-  border-radius: var(--radius-md);
-}
-
-.btn--small.btn--primary,
-.btn--small.btn--secondary {
-  box-shadow:
-    0 3px 0 0 var(--color-primary-dark),
-    0 4px 8px -2px hsla(12, 90%, 40%, 0.3);
+  border-radius: var(--radius-sm);
+  min-height: 36px;
 }
 
 /* Large Button */
@@ -838,81 +589,8 @@ p {
 }
 
 /* ========================================
-   Animations
+   Animations (Keyframes in tokens/motion.css)
    ======================================== */
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.02); }
-}
-
-@keyframes popIn {
-  0% { transform: scale(0.5); opacity: 0; }
-  70% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes bounceSettle {
-  0% { transform: scale(0) rotate(-10deg); }
-  50% { transform: scale(1.2) rotate(5deg); }
-  70% { transform: scale(0.95) rotate(-2deg); }
-  100% { transform: scale(1) rotate(0); }
-}
-
-@keyframes slideInRight {
-  0% { transform: translateX(100%); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes slideInUp {
-  0% { transform: translateY(20px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes successPulse {
-  0% { box-shadow: 0 0 0 0 var(--color-success-glow); }
-  70% { box-shadow: 0 0 0 20px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-@keyframes countUp {
-  0% { transform: translateY(100%); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-4px); }
-  40% { transform: translateX(4px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(4px); }
-}
-
-/* Animation Utility Classes */
-.animate-float { animation: float 4s ease-in-out infinite; }
-.animate-wiggle { animation: wiggle 2s ease-in-out infinite; }
-.animate-pulse { animation: pulse 2s ease-in-out infinite; }
-.animate-pop-in { animation: popIn 0.4s var(--ease-bounce); }
-.animate-bounce-settle { animation: bounceSettle 0.5s var(--ease-bounce); }
-.animate-slide-in-right { animation: slideInRight 0.4s var(--ease-bounce); }
-.animate-slide-in-up { animation: slideInUp 0.4s var(--ease-bounce); }
-.animate-success-pulse { animation: successPulse 0.6s ease-out; }
-.animate-shake { animation: shake 0.4s ease-out; }
 
 /* ========================================
    Responsive Design
@@ -1081,18 +759,10 @@ p {
 
 /* ========================================
    Reduced Motion - Accessibility
+   (Base rules in tokens/motion.css)
    ======================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-
   .dashboard__title {
     animation: none;
   }

@@ -1,11 +1,11 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { MagicGraphIcon, SequenceRaceIcon, ShapeArchitectIcon } from './icons';
-import { CompactProgressRing } from './ProgressRing';
+import { MagicGraphIcon, SequenceRaceIcon, ShapeArchitectIcon } from '@/shared/components/icons';
+import { CompactProgressRing } from '@/shared/components/ui/ProgressRing';
 
 type GameId = 'magicGraph' | 'sequenceRace' | 'shapeArchitect';
 
-interface GameCardProps {
+export interface GameCardProps {
   id: GameId;
   title: string;
   description: string;

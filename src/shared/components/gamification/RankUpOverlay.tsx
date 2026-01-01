@@ -12,7 +12,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { playSound } from '../../utils';
 import { getRankInfo, getNextRank, type PlayerRank } from '../../services';
-import { Button } from '../Button';
+import { Button } from '@/shared/components/ui';
 import { useFocusTrap } from '../../hooks';
 import './RankUpOverlay.css';
 

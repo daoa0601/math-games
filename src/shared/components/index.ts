@@ -1,22 +1,21 @@
-export { Button } from './Button';
-export { DifficultySelector } from './DifficultySelector';
-export { HelpButton } from './HelpButton';
-export { ErrorBoundary } from './ErrorBoundary';
-export { GameCard } from './GameCard';
-export { GameLayout } from './GameLayout';
-export { HighContrastToggle } from './HighContrastToggle';
-export { LanguageSwitcher } from './LanguageSwitcher';
-export { ProgressRing, CompactProgressRing } from './ProgressRing';
-export { Timer } from './Timer';
-export type { TimerProps } from './Timer';
-export { SoundToggle } from './SoundToggle';
-export type { SoundToggleProps } from './SoundToggle';
+// UI primitives
+export * from './ui';
+
+// Layout components
+export * from './layout';
+
+// Gamification components
+export * from './gamification';
 
 // Icons
 export { MagicGraphIcon, SequenceRaceIcon, ShapeArchitectIcon } from './icons';
 
-// Gamification
-export { StatsDisplay, AchievementToast, RankUpOverlay, PlayerProfileCard, AchievementsGallery } from './gamification';
+// Tutorial
+export * from './Tutorial';
+
+// Overlays
+export { GameOverlay } from './overlays';
+export type { GameOverlayProps } from './overlays';
 
 // Daily Challenge
 export { DailyChallenge } from './DailyChallenge';
@@ -25,11 +24,12 @@ export { DailyChallenge } from './DailyChallenge';
 export { PersonalBestIndicator } from './PersonalBest';
 export type { PersonalBestIndicatorProps } from './PersonalBest';
 
-// Overlays
-export { GameOverlay } from './overlays';
-export type { GameOverlayProps } from './overlays';
-
-// Accessibility
+// Remaining top-level components
+export { ErrorBoundary } from './ErrorBoundary';
+export { ErrorFallback } from './ErrorFallback';
+export { HelpButton } from './HelpButton';
+export { HighContrastToggle } from './HighContrastToggle';
+export { LanguageSwitcher } from './LanguageSwitcher';
 export {
   ScreenReaderAnnounceProvider,
   ScreenReaderAnnounce,
@@ -37,6 +37,5 @@ export {
 } from './ScreenReaderAnnounce';
 export type { AnnouncePriority } from './ScreenReaderAnnounce';
 export { SkipLinks } from './SkipLinks';
-
-// Tutorial
-export * from './Tutorial';
+export { SoundToggle } from './SoundToggle';
+export type { SoundToggleProps } from './SoundToggle';

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useGameTimer, formatTime, DEFAULT_TIMER_DURATION } from '../useGameTimer';
+import { useGameTimer, formatTime, DEFAULT_TIMER_DURATION } from '../game/useGameTimer';
 
 describe('formatTime', () => {
     it('formats 0 seconds as 0:00', () => {

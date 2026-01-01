@@ -8,13 +8,13 @@
  */
 
 import { useCallback, useState } from 'react';
-import { usePlayer } from '../contexts';
-import type { Achievement, AchievementContext, GameId } from '../services/achievements';
-import type { PlayerRank } from '../services/rank';
+import { usePlayer } from '@/shared/contexts';
+import type { Achievement, AchievementContext, GameId } from '@/shared/services/achievements';
+import type { PlayerRank } from '@/shared/services/rank';
 import {
   completeLevelWithPB,
   type PersonalBestResult,
-} from '../utils';
+} from '@/shared/utils';
 
 export interface GameCompletionParams {
   gameId: GameId;

@@ -1,0 +1,124 @@
+/* ========================================
+   Playful Premium Design System - Colors
+   "Refined Vibrancy" - Muted bases, vibrant celebrations
+   ======================================== */
+
+:root {
+  /* ---- Core Colors (Refined - 15-20% less saturated) ---- */
+
+  /* Primary - Warm Coral (Energy, Enthusiasm) */
+  --color-primary: hsl(12, 70%, 58%);
+  --color-primary-light: hsl(12, 75%, 68%);
+  --color-primary-dark: hsl(12, 65%, 45%);
+  --color-primary-bg: hsl(12, 70%, 96%);
+
+  /* Secondary - Soft Teal (Calm, Focus) */
+  --color-secondary: hsl(174, 50%, 45%);
+  --color-secondary-light: hsl(174, 55%, 58%);
+  --color-secondary-dark: hsl(174, 45%, 35%);
+  --color-secondary-bg: hsl(174, 45%, 95%);
+
+  /* Accent - Warm Gold (Celebration ONLY) */
+  --color-accent: hsl(42, 85%, 52%);
+  --color-accent-vibrant: hsl(42, 100%, 55%);
+  --color-accent-light: hsl(42, 90%, 65%);
+  --color-accent-dark: hsl(42, 85%, 40%);
+  --color-accent-glow: hsla(42, 85%, 52%, 0.5);
+
+  /* Magic Purple - Special moments */
+  --color-magic: hsl(270, 55%, 55%);
+  --color-magic-light: hsl(270, 60%, 70%);
+  --color-magic-dark: hsl(270, 50%, 42%);
+  --color-magic-bg: hsl(270, 45%, 96%);
+
+  /* Gold - Achievements & Stars */
+  --color-gold: hsl(42, 85%, 50%);
+  --color-gold-light: hsl(42, 90%, 62%);
+  --color-gold-dark: hsl(42, 85%, 38%);
+
+  /* ---- Status Colors ---- */
+
+  /* Success - Leafy Green */
+  --color-success: hsl(145, 65%, 42%);
+  --color-success-light: hsl(145, 70%, 88%);
+  --color-success-dark: hsl(145, 65%, 32%);
+  --color-success-glow: hsla(145, 65%, 42%, 0.4);
+
+  /* Error - Refined Red */
+  --color-error: hsl(0, 65%, 50%);
+  --color-error-light: hsl(0, 65%, 92%);
+  --color-error-dark: hsl(0, 65%, 40%);
+
+  /* Warning - Friendly Amber */
+  --color-warning: hsl(38, 90%, 45%);
+  --color-warning-light: hsl(38, 95%, 90%);
+  --color-warning-dark: hsl(38, 90%, 35%);
+
+  /* Progress - Calm Blue */
+  --color-progress: hsl(210, 70%, 50%);
+  --color-progress-light: hsl(210, 70%, 90%);
+
+  /* Grey Scale */
+  --color-grey: hsl(220, 12%, 45%);
+  --color-grey-light: hsl(220, 10%, 65%);
+  --color-grey-dark: hsl(220, 12%, 32%);
+
+  /* ---- Surfaces ---- */
+
+  --surface-page: hsl(40, 25%, 98%);
+  --surface-card: hsl(0, 0%, 100%);
+  --surface-elevated: hsl(220, 15%, 98%);
+
+  /* Legacy aliases for backwards compatibility */
+  --bg-base: var(--surface-page);
+  --bg-surface: var(--surface-card);
+  --bg-card: var(--surface-card);
+  --bg-card-hover: hsl(40, 25%, 98%);
+  --bg-elevated: var(--surface-elevated);
+
+  /* Subtle texture pattern (noise) */
+  --bg-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+
+  /* ---- Text Colors ---- */
+
+  --text-primary: hsl(220, 30%, 15%);
+  --text-secondary: hsl(220, 18%, 42%);
+  --text-tertiary: hsl(220, 12%, 55%);
+  --text-muted: var(--text-tertiary);
+  --text-on-primary: hsl(0, 0%, 100%);
+  --text-on-dark: hsl(0, 0%, 98%);
+
+  /* ---- Game Theme Accents ---- */
+
+  --theme-magic: hsl(270, 55%, 55%);      /* MagicGraph */
+  --theme-race: hsl(24, 85%, 55%);        /* SequenceRace */
+  --theme-build: hsl(340, 70%, 58%);      /* ShapeArchitect */
+
+  /* ---- Game-Specific Colors (Legacy) ---- */
+
+  /* MagicGraph - Mystical Purple/Gold */
+  --game-magic-primary: hsl(270, 55%, 55%);
+  --game-magic-secondary: hsl(42, 85%, 55%);
+  --game-magic-bg: linear-gradient(135deg, hsl(250, 35%, 12%) 0%, hsl(240, 40%, 8%) 100%);
+
+  /* SequenceRace - Energetic Orange/Blue */
+  --game-race-primary: hsl(24, 85%, 55%);
+  --game-race-secondary: hsl(210, 75%, 55%);
+  --game-race-bg: linear-gradient(180deg, hsl(210, 70%, 65%) 0%, hsl(200, 60%, 75%) 60%, hsl(140, 40%, 70%) 100%);
+
+  /* ShapeArchitect - Creative Pink/Mint */
+  --game-build-primary: hsl(340, 70%, 58%);
+  --game-build-secondary: hsl(160, 55%, 45%);
+  --game-build-bg: linear-gradient(180deg, hsl(32, 35%, 82%) 0%, hsl(28, 30%, 75%) 100%);
+
+  /* Player Colors */
+  --color-player1: hsl(145, 65%, 38%);
+  --color-player2: hsl(24, 85%, 48%);
+  --color-ai: hsl(0, 65%, 48%);
+
+  /* ---- Accessibility ---- */
+
+  --color-focus-ring: hsl(210, 100%, 50%);
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+}

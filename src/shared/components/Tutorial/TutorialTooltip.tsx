@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTutorialContext } from './TutorialContext';
-import { Button } from '../Button';
+import { Button } from '@/shared/components/ui';
 
 // ═══════════════════════════════════════════════════════════════════
 // TYPES

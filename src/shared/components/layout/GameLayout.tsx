@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
-import { HighContrastToggle } from './HighContrastToggle';
-import { LanguageSwitcher } from './LanguageSwitcher';
-import { SkipLinks } from './SkipLinks';
+import { HighContrastToggle } from '@/shared/components/HighContrastToggle';
+import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
+import { SkipLinks } from '@/shared/components/SkipLinks';
 
 interface GameLayoutProps {
     title: string;
