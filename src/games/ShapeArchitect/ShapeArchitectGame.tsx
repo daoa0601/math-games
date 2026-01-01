@@ -86,24 +86,6 @@ export function ShapeArchitectGame() {
     // Screen reader announcements for accessibility
     const { announce } = useAnnounce();
 
-    // Announce puzzle solved for screen readers
-    useEffect(() => {
-        if (gameState.isSolved && !practiceMode) {
-            const timeInSeconds = Math.floor(elapsedTime / 1000);
-            announce(
-                tc('announcements.puzzleSolved', { time: timeInSeconds }),
-                'assertive'
-            );
-        }
-    }, [gameState.isSolved, practiceMode, elapsedTime, announce, tc]);
-
-    // Announce time-up for screen readers
-    useEffect(() => {
-        if (showTimeUp) {
-            announce(tc('announcements.timeUp'), 'assertive');
-        }
-    }, [showTimeUp, announce, tc]);
-
     const handleTimeWarning = useCallback((secondsRemaining: number) => {
         if (secondsRemaining === 30) {
             announce(t('timer.warning30', '30 seconds remaining'), 'polite');
@@ -129,6 +111,23 @@ export function ShapeArchitectGame() {
         practiceMode,
         onTimeWarning: handleTimeWarning,
     });
+
+    // Announce puzzle solved for screen readers
+    useEffect(() => {
+        if (gameState.isSolved && !practiceMode) {
+            announce(
+                tc('announcements.puzzleSolved', { time: elapsedTime }),
+                'assertive'
+            );
+        }
+    }, [gameState.isSolved, practiceMode, elapsedTime, announce, tc]);
+
+    // Announce time-up for screen readers
+    useEffect(() => {
+        if (showTimeUp) {
+            announce(tc('announcements.timeUp'), 'assertive');
+        }
+    }, [showTimeUp, announce, tc]);
 
     // Handle practice mode toggle
     const handlePracticeModeChange = useCallback((newPracticeMode: boolean) => {
