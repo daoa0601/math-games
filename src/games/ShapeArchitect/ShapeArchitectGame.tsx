@@ -626,13 +626,8 @@ export function ShapeArchitectGame() {
                         </button>
                     </div>
 
-                    {/* Grid Board or Editor */}
-                    {showEditor ? (
-                        <LevelEditor
-                            onLevelCreated={handleCustomLevel}
-                            onCancel={() => setShowEditor(false)}
-                        />
-                    ) : (
+                    {/* Grid Board */}
+                    {!showEditor && (
                         <div className={`board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'board-wrapper--urgent' : ''}`}>
                             {viewMode === '2d' ? (
                                 <GridBoard

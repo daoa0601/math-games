@@ -82,6 +82,7 @@ export function useDragScroll(options: UseDragScrollOptions = {}): UseDragScroll
   });
   const isScrollingRef = useRef(false);
   const animationRef = useRef<number | null>(null);
+  const applyMomentumRef = useRef<() => void>(() => {});
 
   /**
    * Check if horizontal scrolling is allowed

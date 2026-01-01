@@ -270,25 +270,6 @@ export function generateRandomConfig(difficulty: 'easy' | 'medium' | 'hard'): Ga
  */
 export function runPresetValidation(): Map<string, FairnessResult> {
     const results = validateAllPresets(presetGames);
-
-    if (import.meta.env.DEV) {
-        console.group('🎮 SequenceRace Preset Validation');
-
-        for (const [id, result] of results) {
-            const preset = presetGames.find((p) => p.id === id);
-            const icon = result.isPlayerWinnable ? '✅' : '⚠️';
-            const status = result.isPlayerWinnable
-                ? 'Player can win'
-                : 'Player CANNOT win with optimal AI';
-
-            console.log(
-                `${icon} ${preset?.name ?? id}: ${status} | First mover: ${result.firstMoverAdvantage}`
-            );
-        }
-
-        console.groupEnd();
-    }
-
     return results;
 }
 

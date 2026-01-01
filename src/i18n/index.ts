@@ -15,8 +15,8 @@ import magicGraphVi from './locales/vi/magicGraph.json';
 import sequenceRaceVi from './locales/vi/sequenceRace.json';
 import shapeArchitectVi from './locales/vi/shapeArchitect.json';
 
-// Check for saved language preference
-const savedLang = localStorage.getItem(LANGUAGE_KEY);
+// Check for saved language preference (SSR-safe)
+const savedLang = typeof window !== 'undefined' ? localStorage.getItem(LANGUAGE_KEY) : null;
 
 i18n
     .use(LanguageDetector)

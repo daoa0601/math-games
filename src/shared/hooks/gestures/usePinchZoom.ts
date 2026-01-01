@@ -216,9 +216,15 @@ export function usePinchZoom(options: UsePinchZoomOptions = {}): UsePinchZoomRet
     };
   }, [enabled, handleTouchStart, handleTouchMove, handleTouchEnd]);
 
+  /**
+   * Get current scale value
+   * Returns a callback to avoid reading ref during render
+   */
+  const getScale = useCallback(() => scaleRef.current, []);
+
   return {
     ref: ref as RefObject<HTMLElement>,
-    scale: scaleRef.current,
+    scale: getScale(),
     resetScale,
   };
 }

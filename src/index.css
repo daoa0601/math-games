@@ -620,18 +620,20 @@ body {
   }
 
   .game-header {
-    flex-wrap: wrap;
-    gap: var(--space-md);
+    flex-wrap: nowrap;
+    gap: var(--space-sm);
   }
 
   .game-header__title {
-    width: 100%;
-    text-align: center;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .game-header__actions {
-    width: 100%;
-    justify-content: center;
+    flex-shrink: 0;
   }
 }
 

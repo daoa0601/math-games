@@ -1006,22 +1006,6 @@ export function generateRandomLevel(difficulty: 'easy' | 'medium' | 'hard'): Lev
  */
 export function runLevelValidation(): Map<string, LevelValidation> {
     const results = validateAllLevels(presetLevels);
-
-    if (import.meta.env.DEV) {
-        console.group('🧱 ShapeArchitect Level Validation');
-
-        for (const [id, result] of results) {
-            const level = presetLevels.find((l) => l.id === id);
-            const icon = result.isValid ? '✅' : '❌';
-
-            console.log(
-                `${icon} ${level?.name ?? id}: Target=${result.targetVolume}, Pieces=${result.pieceVolume} | ${result.message}`
-            );
-        }
-
-        console.groupEnd();
-    }
-
     return results;
 }
 

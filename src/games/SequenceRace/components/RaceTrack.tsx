@@ -123,8 +123,8 @@ export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral
             </div>
 
             {/* Position Display */}
-            <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                Position: <strong style={{ color: 'var(--color-accent)' }}>{currentPosition}</strong> / {target}
+            <div className="position-display">
+                Position: <strong className="position-display__current">{currentPosition}</strong> / {target}
             </div>
         </div>
     );

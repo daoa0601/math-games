@@ -10,7 +10,7 @@
     align-items: center;
     gap: var(--space-xl);
     width: 100%;
-    max-width: 700px;
+    max-width: min(95vw, 1000px);
 }
 
 /* Game Info Panel */
@@ -141,6 +141,23 @@
     height: 100px;
     margin-bottom: var(--space-lg);
     z-index: 1;
+}
+
+/* Position Display - below track */
+.position-display {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: var(--space-xs);
+    padding: var(--space-xs);
+    background: hsla(0, 0%, 100%, 0.15);
+    border-radius: var(--radius-sm);
+    z-index: 0;
+}
+
+.position-display__current {
+    color: var(--color-accent);
+    font-weight: 700;
 }
 
 /* Track line - Championship Stadium running track */

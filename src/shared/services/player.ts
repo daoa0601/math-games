@@ -145,8 +145,6 @@ export function getPlayerProfile(): PlayerProfile {
  * Migrate old profile format to new format
  */
 function migrateProfile(oldProfile: Record<string, unknown>): PlayerProfile {
-  console.log('Migrating player profile from version', oldProfile.version || 1, 'to', STORAGE_VERSION);
-
   const defaultProfile = createDefaultProfile();
 
   // Estimate games from XP if XP exists (old format)
