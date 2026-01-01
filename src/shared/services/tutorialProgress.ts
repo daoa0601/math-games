@@ -54,8 +54,10 @@ export function markTutorialSkipped(gameId: string): void {
 export function resetTutorialProgress(gameId?: string): void {
   if (gameId) {
     const progress = storage.get();
-    const { [gameId]: _, ...completedRest } = progress.completedTutorials;
-    const { [gameId]: __, ...skippedRest } = progress.skippedTutorials;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [gameId]: _completed, ...completedRest } = progress.completedTutorials;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [gameId]: _skipped, ...skippedRest } = progress.skippedTutorials;
     storage.set({
       ...progress,
       completedTutorials: completedRest,

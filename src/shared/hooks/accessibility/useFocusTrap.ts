@@ -153,7 +153,11 @@ export function useFocusTrap(options: UseFocusTrapOptions = {}): UseFocusTrapRet
         // If focus is outside container, bring it back
         if (!containerRef.current.contains(activeElement)) {
           event.preventDefault();
-          event.shiftKey ? focusLast() : focusFirst();
+          if (event.shiftKey) {
+            focusLast();
+          } else {
+            focusFirst();
+          }
         }
       }
     },

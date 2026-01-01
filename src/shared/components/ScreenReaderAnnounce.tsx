@@ -142,6 +142,7 @@ export function ScreenReaderAnnounceProvider({ children }: { children: ReactNode
  * }
  * ```
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAnnounce(): AnnounceContextValue {
   const context = useContext(AnnounceContext);
 
@@ -185,20 +186,27 @@ export function ScreenReaderAnnounce({
   const [currentMessage, setCurrentMessage] = useState('');
 
   useEffect(() => {
-    if (message) {
-      // Clear and re-set to trigger announcement
-      setCurrentMessage(() => '');
-      requestAnimationFrame(() => {
-        setCurrentMessage(message);
-      });
+    if (!message) return;
 
-      // Clear after announcement
-      const timer = setTimeout(() => {
-        setCurrentMessage(() => '');
-      }, 3000);
+    // Clear and set via async callbacks only (not in effect body)
+    const clearId = requestAnimationFrame(() => {
+      setCurrentMessage('');
+    });
 
-      return () => clearTimeout(timer);
-    }
+    const setId = requestAnimationFrame(() => {
+      setCurrentMessage(message);
+    });
+
+    // Clear after announcement
+    const timer = setTimeout(() => {
+      setCurrentMessage('');
+    }, 3000);
+
+    return () => {
+      cancelAnimationFrame(clearId);
+      cancelAnimationFrame(setId);
+      clearTimeout(timer);
+    };
   }, [message]);
 
   return (

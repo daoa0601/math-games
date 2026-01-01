@@ -270,4 +270,4 @@ t('ranks.intermediate');  // "Intermediate" or "Trung cấp"
 
 - `docs/ARCHITECTURE.md` - System overview, patterns, dependencies
 - `docs/adr/` - Architectural Decision Records
-- `SPRINT.md` - Current sprint planning and backlog
+- `CONTRIBUTING.md` - Contributing guidelines

@@ -14,7 +14,8 @@ export function TutorialSpotlight() {
 
   useEffect(() => {
     if (!highlightedElement || !isActive) {
-      setRect(() => null);
+      // Use async callback to avoid setState in effect body
+      requestAnimationFrame(() => setRect(null));
       return;
     }
 

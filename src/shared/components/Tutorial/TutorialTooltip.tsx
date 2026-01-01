@@ -138,7 +138,8 @@ export function TutorialTooltip({
 
   useEffect(() => {
     if (!isActive) {
-      setIsPositioned(false);
+      // Use async callback to avoid setState in effect body
+      requestAnimationFrame(() => setIsPositioned(false));
       return;
     }
 

@@ -145,7 +145,7 @@ export function useSwipe(options: UseSwipeOptions = {}): UseSwipeReturn {
    * Handle touch end - calculate and trigger swipe
    */
   const handleTouchEnd = useCallback(
-    (_e: TouchEvent | React.TouchEvent) => {
+    () => {
       if (!enabled || !startRef.current) return;
 
       const end = moveRef.current || startRef.current;

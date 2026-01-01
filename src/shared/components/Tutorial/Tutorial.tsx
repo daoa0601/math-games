@@ -26,7 +26,7 @@ export function Tutorial({
     if (autoStart && tutorial.isIdle) {
       tutorial.start();
     }
-  }, [autoStart, tutorial.isIdle, tutorial.start]);
+  }, [autoStart, tutorial]);
 
   const contextValue = useMemo(
     () => ({ ...tutorial, highlightedElement, setHighlightedElement }),

@@ -8,6 +8,7 @@ type TutorialContextValue = ReturnType<typeof useTutorial> & {
 
 const TutorialContext = createContext<TutorialContextValue | null>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTutorialContext() {
   const context = useContext(TutorialContext);
   if (!context) {

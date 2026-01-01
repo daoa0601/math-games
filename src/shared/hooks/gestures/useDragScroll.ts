@@ -18,8 +18,8 @@ export interface UseDragScrollOptions {
 export interface UseDragScrollReturn {
   /** Ref to attach to the scrollable container */
   ref: RefObject<HTMLElement>;
-  /** Whether currently scrolling */
-  isScrolling: boolean;
+  /** Get whether currently scrolling (call this function) */
+  getIsScrolling: () => boolean;
 }
 
 interface DragState {
@@ -208,8 +208,12 @@ export function useDragScroll(options: UseDragScrollOptions = {}): UseDragScroll
     }
   }, [friction, allowHorizontal, allowVertical, onScrollEnd]);
 
-  // Store applyMomentum in ref to avoid circular dependency
-  applyMomentumRef.current = applyMomentum;
+  /**
+   * Store applyMomentum in ref (via effect to avoid ref access during render)
+   */
+  useEffect(() => {
+    applyMomentumRef.current = applyMomentum;
+  }, [applyMomentum]);
 
   /**
    * Handle pointer up
@@ -270,9 +274,14 @@ export function useDragScroll(options: UseDragScrollOptions = {}): UseDragScroll
     };
   }, [enabled, handlePointerDown, handlePointerMove, handlePointerUp, handlePointerLeave]);
 
+  /**
+   * Get current scrolling state
+   */
+  const getIsScrolling = useCallback(() => isScrollingRef.current, []);
+
   return {
     ref: ref as RefObject<HTMLElement>,
-    isScrolling: isScrollingRef.current,
+    getIsScrolling,
   };
 }
 

@@ -1,3 +1,5 @@
+English | [Tieng Viet](README.vi.md)
+
 # Math Gymnasium
 
 A collection of interactive math games for primary to middle school students, built with React and TypeScript.

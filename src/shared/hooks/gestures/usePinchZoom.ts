@@ -29,8 +29,8 @@ export interface UsePinchZoomOptions {
 export interface UsePinchZoomReturn {
   /** Ref to attach to the pinch target element */
   ref: RefObject<HTMLElement>;
-  /** Current scale value */
-  scale: number;
+  /** Get current scale value (call this function to get scale) */
+  getScale: () => number;
   /** Reset scale to 1 */
   resetScale: () => void;
 }
@@ -218,13 +218,13 @@ export function usePinchZoom(options: UsePinchZoomOptions = {}): UsePinchZoomRet
 
   /**
    * Get current scale value
-   * Returns a callback to avoid reading ref during render
+   * Returns a callback to get scale without accessing ref during render
    */
   const getScale = useCallback(() => scaleRef.current, []);
 
   return {
     ref: ref as RefObject<HTMLElement>,
-    scale: getScale(),
+    getScale,
     resetScale,
   };
 }
