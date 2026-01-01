@@ -1,6 +1,14 @@
+/* ========================================
+   Tutorial System Styles
+   ======================================== */
+
 .tutorial-container {
   position: relative;
 }
+
+/* ========================================
+   Tutorial Overlay & Spotlight
+   ======================================== */
 
 .tutorial-overlay {
   position: fixed;
@@ -16,4 +24,209 @@
   border-radius: var(--radius-md);
   z-index: 1001;
   pointer-events: auto;
+}
+
+/* ========================================
+   Tutorial Tooltip
+   ======================================== */
+
+.tutorial-tooltip {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  min-width: 280px;
+  max-width: 360px;
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 2px var(--color-primary-light);
+  animation: tutorialTooltipIn 0.3s var(--ease-bounce);
+  z-index: var(--z-tooltip);
+}
+
+@keyframes tutorialTooltipIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Adjust animation based on position */
+.tutorial-tooltip--top {
+  animation-name: tutorialTooltipInFromBottom;
+}
+
+.tutorial-tooltip--left {
+  animation-name: tutorialTooltipInFromRight;
+}
+
+.tutorial-tooltip--right {
+  animation-name: tutorialTooltipInFromLeft;
+}
+
+@keyframes tutorialTooltipInFromBottom {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes tutorialTooltipInFromRight {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(8px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) scale(1);
+  }
+}
+
+@keyframes tutorialTooltipInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-8px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) scale(1);
+  }
+}
+
+/* ========================================
+   Tooltip Arrow
+   ======================================== */
+
+.tutorial-tooltip__arrow {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: var(--bg-card);
+  transform: rotate(45deg);
+  box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tutorial-tooltip__arrow--bottom {
+  top: -8px;
+  left: 50%;
+  margin-left: -8px;
+  box-shadow: -2px -2px 0 0 var(--color-primary-light);
+}
+
+.tutorial-tooltip__arrow--top {
+  bottom: -8px;
+  left: 50%;
+  margin-left: -8px;
+  box-shadow: 2px 2px 0 0 var(--color-primary-light);
+}
+
+.tutorial-tooltip__arrow--left {
+  right: -8px;
+  top: 50%;
+  margin-top: -8px;
+  box-shadow: 2px -2px 0 0 var(--color-primary-light);
+}
+
+.tutorial-tooltip__arrow--right {
+  left: -8px;
+  top: 50%;
+  margin-top: -8px;
+  box-shadow: -2px 2px 0 0 var(--color-primary-light);
+}
+
+/* ========================================
+   Tooltip Content
+   ======================================== */
+
+.tutorial-tooltip__content {
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  line-height: 1.6;
+}
+
+.tutorial-tooltip__content p {
+  margin: 0;
+}
+
+.tutorial-tooltip__content p + p {
+  margin-top: var(--space-sm);
+}
+
+/* ========================================
+   Tooltip Progress Indicator
+   ======================================== */
+
+.tutorial-tooltip__progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-primary-bg);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+/* ========================================
+   Tooltip Actions
+   ======================================== */
+
+.tutorial-tooltip__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid hsla(220, 25%, 10%, 0.08);
+}
+
+/* Make skip button less prominent */
+.tutorial-tooltip__actions .btn--ghost {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.tutorial-tooltip__actions .btn--ghost:hover {
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   Responsive Styles
+   ======================================== */
+
+@media (max-width: 480px) {
+  .tutorial-tooltip {
+    min-width: 240px;
+    max-width: calc(100vw - 32px);
+    padding: var(--space-md);
+  }
+
+  .tutorial-tooltip__actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .tutorial-tooltip,
+  .tutorial-tooltip--top,
+  .tutorial-tooltip--left,
+  .tutorial-tooltip--right {
+    animation: none;
+  }
 }

@@ -207,5 +207,12 @@
         "skipLinks": "Liên kết bỏ qua",
         "skipToMain": "Bỏ qua đến nội dung chính",
         "skipToGame": "Bỏ qua đến khu vực trò chơi"
+    },
+    "tutorial": {
+        "next": "Tiep",
+        "previous": "Quay lai",
+        "skip": "Bo qua huong dan",
+        "finish": "Hoan thanh",
+        "stepOf": "Buoc {{current}} / {{total}}"
     }
 }
