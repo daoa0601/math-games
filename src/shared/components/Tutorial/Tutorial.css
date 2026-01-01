@@ -31,7 +31,7 @@
    ======================================== */
 
 .tutorial-tooltip {
-  background: var(--bg-card);
+  background: var(--surface-card);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
   min-width: 280px;
@@ -108,7 +108,7 @@
   position: absolute;
   width: 16px;
   height: 16px;
-  background: var(--bg-card);
+  background: var(--surface-card);
   transform: rotate(45deg);
   box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
 }

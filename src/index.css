@@ -52,7 +52,7 @@ html {
 body {
   font-family: var(--font-body);
   font-weight: 600;
-  background: var(--bg-base);
+  background: var(--surface-page);
   background-image: var(--bg-texture);
   color: var(--text-primary);
   line-height: 1.6;
@@ -81,7 +81,7 @@ body {
   flex-direction: column;
   align-items: center;
   padding: var(--space-2xl);
-  background: var(--bg-base);
+  background: var(--surface-page);
   background-image:
     radial-gradient(ellipse at top left, hsla(12, 90%, 62%, 0.08), transparent 50%),
     radial-gradient(ellipse at bottom right, hsla(174, 65%, 42%, 0.06), transparent 50%),
@@ -255,7 +255,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-md);
 }
@@ -424,7 +424,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: var(--space-lg);
-  background: var(--bg-base);
+  background: var(--surface-page);
   background-image: var(--bg-texture);
 }
 
@@ -468,7 +468,7 @@ body {
   align-items: center;
   gap: var(--space-xs);
   padding: var(--space-sm) var(--space-md);
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 2px solid hsla(220, 25%, 10%, 0.1);
   border-radius: var(--radius-lg);
   color: var(--text-primary);
@@ -531,7 +531,7 @@ body {
   width: 44px;
   height: 44px;
   padding: 0;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 2px solid hsla(220, 25%, 10%, 0.1);
   border-radius: var(--radius-lg);
   color: var(--text-primary);
@@ -733,28 +733,9 @@ body {
 }
 
 /* ========================================
-   High Contrast Mode - Accessibility
+   High Contrast Mode - Component Overrides
+   (Color tokens defined in tokens/colors.css)
    ======================================== */
-
-.high-contrast {
-  /* Enhanced color contrast */
-  --color-primary: hsl(12, 100%, 55%);
-  --color-primary-light: hsl(12, 100%, 70%);
-  --color-primary-dark: hsl(12, 100%, 40%);
-
-  --color-secondary: hsl(174, 100%, 35%);
-  --color-success: hsl(145, 100%, 35%);
-  --color-warning: hsl(38, 100%, 50%);
-  --color-error: hsl(0, 100%, 50%);
-
-  /* High contrast backgrounds */
-  --bg-base: hsl(0, 0%, 100%);
-  --bg-card: hsl(0, 0%, 100%);
-
-  /* Maximum text contrast */
-  --text-primary: hsl(0, 0%, 0%);
-  --text-secondary: hsl(0, 0%, 20%);
-}
 
 .high-contrast .btn {
   border-width: 3px;
@@ -767,11 +748,6 @@ body {
 .high-contrast *:focus-visible {
   outline: 4px solid var(--color-focus-ring) !important;
   outline-offset: var(--focus-ring-offset) !important;
-}
-
-/* Enhanced focus ring visibility in high contrast */
-.high-contrast {
-  --color-focus-ring: hsl(210, 100%, 40%);
 }
 
 /* ========================================

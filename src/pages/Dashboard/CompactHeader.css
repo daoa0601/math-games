@@ -8,7 +8,7 @@
   justify-content: space-between;
   gap: var(--space-md);
   padding: var(--space-md) var(--space-lg);
-  background: var(--bg-card);
+  background: var(--surface-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   margin-bottom: var(--space-md);

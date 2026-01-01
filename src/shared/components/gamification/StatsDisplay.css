@@ -166,7 +166,7 @@
 .stats-display--detailed {
   padding: var(--space-lg);
   border-radius: var(--radius-lg);
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-color);
 }
 

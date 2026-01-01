@@ -45,14 +45,14 @@
   padding: var(--space-md);
 
   /* Playful Premium glassmorphism */
-  background: hsla(0, 0%, 100%, 0.9);
+  background: var(--toast-bg);
   backdrop-filter: blur(16px) saturate(120%);
-  border: 1px solid hsla(220, 20%, 90%, 0.8);
+  border: 1px solid var(--toast-border);
   border-left: 3px solid var(--rarity-color, var(--color-secondary));
   border-radius: 16px;
   box-shadow:
-    0 8px 32px -4px hsla(220, 25%, 10%, 0.15),
-    0 4px 12px -2px hsla(220, 25%, 10%, 0.08);
+    0 8px 32px -4px var(--overlay-medium),
+    0 4px 12px -2px var(--overlay-light);
 
   cursor: pointer;
   opacity: 0;

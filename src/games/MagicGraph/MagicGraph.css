@@ -16,7 +16,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-xl);
-    background: var(--bg-card);
+    background: var(--surface-card);
     padding: var(--space-md) var(--space-xl);
     border-radius: var(--radius-lg);
     border: 1px solid var(--accent-purple-medium);
@@ -230,7 +230,7 @@
     fill: hsl(0, 0%, 95%);
     font-size: 20px;
     font-weight: 700;
-    font-family: var(--font-sans);
+    font-family: var(--font-body);
     user-select: none;
     pointer-events: none;
     text-shadow: 0 0 4px var(--black-50);
@@ -470,7 +470,7 @@
     display: flex;
     gap: var(--space-md);
     padding: var(--space-md);
-    background: var(--bg-card);
+    background: var(--surface-card);
     border-radius: var(--radius-lg);
     border: 1px solid var(--accent-purple-medium);
 }
@@ -485,7 +485,7 @@
     font-weight: 700;
     border-radius: var(--radius-md);
     border: 2px solid var(--color-primary);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     color: var(--text-primary);
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -579,7 +579,7 @@
     align-items: center;
     gap: var(--space-sm);
     padding: var(--space-sm) var(--space-md);
-    background: var(--bg-card);
+    background: var(--surface-card);
     border-radius: var(--radius-md);
     border: 1px solid var(--accent-purple-medium);
 }
@@ -592,7 +592,7 @@
 .custom-number-field {
     width: 80px;
     padding: var(--space-xs) var(--space-sm);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     border: 1px solid var(--color-primary);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
@@ -755,7 +755,7 @@
     z-index: 200;
     transform: translate(-50%, -100%);
     margin-top: -10px;
-    background: var(--bg-card);
+    background: var(--surface-card);
     border: 2px solid var(--color-primary);
     border-radius: var(--radius-lg);
     box-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.4);
@@ -816,7 +816,7 @@
     font-weight: 700;
     border-radius: var(--radius-md);
     border: 2px solid var(--color-primary);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     color: var(--text-primary);
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -1020,7 +1020,7 @@
 .optimization-toggle {
     display: flex;
     gap: var(--space-xs);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     padding: var(--space-xs);
     border-radius: var(--radius-md);
     border: 1px solid var(--accent-purple-medium);
@@ -1062,7 +1062,7 @@
 
 .puzzle-info__value--range {
     font-family: var(--font-mono, monospace);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     padding: var(--space-xs) var(--space-sm);
     border-radius: var(--radius-sm);
     font-size: 1.1rem;
@@ -1077,7 +1077,7 @@
 .win-overlay__message--feedback {
     font-size: 1.1rem;
     padding: var(--space-md);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     border-radius: var(--radius-md);
     margin: var(--space-md) 0;
 }
@@ -1113,7 +1113,7 @@
     flex-direction: column;
     gap: var(--space-md);
     padding: var(--space-lg);
-    background: var(--bg-card);
+    background: var(--surface-card);
     border-radius: var(--radius-lg);
     max-width: 420px;
     margin: 0 auto;
@@ -1143,7 +1143,7 @@
 .mode-btn {
     flex: 1;
     padding: var(--space-sm) var(--space-md);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     border: 2px solid transparent;
     border-radius: var(--radius-md);
     color: var(--text-secondary);
@@ -1163,7 +1163,7 @@
 }
 
 .topology-editor__canvas {
-    background: var(--bg-surface);
+    background: var(--surface-card);
     border-radius: var(--radius-md);
     border: 2px dashed var(--color-border);
     cursor: crosshair;
@@ -1182,7 +1182,7 @@
 }
 
 .editor-node__circle {
-    fill: var(--bg-card);
+    fill: var(--surface-card);
     stroke: var(--color-primary);
     stroke-width: 3;
     transition: all 0.2s ease;
@@ -1273,7 +1273,7 @@
 .topology-editor__numbers input {
     flex: 1;
     padding: var(--space-sm);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
@@ -1334,7 +1334,7 @@
 }
 
 .topology-editor__actions .btn--secondary {
-    background: var(--bg-surface);
+    background: var(--surface-card);
     color: var(--text-secondary);
     border: 1px solid var(--color-border);
 }

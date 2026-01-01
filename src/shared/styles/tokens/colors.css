@@ -69,10 +69,7 @@
   --surface-card: hsl(0, 0%, 100%);
   --surface-elevated: hsl(220, 15%, 98%);
 
-  /* Legacy aliases for backwards compatibility */
-  --bg-base: var(--surface-page);
-  --bg-surface: var(--surface-card);
-  --bg-card: var(--surface-card);
+  /* Hover/elevated states (keep for unique values) */
   --bg-card-hover: hsl(40, 25%, 98%);
   --bg-elevated: var(--surface-elevated);
 
@@ -94,22 +91,53 @@
   --theme-race: hsl(24, 85%, 55%);        /* SequenceRace */
   --theme-build: hsl(340, 70%, 58%);      /* ShapeArchitect */
 
-  /* ---- Game-Specific Colors (Legacy) ---- */
+  /* ---- Game-Specific Colors ---- */
 
-  /* MagicGraph - Mystical Purple/Gold */
+  /* MagicGraph - Mystical Constellation Theme */
   --game-magic-primary: hsl(270, 55%, 55%);
   --game-magic-secondary: hsl(42, 85%, 55%);
   --game-magic-bg: linear-gradient(135deg, hsl(250, 35%, 12%) 0%, hsl(240, 40%, 8%) 100%);
+  --game-magic-deep: hsl(250, 35%, 12%);
+  --game-magic-darker: hsl(240, 40%, 8%);
+  --game-magic-nebula: hsla(270, 40%, 25%, 0.4);
+  --game-magic-nebula-alt: hsla(220, 45%, 20%, 0.3);
+  --game-magic-star: hsl(45, 100%, 90%);
+  --game-magic-node: hsla(250, 40%, 15%, 0.9);
+  --game-magic-node-glow: hsla(270, 70%, 65%, 0.8);
+  --game-magic-line-correct: hsl(145, 80%, 55%);
+  --game-magic-line-glow: hsla(145, 80%, 55%, 0.6);
 
-  /* SequenceRace - Energetic Orange/Blue */
+  /* SequenceRace - Track & Field Theme */
   --game-race-primary: hsl(24, 85%, 55%);
   --game-race-secondary: hsl(210, 75%, 55%);
   --game-race-bg: linear-gradient(180deg, hsl(210, 70%, 65%) 0%, hsl(200, 60%, 75%) 60%, hsl(140, 40%, 70%) 100%);
+  --game-race-sky: hsl(210, 70%, 65%);
+  --game-race-sky-mid: hsl(200, 60%, 75%);
+  --game-race-grass: hsl(140, 40%, 70%);
+  --game-race-track: hsl(15, 55%, 45%);
+  --game-race-track-light: hsl(18, 60%, 48%);
+  --game-race-track-border: hsl(15, 50%, 35%);
+  --game-race-lane: hsla(0, 0%, 100%, 0.3);
+  --game-race-cloud: hsla(0, 0%, 100%, 0.6);
+  --game-race-dust: hsla(35, 50%, 75%, 0.7);
 
-  /* ShapeArchitect - Creative Pink/Mint */
+  /* ShapeArchitect - Workshop Theme */
   --game-build-primary: hsl(340, 70%, 58%);
   --game-build-secondary: hsl(160, 55%, 45%);
   --game-build-bg: linear-gradient(180deg, hsl(32, 35%, 82%) 0%, hsl(28, 30%, 75%) 100%);
+  --game-build-wood-light: hsl(32, 35%, 82%);
+  --game-build-wood-mid: hsl(28, 30%, 75%);
+  --game-build-wood-dark: hsl(30, 40%, 55%);
+  --game-build-wood-grain: hsla(30, 20%, 40%, 0.03);
+  --game-build-blueprint: hsl(200, 65%, 55%);
+  --game-build-blueprint-light: hsla(200, 75%, 94%, 0.95);
+  --game-build-blueprint-grid: hsla(200, 70%, 55%, 0.12);
+  --game-build-block-border: hsla(35, 50%, 60%, 0.4);
+
+  /* 3D Axis Colors (ShapeArchitect) */
+  --axis-x-color: hsl(0, 84%, 60%);
+  --axis-y-color: hsl(142, 71%, 45%);
+  --axis-z-color: hsl(217, 91%, 60%);
 
   /* Player Colors */
   --color-player1: hsl(145, 65%, 38%);
@@ -126,11 +154,44 @@
 
   --bg-hover: hsl(220, 20%, 95%);
   --bg-subtle: hsl(220, 20%, 96%);
+  --bg-page: var(--surface-page);
   --border-color: hsl(220, 15%, 85%);
   --border-subtle: hsl(220, 15%, 90%);
   --color-text: var(--text-primary);
   --color-text-muted: var(--text-secondary);
   --color-accent-bg: hsl(12, 90%, 95%);
+
+  /* ---- Status Aliases (for semantic naming) ---- */
+  --color-danger: var(--color-error);
+
+  /* ---- Semantic Overlays ---- */
+  --overlay-light: hsla(220, 25%, 10%, 0.05);
+  --overlay-medium: hsla(220, 25%, 10%, 0.15);
+  --overlay-dark: hsla(0, 0%, 0%, 0.3);
+  --overlay-modal: hsla(230, 25%, 10%, 0.95);
+  --overlay-backdrop: rgba(0, 0%, 0%, 0.6);
+
+  /* ---- Semantic Whites/Blacks (for transparency patterns) ---- */
+  --white-5: hsla(0, 0%, 100%, 0.05);
+  --white-10: hsla(0, 0%, 100%, 0.1);
+  --white-15: hsla(0, 0%, 100%, 0.15);
+  --white-30: hsla(0, 0%, 100%, 0.3);
+  --white-60: hsla(0, 0%, 100%, 0.6);
+  --white-90: hsla(0, 0%, 100%, 0.9);
+  --black-10: hsla(0, 0%, 0%, 0.1);
+  --black-20: hsla(0, 0%, 0%, 0.2);
+  --black-30: hsla(0, 0%, 0%, 0.3);
+  --black-50: hsla(0, 0%, 0%, 0.5);
+
+  /* ---- Toast/Notification Colors ---- */
+  --toast-bg: hsla(0, 0%, 100%, 0.9);
+  --toast-border: hsla(220, 20%, 90%, 0.8);
+
+  /* ---- Common accent pattern (used extensively) ---- */
+  --accent-purple: hsl(250, 84%, 54%);
+  --accent-purple-light: hsla(250, 84%, 54%, 0.1);
+  --accent-purple-medium: hsla(250, 84%, 54%, 0.2);
+  --accent-purple-strong: hsla(250, 84%, 54%, 0.3);
 }
 
 /* ========================================
@@ -152,9 +213,6 @@
   /* Backgrounds */
   --bg-hover: hsl(220, 20%, 20%);
   --bg-subtle: hsl(220, 20%, 12%);
-  --bg-base: hsl(220, 20%, 8%);
-  --bg-card: hsl(220, 20%, 15%);
-  --bg-surface: hsl(220, 20%, 15%);
   --bg-card-hover: hsl(220, 20%, 18%);
   --bg-elevated: hsl(220, 20%, 18%);
 
@@ -221,6 +279,37 @@
   --color-player1: hsl(145, 65%, 48%);
   --color-player2: hsl(24, 85%, 58%);
   --color-ai: hsl(0, 65%, 58%);
+
+  /* Game Theme Colors - Dark Mode */
+  --game-magic-deep: hsl(250, 35%, 8%);
+  --game-magic-darker: hsl(240, 40%, 5%);
+  --game-magic-nebula: hsla(270, 40%, 35%, 0.4);
+  --game-magic-node: hsla(250, 40%, 20%, 0.9);
+  --game-magic-node-glow: hsla(270, 70%, 70%, 0.8);
+
+  --game-race-sky: hsl(210, 60%, 25%);
+  --game-race-sky-mid: hsl(200, 50%, 30%);
+  --game-race-grass: hsl(140, 35%, 25%);
+  --game-race-cloud: hsla(0, 0%, 100%, 0.3);
+
+  --game-build-wood-light: hsl(32, 25%, 25%);
+  --game-build-wood-mid: hsl(28, 20%, 20%);
+  --game-build-wood-dark: hsl(30, 30%, 35%);
+  --game-build-blueprint: hsl(200, 60%, 45%);
+  --game-build-blueprint-light: hsla(200, 60%, 30%, 0.95);
+  --game-build-blueprint-grid: hsla(200, 65%, 45%, 0.15);
+
+  /* Semantic Overlays - Dark Mode */
+  --overlay-light: hsla(220, 25%, 95%, 0.05);
+  --overlay-medium: hsla(220, 25%, 95%, 0.1);
+  --toast-bg: hsla(220, 20%, 15%, 0.95);
+  --toast-border: hsla(220, 20%, 30%, 0.8);
+
+  /* Accent Purple - Dark Mode */
+  --accent-purple: hsl(250, 84%, 64%);
+  --accent-purple-light: hsla(250, 84%, 64%, 0.15);
+  --accent-purple-medium: hsla(250, 84%, 64%, 0.25);
+  --accent-purple-strong: hsla(250, 84%, 64%, 0.4);
 }
 
 /* System preference support */
@@ -237,9 +326,6 @@
 
     --bg-hover: hsl(220, 20%, 20%);
     --bg-subtle: hsl(220, 20%, 12%);
-    --bg-base: hsl(220, 20%, 8%);
-    --bg-card: hsl(220, 20%, 15%);
-    --bg-surface: hsl(220, 20%, 15%);
     --bg-card-hover: hsl(220, 20%, 18%);
     --bg-elevated: hsl(220, 20%, 18%);
 
@@ -258,4 +344,33 @@
     --color-text: hsl(220, 15%, 95%);
     --color-text-muted: hsl(220, 10%, 70%);
   }
+}
+
+/* ========================================
+   High Contrast Mode - Accessibility
+   ======================================== */
+
+.high-contrast {
+  /* Enhanced color contrast - 100% saturation for visibility */
+  --color-primary: hsl(12, 100%, 55%);
+  --color-primary-light: hsl(12, 100%, 70%);
+  --color-primary-dark: hsl(12, 100%, 40%);
+
+  --color-secondary: hsl(174, 100%, 35%);
+  --color-success: hsl(145, 100%, 35%);
+  --color-warning: hsl(38, 100%, 50%);
+  --color-error: hsl(0, 100%, 50%);
+
+  /* High contrast backgrounds */
+  --surface-page: hsl(0, 0%, 100%);
+  --surface-card: hsl(0, 0%, 100%);
+  --bg-base: hsl(0, 0%, 100%);
+  --bg-card: hsl(0, 0%, 100%);
+
+  /* Maximum text contrast */
+  --text-primary: hsl(0, 0%, 0%);
+  --text-secondary: hsl(0, 0%, 20%);
+
+  /* Enhanced focus ring */
+  --color-focus-ring: hsl(210, 100%, 40%);
 }

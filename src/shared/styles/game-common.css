@@ -15,7 +15,7 @@
 
 .difficulty-btn {
     padding: var(--space-sm) var(--space-md);
-    background: var(--bg-card);
+    background: var(--surface-card);
     border: 1px solid hsla(250, 84%, 54%, 0.3);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
@@ -58,7 +58,7 @@
 
 .level-btn {
     padding: var(--space-sm) var(--space-md);
-    background: var(--bg-card);
+    background: var(--surface-card);
     border: 1px solid hsla(250, 84%, 54%, 0.3);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
@@ -86,7 +86,7 @@
     gap: var(--space-md);
     width: 100%;
     padding: var(--space-lg);
-    background: var(--bg-card);
+    background: var(--surface-card);
     border-radius: var(--radius-lg);
     border: 1px solid hsla(250, 84%, 54%, 0.2);
 }
@@ -95,7 +95,7 @@
     padding: var(--space-md);
     border-radius: var(--radius-md);
     border-left: 4px solid var(--color-primary);
-    background: var(--bg-surface);
+    background: var(--surface-card);
 }
 
 .hint-card h4 {
@@ -151,7 +151,7 @@
     align-items: center;
     gap: var(--space-sm);
     padding: var(--space-sm) var(--space-lg);
-    background: var(--bg-card);
+    background: var(--surface-card);
     border-radius: var(--radius-full);
     border: 2px solid var(--color-primary);
     font-size: 1.25rem;
@@ -171,7 +171,7 @@
 }
 
 .timer__pulse {
-    animation: pulse 0.5s ease infinite;
+    animation: game-pulse 0.5s ease infinite;
     color: var(--color-error);
 }
 
@@ -187,12 +187,12 @@
 .timer--critical {
     border-color: var(--color-error);
     background: hsla(0, 84%, 60%, 0.2);
-    animation: shake 0.5s ease infinite;
+    animation: game-shake 0.5s ease infinite;
 }
 
 .timer--critical .timer__value {
     color: var(--color-error);
-    animation: pulse 0.5s ease infinite;
+    animation: game-pulse 0.5s ease infinite;
 }
 
 /* ========================================
@@ -319,7 +319,8 @@
     }
 }
 
-@keyframes pulse {
+/* Game-specific pulse - more dramatic than motion.css pulse */
+@keyframes game-pulse {
     0%, 100% {
         opacity: 1;
         transform: scale(1);
@@ -330,7 +331,8 @@
     }
 }
 
-@keyframes shake {
+/* Game-specific shake - gentler than motion.css shake */
+@keyframes game-shake {
     0%, 100% {
         transform: translateX(0);
     }

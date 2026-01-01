@@ -74,7 +74,7 @@
     display: flex;
     gap: var(--space-xs);
     padding: var(--space-xs);
-    background: var(--bg-card);
+    background: var(--surface-card);
     border-radius: var(--radius-md);
     border: 1px solid var(--accent-purple-medium);
 }
@@ -283,7 +283,7 @@
     flex-wrap: wrap;
     justify-content: center;
     padding: var(--space-lg);
-    background: var(--bg-card);
+    background: var(--surface-card);
     border-radius: var(--radius-lg);
     border: 1px solid var(--accent-purple-medium);
     min-height: 100px;
@@ -295,7 +295,7 @@
     align-items: center;
     gap: var(--space-sm);
     padding: var(--space-md);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     border-radius: var(--radius-md);
     border: 2px solid transparent;
     cursor: pointer;
@@ -379,7 +379,7 @@
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
-    background: var(--bg-card);
+    background: var(--surface-card);
     border: 2px solid var(--color-primary);
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -469,7 +469,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-xl);
-    background: var(--bg-card);
+    background: var(--surface-card);
     padding: var(--space-md) var(--space-xl);
     border-radius: var(--radius-lg);
     border: 1px solid var(--accent-purple-medium);
@@ -1350,7 +1350,7 @@
     flex-direction: column;
     gap: var(--space-md);
     padding: var(--space-lg);
-    background: var(--bg-card);
+    background: var(--surface-card);
     border-radius: var(--radius-lg);
     max-width: 500px;
     margin: 0 auto;
@@ -1389,7 +1389,7 @@
 .level-editor__size input {
     width: 60px;
     padding: var(--space-xs);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
@@ -1408,7 +1408,7 @@
 }
 
 .level-editor__canvas {
-    background: var(--bg-surface);
+    background: var(--surface-card);
     border-radius: var(--radius-md);
     border: 2px solid var(--color-border);
     padding: 4px;
@@ -1443,7 +1443,7 @@
 .level-editor__quick-actions .btn--small {
     padding: var(--space-xs) var(--space-sm);
     font-size: 0.75rem;
-    background: var(--bg-surface);
+    background: var(--surface-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
@@ -1477,7 +1477,7 @@
     align-items: center;
     gap: var(--space-xs);
     padding: var(--space-sm);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     border: 2px solid transparent;
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -1485,7 +1485,7 @@
 }
 
 .piece-btn:hover {
-    background: var(--bg-card);
+    background: var(--surface-card);
 }
 
 .piece-btn--selected {
@@ -1566,7 +1566,7 @@
 }
 
 .level-editor__actions .btn--secondary {
-    background: var(--bg-surface);
+    background: var(--surface-card);
     color: var(--text-secondary);
     border: 1px solid var(--color-border);
 }

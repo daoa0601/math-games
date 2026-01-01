@@ -6,7 +6,7 @@
 
 .difficulty-btn {
     padding: var(--space-sm) var(--space-md);
-    background: var(--bg-card);
+    background: var(--surface-card);
     border: 1px solid hsla(250, 84%, 54%, 0.3);
     border-radius: var(--radius-md);
     color: var(--text-secondary);

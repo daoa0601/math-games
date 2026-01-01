@@ -5,7 +5,7 @@
 .dashboard {
   min-height: 100vh;
   padding: var(--space-lg);
-  background: var(--bg-base);
+  background: var(--surface-page);
 }
 
 .dashboard__content {

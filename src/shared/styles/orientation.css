@@ -120,7 +120,7 @@
     position: sticky;
     bottom: 0;
     padding: var(--space-md);
-    background: var(--bg-surface);
+    background: var(--surface-card);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   }
 }
