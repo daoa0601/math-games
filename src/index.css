@@ -186,6 +186,21 @@ body {
   transform: translateY(-2px);
 }
 
+/* Dark mode game card */
+[data-theme="dark"] .game-card {
+  background: linear-gradient(135deg, var(--surface-card) 0%, var(--surface-elevated) 100%);
+  border-color: var(--border-color);
+  box-shadow: 0 4px 12px hsla(0, 0%, 0%, 0.3);
+}
+
+[data-theme="dark"] .game-card::before {
+  background: linear-gradient(135deg, hsla(12, 70%, 58%, 0.5), hsla(174, 50%, 45%, 0.5));
+}
+
+[data-theme="dark"] .game-card:hover {
+  box-shadow: 0 8px 24px hsla(0, 0%, 0%, 0.4);
+}
+
 .game-card__icon {
   width: 80px;
   height: 80px;
