@@ -857,6 +857,16 @@ export function ShapeArchitectGame() {
                         is3DMode={viewMode === '3d'}
                     />
                 )}
+
+                {/* Level Editor Modal */}
+                {showEditor && (
+                    <div className="level-editor-overlay">
+                        <LevelEditor
+                            onLevelCreated={handleCustomLevel}
+                            onCancel={() => setShowEditor(false)}
+                        />
+                    </div>
+                )}
             </GameLayout>
         </DndContext>
     );

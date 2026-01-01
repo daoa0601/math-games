@@ -201,12 +201,15 @@ export function useDragScroll(options: UseDragScrollOptions = {}): UseDragScroll
     // Continue animation if velocity is significant
     const speed = Math.abs(state.velocityX) + Math.abs(state.velocityY);
     if (speed > 0.01) {
-      animationRef.current = requestAnimationFrame(applyMomentum);
+      animationRef.current = requestAnimationFrame(applyMomentumRef.current);
     } else {
       isScrollingRef.current = false;
       onScrollEnd?.();
     }
   }, [friction, allowHorizontal, allowVertical, onScrollEnd]);
+
+  // Store applyMomentum in ref to avoid circular dependency
+  applyMomentumRef.current = applyMomentum;
 
   /**
    * Handle pointer up
