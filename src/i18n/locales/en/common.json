@@ -229,6 +229,20 @@
             "step5": "Use Undo to take back moves. Good luck!"
         }
     },
+    "sequenceRace": {
+        "tutorial": {
+            "step1Title": "Welcome to Sequence Race!",
+            "step1": "Race against the AI to reach the target number first!",
+            "step2Title": "The Track",
+            "step2": "You start at position 0. The target is shown at the finish line.",
+            "step3Title": "Making Moves",
+            "step3": "Choose a step card to move forward. Each card shows how many spaces you'll move.",
+            "step4Title": "Taking Turns",
+            "step4": "You and the AI take turns. Watch the AI's moves and plan your strategy!",
+            "step5Title": "Winning",
+            "step5": "Be the first to reach exactly the target number to win!"
+        }
+    },
     "shapeArchitect": {
         "tutorial": {
             "step1Title": "Welcome to Shape Architect!",

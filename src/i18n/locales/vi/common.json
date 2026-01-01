@@ -231,16 +231,32 @@
     },
     "sequenceRace": {
         "tutorial": {
-            "step1Title": "Chao mung den voi Dua Day So!",
-            "step1": "Dua voi AI de dat so muc tieu truoc!",
-            "step2Title": "Duong Dua",
-            "step2": "Ban bat dau o vi tri 0. Muc tieu duoc hien thi o vach dich.",
-            "step3Title": "Thuc Hien Nuoc Di",
-            "step3": "Chon mot the buoc de di chuyen. Moi the cho thay ban se di bao nhieu o.",
-            "step4Title": "Lan Luot",
-            "step4": "Ban va AI thay phien nhau. Quan sat nuoc di cua AI va len ke hoach chien thuat!",
-            "step5Title": "Chien Thang",
-            "step5": "Hay la nguoi dau tien dat dung so muc tieu de thang!"
+            "step1Title": "Chào mừng đến với Đua Dãy Số!",
+            "step1": "Đua với AI để đạt số mục tiêu trước!",
+            "step2Title": "Đường Đua",
+            "step2": "Bạn bắt đầu ở vị trí 0. Mục tiêu được hiển thị ở vạch đích.",
+            "step3Title": "Thực Hiện Nước Đi",
+            "step3": "Chọn một thẻ bước để di chuyển. Mỗi thẻ cho thấy bạn sẽ đi bao nhiêu ô.",
+            "step4Title": "Lần Lượt",
+            "step4": "Bạn và AI thay phiên nhau. Quan sát nước đi của AI và lên kế hoạch chiến thuật!",
+            "step5Title": "Chiến Thắng",
+            "step5": "Hãy là người đầu tiên đạt đúng số mục tiêu để thắng!"
+        }
+    },
+    "shapeArchitect": {
+        "tutorial": {
+            "step1Title": "Chao mung den voi Kien Truc Su Hinh Khoi!",
+            "step1": "Xay dung hinh muc tieu bang cac manh ghep trong kho cua ban.",
+            "step2Title": "Hinh Muc Tieu",
+            "step2": "Luoi mau xanh cho biet noi ban can dat cac manh.",
+            "step3Title": "Cac Manh Ghep",
+            "step3": "Chon mot manh tu kho de dat len luoi.",
+            "step4Title": "Xoay Manh",
+            "step4": "Nhan R hoac dung cac nut xoay de xoay manh da chon.",
+            "step5Title": "Dat Manh",
+            "step5": "Nhan vao luoi de dat manh. Manh se tu dong khop vao vi tri hop le.",
+            "step6Title": "Che Do 3D",
+            "step6": "Chuyen sang che do 3D cho cac cau do phuc tap. Dung cac nut camera de thay doi goc nhin."
         }
     }
 }
