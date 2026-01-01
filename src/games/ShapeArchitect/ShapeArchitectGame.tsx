@@ -1,17 +1,21 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { DndContext, pointerWithin } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
-import confetti from 'canvas-confetti';
-import { GameLayout, DifficultySelector } from '../../shared/components';
-import { useGameTimer, formatTime } from '../../shared/hooks';
-import { playSound } from '../../shared/utils';
-import { GridBoard, GridBoard3D, PieceInventory, LevelEditor } from './components';
-import type { GameState, Position3D, Piece, LevelConfig } from './logic/types';
-import { createGameState, tryPlacePiece, placePiece, checkSolved, removePieceFromGrid, findNearestValidPosition } from './logic/engine';
+import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, PersonalBestIndicator } from '../../shared/components';
+import { useGameTimer, useGameRewards, useSwipe, useSwipeNavigation, useAnnounce } from '../../shared/hooks';
+import { usePlayer } from '../../shared/contexts';
+import { playSound, showConfetti } from '../../shared/utils';
+import { isDailyCompleted, completeDailyChallenge } from '../../shared/services/daily';
+import { GridBoard, GridBoard3D, PieceInventory, LevelEditor, CameraPresetButtons, RotationControls, LayerControls } from './components';
+import type { CameraPreset } from './components/CameraPresetButtons';
+import type { GameState, Position3D, Piece, LevelConfig, Rotation3D, RotationAxis } from './logic/types';
+import { DEFAULT_ROTATION } from './logic/types';
+import { createGameState, tryPlacePiece, placePiece, checkSolved, removePieceFromGrid, findNearestValidPosition, getPieceWorldPositions, rotateBy90OnAxis } from './logic/engine';
 import { presetLevels, generateRandomLevel } from './logic/presets';
+import { getDailyShapeArchitectLevel } from './logic/seededGenerator';
 import {
-    completeLevel as saveCompletion,
     isLevelUnlocked,
     isLevelCompleted,
     getBestTime,
@@ -30,29 +34,107 @@ const GEOMETRY_HINT_KEYS = [
 export function ShapeArchitectGame() {
     const { t } = useTranslation('shapeArchitect');
     const { t: tc } = useTranslation('common');
+    const [searchParams] = useSearchParams();
+
+    // Daily mode detection
+    const isDailyMode = searchParams.get('daily') === 'true';
+    const [dailyCompleted, setDailyCompleted] = useState(() => isDailyMode && isDailyCompleted('shape-architect'));
+    const dailyLevelRef = useRef(isDailyMode ? getDailyShapeArchitectLevel() : null);
+
     const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
-    const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
-    const [gameState, setGameState] = useState<GameState>(() =>
-        createGameState(presetLevels[0])
-    );
+    const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>(isDailyMode ? 'medium' : 'easy');
+    const [gameState, setGameState] = useState<GameState>(() => {
+        // In daily mode, use the seeded daily level
+        if (isDailyMode && dailyLevelRef.current) {
+            return createGameState(dailyLevelRef.current);
+        }
+        return createGameState(presetLevels[0]);
+    });
     const [showHints, setShowHints] = useState(false);
     const [placementError, setPlacementError] = useState<string | null>(null);
     const [hoverPosition, setHoverPosition] = useState<Position3D | null>(null);
     const [progressVersion, setProgressVersion] = useState(0); // Trigger re-render on progress change
     const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
+    const [cameraPreset, setCameraPreset] = useState<CameraPreset>('isometric');
+    const [maxVisibleLayer, setMaxVisibleLayer] = useState<number>(() => gameState.level.gridSize[2] - 1);
     const [showEditor, setShowEditor] = useState(false);
     const [showRotationHint, setShowRotationHint] = useState(() => {
         // Show hint if user hasn't rotated before
         return !localStorage.getItem('shape-architect-rotated');
     });
+    const [justPlacedPositions, setJustPlacedPositions] = useState<Set<string>>(new Set());
 
     // Get total score (re-computed when progressVersion changes)
+    // progressVersion is intentionally used as a trigger to force re-computation after level completion
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const totalScore = useMemo(() => getTotalScore('shape-architect'), [progressVersion]);
 
-    // Timer hook
-    const { timeLeft, showTimeUp, timerClass: timerModifier, elapsedTime, resetTimer } = useGameTimer({
+    // Player and rewards
+    const { profile: playerProfile, updatePreferences } = usePlayer();
+    const {
+        handleCompletion,
+        rewards,
+        showingRankUp,
+        setShowingRankUp,
+        toastQueue,
+        dismissToast,
+    } = useGameRewards();
+
+    // Practice mode from player preferences
+    const [practiceMode, setPracticeMode] = useState(playerProfile.preferences.practiceMode);
+
+    // Screen reader announcements for accessibility
+    const { announce } = useAnnounce();
+
+    // Announce puzzle solved for screen readers
+    useEffect(() => {
+        if (gameState.isSolved && !practiceMode) {
+            const timeInSeconds = Math.floor(elapsedTime / 1000);
+            announce(
+                tc('announcements.puzzleSolved', { time: timeInSeconds }),
+                'assertive'
+            );
+        }
+    }, [gameState.isSolved, practiceMode, elapsedTime, announce, tc]);
+
+    // Announce time-up for screen readers
+    useEffect(() => {
+        if (showTimeUp) {
+            announce(tc('announcements.timeUp'), 'assertive');
+        }
+    }, [showTimeUp, announce, tc]);
+
+    const handleTimeWarning = useCallback((secondsRemaining: number) => {
+        if (secondsRemaining === 30) {
+            announce(t('timer.warning30', '30 seconds remaining'), 'polite');
+        } else if (secondsRemaining === 10) {
+            announce(t('timer.warning10', '10 seconds remaining! Hurry!'), 'assertive');
+        }
+    }, [announce, t]);
+
+    // Timer hook with practice mode support
+    const {
+        timeLeft,
+        showTimeUp,
+        timerClass,
+        formattedTime,
+        elapsedTime,
+        isPracticeMode,
+        isPaused,
+        resetTimer,
+        pauseTimer,
+        resumeTimer,
+    } = useGameTimer({
         isGameOver: gameState.isSolved,
+        practiceMode,
+        onTimeWarning: handleTimeWarning,
     });
+
+    // Handle practice mode toggle
+    const handlePracticeModeChange = useCallback((newPracticeMode: boolean) => {
+        setPracticeMode(newPracticeMode);
+        updatePreferences({ practiceMode: newPracticeMode });
+    }, [updatePreferences]);
 
     // Filter levels by difficulty
     const filteredLevels = useMemo(() =>
@@ -70,7 +152,7 @@ export function ShapeArchitectGame() {
         if (gameState.isSolved) {
             // Celebrate with confetti!
             playSound('win');
-            confetti({
+            showConfetti({
                 particleCount: 100,
                 spread: 70,
                 origin: { y: 0.6 },
@@ -80,18 +162,26 @@ export function ShapeArchitectGame() {
             const currentIdx = filteredLevels.findIndex((l) => l.id === gameState.level.id);
             const nextLevel = filteredLevels[currentIdx + 1];
 
-            // Save completion to storage
-            saveCompletion(
-                'shape-architect',
-                gameState.level.id,
-                elapsedTime,
-                nextLevel?.id
-            );
+            // Award stats for completion
+            handleCompletion({
+                gameId: 'shape-architect',
+                levelId: isDailyMode ? 'daily' : gameState.level.id,
+                difficulty,
+                timeSeconds: elapsedTime,
+                practiceMode,
+                nextLevelId: isDailyMode ? undefined : nextLevel?.id,
+            });
+
+            // Track daily challenge completion
+            if (isDailyMode && !dailyCompleted) {
+                completeDailyChallenge('shape-architect', elapsedTime);
+                setDailyCompleted(true);
+            }
 
             // Trigger re-render of progress-dependent UI
             setProgressVersion((v) => v + 1);
         }
-    }, [gameState.isSolved, gameState.level.id, filteredLevels, elapsedTime]);
+    }, [gameState.isSolved, gameState.level.id, filteredLevels, elapsedTime, difficulty, practiceMode, handleCompletion, isDailyMode, dailyCompleted]);
 
     // Handle piece selection
     const handleSelectPiece = useCallback((pieceId: string) => {
@@ -99,15 +189,15 @@ export function ShapeArchitectGame() {
         setGameState((prev) => ({
             ...prev,
             selectedPieceId: prev.selectedPieceId === pieceId ? null : pieceId,
-            rotation: 0,
+            rotation: { ...DEFAULT_ROTATION },
         }));
     }, [showTimeUp]);
 
-    // Handle rotation
-    const handleRotate = useCallback(() => {
+    // Handle rotation on specific axis
+    const handleRotateAxis = useCallback((axis: RotationAxis) => {
         setGameState((prev) => ({
             ...prev,
-            rotation: (prev.rotation + 90) % 360,
+            rotation: rotateBy90OnAxis(prev.rotation, axis),
         }));
         // Dismiss rotation hint after first use
         if (showRotationHint) {
@@ -132,12 +222,26 @@ export function ShapeArchitectGame() {
         if (newState) {
             playSound('place');
             setGameState(newState);
+
+            // Trigger snap animation for placed cells
+            const piece = gameState.remainingPieces.find(p => p.id === gameState.selectedPieceId);
+            if (piece) {
+                const snappedPos = findNearestValidPosition(
+                    gameState.grid, piece, position, gameState.rotation, gameState.level.gridSize, 2
+                );
+                if (snappedPos) {
+                    const positions = getPieceWorldPositions(piece, snappedPos, gameState.rotation);
+                    const posSet = new Set(positions.map(p => `${p.x},${p.y},${p.z}`));
+                    setJustPlacedPositions(posSet);
+                    setTimeout(() => setJustPlacedPositions(new Set()), 400);
+                }
+            }
         } else {
             playSound('error');
             setPlacementError(t('errors.cannotPlace'));
             setTimeout(() => setPlacementError(null), 2000);
         }
-    }, [gameState, showTimeUp]);
+    }, [gameState, showTimeUp, t]);
 
     // Handle drag end for piece placement
     const handleDragEnd = useCallback((event: DragEndEvent) => {
@@ -156,7 +260,8 @@ export function ShapeArchitectGame() {
 
         // Get the dragged piece
         const piece = active.data.current?.piece as Piece | undefined;
-        const rotation = (active.data.current?.rotation as number) ?? gameState.rotation;
+        const dragRotation = active.data.current?.rotation as Rotation3D | undefined;
+        const rotation: Rotation3D = dragRotation ?? gameState.rotation;
         if (!piece) return;
 
         // Check if placement is valid, using snap-to-nearest
@@ -182,19 +287,25 @@ export function ShapeArchitectGame() {
         const newRemaining = gameState.remainingPieces.filter((p) => p.id !== piece.id);
         const isSolved = checkSolved(newGrid, gameState.level.targetVoxels);
 
+        // Trigger snap animation for placed cells
+        const positions = getPieceWorldPositions(piece, finalPosition, rotation);
+        const posSet = new Set(positions.map(p => `${p.x},${p.y},${p.z}`));
+        setJustPlacedPositions(posSet);
+        setTimeout(() => setJustPlacedPositions(new Set()), 400);
+
         setGameState({
             ...gameState,
             grid: newGrid,
             placedPieces: [
                 ...gameState.placedPieces,
-                { pieceId: piece.id, position: finalPosition, rotation, color: piece.color },
+                { pieceId: piece.id, position: finalPosition, rotation: { ...rotation }, color: piece.color },
             ],
             remainingPieces: newRemaining,
             selectedPieceId: null,
-            rotation: 0,
+            rotation: { ...DEFAULT_ROTATION },
             isSolved,
         });
-    }, [gameState, showTimeUp]);
+    }, [gameState, showTimeUp, t]);
 
     // Load level
     const loadLevel = useCallback((index: number, levels: typeof presetLevels) => {
@@ -203,6 +314,7 @@ export function ShapeArchitectGame() {
         setCurrentLevelIndex(index);
         setGameState(createGameState(level));
         setShowHints(false);
+        setMaxVisibleLayer(level.gridSize[2] - 1); // Reset layer visibility for new level
         resetTimer();
     }, [resetTimer]);
 
@@ -219,6 +331,7 @@ export function ShapeArchitectGame() {
     const startRandomLevel = useCallback(() => {
         const level = generateRandomLevel(difficulty);
         setGameState(createGameState(level));
+        setMaxVisibleLayer(level.gridSize[2] - 1);
         resetTimer();
     }, [difficulty, resetTimer]);
 
@@ -226,6 +339,7 @@ export function ShapeArchitectGame() {
     const handleCustomLevel = useCallback((level: LevelConfig) => {
         setGameState(createGameState(level));
         setShowEditor(false);
+        setMaxVisibleLayer(level.gridSize[2] - 1);
         resetTimer();
         playSound('click');
     }, [resetTimer]);
@@ -241,6 +355,19 @@ export function ShapeArchitectGame() {
         const nextIndex = (currentLevelIndex + 1) % filteredLevels.length;
         loadLevel(nextIndex, filteredLevels);
     }, [currentLevelIndex, filteredLevels, loadLevel]);
+
+    // Previous level
+    const previousLevel = useCallback(() => {
+        const prevIndex = (currentLevelIndex - 1 + filteredLevels.length) % filteredLevels.length;
+        loadLevel(prevIndex, filteredLevels);
+    }, [currentLevelIndex, filteredLevels, loadLevel]);
+
+    // Swipe navigation for level selector (mobile)
+    const { ref: levelSwipeRef, handlers: levelSwipeHandlers } = useSwipeNavigation({
+        onNext: nextLevel,
+        onPrevious: previousLevel,
+        enabled: !isDailyMode && !gameState.isSolved && !showTimeUp,
+    });
 
     // Undo last piece placement
     const undoLastPiece = useCallback(() => {
@@ -285,16 +412,30 @@ export function ShapeArchitectGame() {
 
             switch (e.key.toLowerCase()) {
                 case 'r':
-                    // Rotate selected piece
+                    // Rotate Z axis (roll) - default rotation key
                     if (selectedPiece) {
-                        handleRotate();
+                        handleRotateAxis('z');
+                        playSound('click');
+                    }
+                    break;
+                case 't':
+                    // Rotate X axis (pitch)
+                    if (selectedPiece) {
+                        handleRotateAxis('x');
+                        playSound('click');
+                    }
+                    break;
+                case 'y':
+                    // Rotate Y axis (yaw)
+                    if (selectedPiece) {
+                        handleRotateAxis('y');
                         playSound('click');
                     }
                     break;
                 case 'escape':
                     // Deselect piece
                     if (gameState.selectedPieceId) {
-                        setGameState(prev => ({ ...prev, selectedPieceId: null, rotation: 0 }));
+                        setGameState(prev => ({ ...prev, selectedPieceId: null, rotation: { ...DEFAULT_ROTATION } }));
                     }
                     break;
                 case 'z':
@@ -309,31 +450,69 @@ export function ShapeArchitectGame() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [gameState.isSolved, showTimeUp, selectedPiece, gameState.selectedPieceId, gameState.placedPieces.length, handleRotate, undoLastPiece]);
+    }, [gameState.isSolved, showTimeUp, selectedPiece, gameState.selectedPieceId, gameState.placedPieces.length, handleRotateAxis, undoLastPiece]);
 
-    // Timer class
-    const timerClass = `timer ${timerModifier}`.trim();
+    // Swipe gestures for piece rotation (mobile)
+    const { ref: swipeRef, handlers: swipeHandlers } = useSwipe({
+        onSwipeLeft: () => {
+            if (selectedPiece && !showTimeUp && !gameState.isSolved) {
+                handleRotateAxis('z');
+                playSound('click');
+            }
+        },
+        onSwipeRight: () => {
+            // Counter-clockwise rotation (rotate 3 times = -90°)
+            if (selectedPiece && !showTimeUp && !gameState.isSolved) {
+                handleRotateAxis('z');
+                handleRotateAxis('z');
+                handleRotateAxis('z');
+                playSound('click');
+            }
+        },
+        threshold: 50,
+        enabled: !!selectedPiece && !showTimeUp && !gameState.isSolved,
+    });
 
     // Random hint for failure
     const failureHintKey = GEOMETRY_HINT_KEYS[Math.floor(Math.random() * GEOMETRY_HINT_KEYS.length)];
 
     return (
         <DndContext onDragEnd={handleDragEnd} collisionDetection={pointerWithin}>
-            <GameLayout title={t('title')}>
+            <GameLayout
+                title={t('title')}
+                headerRight={<SoundToggle />}
+            >
                 <div className="shape-container">
-                    {/* Timer */}
-                    <div className={timerClass}>
-                        <span className="timer__icon">⏱️</span>
-                        <span className="timer__value">{formatTime(timeLeft)}</span>
-                        {timeLeft <= 10 && <span className="timer__pulse">!</span>}
-                    </div>
+                    {/* Daily Challenge Badge */}
+                    {isDailyMode && (
+                        <div className="daily-badge">
+                            <span className="daily-badge__icon">📅</span>
+                            <span className="daily-badge__text">{tc('daily.dailyChallenge')}</span>
+                            {dailyCompleted && <span className="daily-badge__check">✓</span>}
+                        </div>
+                    )}
 
-                    {/* Difficulty Selector */}
-                    <DifficultySelector
-                        options={['easy', 'medium', 'hard']}
-                        value={difficulty}
-                        onChange={handleDifficultyChange}
+                    {/* Timer with Practice/Timed Mode Toggle */}
+                    <Timer
+                        timeLeft={timeLeft}
+                        formattedTime={formattedTime}
+                        timerClass={timerClass}
+                        isPracticeMode={isPracticeMode}
+                        isPaused={isPaused}
+                        onModeChange={handlePracticeModeChange}
+                        onPause={pauseTimer}
+                        onResume={resumeTimer}
+                        disabled={gameState.isSolved}
                     />
+
+                    {/* Difficulty Selector (hidden in daily mode) */}
+                    {!isDailyMode && (
+                        <DifficultySelector
+                            options={['easy', 'medium', 'hard']}
+                            value={difficulty}
+                            onChange={handleDifficultyChange}
+                        />
+                    )}
 
                     {/* Game Rules */}
                     <div className="game-rules">
@@ -349,36 +528,42 @@ export function ShapeArchitectGame() {
                         </div>
                     )}
 
-                    {/* Level Selector */}
-                    <div className="level-selector">
-                        {filteredLevels.map((level, index) => {
-                            const firstLevelId = filteredLevels[0]?.id ?? '';
-                            const unlocked = isLevelUnlocked('shape-architect', level.id, firstLevelId);
-                            const completed = isLevelCompleted('shape-architect', level.id);
-                            const bestTime = getBestTime('shape-architect', level.id);
+                    {/* Level Selector (hidden in daily mode) - Swipeable on mobile */}
+                    {!isDailyMode && (
+                        <div
+                            className="level-selector"
+                            ref={levelSwipeRef as React.RefObject<HTMLDivElement>}
+                            {...levelSwipeHandlers}
+                        >
+                            {filteredLevels.map((level, index) => {
+                                const firstLevelId = filteredLevels[0]?.id ?? '';
+                                const unlocked = isLevelUnlocked('shape-architect', level.id, firstLevelId);
+                                const completed = isLevelCompleted('shape-architect', level.id);
+                                const bestTime = getBestTime('shape-architect', level.id);
 
-                            return (
-                                <button
-                                    key={level.id}
-                                    className={`level-btn ${index === currentLevelIndex ? 'level-btn--active' : ''} ${completed ? 'level-btn--completed' : ''} ${!unlocked ? 'level-btn--locked' : ''}`}
-                                    onClick={() => unlocked && loadLevel(index, filteredLevels)}
-                                    disabled={!unlocked}
-                                    title={!unlocked ? tc('completePreviousLevel') : bestTime ? `${tc('best')}: ${bestTime}s` : undefined}
-                                >
-                                    {!unlocked && '🔒 '}
-                                    {completed && '✓ '}
-                                    {level.name}
-                                    {bestTime && <span className="level-btn__time">{bestTime}s</span>}
-                                </button>
-                            );
-                        })}
-                        <button className="btn btn--secondary" onClick={startRandomLevel}>
-                            🎲 {tc('buttons.random')}
-                        </button>
-                        <button className="btn btn--secondary" onClick={() => setShowEditor(true)}>
-                            ✏️ {t('editor.openEditor')}
-                        </button>
-                    </div>
+                                return (
+                                    <button
+                                        key={level.id}
+                                        className={`level-btn ${index === currentLevelIndex ? 'level-btn--active' : ''} ${completed ? 'level-btn--completed' : ''} ${!unlocked ? 'level-btn--locked' : ''}`}
+                                        onClick={() => unlocked && loadLevel(index, filteredLevels)}
+                                        disabled={!unlocked}
+                                        title={!unlocked ? tc('completePreviousLevel') : bestTime ? `${tc('best')}: ${bestTime}s` : undefined}
+                                    >
+                                        {!unlocked && '🔒 '}
+                                        {completed && '✓ '}
+                                        {level.name}
+                                        {bestTime && <span className="level-btn__time">{bestTime}s</span>}
+                                    </button>
+                                );
+                            })}
+                            <button className="btn btn--secondary" onClick={startRandomLevel}>
+                                🎲 {tc('buttons.random')}
+                            </button>
+                            <button className="btn btn--secondary" onClick={() => setShowEditor(true)}>
+                                ✏️ {t('editor.openEditor')}
+                            </button>
+                        </div>
+                    )}
 
                     {/* Level Info */}
                     <div className="level-info">
@@ -392,7 +577,9 @@ export function ShapeArchitectGame() {
                         </div>
                         <div className="level-info__item">
                             <span className="level-info__label">{t('rotation')}</span>
-                            <span className="level-info__value">{gameState.rotation}°</span>
+                            <span className="level-info__value">
+                                X:{gameState.rotation.x}° Y:{gameState.rotation.y}° Z:{gameState.rotation.z}°
+                            </span>
                         </div>
                     </div>
 
@@ -436,7 +623,7 @@ export function ShapeArchitectGame() {
                             onCancel={() => setShowEditor(false)}
                         />
                     ) : (
-                        <div className={`board-wrapper ${timeLeft <= 10 ? 'board-wrapper--urgent' : ''}`}>
+                        <div className={`board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'board-wrapper--urgent' : ''}`}>
                             {viewMode === '2d' ? (
                                 <GridBoard
                                     grid={gameState.grid}
@@ -448,25 +635,46 @@ export function ShapeArchitectGame() {
                                     onCellClick={handleCellClick}
                                     hoverPosition={hoverPosition}
                                     onCellHover={setHoverPosition}
+                                    justPlacedPositions={justPlacedPositions}
                                 />
                             ) : (
-                                <GridBoard3D
-                                    grid={gameState.grid}
-                                    gridSize={gameState.level.gridSize}
-                                    selectedPiece={selectedPiece}
-                                    rotation={gameState.rotation}
-                                    placedPieces={gameState.placedPieces}
-                                    levelPieces={gameState.level.pieces}
-                                    onCellClick={handleCellClick}
-                                    hoverPosition={hoverPosition}
-                                    onCellHover={setHoverPosition}
-                                />
+                                <>
+                                    <div className="view-3d-controls">
+                                        <CameraPresetButtons
+                                            activePreset={cameraPreset}
+                                            onPresetChange={setCameraPreset}
+                                        />
+                                        <LayerControls
+                                            depth={gameState.level.gridSize[2]}
+                                            maxVisibleLayer={maxVisibleLayer}
+                                            onChange={setMaxVisibleLayer}
+                                            disabled={gameState.isSolved || showTimeUp}
+                                        />
+                                    </div>
+                                    <GridBoard3D
+                                        grid={gameState.grid}
+                                        gridSize={gameState.level.gridSize}
+                                        selectedPiece={selectedPiece}
+                                        rotation={gameState.rotation}
+                                        placedPieces={gameState.placedPieces}
+                                        levelPieces={gameState.level.pieces}
+                                        onCellClick={handleCellClick}
+                                        hoverPosition={hoverPosition}
+                                        onCellHover={setHoverPosition}
+                                        cameraPreset={cameraPreset}
+                                        maxVisibleLayer={maxVisibleLayer}
+                                    />
+                                </>
                             )}
                         </div>
                     )}
 
-                    {/* Controls */}
-                    <div className="shape-controls">
+                    {/* Controls - Swipe area for mobile rotation */}
+                    <div
+                        className="shape-controls"
+                        ref={swipeRef as React.RefObject<HTMLDivElement>}
+                        {...swipeHandlers}
+                    >
                         <button
                             className="btn btn--icon"
                             onClick={undoLastPiece}
@@ -475,21 +683,24 @@ export function ShapeArchitectGame() {
                         >
                             ↩️
                         </button>
-                        <div className="rotate-btn-wrapper">
-                            <button
-                                className={`rotate-btn ${selectedPiece && showRotationHint ? 'rotate-btn--highlight' : ''}`}
-                                onClick={handleRotate}
-                                disabled={!selectedPiece || showTimeUp}
-                                title={`${t('controls.rotateTitle', { current: gameState.rotation })} (R)`}
-                            >
-                                🔄 {t('controls.rotate')} <kbd>R</kbd>
-                            </button>
-                            {showRotationHint && selectedPiece && (
-                                <div className="rotation-hint-tooltip">
-                                    <span>💡 {t('hints.rotationTip')}</span>
-                                </div>
-                            )}
-                        </div>
+                        <RotationControls
+                            rotation={gameState.rotation}
+                            onRotateX={() => handleRotateAxis('x')}
+                            onRotateY={() => handleRotateAxis('y')}
+                            onRotateZ={() => handleRotateAxis('z')}
+                            disabled={!selectedPiece || showTimeUp || gameState.isSolved}
+                        />
+                        {showRotationHint && selectedPiece && (
+                            <div className="rotation-hint-tooltip">
+                                <span>💡 {t('hints.rotationTip')}</span>
+                            </div>
+                        )}
+                        {/* Mobile swipe hint */}
+                        {selectedPiece && (
+                            <div className="swipe-hint" aria-hidden="true">
+                                <span>👆 {t('hints.swipeRotate', '← Swipe to rotate →')}</span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Piece Inventory */}
@@ -556,6 +767,16 @@ export function ShapeArchitectGame() {
                                 </div>
                             </div>
 
+                            {/* Personal Best Indicator */}
+                            {rewards?.personalBest && (
+                                <PersonalBestIndicator
+                                    currentTime={rewards.personalBest.currentTime}
+                                    previousBest={rewards.personalBest.previousBest}
+                                    isNewBest={rewards.personalBest.isNewBest}
+                                    className="win-overlay__pb"
+                                />
+                            )}
+
                             <div className="math-insight">
                                 <h4>💡 {t('win.geometryInsight.title')}</h4>
                                 <p>
@@ -563,12 +784,21 @@ export function ShapeArchitectGame() {
                                 </p>
                             </div>
                             <div className="game-actions">
-                                <button className="btn btn--primary" onClick={nextLevel}>
-                                    {tc('buttons.nextLevel')} →
-                                </button>
-                                <button className="btn btn--secondary" onClick={startRandomLevel}>
-                                    {tc('buttons.randomLevel')}
-                                </button>
+                                {/* In daily mode, show Back to Games; otherwise show game buttons */}
+                                {isDailyMode ? (
+                                    <a href="/math-games/" className="btn btn--primary">
+                                        {tc('backToGames')}
+                                    </a>
+                                ) : (
+                                    <>
+                                        <button className="btn btn--primary" onClick={nextLevel}>
+                                            {tc('buttons.nextLevel')} →
+                                        </button>
+                                        <button className="btn btn--secondary" onClick={startRandomLevel}>
+                                            {tc('buttons.randomLevel')}
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     )}
@@ -597,6 +827,23 @@ export function ShapeArchitectGame() {
                         </div>
                     )}
                 </div>
+
+                {/* Gamification Overlays */}
+                {showingRankUp && rewards?.rankedUp && rewards.previousRank && rewards.newRank && (
+                    <RankUpOverlay
+                        previousRank={rewards.previousRank}
+                        newRank={rewards.newRank}
+                        onClose={() => setShowingRankUp(false)}
+                    />
+                )}
+                {toastQueue.map((achievement, index) => (
+                    <AchievementToast
+                        key={achievement.id}
+                        achievement={achievement}
+                        onClose={() => dismissToast(achievement.id)}
+                        delay={index * 500}
+                    />
+                ))}
             </GameLayout>
         </DndContext>
     );
