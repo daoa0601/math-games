@@ -196,6 +196,11 @@
     "announcements": {
         "puzzleSolved": "Chúc mừng! Giải xong trong {{time}} giây.",
         "timeUp": "Hết giờ. Chưa hoàn thành câu đố.",
-        "newPersonalBest": "Kỷ lục mới! {{time}} giây."
+        "newPersonalBest": "Kỷ lục mới! {{time}} giây.",
+        "yourTurn": "Lượt bạn. Vị trí: {{position}}. Đích: {{target}}.",
+        "aiTurn": "AI đang suy nghĩ...",
+        "aiMoved": "AI di chuyển {{steps}} bước đến vị trí {{position}}.",
+        "youWin": "Bạn thắng! Đạt {{target}} trong {{moves}} lượt.",
+        "aiWins": "AI thắng. Chúc may mắn lần sau!"
     }
 }

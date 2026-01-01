@@ -196,6 +196,11 @@
     "announcements": {
         "puzzleSolved": "Congratulations! Puzzle solved in {{time}} seconds.",
         "timeUp": "Time is up. The puzzle was not completed.",
-        "newPersonalBest": "New personal best! {{time}} seconds."
+        "newPersonalBest": "New personal best! {{time}} seconds.",
+        "yourTurn": "Your turn. Current position: {{position}}. Target: {{target}}.",
+        "aiTurn": "AI is thinking...",
+        "aiMoved": "AI moved {{steps}} steps to position {{position}}.",
+        "youWin": "You win! Reached {{target}} in {{moves}} moves.",
+        "aiWins": "AI wins. Better luck next time!"
     }
 }
