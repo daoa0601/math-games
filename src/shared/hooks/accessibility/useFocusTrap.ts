@@ -86,7 +86,7 @@ export function useFocusTrap(options: UseFocusTrapOptions = {}): UseFocusTrapRet
     return Array.from(elements).filter(
       (el) => !el.hasAttribute('disabled') && el.offsetParent !== null
     );
-  }, []);
+  }, [containerRef]);
 
   /**
    * Focus the first focusable element

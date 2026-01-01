@@ -14,7 +14,7 @@ export function TutorialSpotlight() {
 
   useEffect(() => {
     if (!highlightedElement || !isActive) {
-      setRect(null);
+      setRect(() => null);
       return;
     }
 

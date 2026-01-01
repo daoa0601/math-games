@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { HighContrastToggle } from '@/shared/components/HighContrastToggle';
 import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
 import { SkipLinks } from '@/shared/components/SkipLinks';
+import { ThemeToggle } from '@/shared/components/ThemeToggle';
 
 interface GameLayoutProps {
     title: string;
@@ -22,6 +23,7 @@ export function GameLayout({ title, children, headerRight }: GameLayoutProps) {
                 <h1 className="game-header__title">{title}</h1>
                 <div className="game-header__actions">
                     {headerRight}
+                    <ThemeToggle />
                     <HighContrastToggle />
                     <LanguageSwitcher />
                     <Link to="/" className="btn btn--secondary">

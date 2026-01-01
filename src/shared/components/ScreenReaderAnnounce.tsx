@@ -187,14 +187,14 @@ export function ScreenReaderAnnounce({
   useEffect(() => {
     if (message) {
       // Clear and re-set to trigger announcement
-      setCurrentMessage('');
+      setCurrentMessage(() => '');
       requestAnimationFrame(() => {
         setCurrentMessage(message);
       });
 
       // Clear after announcement
       const timer = setTimeout(() => {
-        setCurrentMessage('');
+        setCurrentMessage(() => '');
       }, 3000);
 
       return () => clearTimeout(timer);

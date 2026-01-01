@@ -1,6 +1,7 @@
 import { useDraggable } from '@dnd-kit/core';
 import type { Piece, Rotation3D } from '../logic/types';
 import { getExplicitPattern } from '@/shared/utils';
+import { IsometricPiecePreview } from './IsometricPiecePreview';
 
 interface PieceInventoryProps {
     pieces: Piece[];
@@ -22,11 +23,14 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
         data: { piece, rotation },
     });
 
+    // Check if piece has 3D depth (z > 0)
+    const is3DPiece = piece.layout.some((p) => p.z > 0);
+
     // Calculate piece bounds for preview
     const maxX = Math.max(...piece.layout.map((p) => p.x)) + 1;
     const maxY = Math.max(...piece.layout.map((p) => p.y)) + 1;
 
-    // Create preview grid
+    // Create preview grid for 2D pieces
     const previewGrid: boolean[][] = Array(maxY)
         .fill(null)
         .map(() => Array(maxX).fill(false));
@@ -55,19 +59,25 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
             {...listeners}
             {...attributes}
         >
-            <div className="piece-preview" aria-label={`${piece.name} piece`}>
-                {[...previewGrid].reverse().map((row, y) => (
-                    <div key={y} className="piece-preview-row">
-                        {row.map((filled, x) => (
-                            <div
-                                key={x}
-                                className={`piece-preview-cell ${filled ? patternClass : 'piece-preview-cell--empty'}`}
-                                style={{ backgroundColor: filled ? piece.color : undefined }}
-                            />
-                        ))}
-                    </div>
-                ))}
-            </div>
+            {is3DPiece ? (
+                <div className="piece-preview" aria-label={`${piece.name} piece`}>
+                    <IsometricPiecePreview piece={piece} size={48} />
+                </div>
+            ) : (
+                <div className="piece-preview" aria-label={`${piece.name} piece`}>
+                    {[...previewGrid].reverse().map((row, y) => (
+                        <div key={y} className="piece-preview-row">
+                            {row.map((filled, x) => (
+                                <div
+                                    key={x}
+                                    className={`piece-preview-cell ${filled ? patternClass : 'piece-preview-cell--empty'}`}
+                                    style={{ backgroundColor: filled ? piece.color : undefined }}
+                                />
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            )}
             <span className="piece-name">{piece.name}</span>
         </div>
     );

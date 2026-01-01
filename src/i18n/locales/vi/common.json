@@ -172,6 +172,12 @@
         "enable": "Bật âm thanh",
         "disable": "Tắt âm thanh"
     },
+    "theme": {
+        "light": "Sáng",
+        "dark": "Tối",
+        "system": "Hệ thống",
+        "toggle": "Chuyển đổi giao diện"
+    },
     "games": {
         "magicGraph": {
             "title": "Đồ Thị Ma Thuật",

@@ -172,6 +172,12 @@
         "enable": "Enable sounds",
         "disable": "Mute sounds"
     },
+    "theme": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System",
+        "toggle": "Toggle theme"
+    },
     "games": {
         "magicGraph": {
             "title": "Magic Graph",
