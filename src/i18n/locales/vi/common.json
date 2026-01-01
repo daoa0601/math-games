@@ -1,6 +1,14 @@
 {
     "appTitle": "Phòng Gym Toán Học",
     "appSubtitle": "Chọn một trò chơi để rèn luyện trí não!",
+    "dashboard": {
+        "tabs": {
+            "play": "Chơi",
+            "stats": "Thống kê",
+            "achievements": "Thành tựu"
+        },
+        "tabsLabel": "Điều hướng bảng điều khiển"
+    },
     "backToGames": "Quay lại Trò chơi",
     "player": {
         "streak": "Chuỗi ngày",

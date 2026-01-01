@@ -1,6 +1,14 @@
 {
     "appTitle": "Math Gymnasium",
     "appSubtitle": "Choose a game to train your brain!",
+    "dashboard": {
+        "tabs": {
+            "play": "Play",
+            "stats": "Stats",
+            "achievements": "Achievements"
+        },
+        "tabsLabel": "Dashboard navigation"
+    },
     "backToGames": "Back to Games",
     "player": {
         "streak": "Day Streak",
