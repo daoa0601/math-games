@@ -2,6 +2,111 @@
     "appTitle": "Phòng Gym Toán Học",
     "appSubtitle": "Chọn một trò chơi để rèn luyện trí não!",
     "backToGames": "Quay lại Trò chơi",
+    "player": {
+        "streak": "Chuỗi ngày",
+        "streakDays": "Chuỗi {{count}} ngày",
+        "streakDays_plural": "Chuỗi {{count}} ngày",
+        "editName": "Nhấn để đổi tên",
+        "defaultName": "Nhà Vô Địch Toán",
+        "recentAchievements": "Thành tựu gần đây",
+        "displayName": "Tên hiển thị"
+    },
+    "ranks": {
+        "beginner": "Người mới",
+        "learner": "Học viên",
+        "apprentice": "Tập sự",
+        "intermediate": "Trung cấp",
+        "advanced": "Nâng cao",
+        "expert": "Chuyên gia",
+        "master": "Bậc thầy",
+        "grandmaster": "Đại kiện tướng"
+    },
+    "rankUp": {
+        "title": "Lên Hạng!",
+        "reached": "Bạn đã đạt {{rank}}!",
+        "continue": "Tiếp tục"
+    },
+    "stats": {
+        "time": "Thời gian",
+        "moves": "Số bước",
+        "nodes": "Số nút",
+        "pieces": "Số mảnh",
+        "score": "Điểm",
+        "games": "ván",
+        "solved": "đã giải",
+        "gamesPlayed": "Số ván đã chơi",
+        "puzzlesSolved": "Câu đố đã giải",
+        "wins": "Chiến thắng",
+        "nextRank": "Hạng tiếp theo",
+        "gamesNeeded": "Cần thêm {{count}} ván",
+        "gamesNeeded_plural": "Cần thêm {{count}} ván",
+        "solvesNeeded": "Cần thêm {{count}} câu",
+        "solvesNeeded_plural": "Cần thêm {{count}} câu"
+    },
+    "achievements": {
+        "title": "Mở khóa thành tựu!",
+        "unlocked": "Mở khóa thành tựu!",
+        "viewAll": "Xem tất cả thành tựu",
+        "hideAll": "Ẩn thành tựu",
+        "progress": "{{count}}/{{total}} Đã mở",
+        "locked": "Đã khóa",
+        "categories": {
+            "global": "Toàn cục",
+            "magic-graph": "Đồ Thị Ma Thuật",
+            "sequence-race": "Đua Dãy Số",
+            "shape-architect": "Kiến Trúc Sư"
+        },
+        "rarity": {
+            "common": "Thường",
+            "rare": "Hiếm",
+            "epic": "Sử thi",
+            "legendary": "Huyền thoại"
+        },
+        "rarityCommon": "Thường",
+        "rarityRare": "Hiếm",
+        "rarityEpic": "Sử thi",
+        "rarityLegendary": "Huyền thoại",
+        "global_first_steps": {
+            "name": "Bước Đầu Tiên",
+            "description": "Hoàn thành bất kỳ trò chơi nào lần đầu"
+        },
+        "global_all_games": {
+            "name": "Trí Tuệ Đa Năng",
+            "description": "Hoàn thành ít nhất một màn trong mỗi trò chơi"
+        },
+        "global_streak_30": {
+            "name": "Bậc Thầy Tháng",
+            "description": "Chơi 30 ngày liên tiếp"
+        },
+        "global_grandmaster": {
+            "name": "Huyền Thoại",
+            "description": "Đạt hạng Đại kiện tướng"
+        },
+        "mg_first_solve": {
+            "name": "Đồ Thị Đầu Tiên",
+            "description": "Hoàn thành câu đố Đồ Thị Ma Thuật đầu tiên"
+        },
+        "mg_grandmaster": {
+            "name": "Đại Kiện Tướng Ma Thuật",
+            "description": "Tìm ra giải pháp tối ưu ở chế độ Đại kiện tướng"
+        },
+        "sr_first_victory": {
+            "name": "Chiến Thắng Đầu Tiên",
+            "description": "Thắng Đua Dãy Số lần đầu tiên"
+        },
+        "sr_hard_winner": {
+            "name": "Chiến Thắng Độ Khó",
+            "description": "Đánh bại AI ở độ khó Khó"
+        },
+        "sa_first_build": {
+            "name": "Công Trình Đầu Tiên",
+            "description": "Hoàn thành câu đố Kiến Trúc Sư đầu tiên"
+        },
+        "sa_master_architect": {
+            "name": "Kiến Trúc Sư Bậc Thầy",
+            "description": "Hoàn thành câu đố độ khó Bậc thầy"
+        }
+    },
     "difficulty": {
         "easy": "Dễ",
         "medium": "Trung bình",
@@ -34,14 +139,21 @@
     },
     "timer": {
         "timeUp": "Hết giờ!",
-        "practiceMessage": "Đừng lo - luyện tập nhiều sẽ giỏi hơn!"
+        "practiceMessage": "Đừng lo - luyện tập nhiều sẽ giỏi hơn!",
+        "timed": "Tính giờ",
+        "practice": "Luyện tập",
+        "paused": "Tạm dừng",
+        "modeLabel": "Chế độ đồng hồ",
+        "elapsedTime": "Thời gian đã trôi: {{time}}",
+        "remainingTime": "Thời gian còn lại: {{time}}",
+        "pause": "Tạm dừng",
+        "resume": "Tiếp tục",
+        "practiceHint": "Không giới hạn thời gian - học theo nhịp của bạn!",
+        "timedHint": "Vượt qua thời gian!"
     },
-    "stats": {
-        "time": "Thời gian",
-        "moves": "Số bước",
-        "nodes": "Số nút",
-        "pieces": "Số mảnh",
-        "score": "Điểm"
+    "sound": {
+        "enable": "Bật âm thanh",
+        "disable": "Tắt âm thanh"
     },
     "games": {
         "magicGraph": {
@@ -64,5 +176,26 @@
     "generatingPuzzle": "Đang tạo câu đố... (có thể mất vài giây)",
     "availableNumbers": "Các số có sẵn:",
     "completePreviousLevel": "Hoàn thành màn trước để mở khóa",
-    "best": "Tốt nhất"
+    "best": "Tốt nhất",
+    "daily": {
+        "title": "Thử Thách Hằng Ngày",
+        "resetsIn": "Đặt lại sau",
+        "completed": "Hoàn thành",
+        "play": "Chơi",
+        "streak": "Chuỗi ngày",
+        "allComplete": "Hoàn thành tất cả!",
+        "dailyChallenge": "Thử Thách Hằng Ngày"
+    },
+    "personalBest": {
+        "new": "Kỷ Lục Cá Nhân Mới!",
+        "improvement": "Nhanh hơn {{seconds}}s!",
+        "tied": "Đã bằng kỷ lục!",
+        "best": "Kỷ lục của bạn",
+        "first": "Lần Hoàn Thành Đầu Tiên!"
+    },
+    "announcements": {
+        "puzzleSolved": "Chúc mừng! Giải xong trong {{time}} giây.",
+        "timeUp": "Hết giờ. Chưa hoàn thành câu đố.",
+        "newPersonalBest": "Kỷ lục mới! {{time}} giây."
+    }
 }

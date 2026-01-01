@@ -2,6 +2,111 @@
     "appTitle": "Math Gymnasium",
     "appSubtitle": "Choose a game to train your brain!",
     "backToGames": "Back to Games",
+    "player": {
+        "streak": "Day Streak",
+        "streakDays": "{{count}} day streak",
+        "streakDays_plural": "{{count}} day streak",
+        "editName": "Click to edit name",
+        "defaultName": "Math Champion",
+        "recentAchievements": "Recent Achievements",
+        "displayName": "Display Name"
+    },
+    "ranks": {
+        "beginner": "Beginner",
+        "learner": "Learner",
+        "apprentice": "Apprentice",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "expert": "Expert",
+        "master": "Master",
+        "grandmaster": "Grandmaster"
+    },
+    "rankUp": {
+        "title": "Rank Up!",
+        "reached": "You reached {{rank}}!",
+        "continue": "Continue"
+    },
+    "stats": {
+        "time": "Time",
+        "moves": "Moves",
+        "nodes": "Nodes",
+        "pieces": "Pieces",
+        "score": "Score",
+        "games": "games",
+        "solved": "solved",
+        "gamesPlayed": "Games Played",
+        "puzzlesSolved": "Puzzles Solved",
+        "wins": "Wins",
+        "nextRank": "Next Rank",
+        "gamesNeeded": "{{count}} more game",
+        "gamesNeeded_plural": "{{count}} more games",
+        "solvesNeeded": "{{count}} more solve",
+        "solvesNeeded_plural": "{{count}} more solves"
+    },
+    "achievements": {
+        "title": "Achievement Unlocked!",
+        "unlocked": "Achievement Unlocked!",
+        "viewAll": "View All Achievements",
+        "hideAll": "Hide Achievements",
+        "progress": "{{count}}/{{total}} Unlocked",
+        "locked": "Locked",
+        "categories": {
+            "global": "Global",
+            "magic-graph": "Magic Graph",
+            "sequence-race": "Sequence Race",
+            "shape-architect": "Shape Architect"
+        },
+        "rarity": {
+            "common": "Common",
+            "rare": "Rare",
+            "epic": "Epic",
+            "legendary": "Legendary"
+        },
+        "rarityCommon": "Common",
+        "rarityRare": "Rare",
+        "rarityEpic": "Epic",
+        "rarityLegendary": "Legendary",
+        "global_first_steps": {
+            "name": "First Steps",
+            "description": "Complete any game for the first time"
+        },
+        "global_all_games": {
+            "name": "Versatile Mind",
+            "description": "Complete at least one level in each game"
+        },
+        "global_streak_30": {
+            "name": "Monthly Master",
+            "description": "Play for 30 days in a row"
+        },
+        "global_grandmaster": {
+            "name": "Legendary",
+            "description": "Reach Grandmaster rank"
+        },
+        "mg_first_solve": {
+            "name": "First Graph",
+            "description": "Complete your first Magic Graph puzzle"
+        },
+        "mg_grandmaster": {
+            "name": "Magic Grandmaster",
+            "description": "Find the optimal solution in Grandmaster mode"
+        },
+        "sr_first_victory": {
+            "name": "First Victory",
+            "description": "Win your first Sequence Race"
+        },
+        "sr_hard_winner": {
+            "name": "Hard Winner",
+            "description": "Defeat the AI on Hard difficulty"
+        },
+        "sa_first_build": {
+            "name": "First Build",
+            "description": "Complete your first Shape Architect puzzle"
+        },
+        "sa_master_architect": {
+            "name": "Master Architect",
+            "description": "Complete a Master difficulty puzzle"
+        }
+    },
     "difficulty": {
         "easy": "Easy",
         "medium": "Medium",
@@ -34,14 +139,21 @@
     },
     "timer": {
         "timeUp": "Time's Up!",
-        "practiceMessage": "Don't worry - practice makes perfect!"
+        "practiceMessage": "Don't worry - practice makes perfect!",
+        "timed": "Timed",
+        "practice": "Practice",
+        "paused": "Paused",
+        "modeLabel": "Timer mode",
+        "elapsedTime": "Elapsed time: {{time}}",
+        "remainingTime": "Time remaining: {{time}}",
+        "pause": "Pause timer",
+        "resume": "Resume timer",
+        "practiceHint": "No time limit - learn at your pace!",
+        "timedHint": "Beat the clock!"
     },
-    "stats": {
-        "time": "Time",
-        "moves": "Moves",
-        "nodes": "Nodes",
-        "pieces": "Pieces",
-        "score": "Score"
+    "sound": {
+        "enable": "Enable sounds",
+        "disable": "Mute sounds"
     },
     "games": {
         "magicGraph": {
@@ -64,5 +176,26 @@
     "generatingPuzzle": "Generating puzzle... (may take a few seconds)",
     "availableNumbers": "Available numbers:",
     "completePreviousLevel": "Complete previous level to unlock",
-    "best": "Best"
+    "best": "Best",
+    "daily": {
+        "title": "Daily Challenge",
+        "resetsIn": "Resets in",
+        "completed": "Completed",
+        "play": "Play",
+        "streak": "Day streak",
+        "allComplete": "All Done!",
+        "dailyChallenge": "Daily Challenge"
+    },
+    "personalBest": {
+        "new": "New Personal Best!",
+        "improvement": "{{seconds}}s faster!",
+        "tied": "Matched your best!",
+        "best": "Your best",
+        "first": "First Completion!"
+    },
+    "announcements": {
+        "puzzleSolved": "Congratulations! Puzzle solved in {{time}} seconds.",
+        "timeUp": "Time is up. The puzzle was not completed.",
+        "newPersonalBest": "New personal best! {{time}} seconds."
+    }
 }

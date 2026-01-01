@@ -1,13 +1,16 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import confetti from 'canvas-confetti';
-import { GameLayout, DifficultySelector } from '../../shared/components';
-import { useGameTimer, formatTime } from '../../shared/hooks';
-import { playSound } from '../../shared/utils';
+import { useSearchParams } from 'react-router-dom';
+import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, PersonalBestIndicator } from '../../shared/components';
+import { useGameTimer, useGameRewards, useSwipeNavigation, useAnnounce } from '../../shared/hooks';
+import { usePlayer } from '../../shared/contexts';
+import { playSound, showConfetti } from '../../shared/utils';
+import { isDailyCompleted, completeDailyChallenge } from '../../shared/services/daily';
 import { PuzzleBoard, NumberInventory, NumberPicker, TopologyEditor } from './components';
 import type { PuzzleConfig, Difficulty, OptimizationGoal } from './logic/types';
 import { generatePuzzle, isPuzzleSolved, getLineStatus, findImpossibleLines, findBestStartingNode, deriveAlgebraicHints, findOptimalSums, checkOptimalSolution, calculateSumSearchRange } from './logic/solver';
 import { puzzleTemplates, getHints, getProgressHint, createRandomBasePuzzle } from './logic/puzzles';
+import { getDailyMagicGraphPuzzle } from './logic/seededGenerator';
 import { useHistory, useWorkerSolver } from './hooks';
 import './MagicGraph.css';
 
@@ -22,11 +25,35 @@ const DIFFICULTY_HINTS: Record<Difficulty, number> = { easy: 2, medium: 1, hard:
 export function MagicGraphGame() {
     const { t } = useTranslation('magicGraph');
     const { t: tc } = useTranslation('common');
-    const [difficulty, setDifficulty] = useState<Difficulty>('easy');
+    const [searchParams] = useSearchParams();
+
+    // Daily mode detection
+    const isDailyMode = searchParams.get('daily') === 'true';
+    const [dailyCompleted, setDailyCompleted] = useState(() => isDailyMode && isDailyCompleted('magic-graph'));
+
+    const [difficulty, setDifficulty] = useState<Difficulty>(isDailyMode ? 'medium' : 'easy');
     const [currentTemplateIndex, setCurrentTemplateIndex] = useState(0);
+
+    // Player and rewards
+    const { profile, updatePreferences } = usePlayer();
+    const {
+        handleCompletion,
+        rewards,
+        showingRankUp,
+        setShowingRankUp,
+        toastQueue,
+        dismissToast,
+    } = useGameRewards();
+
+    // Practice mode from player preferences
+    const [practiceMode, setPracticeMode] = useState(profile.preferences.practiceMode);
 
     // Generate initial puzzle once and derive both states from it
     const [puzzle, setPuzzle] = useState<PuzzleConfig>(() => {
+        // In daily mode, load the seeded daily puzzle
+        if (isDailyMode) {
+            return getDailyMagicGraphPuzzle();
+        }
         return generatePuzzle(puzzleTemplates[0], DIFFICULTY_HINTS.easy);
     });
 
@@ -49,11 +76,61 @@ export function MagicGraphGame() {
     const [showHints, setShowHints] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
+    const [justPlacedNodeId, setJustPlacedNodeId] = useState<string | null>(null);
 
-    // Timer hook
-    const { timeLeft, showTimeUp, timerClass: timerModifier, elapsedTime, resetTimer, pauseTimer } = useGameTimer({
+    // Screen reader announcements for accessibility
+    const { announce } = useAnnounce();
+
+    // Time warning callback for screen reader announcements
+    const handleTimeWarning = useCallback((secondsRemaining: number) => {
+        if (secondsRemaining === 30) {
+            announce(t('timer.warning30', '30 seconds remaining'), 'polite');
+        } else if (secondsRemaining === 10) {
+            announce(t('timer.warning10', '10 seconds remaining! Hurry!'), 'assertive');
+        }
+    }, [announce, t]);
+
+    // Timer hook with practice mode support
+    const {
+        timeLeft,
+        showTimeUp,
+        timerClass,
+        formattedTime,
+        elapsedTime,
+        isPracticeMode,
+        isPaused,
+        resetTimer,
+        pauseTimer,
+        resumeTimer,
+    } = useGameTimer({
         isGameOver: showWin,
+        practiceMode,
+        onTimeWarning: handleTimeWarning,
     });
+
+    // Announce puzzle solved for screen readers
+    useEffect(() => {
+        if (showWin && !practiceMode) {
+            const timeInSeconds = Math.floor(elapsedTime / 1000);
+            announce(
+                tc('announcements.puzzleSolved', { time: timeInSeconds }),
+                'assertive'
+            );
+        }
+    }, [showWin, practiceMode, elapsedTime, announce, tc]);
+
+    // Announce time-up for screen readers
+    useEffect(() => {
+        if (showTimeUp) {
+            announce(tc('announcements.timeUp'), 'assertive');
+        }
+    }, [showTimeUp, announce, tc]);
+
+    // Handle practice mode toggle
+    const handlePracticeModeChange = useCallback((newPracticeMode: boolean) => {
+        setPracticeMode(newPracticeMode);
+        updatePreferences({ practiceMode: newPracticeMode });
+    }, [updatePreferences]);
 
     // Master mode: hidden target sum state
     const [targetRevealed, setTargetRevealed] = useState(false);
@@ -151,11 +228,16 @@ export function MagicGraphGame() {
     const handlePickerSelect = useCallback((num: number) => {
         if (!pickerState) return;
 
+        const placedNodeId = pickerState.nodeId;
         const newValues = new Map(nodeValues);
-        newValues.set(pickerState.nodeId, num);
+        newValues.set(placedNodeId, num);
         nodeValuesHistory.set(newValues);
         setPickerState(null);
         playSound('place');
+
+        // Trigger sparkle animation
+        setJustPlacedNodeId(placedNodeId);
+        setTimeout(() => setJustPlacedNodeId(null), 500);
 
         // Check for grandmaster mode win (all lines equal, any valid sum)
         if (difficulty === 'grandmaster' && computedOptimalResult) {
@@ -187,9 +269,25 @@ export function MagicGraphGame() {
                 const feedback = checkOptimalSolution(newValues, puzzle.lines, computedOptimalResult, optimizationGoal);
                 setGrandmasterFeedback(feedback);
 
+                // Award stats for grandmaster completion
+                handleCompletion({
+                    gameId: 'magic-graph',
+                    levelId: isDailyMode ? 'daily' : puzzle.name,
+                    difficulty,
+                    timeSeconds: elapsedTime,
+                    practiceMode,
+                    isOptimalSolution: feedback.isOptimal,
+                });
+
+                // Track daily challenge completion
+                if (isDailyMode && !dailyCompleted) {
+                    completeDailyChallenge('magic-graph', elapsedTime);
+                    setDailyCompleted(true);
+                }
+
                 if (feedback.isOptimal) {
                     playSound('win');
-                    confetti({
+                    showConfetti({
                         particleCount: 150,
                         spread: 100,
                         origin: { y: 0.6 },
@@ -201,15 +299,31 @@ export function MagicGraphGame() {
             }
         } else if (isPuzzleSolved(puzzle.lines, newValues, puzzle.targetSum)) {
             pauseTimer();
+
+            // Award stats for completion
+            handleCompletion({
+                gameId: 'magic-graph',
+                levelId: isDailyMode ? 'daily' : puzzle.name,
+                difficulty,
+                timeSeconds: elapsedTime,
+                practiceMode,
+            });
+
+            // Track daily challenge completion
+            if (isDailyMode && !dailyCompleted) {
+                completeDailyChallenge('magic-graph', elapsedTime);
+                setDailyCompleted(true);
+            }
+
             playSound('win');
-            confetti({
+            showConfetti({
                 particleCount: 100,
                 spread: 70,
                 origin: { y: 0.6 },
             });
             setTimeout(() => setShowWin(true), 300);
         }
-    }, [pickerState, nodeValues, puzzle, nodeValuesHistory, difficulty, computedOptimalResult, optimizationGoal, pauseTimer]);
+    }, [pickerState, nodeValues, puzzle, nodeValuesHistory, difficulty, computedOptimalResult, optimizationGoal, pauseTimer, elapsedTime, practiceMode, handleCompletion, isDailyMode, dailyCompleted]);
 
     // Handle clearing a node value
     const handlePickerClear = useCallback(() => {
@@ -314,6 +428,19 @@ export function MagicGraphGame() {
         loadTemplate(nextIndex, filteredTemplates);
     }, [currentTemplateIndex, filteredTemplates, loadTemplate]);
 
+    // Previous puzzle
+    const previousPuzzle = useCallback(() => {
+        const prevIndex = (currentTemplateIndex - 1 + filteredTemplates.length) % filteredTemplates.length;
+        loadTemplate(prevIndex, filteredTemplates);
+    }, [currentTemplateIndex, filteredTemplates, loadTemplate]);
+
+    // Swipe navigation for level selector (mobile)
+    const { ref: levelSwipeRef, handlers: levelSwipeHandlers } = useSwipeNavigation({
+        onNext: nextPuzzle,
+        onPrevious: previousPuzzle,
+        enabled: !isDailyMode && !showWin && !showTimeUp,
+    });
+
     // Handle custom puzzle from TopologyEditor
     const handleCustomPuzzle = useCallback((customPuzzle: PuzzleConfig) => {
         setPuzzle(customPuzzle);
@@ -327,25 +454,42 @@ export function MagicGraphGame() {
         playSound('click');
     }, [nodeValuesHistory, resetTimer]);
 
-    // Timer urgency class
-    const timerClass = `timer ${timerModifier}`.trim();
-
     return (
-        <GameLayout title={t('title')}>
+        <GameLayout
+            title={t('title')}
+            headerRight={<SoundToggle />}
+        >
             <div className="puzzle-container">
-                {/* Timer Display */}
-                <div className={timerClass}>
-                    <span className="timer__icon">⏱️</span>
-                    <span className="timer__value">{formatTime(timeLeft)}</span>
-                    {timeLeft <= 10 && <span className="timer__pulse">!</span>}
-                </div>
+                {/* Daily Challenge Badge */}
+                {isDailyMode && (
+                    <div className="daily-badge">
+                        <span className="daily-badge__icon">📅</span>
+                        <span className="daily-badge__text">{tc('daily.dailyChallenge')}</span>
+                        {dailyCompleted && <span className="daily-badge__check">✓</span>}
+                    </div>
+                )}
 
-                {/* Difficulty Selector */}
-                <DifficultySelector
-                    options={['easy', 'medium', 'hard', 'master', 'grandmaster']}
-                    value={difficulty}
-                    onChange={handleDifficultyChange}
+                {/* Timer with Practice/Timed Mode Toggle */}
+                <Timer
+                    timeLeft={timeLeft}
+                    formattedTime={formattedTime}
+                    timerClass={timerClass}
+                    isPracticeMode={isPracticeMode}
+                    isPaused={isPaused}
+                    onModeChange={handlePracticeModeChange}
+                    onPause={pauseTimer}
+                    onResume={resumeTimer}
+                    disabled={showWin}
                 />
+
+                {/* Difficulty Selector (hidden in daily mode) */}
+                {!isDailyMode && (
+                    <DifficultySelector
+                        options={['easy', 'medium', 'hard', 'master', 'grandmaster']}
+                        value={difficulty}
+                        onChange={handleDifficultyChange}
+                    />
+                )}
 
                 {/* Game Rules */}
                 <div className="game-rules">
@@ -353,31 +497,37 @@ export function MagicGraphGame() {
                     <p className="game-rules__text">{t('rules')}</p>
                 </div>
 
-                {/* Level Selector */}
-                <div className="level-selector">
-                    {filteredTemplates.map((template, index) => (
+                {/* Level Selector (hidden in daily mode) - Swipeable on mobile */}
+                {!isDailyMode && (
+                    <div
+                        className="level-selector"
+                        ref={levelSwipeRef as React.RefObject<HTMLDivElement>}
+                        {...levelSwipeHandlers}
+                    >
+                        {filteredTemplates.map((template, index) => (
+                            <button
+                                key={template.name}
+                                className={`level-btn ${index === currentTemplateIndex ? 'level-btn--active' : ''}`}
+                                onClick={() => loadTemplate(index, filteredTemplates)}
+                            >
+                                {template.name}
+                            </button>
+                        ))}
                         <button
-                            key={template.name}
-                            className={`level-btn ${index === currentTemplateIndex ? 'level-btn--active' : ''}`}
-                            onClick={() => loadTemplate(index, filteredTemplates)}
+                            className="btn btn--secondary"
+                            onClick={handleRandomPuzzle}
+                            disabled={isGenerating || isWorkerBusy}
                         >
-                            {template.name}
+                            {isGenerating || isWorkerBusy ? `⏳ ${tc('generating')}` : `🎲 ${tc('buttons.random')}`}
                         </button>
-                    ))}
-                    <button
-                        className="btn btn--secondary"
-                        onClick={handleRandomPuzzle}
-                        disabled={isGenerating || isWorkerBusy}
-                    >
-                        {isGenerating || isWorkerBusy ? `⏳ ${tc('generating')}` : `🎲 ${tc('buttons.random')}`}
-                    </button>
-                    <button
-                        className="btn btn--secondary"
-                        onClick={() => setShowEditor(true)}
-                    >
-                        ✏️ {t('editor.openEditor')}
-                    </button>
-                </div>
+                        <button
+                            className="btn btn--secondary"
+                            onClick={() => setShowEditor(true)}
+                        >
+                            ✏️ {t('editor.openEditor')}
+                        </button>
+                    </div>
+                )}
 
                 {/* Generation Loading */}
                 {isGenerating && (
@@ -465,7 +615,7 @@ export function MagicGraphGame() {
                         onCancel={() => setShowEditor(false)}
                     />
                 ) : (
-                    <div className={`board-wrapper ${timeLeft <= 10 ? 'board-wrapper--urgent' : ''}`}>
+                    <div className={`board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'board-wrapper--urgent' : ''}`}>
                         <PuzzleBoard
                             nodes={puzzle.nodes}
                             lines={puzzle.lines}
@@ -475,6 +625,8 @@ export function MagicGraphGame() {
                             onNodeClick={handleNodeClick}
                             impossibleLineIds={impossibleLineIds}
                             recommendedNodeId={starterHint?.nodeId ?? null}
+                            justPlacedNodeId={justPlacedNodeId}
+                            isCompleted={showWin}
                         />
                     </div>
                 )}
@@ -649,12 +801,28 @@ export function MagicGraphGame() {
                                     <span className="stat__label">{tc('stats.nodes')}</span>
                                 </div>
                             </div>
+                            {/* Personal Best Indicator */}
+                            {rewards?.personalBest && (
+                                <PersonalBestIndicator
+                                    currentTime={rewards.personalBest.currentTime}
+                                    previousBest={rewards.personalBest.previousBest}
+                                    isNewBest={rewards.personalBest.isNewBest}
+                                    className="win-overlay__pb"
+                                />
+                            )}
                             <p className="win-overlay__tip">
                                 💡 {t('win.mathInsight', { nodeCount: puzzle.nodes.length, lineCount: puzzle.lines.length })}
                             </p>
-                            <button className="btn btn--primary btn--large" onClick={nextPuzzle}>
-                                {tc('buttons.nextPuzzle')} →
-                            </button>
+                            {/* In daily mode, show Back to Games; otherwise show Next Puzzle */}
+                            {isDailyMode ? (
+                                <a href="/math-games/" className="btn btn--primary btn--large">
+                                    {tc('backToGames')}
+                                </a>
+                            ) : (
+                                <button className="btn btn--primary btn--large" onClick={nextPuzzle}>
+                                    {tc('buttons.nextPuzzle')} →
+                                </button>
+                            )}
                         </>
                     )}
                 </div>
@@ -677,6 +845,25 @@ export function MagicGraphGame() {
                     </div>
                 </div>
             )}
+
+            {/* Rank Up Overlay */}
+            {showingRankUp && rewards?.rankedUp && rewards.previousRank && rewards.newRank && (
+                <RankUpOverlay
+                    previousRank={rewards.previousRank}
+                    newRank={rewards.newRank}
+                    onClose={() => setShowingRankUp(false)}
+                />
+            )}
+
+            {/* Achievement Toasts */}
+            {toastQueue.map((achievement, index) => (
+                <AchievementToast
+                    key={achievement.id}
+                    achievement={achievement}
+                    onClose={() => dismissToast(achievement.id)}
+                    delay={index * 500}
+                />
+            ))}
         </GameLayout>
     );
 }
