@@ -202,5 +202,10 @@
         "aiMoved": "AI moved {{steps}} steps to position {{position}}.",
         "youWin": "You win! Reached {{target}} in {{moves}} moves.",
         "aiWins": "AI wins. Better luck next time!"
+    },
+    "a11y": {
+        "skipLinks": "Skip links",
+        "skipToMain": "Skip to main content",
+        "skipToGame": "Skip to game area"
     }
 }

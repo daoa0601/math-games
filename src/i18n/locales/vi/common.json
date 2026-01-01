@@ -202,5 +202,10 @@
         "aiMoved": "AI di chuyển {{steps}} bước đến vị trí {{position}}.",
         "youWin": "Bạn thắng! Đạt {{target}} trong {{moves}} lượt.",
         "aiWins": "AI thắng. Chúc may mắn lần sau!"
+    },
+    "a11y": {
+        "skipLinks": "Liên kết bỏ qua",
+        "skipToMain": "Bỏ qua đến nội dung chính",
+        "skipToGame": "Bỏ qua đến khu vực trò chơi"
     }
 }
