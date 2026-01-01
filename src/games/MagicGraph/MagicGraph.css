@@ -19,7 +19,7 @@
     background: var(--bg-card);
     padding: var(--space-md) var(--space-xl);
     border-radius: var(--radius-lg);
-    border: 1px solid hsla(250, 84%, 54%, 0.2);
+    border: 1px solid var(--accent-purple-medium);
 }
 
 .puzzle-info__item {
@@ -49,10 +49,10 @@
 .puzzle-board {
     background:
         /* Nebula clouds */
-        radial-gradient(ellipse at 30% 20%, hsla(270, 40%, 25%, 0.4) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 80%, hsla(220, 45%, 20%, 0.3) 0%, transparent 50%),
+        radial-gradient(ellipse at 30% 20%, var(--game-magic-nebula) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 80%, var(--game-magic-nebula-alt) 0%, transparent 50%),
         /* Base */
-        linear-gradient(135deg, hsl(250, 35%, 12%) 0%, hsl(240, 40%, 8%) 100%);
+        linear-gradient(135deg, var(--game-magic-deep) 0%, var(--game-magic-darker) 100%);
     border-radius: var(--radius-xl);
     border: 2px solid hsla(270, 80%, 50%, 0.4);
     box-shadow:
@@ -98,7 +98,7 @@
 
 /* Constellation line - shimmer effect when correct */
 .puzzle-line--correct {
-    stroke: hsl(145, 80%, 55%);
+    stroke: var(--game-magic-line-correct);
     filter:
         drop-shadow(0 0 4px hsl(145, 80%, 50%))
         drop-shadow(0 0 8px hsl(145, 70%, 45%))
@@ -153,8 +153,8 @@
 
 /* Constellation star nodes */
 .puzzle-node__circle {
-    fill: hsla(250, 40%, 15%, 0.9);
-    stroke: hsla(270, 70%, 65%, 0.8);
+    fill: var(--game-magic-node);
+    stroke: var(--game-magic-node-glow);
     stroke-width: 3;
     transition: all var(--transition-fast);
     filter:
@@ -233,7 +233,7 @@
     font-family: var(--font-sans);
     user-select: none;
     pointer-events: none;
-    text-shadow: 0 0 4px hsla(0, 0%, 0%, 0.5);
+    text-shadow: 0 0 4px var(--black-50);
 }
 
 .puzzle-node--fixed .puzzle-node__text {
@@ -472,7 +472,7 @@
     padding: var(--space-md);
     background: var(--bg-card);
     border-radius: var(--radius-lg);
-    border: 1px solid hsla(250, 84%, 54%, 0.2);
+    border: 1px solid var(--accent-purple-medium);
 }
 
 .number-chip {
@@ -568,7 +568,7 @@
     font-size: 0.95rem;
     color: var(--text-muted);
     padding: var(--space-md);
-    background: hsla(250, 84%, 54%, 0.1);
+    background: var(--accent-purple-light);
     border-radius: var(--radius-md);
     border-left: 4px solid var(--color-primary);
 }
@@ -581,7 +581,7 @@
     padding: var(--space-sm) var(--space-md);
     background: var(--bg-card);
     border-radius: var(--radius-md);
-    border: 1px solid hsla(250, 84%, 54%, 0.2);
+    border: 1px solid var(--accent-purple-medium);
 }
 
 .custom-number-label {
@@ -618,7 +618,7 @@
     align-items: center;
     gap: var(--space-md);
     padding: var(--space-xl);
-    background: hsla(250, 84%, 54%, 0.1);
+    background: var(--accent-purple-light);
     border-radius: var(--radius-lg);
     border: 2px dashed var(--color-primary);
 }
@@ -725,7 +725,7 @@
 
 .btn--ghost {
     background: transparent;
-    border: 1px solid hsla(250, 84%, 54%, 0.3);
+    border: 1px solid var(--accent-purple-strong);
     color: var(--text-muted);
     opacity: 0.6;
     transition: all var(--transition-fast);
@@ -733,7 +733,7 @@
 
 .btn--ghost:hover {
     opacity: 1;
-    background: hsla(250, 84%, 54%, 0.2);
+    background: var(--accent-purple-medium);
     border-color: var(--color-primary);
 }
 
@@ -779,7 +779,7 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--space-sm) var(--space-md);
-    border-bottom: 1px solid hsla(250, 84%, 54%, 0.2);
+    border-bottom: 1px solid var(--accent-purple-medium);
     font-size: 0.85rem;
     color: var(--text-muted);
 }
@@ -838,7 +838,7 @@
     padding: var(--space-sm);
     background: hsla(0, 84%, 60%, 0.2);
     border: none;
-    border-top: 1px solid hsla(250, 84%, 54%, 0.2);
+    border-top: 1px solid var(--accent-purple-medium);
     color: var(--color-error);
     cursor: pointer;
     font-size: 0.9rem;
@@ -1023,7 +1023,7 @@
     background: var(--bg-surface);
     padding: var(--space-xs);
     border-radius: var(--radius-md);
-    border: 1px solid hsla(250, 84%, 54%, 0.2);
+    border: 1px solid var(--accent-purple-medium);
 }
 
 .opt-btn {
@@ -1039,7 +1039,7 @@
 }
 
 .opt-btn:hover {
-    background: hsla(250, 84%, 54%, 0.1);
+    background: var(--accent-purple-light);
     color: var(--text-primary);
 }
 
