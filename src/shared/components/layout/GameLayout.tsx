@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
-import { HighContrastToggle } from '@/shared/components/HighContrastToggle';
 import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
 import { SkipLinks } from '@/shared/components/SkipLinks';
 import { ThemeToggle } from '@/shared/components/ThemeToggle';
@@ -24,7 +23,6 @@ export function GameLayout({ title, children, headerRight }: GameLayoutProps) {
                 <div className="game-header__actions">
                     {headerRight}
                     <ThemeToggle />
-                    <HighContrastToggle />
                     <LanguageSwitcher />
                     <Link to="/" className="btn btn--secondary">
                         ← {t('backToGames')}
