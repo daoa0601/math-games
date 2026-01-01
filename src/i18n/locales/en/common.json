@@ -45,11 +45,20 @@
         "gamesPlayed": "Games Played",
         "puzzlesSolved": "Puzzles Solved",
         "wins": "Wins",
-        "nextRank": "Next Rank",
+        "streak": "Day Streak",
+        "overall": "Overall Progress",
+        "rankProgress": "Rank Progress",
+        "nextRank": "Next: {{rank}}",
         "gamesNeeded": "{{count}} more game",
         "gamesNeeded_plural": "{{count}} more games",
         "solvesNeeded": "{{count}} more solve",
-        "solvesNeeded_plural": "{{count}} more solves"
+        "solvesNeeded_plural": "{{count}} more solves",
+        "breakdown": "Per-Game Breakdown",
+        "solves": "solves",
+        "winsShort": "wins",
+        "built": "built",
+        "best": "best",
+        "noRecord": "No record"
     },
     "achievements": {
         "title": "Achievement Unlocked!",

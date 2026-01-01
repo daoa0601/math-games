@@ -45,11 +45,20 @@
         "gamesPlayed": "Số ván đã chơi",
         "puzzlesSolved": "Câu đố đã giải",
         "wins": "Chiến thắng",
-        "nextRank": "Hạng tiếp theo",
+        "streak": "Chuỗi ngày",
+        "overall": "Tiến độ tổng thể",
+        "rankProgress": "Tiến độ cấp bậc",
+        "nextRank": "Tiếp theo: {{rank}}",
         "gamesNeeded": "Cần thêm {{count}} ván",
         "gamesNeeded_plural": "Cần thêm {{count}} ván",
         "solvesNeeded": "Cần thêm {{count}} câu",
-        "solvesNeeded_plural": "Cần thêm {{count}} câu"
+        "solvesNeeded_plural": "Cần thêm {{count}} câu",
+        "breakdown": "Chi tiết từng game",
+        "solves": "giải",
+        "winsShort": "thắng",
+        "built": "hoàn thành",
+        "best": "tốt nhất",
+        "noRecord": "Chưa có"
     },
     "achievements": {
         "title": "Mở khóa thành tựu!",
