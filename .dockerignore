@@ -1,0 +1,35 @@
+# Dependencies - installed inside container
+node_modules
+
+# Build output - built inside container
+dist
+
+# Development files
+.git
+.gitignore
+.dockerignore
+*.md
+!README.md
+
+# IDE/Editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test and coverage
+coverage
+.nyc_output
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
