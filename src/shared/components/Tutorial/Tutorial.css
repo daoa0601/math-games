@@ -14,7 +14,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  z-index: 1000;
+  z-index: var(--z-tutorial-backdrop);
   pointer-events: none;
 }
 
@@ -22,7 +22,7 @@
   position: absolute;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
   border-radius: var(--radius-md);
-  z-index: 1001;
+  z-index: var(--z-tutorial-spotlight);
   pointer-events: auto;
 }
 
@@ -40,7 +40,7 @@
     var(--shadow-lg),
     0 0 0 2px var(--color-primary-light);
   animation: tutorialTooltipIn 0.3s var(--ease-bounce);
-  z-index: var(--z-tooltip);
+  z-index: var(--z-tutorial-tooltip);
 }
 
 @keyframes tutorialTooltipIn {
