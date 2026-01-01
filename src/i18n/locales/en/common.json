@@ -213,7 +213,8 @@
         "previous": "Back",
         "skip": "Skip Tutorial",
         "finish": "Finish",
-        "stepOf": "Step {{current}} of {{total}}"
+        "stepOf": "Step {{current}} of {{total}}",
+        "showHelp": "Show tutorial"
     },
     "magicGraph": {
         "tutorial": {

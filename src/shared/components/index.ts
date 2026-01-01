@@ -1,5 +1,6 @@
 export { Button } from './Button';
 export { DifficultySelector } from './DifficultySelector';
+export { HelpButton } from './HelpButton';
 export { ErrorBoundary } from './ErrorBoundary';
 export { GameCard } from './GameCard';
 export { GameLayout } from './GameLayout';

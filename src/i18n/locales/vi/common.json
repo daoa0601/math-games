@@ -213,7 +213,8 @@
         "previous": "Quay lại",
         "skip": "Bỏ qua hướng dẫn",
         "finish": "Hoàn thành",
-        "stepOf": "Bước {{current}} / {{total}}"
+        "stepOf": "Bước {{current}} / {{total}}",
+        "showHelp": "Hiển thị hướng dẫn"
     },
     "magicGraph": {
         "tutorial": {
