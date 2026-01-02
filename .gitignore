@@ -55,3 +55,8 @@ Thumbs.db
 
 *storybook.log
 storybook-static
+
+# Playwright test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
