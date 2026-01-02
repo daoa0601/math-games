@@ -9,12 +9,23 @@ import type { SequenceState, HistoryEntry, GameConfig, GameMode } from './types'
  */
 export function createGameState(config: GameConfig): SequenceState {
     const mode = config.mode ?? 'vs-ai';
+
+    // Determine starting turn
+    let startingTurn: SequenceState['turn'];
+    if (mode === 'two-player') {
+        startingTurn = 'player1';
+    } else if (config.aiMovesFirst) {
+        // AI moves first - player gets second-mover advantage
+        startingTurn = 'ai';
+    } else {
+        startingTurn = 'player';
+    }
+
     return {
         target: config.target,
         currentPosition: 0,
         availableSteps: [...config.stepPool],
-        // In two-player mode, player1 starts. In vs-ai mode, use 'player' for backward compat
-        turn: mode === 'two-player' ? 'player1' : 'player',
+        turn: startingTurn,
         history: [],
         winner: null,
         gameOver: false,

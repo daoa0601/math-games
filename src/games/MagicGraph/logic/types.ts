@@ -31,6 +31,8 @@ export interface PuzzleConfig {
     targetSum: number;
     availableNumbers: number[];
     difficulty: Difficulty;
+    /** Whether this puzzle has a valid solution (default: true) */
+    isSolvable?: boolean;
 }
 
 export interface PuzzleState {

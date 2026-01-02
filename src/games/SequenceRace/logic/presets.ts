@@ -120,6 +120,7 @@ export const presetGames: GameConfig[] = [
         stepPool: generateSequence('arithmetic', 4), // [1,2,3,4]
         difficulty: 'easy',
         sequenceType: 'arithmetic',
+        aiMovesFirst: true, // Second-mover wins this game
     },
     {
         id: 'arith_15',
@@ -138,6 +139,7 @@ export const presetGames: GameConfig[] = [
         stepPool: generateSequence('geometric', 4), // [1,2,4,8]
         difficulty: 'medium',
         sequenceType: 'geometric',
+        aiMovesFirst: true, // Second-mover wins this game
     },
     {
         id: 'fib_13',
@@ -146,6 +148,7 @@ export const presetGames: GameConfig[] = [
         stepPool: generateSequence('fibonacci', 5), // [1,1,2,3,5]
         difficulty: 'medium',
         sequenceType: 'fibonacci',
+        aiMovesFirst: true, // Second-mover wins this game
     },
     {
         id: 'geo_31',
@@ -172,6 +175,7 @@ export const presetGames: GameConfig[] = [
         stepPool: generateSequence('square', 4), // [1,4,9,16]
         difficulty: 'hard',
         sequenceType: 'square',
+        aiMovesFirst: true, // Second-mover wins this game
     },
     {
         id: 'fib_21',
@@ -190,6 +194,7 @@ export const presetGames: GameConfig[] = [
         stepPool: generateSequence('triangular', 5), // [1,3,6,10,15]
         difficulty: 'medium',
         sequenceType: 'triangular',
+        aiMovesFirst: true, // Second-mover wins this game
     },
     {
         id: 'tri_36',
@@ -198,6 +203,7 @@ export const presetGames: GameConfig[] = [
         stepPool: generateSequence('triangular', 6), // [1,3,6,10,15,21]
         difficulty: 'hard',
         sequenceType: 'triangular',
+        aiMovesFirst: true, // Second-mover wins this game
     },
 
     // New: Powers of 3
@@ -216,6 +222,7 @@ export const presetGames: GameConfig[] = [
         stepPool: generateSequence('powers3', 4), // [1,3,9,27]
         difficulty: 'hard',
         sequenceType: 'powers3',
+        aiMovesFirst: true, // Second-mover wins this game
     },
 ];
 

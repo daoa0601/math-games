@@ -21,6 +21,7 @@ export const linePuzzle: Omit<PuzzleConfig, 'id'> = {
     targetSum: 6,
     availableNumbers: [1, 2, 3],
     difficulty: 'easy',
+    isSolvable: true,
 };
 
 /**
@@ -42,6 +43,7 @@ export const crossPuzzle: Omit<PuzzleConfig, 'id'> = {
     targetSum: 9,
     availableNumbers: [1, 2, 3, 4, 5],
     difficulty: 'easy',
+    isSolvable: true,
 };
 
 /**
@@ -65,6 +67,7 @@ export const magicTrianglePuzzle: Omit<PuzzleConfig, 'id'> = {
     targetSum: 9,
     availableNumbers: [1, 2, 3, 4, 5, 6],
     difficulty: 'medium',
+    isSolvable: true,
 };
 
 /**
@@ -103,6 +106,7 @@ export const mShapePuzzle: Omit<PuzzleConfig, 'id'> = {
     targetSum: 15,
     availableNumbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     difficulty: 'hard',
+    isSolvable: true,
 };
 
 /**
@@ -134,6 +138,7 @@ export const starPuzzle: Omit<PuzzleConfig, 'id'> = {
     targetSum: 24,
     availableNumbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     difficulty: 'hard',
+    isSolvable: true,
 };
 
 /**
@@ -163,6 +168,7 @@ export const diamondPuzzle: Omit<PuzzleConfig, 'id'> = {
     targetSum: 15,
     availableNumbers: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     difficulty: 'medium',
+    isSolvable: true,
 };
 
 /**
@@ -192,15 +198,19 @@ export const magicSquarePuzzle: Omit<PuzzleConfig, 'id'> = {
     targetSum: 15,
     availableNumbers: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     difficulty: 'hard',
+    isSolvable: true,
 };
 
+/**
+ * Verified solvable puzzle templates.
+ * Note: mShapePuzzle and starPuzzle are excluded due to structural issues
+ * (lines with different node counts cannot have the same target sum)
+ */
 export const puzzleTemplates = [
     linePuzzle,
     crossPuzzle,
     magicTrianglePuzzle,
     diamondPuzzle,
-    mShapePuzzle,
-    starPuzzle,
     magicSquarePuzzle,
 ];
 
@@ -267,7 +277,8 @@ function getRandomShapes(difficulty: 'easy' | 'medium' | 'hard') {
     } else if (difficulty === 'medium') {
         return [crossPuzzle, magicTrianglePuzzle, diamondPuzzle];
     } else {
-        return [mShapePuzzle, starPuzzle, magicSquarePuzzle];
+        // Only verified solvable puzzles for hard difficulty
+        return [diamondPuzzle, magicSquarePuzzle];
     }
 }
 

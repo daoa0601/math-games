@@ -131,14 +131,11 @@ export function GridBoard3D({
                         z + centerOffset[2],
                     ];
 
-                    // Skip empty cells
-                    if (cell === 0) continue;
-
-                    // Check for preview (ghost preview for piece placement)
+                    // Check for preview FIRST (ghost preview can appear on any cell)
                     const isPreview = previewData.positions.has(posKey);
 
+                    // Render ghost preview on ANY cell type (including empty)
                     if (isPreview) {
-                        // Render ghost preview voxel with semi-transparent material
                         result.push(
                             <Voxel
                                 key={`preview-${posKey}`}
@@ -148,7 +145,13 @@ export function GridBoard3D({
                                 isPreviewValid={previewData.isValid}
                             />
                         );
-                    } else if (cell === 1) {
+                        continue; // Don't render the underlying cell when showing preview
+                    }
+
+                    // Skip empty cells (only after preview check)
+                    if (cell === 0) continue;
+
+                    if (cell === 1) {
                         // Target cell - can place pieces here
                         result.push(
                             <Voxel

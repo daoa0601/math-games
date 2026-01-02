@@ -290,19 +290,100 @@ Respects `prefers-reduced-motion` media query.
 
 ---
 
+## Theme System
+
+### Dark/Light Mode Architecture
+
+The app supports system and manual theme switching:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     ThemeProvider                        │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │                  ThemeContext                    │    │
+│  │  - theme: 'light' | 'dark'                      │    │
+│  │  - toggleTheme()                                │    │
+│  │  - setTheme(theme)                              │    │
+│  └─────────────────────────────────────────────────┘    │
+│                          │                               │
+│                          ▼                               │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │  document.documentElement                        │    │
+│  │  data-theme="light" | data-theme="dark"         │    │
+│  └─────────────────────────────────────────────────┘    │
+│                          │                               │
+│                          ▼                               │
+│                   localStorage                           │
+│                   'math-games-theme'                     │
+└─────────────────────────────────────────────────────────┘
+```
+
+### CSS Custom Properties
+
+Theme colors are defined in `src/index.css`:
+
+```css
+:root {
+  --bg-primary: hsl(0, 0%, 98%);
+  --bg-secondary: hsl(0, 0%, 95%);
+  --text-primary: hsl(0, 0%, 10%);
+}
+
+[data-theme="dark"] {
+  --bg-primary: hsl(220, 20%, 12%);
+  --bg-secondary: hsl(220, 18%, 16%);
+  --text-primary: hsl(0, 0%, 95%);
+}
+```
+
+### Theme-Aware Components
+
+Components use CSS variables for automatic theming:
+
+```css
+.game-card {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+```
+
+---
+
 ## Testing Strategy
 
-| Test Type | Tool | Coverage |
-|-----------|------|----------|
-| Unit | Vitest | Game logic, utilities |
-| Component | Testing Library | UI components |
-| Integration | Vitest + jsdom | Context providers |
+| Test Type | Tool | Count | Coverage |
+|-----------|------|-------|----------|
+| Unit | Vitest | 246 | Game logic, utilities, hooks |
+| Component | Storybook | 26 stories | Visual component development |
+| E2E | Playwright | 112 | Full user flows across all games |
 
-Run tests:
+### Test Commands
+
 ```bash
-npm test              # Watch mode
-npm run test:coverage # Coverage report
+npm test              # Unit tests (watch mode)
+npm run test:coverage # Unit tests with coverage report
+npm run test:e2e      # E2E tests (headless Chromium)
+npm run test:e2e:ui   # E2E tests with interactive UI
+npm run storybook     # Launch Storybook component explorer
 ```
+
+### E2E Test Architecture
+
+E2E tests use the Page Object Model pattern:
+
+```
+e2e/
+├── fixtures/          # Test data (player profiles, storage helpers)
+├── pages/             # Page Object Models (DashboardPage, etc.)
+└── *.spec.ts          # Test specifications
+```
+
+Key test files:
+- `dashboard.spec.ts` - Tab navigation, game cards, header controls
+- `magic-graph.spec.ts` - Puzzle solving, validation, hints
+- `sequence-race.spec.ts` - AI gameplay, win/lose conditions
+- `shape-architect.spec.ts` - 3D mode, piece placement
+- `accessibility.spec.ts` - ARIA, keyboard navigation, focus management
 
 ---
 

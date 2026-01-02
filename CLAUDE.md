@@ -5,12 +5,21 @@ This file provides guidance to Claude Code when working with this repository.
 ## Commands
 
 ```bash
+# Development
 npm run dev          # Start Vite dev server with HMR
 npm run build        # TypeScript compilation + Vite production build
 npm run lint         # ESLint with TypeScript-aware rules
 npm run preview      # Preview production build locally
-npm test             # Run tests in watch mode (Vitest)
-npm run test:coverage # Run tests with coverage report
+
+# Testing
+npm test             # Run unit tests in watch mode (Vitest)
+npm run test:coverage # Run unit tests with coverage report
+npm run test:e2e     # Run Playwright E2E tests
+npm run test:e2e:ui  # Run E2E tests with interactive UI
+
+# Component Development
+npm run storybook       # Launch Storybook component explorer
+npm run build-storybook # Build static Storybook site
 ```
 
 ## Architecture
@@ -263,6 +272,83 @@ t('ranks.intermediate');  // "Intermediate" or "Trung cấp"
 ### Typography
 - Display: 'Quicksand' (titles, headings)
 - Body: 'Nunito' (text, buttons)
+
+---
+
+## Testing
+
+### Test Layers
+
+| Layer | Tool | Count | Purpose |
+|-------|------|-------|---------|
+| Unit | Vitest | 246 tests | Game logic, utilities, hooks |
+| Component | Storybook | 26 stories | Visual component development |
+| E2E | Playwright | 112 tests | Full user flows across games |
+
+### Running Tests
+
+```bash
+npm test              # Unit tests in watch mode
+npm run test:coverage # Unit tests with coverage
+npm run test:e2e      # E2E tests (headless)
+npm run test:e2e:ui   # E2E tests with interactive UI
+npm run storybook     # Component explorer
+```
+
+### E2E Test Structure
+
+```
+e2e/
+├── fixtures/          # Test data and helpers
+├── pages/             # Page Object Models
+├── dashboard.spec.ts  # Dashboard tests (30 tests)
+├── magic-graph.spec.ts
+├── sequence-race.spec.ts
+├── shape-architect.spec.ts
+├── accessibility.spec.ts
+├── daily-challenge.spec.ts
+├── progression.spec.ts
+└── navigation.spec.ts
+```
+
+---
+
+## Theme System
+
+### Dark/Light Mode
+
+The app supports dark and light themes via `ThemeContext`:
+
+```typescript
+import { useTheme } from '@/shared/contexts';
+
+const { theme, toggleTheme } = useTheme();
+// theme: 'light' | 'dark'
+```
+
+### CSS Variables
+
+Theme colors are defined in `src/index.css` with automatic dark mode:
+
+```css
+:root {
+  --bg-primary: hsl(0, 0%, 98%);
+  --text-primary: hsl(0, 0%, 10%);
+}
+
+[data-theme="dark"] {
+  --bg-primary: hsl(220, 20%, 12%);
+  --text-primary: hsl(0, 0%, 95%);
+}
+```
+
+### Theme Toggle
+
+Use the `ThemeToggle` component in headers:
+
+```typescript
+import { ThemeToggle } from '@/shared/components';
+```
 
 ---
 

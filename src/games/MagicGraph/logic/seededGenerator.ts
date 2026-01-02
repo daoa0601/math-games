@@ -19,15 +19,21 @@ import {
   crossPuzzle,
   magicTrianglePuzzle,
   diamondPuzzle,
-  mShapePuzzle,
-  starPuzzle,
   magicSquarePuzzle,
+  // Note: mShapePuzzle and starPuzzle excluded - they have structural issues
+  // (lines with different node counts can't have the same target sum)
 } from './puzzles';
-import { solve } from './solver';
+import { solve, checkSolvability } from './solver';
 
 // ============================================================================
 // Constants
 // ============================================================================
+
+/**
+ * Probability of generating an unsolvable puzzle (1 in 10 = 10%).
+ * This teaches students to recognize when constraints are impossible.
+ */
+const UNSOLVABLE_PROBABILITY = 0.1;
 
 /**
  * Number of hint nodes to show based on difficulty.
@@ -43,11 +49,12 @@ const DIFFICULTY_HINTS: Record<Difficulty, number> = {
 
 /**
  * Puzzle templates organized by difficulty for seeded selection.
+ * Only includes puzzles verified to be solvable.
  */
 const TEMPLATES_BY_DIFFICULTY: Record<'easy' | 'medium' | 'hard', Array<Omit<PuzzleConfig, 'id'>>> = {
   easy: [linePuzzle, crossPuzzle],
   medium: [crossPuzzle, magicTrianglePuzzle, diamondPuzzle],
-  hard: [mShapePuzzle, starPuzzle, magicSquarePuzzle],
+  hard: [diamondPuzzle, magicSquarePuzzle], // Only verified solvable puzzles
 };
 
 // ============================================================================
@@ -57,6 +64,7 @@ const TEMPLATES_BY_DIFFICULTY: Record<'easy' | 'medium' | 'hard', Array<Omit<Puz
 /**
  * Generate a puzzle using seeded randomness.
  * This produces the same puzzle for the same seed.
+ * Has a 10% chance of generating an unsolvable puzzle.
  *
  * @param rng - Seeded random number generator
  * @param difficulty - Puzzle difficulty (daily challenges use 'medium')
@@ -84,7 +92,10 @@ export function generateSeededPuzzle(
     templateDifficulty
   );
 
-  // 3. Create base puzzle with generated numbers
+  // 3. Decide if this should be an unsolvable puzzle (10% chance)
+  const shouldBeUnsolvable = rng.next() < UNSOLVABLE_PROBABILITY;
+
+  // 4. Create base puzzle with generated numbers
   const basePuzzle: Omit<PuzzleConfig, 'id'> = {
     ...template,
     availableNumbers,
@@ -92,12 +103,49 @@ export function generateSeededPuzzle(
     difficulty,
   };
 
-  // 4. Solve and mask with seeded hint selection
-  return generateWithSeededHints(
+  // 5. Generate solvable puzzle first
+  const solvablePuzzle = generateWithSeededHints(
     basePuzzle,
     rng,
     DIFFICULTY_HINTS[difficulty]
   );
+
+  // 6. If this should be unsolvable, break it
+  if (shouldBeUnsolvable) {
+    return makeUnsolvable(solvablePuzzle, rng);
+  }
+
+  // Return solvable puzzle with explicit isSolvable flag
+  return { ...solvablePuzzle, isSolvable: true };
+}
+
+/**
+ * Break a solvable puzzle by modifying the target sum.
+ * Tries small adjustments (+1, -1, +2, -2) and verifies unsolvability.
+ */
+function makeUnsolvable(puzzle: PuzzleConfig, rng: SeededRandom): PuzzleConfig {
+  const originalSum = puzzle.targetSum;
+
+  // Try different adjustments to break the puzzle
+  const adjustments = rng.shuffle([1, -1, 2, -2, 3, -3]);
+
+  for (const adj of adjustments) {
+    const brokenPuzzle: PuzzleConfig = {
+      ...puzzle,
+      targetSum: originalSum + adj,
+      isSolvable: false,
+    };
+
+    // Verify it's actually unsolvable
+    const result = checkSolvability(brokenPuzzle);
+    if (!result.solvable) {
+      return brokenPuzzle;
+    }
+  }
+
+  // If we couldn't break it (rare), return as solvable
+  // This maintains the 9:1 ratio on average
+  return { ...puzzle, isSolvable: true };
 }
 
 /**

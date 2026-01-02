@@ -15,6 +15,7 @@ import type { GameConfig } from './types';
 import type { SeededRandom } from '@/shared/utils';
 import { createDailyRandom } from '@/shared/utils';
 import { generateSequence, SEQUENCE_INFO, type SequenceType } from './presets';
+import { validateGameFairness } from './engine';
 
 // ============================================================================
 // Constants
@@ -74,7 +75,8 @@ export function generateSeededConfig(
   const maxTarget = totalSum;
   const target = rng.nextInt(minTarget, maxTarget);
 
-  return {
+  // 5. Create base config
+  const baseConfig: GameConfig = {
     id: `daily_${rng.seed}`,
     name: `${SEQUENCE_INFO[sequenceType].name} (${target})`,
     target,
@@ -82,6 +84,17 @@ export function generateSeededConfig(
     difficulty,
     sequenceType,
   };
+
+  // 6. Validate fairness - ensure player can win
+  const fairness = validateGameFairness(baseConfig);
+
+  // If player can't win going first, check if they can win going second
+  if (!fairness.isPlayerWinnable && fairness.isAIWinnable) {
+    // Player gets second-mover advantage (AI moves first)
+    return { ...baseConfig, aiMovesFirst: true };
+  }
+
+  return baseConfig;
 }
 
 // ============================================================================

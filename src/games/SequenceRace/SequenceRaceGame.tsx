@@ -469,6 +469,14 @@ export function SequenceRaceGame() {
           />
         </div>
 
+        {/* AI First Move Banner */}
+        {currentConfig.aiMovesFirst && gameState.history.length === 0 && gameState.turn === 'ai' && (
+          <div className="ai-first-banner">
+            <span className="ai-first-banner__icon">🎯</span>
+            <span className="ai-first-banner__text">{t('aiMovesFirst', 'The opponent moves first this round!')}</span>
+          </div>
+        )}
+
         {/* Turn Indicator */}
         {!gameState.gameOver && !showTimeUp && (
           <div className={`turn-indicator turn-indicator--${gameState.turn}`}>

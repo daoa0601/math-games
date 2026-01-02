@@ -39,4 +39,6 @@ export interface GameConfig {
     sequenceType?: SequenceType;
     /** Game mode - defaults to 'vs-ai' */
     mode?: GameMode;
+    /** If true, AI moves first (player has second-mover advantage) */
+    aiMovesFirst?: boolean;
 }

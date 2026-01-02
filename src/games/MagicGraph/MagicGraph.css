@@ -874,6 +874,107 @@
 }
 
 /* ========================================
+   Unsolvable Button
+   ======================================== */
+
+.unsolvable-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    animation: unsolvableFadeIn 0.5s ease-out;
+}
+
+@keyframes unsolvableFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn--unsolvable {
+    padding: var(--space-md) var(--space-xl);
+    background: linear-gradient(135deg, hsla(0, 60%, 45%, 0.2), hsla(270, 50%, 35%, 0.15));
+    border: 2px solid var(--color-error);
+    border-radius: var(--radius-lg);
+    color: var(--color-error);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn--unsolvable:hover:not(:disabled) {
+    background: linear-gradient(135deg, hsla(0, 70%, 50%, 0.3), hsla(270, 60%, 40%, 0.2));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px hsla(0, 70%, 50%, 0.3);
+}
+
+.btn--unsolvable:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn--shake {
+    animation: unsolvableShake 0.5s ease;
+}
+
+@keyframes unsolvableShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.unsolvable-feedback {
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 500;
+    animation: feedbackPop 0.3s ease-out;
+}
+
+@keyframes feedbackPop {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.unsolvable-feedback--correct {
+    background: hsla(145, 70%, 45%, 0.2);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+}
+
+.unsolvable-feedback--wrong {
+    background: hsla(0, 70%, 50%, 0.15);
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .unsolvable-section {
+        animation: none;
+    }
+
+    .btn--shake {
+        animation: none;
+    }
+
+    .unsolvable-feedback {
+        animation: none;
+    }
+}
+
+/* ========================================
    Mobile Touch Optimization
    ======================================== */
 

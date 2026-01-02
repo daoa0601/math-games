@@ -84,6 +84,13 @@ export function MagicGraphGame() {
     const [showEditor, setShowEditor] = useState(false);
     const [justPlacedNodeId, setJustPlacedNodeId] = useState<string | null>(null);
 
+    // Unsolvable button state
+    const [showUnsolvableButton, setShowUnsolvableButton] = useState(false);
+    const [unsolvableFeedback, setUnsolvableFeedback] = useState<{
+        type: 'correct' | 'wrong';
+        message: string;
+    } | null>(null);
+
     // Screen reader announcements for accessibility
     const { announce } = useAnnounce();
 
@@ -131,6 +138,73 @@ export function MagicGraphGame() {
             announce(tc('announcements.timeUp'), 'assertive');
         }
     }, [showTimeUp, announce, tc]);
+
+    // Show unsolvable button after 45 seconds (only for seeded daily puzzles)
+    useEffect(() => {
+        if (showWin || showTimeUp || practiceMode) {
+            setShowUnsolvableButton(false);
+            return;
+        }
+
+        // Only show for puzzles that have isSolvable defined (seeded puzzles)
+        if (puzzle.isSolvable === undefined) {
+            setShowUnsolvableButton(false);
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            setShowUnsolvableButton(true);
+        }, 45000); // 45 seconds
+
+        return () => clearTimeout(timer);
+    }, [puzzle.isSolvable, showWin, showTimeUp, practiceMode, puzzle.id]);
+
+    // Handle declare unsolvable
+    const handleDeclareUnsolvable = useCallback(() => {
+        if (puzzle.isSolvable === undefined) return;
+
+        if (!puzzle.isSolvable) {
+            // Correct! The puzzle is unsolvable
+            pauseTimer();
+            setUnsolvableFeedback({
+                type: 'correct',
+                message: t('unsolvable.correct', 'Correct! This puzzle has no valid solution.'),
+            });
+
+            // Award stats for correctly identifying unsolvable
+            handleCompletion({
+                gameId: 'magic-graph',
+                levelId: isDailyMode ? 'daily' : puzzle.name,
+                difficulty,
+                timeSeconds: elapsedTime,
+                practiceMode,
+            });
+
+            // Track daily challenge completion
+            if (isDailyMode && !dailyCompleted) {
+                completeDailyChallenge('magic-graph', elapsedTime);
+                setDailyCompleted(true);
+            }
+
+            playSound('win');
+            showConfetti({
+                particleCount: 80,
+                spread: 60,
+                origin: { y: 0.6 },
+            });
+            setTimeout(() => setShowWin(true), 800);
+        } else {
+            // Wrong! The puzzle is solvable
+            setUnsolvableFeedback({
+                type: 'wrong',
+                message: t('unsolvable.wrong', 'This puzzle has a solution. Keep trying!'),
+            });
+            playSound('click');
+
+            // Clear feedback after 3 seconds
+            setTimeout(() => setUnsolvableFeedback(null), 3000);
+        }
+    }, [puzzle, pauseTimer, handleCompletion, isDailyMode, difficulty, elapsedTime, practiceMode, dailyCompleted, t]);
 
     // Handle practice mode toggle
     const handlePracticeModeChange = useCallback((newPracticeMode: boolean) => {
@@ -363,6 +437,8 @@ export function MagicGraphGame() {
         setShowHints(false);
         setTargetRevealed(false); // Reset for master mode
         setGrandmasterFeedback(null); // Reset grandmaster feedback
+        setShowUnsolvableButton(false); // Reset unsolvable button
+        setUnsolvableFeedback(null); // Reset unsolvable feedback
         resetTimer();
     }, [difficulty, resetTimer, nodeValuesHistory]);
 
@@ -388,6 +464,8 @@ export function MagicGraphGame() {
             setShowHints(false);
             setTargetRevealed(false); // Reset for master mode
             setGrandmasterFeedback(null); // Reset grandmaster feedback
+            setShowUnsolvableButton(false); // Reset unsolvable button
+            setUnsolvableFeedback(null); // Reset unsolvable feedback
             resetTimer();
         } catch (error) {
             console.error('Failed to generate random puzzle:', error);
@@ -413,6 +491,8 @@ export function MagicGraphGame() {
             nodeValuesHistory.reset(map);
             setTargetRevealed(false); // Reset for master mode
             setGrandmasterFeedback(null); // Reset grandmaster feedback
+            setShowUnsolvableButton(false); // Reset unsolvable button
+            setUnsolvableFeedback(null); // Reset unsolvable feedback
             resetTimer();
         }
     }, [resetTimer, nodeValuesHistory]);
@@ -425,6 +505,8 @@ export function MagicGraphGame() {
         setPickerState(null);
         setShowWin(false);
         setGrandmasterFeedback(null);
+        setShowUnsolvableButton(false); // Reset unsolvable button
+        setUnsolvableFeedback(null); // Reset unsolvable feedback
         resetTimer();
     }, [puzzle, resetTimer, nodeValuesHistory]);
 
@@ -456,6 +538,8 @@ export function MagicGraphGame() {
         setShowEditor(false);
         setShowWin(false);
         setGrandmasterFeedback(null);
+        setShowUnsolvableButton(false); // Reset unsolvable button
+        setUnsolvableFeedback(null); // Reset unsolvable feedback
         resetTimer();
         playSound('click');
     }, [nodeValuesHistory, resetTimer]);
@@ -665,6 +749,24 @@ export function MagicGraphGame() {
                         onSelectNumber={() => { }}
                     />
                 </div>
+
+                {/* Unsolvable Button (appears after 45 seconds for seeded puzzles) */}
+                {showUnsolvableButton && !showWin && !showTimeUp && (
+                    <div className="unsolvable-section">
+                        <button
+                            className={`btn btn--unsolvable ${unsolvableFeedback?.type === 'wrong' ? 'btn--shake' : ''}`}
+                            onClick={handleDeclareUnsolvable}
+                            disabled={unsolvableFeedback?.type === 'correct'}
+                        >
+                            🚫 {t('unsolvable.button', 'Declare Unsolvable')}
+                        </button>
+                        {unsolvableFeedback && (
+                            <div className={`unsolvable-feedback unsolvable-feedback--${unsolvableFeedback.type}`}>
+                                {unsolvableFeedback.type === 'correct' ? '✓' : '✗'} {unsolvableFeedback.message}
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Hint Toggle */}
                 <button

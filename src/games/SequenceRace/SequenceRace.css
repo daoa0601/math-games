@@ -98,6 +98,61 @@
 }
 
 /* ========================================
+   AI First Move Banner
+   ======================================== */
+
+.ai-first-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-xl);
+    background: linear-gradient(135deg, hsla(15, 85%, 55%, 0.15), hsla(0, 80%, 50%, 0.1));
+    border: 2px solid var(--color-error);
+    border-radius: var(--radius-lg);
+    animation: aiBannerPulse 2s ease-in-out infinite;
+}
+
+.ai-first-banner__icon {
+    font-size: 1.5rem;
+    animation: aiBannerBounce 1s ease-in-out infinite;
+}
+
+.ai-first-banner__text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-error);
+}
+
+@keyframes aiBannerPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 hsla(0, 80%, 50%, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 12px 4px hsla(0, 80%, 50%, 0.2);
+    }
+}
+
+@keyframes aiBannerBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ai-first-banner {
+        animation: none;
+    }
+
+    .ai-first-banner__icon {
+        animation: none;
+    }
+}
+
+/* ========================================
    Track & Field Race Arena
    ======================================== */
 
