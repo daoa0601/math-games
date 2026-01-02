@@ -27,6 +27,7 @@ export interface SolverResult {
     solution?: SolutionStep[];
     searchedStates: number;
     timeMs: number;
+    timedOut: boolean;  // true if search timed out before completion
 }
 
 // ========================================
@@ -211,6 +212,7 @@ export function solvePuzzle(level: LevelConfig, maxTimeMs: number = 5000): Solve
             solution: [],
             searchedStates: 0,
             timeMs: performance.now() - startTime,
+            timedOut: false,
         };
     }
 
@@ -223,6 +225,7 @@ export function solvePuzzle(level: LevelConfig, maxTimeMs: number = 5000): Solve
             solvable: false,
             searchedStates: 0,
             timeMs: performance.now() - startTime,
+            timedOut: false,
         };
     }
 
@@ -330,6 +333,7 @@ export function solvePuzzle(level: LevelConfig, maxTimeMs: number = 5000): Solve
         solution: solution ?? undefined,
         searchedStates,
         timeMs,
+        timedOut,
     };
 }
 

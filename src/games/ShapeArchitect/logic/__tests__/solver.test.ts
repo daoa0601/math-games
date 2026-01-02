@@ -123,6 +123,7 @@ describe('solvePuzzle - Solvable Cases', () => {
         const result = solvePuzzle(level);
 
         expect(result.solvable).toBe(true);
+        expect(result.timedOut).toBe(false);
         expect(result.solution).toBeDefined();
         expect(result.solution).toHaveLength(1);
         expect(result.solution![0].pieceId).toBe('o1');
@@ -200,6 +201,7 @@ describe('solvePuzzle - Unsolvable Cases', () => {
         const result = solvePuzzle(level);
 
         expect(result.solvable).toBe(false);
+        expect(result.timedOut).toBe(false);
         expect(result.solution).toBeUndefined();
         expect(result.searchedStates).toBe(0); // Quick volume rejection
     });
@@ -326,6 +328,7 @@ describe('solvePuzzle - Edge Cases', () => {
         const result = solvePuzzle(level);
 
         expect(result.solvable).toBe(true);
+        expect(result.timedOut).toBe(false);
         expect(result.solution).toEqual([]);
         expect(result.searchedStates).toBe(0);
     });
@@ -363,7 +366,7 @@ describe('solvePuzzle - Edge Cases', () => {
 // ========================================
 
 describe('solvePuzzle - Timeout', () => {
-    it('respects timeout and returns partial result', () => {
+    it('respects timeout and returns timedOut=true', () => {
         // Create a complex puzzle that would take too long
         const level = createTestLevel({
             gridSize: [12, 12, 1],
@@ -390,9 +393,12 @@ describe('solvePuzzle - Timeout', () => {
         expect(result.timeMs).toBeLessThan(100); // Allow some overhead
         // searchedStates should reflect work done
         expect(result.searchedStates).toBeGreaterThanOrEqual(0);
+        // When timed out, solvable is false but timedOut is true
+        // This allows caller to distinguish timeout from definitive unsolvable
+        expect(result.timedOut).toBe(true);
     });
 
-    it('completes simple puzzle within default timeout', () => {
+    it('completes simple puzzle within default timeout with timedOut=false', () => {
         const level = createTestLevel({
             gridSize: [4, 4, 1],
             targetVoxels: [
@@ -405,6 +411,7 @@ describe('solvePuzzle - Timeout', () => {
         const result = solvePuzzle(level);
 
         expect(result.solvable).toBe(true);
+        expect(result.timedOut).toBe(false);
         expect(result.timeMs).toBeLessThan(1000); // Should be very fast
     });
 });
