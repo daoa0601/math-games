@@ -18,6 +18,7 @@
 
 /* Grid Board - Rich artisan wooden workbench */
 .grid-board {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -248,6 +249,43 @@
 .grid-cell--drag-over {
     background: hsla(250, 84%, 60%, 0.4) !important;
     border: 2px solid var(--color-primary) !important;
+}
+
+/* ========================================
+   Ghost Preview Overlay
+   Shows piece shape at hover position
+   ======================================== */
+
+.ghost-overlay {
+    position: absolute;
+    inset: var(--space-lg);
+    pointer-events: none;
+    z-index: 5;
+}
+
+.ghost-cell {
+    position: absolute;
+    border-radius: var(--radius-sm);
+    animation: sa-previewPulse 0.8s ease-in-out infinite;
+}
+
+.ghost-cell--valid {
+    opacity: 0.5;
+    border: 2px solid var(--color-success);
+    box-shadow: var(--shadow-glow-success);
+}
+
+.ghost-cell--invalid {
+    opacity: 0.3;
+    border: 2px dashed var(--color-error);
+}
+
+/* Reduced motion: disable ghost pulse */
+@media (prefers-reduced-motion: reduce) {
+    .ghost-cell {
+        animation: none;
+        opacity: 0.5;
+    }
 }
 
 /* Reduced motion: disable workshop animations */

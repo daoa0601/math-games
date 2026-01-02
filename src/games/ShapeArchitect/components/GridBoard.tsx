@@ -199,6 +199,20 @@ export const GridBoard = memo(function GridBoard({
         return `${position}: Target cell, needs to be filled`;
     };
 
+    // Parse position keys for ghost overlay rendering
+    const ghostCells = useMemo(() => {
+        if (!selectedPiece || previewData.positions.size === 0) {
+            return [];
+        }
+
+        const cells: Array<{ x: number; y: number; z: number; key: string }> = [];
+        previewData.positions.forEach((posKey) => {
+            const [x, y, z] = posKey.split(',').map(Number);
+            cells.push({ x, y, z, key: posKey });
+        });
+        return cells;
+    }, [selectedPiece, previewData.positions]);
+
     return (
         <div
             className="grid-board"
@@ -273,6 +287,35 @@ export const GridBoard = memo(function GridBoard({
                             })}
                     </div>
                 ))}
+            {/* Ghost overlay showing piece shape at hover position */}
+            {selectedPiece && ghostCells.length > 0 && (
+                <div className="ghost-overlay" aria-hidden="true">
+                    {ghostCells.map(({ x, y, key }) => {
+                        // Convert grid Y to visual Y (flip for display)
+                        const visualY = height - 1 - y;
+                        // Calculate position based on grid cell size (48px) and gap (2px)
+                        // Account for padding (var(--space-lg) = 24px typically)
+                        const cellSize = 48;
+                        const gap = 2;
+                        const left = x * (cellSize + gap);
+                        const top = visualY * (cellSize + gap);
+
+                        return (
+                            <div
+                                key={key}
+                                className={`ghost-cell ${previewData.isValid ? 'ghost-cell--valid' : 'ghost-cell--invalid'}`}
+                                style={{
+                                    left: `${left}px`,
+                                    top: `${top}px`,
+                                    width: `${cellSize}px`,
+                                    height: `${cellSize}px`,
+                                    backgroundColor: selectedPiece.color,
+                                }}
+                            />
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 });
