@@ -13,7 +13,9 @@
 
 import type { LevelConfig, Piece, Position3D } from './types';
 import type { SeededRandom } from '@/shared/utils';
-import { createDailyRandom } from '@/shared/utils';
+import { createDailyRandom, createSeededRandom } from '@/shared/utils';
+import { solvePuzzle } from './solver';
+import { presetLevels } from './presets';
 
 // ============================================================================
 // Piece Factories (inline to avoid circular deps with presets)
@@ -126,6 +128,55 @@ const PIECE_COUNT_RANGE: Record<'easy' | 'medium' | 'hard', [number, number]> = 
   hard: [6, 7],
 };
 
+/**
+ * Validation timeout in milliseconds.
+ * Fast enough for real-time generation while still being thorough.
+ */
+const VALIDATION_TIMEOUT_MS = 2000;
+
+/**
+ * Maximum retry attempts before falling back to preset.
+ */
+const MAX_RETRY_ATTEMPTS = 10;
+
+// ============================================================================
+// Fallback Preset Selection
+// ============================================================================
+
+/**
+ * Get a fallback preset level matching the specified difficulty.
+ * Uses seeded selection to ensure consistent fallback for the same seed.
+ *
+ * @param rng - Seeded random number generator for consistent selection
+ * @param difficulty - Target difficulty level
+ * @returns A preset level matching the difficulty
+ */
+function getFallbackPreset(
+  rng: SeededRandom,
+  difficulty: 'easy' | 'medium' | 'hard'
+): LevelConfig {
+  // Filter presets by difficulty (only 2D presets for now since generator is 2D)
+  const matchingPresets = presetLevels.filter(
+    (level) => level.difficulty === difficulty && level.type === '2D'
+  );
+
+  // If no exact match, use any 2D preset
+  const candidates =
+    matchingPresets.length > 0
+      ? matchingPresets
+      : presetLevels.filter((level) => level.type === '2D');
+
+  // Use seeded selection for reproducibility
+  const selected = rng.pick(candidates);
+
+  // Return a copy with modified ID to indicate it's a fallback
+  return {
+    ...selected,
+    id: `daily_fallback_${rng.seed}`,
+    name: `Daily Challenge (${selected.name})`,
+  };
+}
+
 // ============================================================================
 // Seeded Generator Functions
 // ============================================================================
@@ -186,22 +237,71 @@ export function generateSeededLevel(
 }
 
 // ============================================================================
+// Level Validation
+// ============================================================================
+
+/**
+ * Generate a validated level with retry logic.
+ * Attempts to generate a solvable level, retrying with modified seeds if needed.
+ *
+ * @param baseSeed - Base seed string for generation
+ * @param difficulty - Target difficulty level
+ * @returns A validated level config (either generated or fallback preset)
+ */
+function generateValidatedLevel(
+  baseSeed: string,
+  difficulty: 'easy' | 'medium' | 'hard'
+): LevelConfig {
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    // Create seed with attempt suffix for retries
+    const seed = attempt === 0 ? baseSeed : `${baseSeed}-retry${attempt}`;
+    const rng = createSeededRandom(seed);
+
+    const level = generateSeededLevel(rng, difficulty);
+
+    // Validate the generated level
+    const result = solvePuzzle(level, VALIDATION_TIMEOUT_MS);
+
+    if (result.solvable) {
+      // Definitely solvable, return it
+      return level;
+    }
+
+    if (result.timedOut) {
+      // Solver timed out - for complex puzzles, we can't be certain
+      // Continue trying to find a definitively solvable level
+      // But if we exhaust retries, this is better than nothing
+      continue;
+    }
+
+    // result.solvable === false && !result.timedOut means definitively unsolvable
+    // Continue to next attempt
+  }
+
+  // All retries exhausted, fall back to a preset level
+  // Presets are pre-validated, so they're guaranteed solvable
+  const fallbackRng = createSeededRandom(baseSeed);
+  return getFallbackPreset(fallbackRng, difficulty);
+}
+
+// ============================================================================
 // Daily Challenge API
 // ============================================================================
 
 /**
  * Get today's daily challenge level for ShapeArchitect.
  * Always returns the same level for the same date.
+ * Validates that the generated level is solvable, with retry and fallback logic.
  *
  * @param date - Date string in YYYY-MM-DD format (defaults to today)
- * @returns Level config for daily challenge
+ * @returns Level config for daily challenge (guaranteed solvable)
  */
 export function getDailyShapeArchitectLevel(date?: string): LevelConfig {
   const dateStr = date ?? new Date().toISOString().split('T')[0];
-  const rng = createDailyRandom(dateStr, 'shape-architect');
+  const baseSeed = `${dateStr}-shape-architect`;
 
   // Daily challenges are always medium difficulty
-  return generateSeededLevel(rng, 'medium');
+  return generateValidatedLevel(baseSeed, 'medium');
 }
 
 /**
@@ -216,3 +316,37 @@ export function previewDailyLevel(daysFromNow: number = 0): LevelConfig {
   const dateStr = date.toISOString().split('T')[0];
   return getDailyShapeArchitectLevel(dateStr);
 }
+
+// ============================================================================
+// Testing Utilities
+// ============================================================================
+
+/**
+ * Exported constants for testing purposes.
+ */
+export const GENERATOR_CONSTANTS = {
+  VALIDATION_TIMEOUT_MS,
+  MAX_RETRY_ATTEMPTS,
+} as const;
+
+/**
+ * Generate a validated level directly (for testing).
+ * Exposes the internal generateValidatedLevel function.
+ */
+export { generateValidatedLevel as generateValidatedLevelForTesting };
+
+// ============================================================================
+// 3D Support Status
+// ============================================================================
+
+/**
+ * NOTE: The current seeded generator only produces 2D levels (z=0).
+ *
+ * To support 3D daily challenges, the generator would need to be extended to:
+ * 1. Use 3D polycube pieces (from presets.ts POLYCUBE_3D)
+ * 2. Generate 3D target voxels with z > 0
+ * 3. Set level type to '3D' for proper solver rotation handling
+ *
+ * For now, 3D puzzles are only available through preset levels.
+ * The fallback mechanism will use 2D presets for daily challenges.
+ */
