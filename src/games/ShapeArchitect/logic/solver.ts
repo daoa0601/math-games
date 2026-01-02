@@ -156,7 +156,7 @@ function findCandidatePositions(
     piece: Piece,
     rotation: Rotation3D,
     targetCell: Position3D,
-    gridSize: [number, number, number]
+    _gridSize: [number, number, number]
 ): Position3D[] {
     const rotatedLayout = rotatePieceLayout3D(piece.layout, rotation);
     const candidates: Position3D[] = [];

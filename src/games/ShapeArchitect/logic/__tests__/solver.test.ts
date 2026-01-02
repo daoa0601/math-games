@@ -4,7 +4,6 @@ import {
     isSolvable,
     generate2DRotations,
     generate3DRotations,
-    type SolverResult,
 } from '../solver';
 import type { LevelConfig, Piece, Position3D } from '../types';
 
@@ -242,15 +241,8 @@ describe('solvePuzzle - Unsolvable Cases', () => {
 
     it('returns unsolvable for isolated single cell with multi-cell pieces', () => {
         // Single isolated target cell cannot be filled by a 4-cell piece
-        const level = createTestLevel({
-            gridSize: [10, 10, 1],
-            targetVoxels: [
-                // Cluster of 3 cells (can't be filled by 4-cell O-block)
-                { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
-                { x: 1, y: 2, z: 0 },
-            ],
-            pieces: [], // Volume would mismatch anyway with O-block
-        });
+        // Note: Creating level with volume mismatch would fail early anyway
+        // So we test with correct volume but impossible shape
 
         // Even with correct volume, shape doesn't fit
         const level2 = createTestLevel({

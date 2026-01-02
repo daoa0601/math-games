@@ -7,7 +7,7 @@ import {
   generateValidatedLevelForTesting,
 } from '../seededGenerator';
 import { createSeededRandom } from '@/shared/utils';
-import { solvePuzzle, isSolvable } from '../solver';
+import { solvePuzzle } from '../solver';
 
 // ========================================
 // Test Fixtures
@@ -183,7 +183,6 @@ describe('getDailyShapeArchitectLevel', () => {
 
   it('uses today date when not specified', () => {
     const level = getDailyShapeArchitectLevel();
-    const today = new Date().toISOString().split('T')[0];
 
     // The level should be for today
     expect(level.id).toContain('daily');

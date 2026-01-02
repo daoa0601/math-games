@@ -13,7 +13,7 @@
 
 import type { LevelConfig, Piece, Position3D } from './types';
 import type { SeededRandom } from '@/shared/utils';
-import { createDailyRandom, createSeededRandom } from '@/shared/utils';
+import { createSeededRandom } from '@/shared/utils';
 import { solvePuzzle } from './solver';
 import { presetLevels } from './presets';
 
