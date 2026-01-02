@@ -4,7 +4,7 @@ import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import * as THREE from 'three';
 import type { CellState, Piece, Position3D, PlacedPiece, Rotation3D } from '../logic/types';
-import { getPieceWorldPositions, isInBounds } from '../logic/engine';
+import { getPieceWorldPositions, findNearestValidPosition } from '../logic/engine';
 import { Voxel } from './Voxel';
 import { GridFloor } from './GridFloor';
 import { useThreeCleanup } from '../hooks';
@@ -68,29 +68,35 @@ export function GridBoard3D({
         return colorMap;
     }, [placedPieces, levelPieces]);
 
-    // Calculate preview positions based on hover
+    // Calculate preview positions based on hover, using snap-to-nearest
     const previewData = useMemo(() => {
         if (!selectedPiece || !hoverPosition) {
-            return { positions: new Map<string, boolean>() };
+            return { positions: new Set<string>(), isValid: false, snappedPosition: null };
         }
 
-        const worldPositions = getPieceWorldPositions(selectedPiece, hoverPosition, rotation);
-        const positionMap = new Map<string, boolean>();
+        // Try to find a valid position using snap-to-nearest
+        const snappedPosition = findNearestValidPosition(
+            grid,
+            selectedPiece,
+            hoverPosition,
+            rotation,
+            gridSize,
+            2
+        );
+
+        const finalPosition = snappedPosition ?? hoverPosition;
+        const worldPositions = getPieceWorldPositions(selectedPiece, finalPosition, rotation);
+        const positionSet = new Set<string>();
 
         for (const pos of worldPositions) {
-            let isValid = true;
-            if (!isInBounds(pos, gridSize)) {
-                isValid = false;
-            } else {
-                const cell = grid[pos.x][pos.y][pos.z];
-                if (cell !== 1) {
-                    isValid = false;
-                }
-            }
-            positionMap.set(`${pos.x},${pos.y},${pos.z}`, isValid);
+            positionSet.add(`${pos.x},${pos.y},${pos.z}`);
         }
 
-        return { positions: positionMap };
+        return {
+            positions: positionSet,
+            isValid: snappedPosition !== null,
+            snappedPosition,
+        };
     }, [selectedPiece, hoverPosition, rotation, gridSize, grid]);
 
     const handleCellClick = useCallback(
@@ -128,19 +134,18 @@ export function GridBoard3D({
                     // Skip empty cells
                     if (cell === 0) continue;
 
-                    // Check for preview
+                    // Check for preview (ghost preview for piece placement)
                     const isPreview = previewData.positions.has(posKey);
-                    const isPreviewValid = previewData.positions.get(posKey) ?? true;
 
                     if (isPreview) {
-                        // Render preview voxel
+                        // Render ghost preview voxel with semi-transparent material
                         result.push(
                             <Voxel
                                 key={`preview-${posKey}`}
                                 position={position}
                                 color={selectedPiece?.color ?? '#6366f1'}
                                 isPreview
-                                isPreviewValid={isPreviewValid}
+                                isPreviewValid={previewData.isValid}
                             />
                         );
                     } else if (cell === 1) {
