@@ -289,26 +289,25 @@ export const GridBoard = memo(function GridBoard({
                 ))}
             {/* Ghost overlay showing piece shape at hover position */}
             {selectedPiece && ghostCells.length > 0 && (
-                <div className="ghost-overlay" aria-hidden="true">
+                <div
+                    className="ghost-overlay"
+                    aria-hidden="true"
+                    style={{
+                        '--grid-cols': width,
+                        '--grid-rows': height,
+                    } as React.CSSProperties}
+                >
                     {ghostCells.map(({ x, y, key }) => {
                         // Convert grid Y to visual Y (flip for display)
                         const visualY = height - 1 - y;
-                        // Calculate position based on grid cell size (48px) and gap (2px)
-                        // Account for padding (var(--space-lg) = 24px typically)
-                        const cellSize = 48;
-                        const gap = 2;
-                        const left = x * (cellSize + gap);
-                        const top = visualY * (cellSize + gap);
 
                         return (
                             <div
                                 key={key}
                                 className={`ghost-cell ${previewData.isValid ? 'ghost-cell--valid' : 'ghost-cell--invalid'}`}
                                 style={{
-                                    left: `${left}px`,
-                                    top: `${top}px`,
-                                    width: `${cellSize}px`,
-                                    height: `${cellSize}px`,
+                                    gridColumn: x + 1,
+                                    gridRow: visualY + 1,
                                     backgroundColor: selectedPiece.color,
                                 }}
                             />

@@ -261,10 +261,13 @@
     inset: var(--space-lg);
     pointer-events: none;
     z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols, 8), 1fr);
+    grid-template-rows: repeat(var(--grid-rows, 8), 1fr);
+    gap: 2px;
 }
 
 .ghost-cell {
-    position: absolute;
     border-radius: var(--radius-sm);
     animation: sa-previewPulse 0.8s ease-in-out infinite;
 }
@@ -278,6 +281,13 @@
 .ghost-cell--invalid {
     opacity: 0.3;
     border: 2px dashed var(--color-error);
+}
+
+/* Responsive ghost overlay - match grid-board padding on smaller screens */
+@media (max-width: 600px) {
+    .ghost-overlay {
+        inset: var(--space-md);
+    }
 }
 
 /* Reduced motion: disable ghost pulse */
