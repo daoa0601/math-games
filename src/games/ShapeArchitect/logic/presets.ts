@@ -454,24 +454,23 @@ export const presetLevels: LevelConfig[] = [
         id: 'easy_3',
         name: 'T-Formation',
         type: '2D',
-        gridSize: [7, 6, 1],
+        gridSize: [7, 7, 1],
         targetVoxels: [
-            // 20 cells = 5 pieces
-            // Top bar
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 },
-            // Stem
-            { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 },
-            { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 },
-            { x: 2, y: 5, z: 0 }, { x: 3, y: 5, z: 0 }, { x: 4, y: 5, z: 0 },
-            { x: 3, y: 6, z: 0 },
+            // Simple T-shape = 16 cells = 4 O-blocks
+            // Top bar 4x2
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
+            // Stem 2x4
+            { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 },
+            { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 },
+            { x: 2, y: 5, z: 0 }, { x: 3, y: 5, z: 0 },
+            { x: 2, y: 6, z: 0 }, { x: 3, y: 6, z: 0 },
         ],
         pieces: [
-            TETRIS.I('i1', '#00BCD4'),
-            TETRIS.T('t1', '#9C27B0'),
-            TETRIS.T('t2', '#E91E63'),
-            TETRIS.L('l1', '#FF9800'),
-            TETRIS.J('j1', '#2196F3'),
+            TETRIS.O('o1', '#00BCD4'),
+            TETRIS.O('o2', '#9C27B0'),
+            TETRIS.O('o3', '#E91E63'),
+            TETRIS.O('o4', '#FF9800'),
         ],
         difficulty: 'easy',
     },
@@ -479,20 +478,21 @@ export const presetLevels: LevelConfig[] = [
         id: 'easy_4',
         name: 'Rectangle',
         type: '2D',
-        gridSize: [7, 5, 1],
+        gridSize: [8, 5, 1],
         targetVoxels: [
-            // 5x4 = 20 cells = 5 pieces
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 },
-            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 },
+            // 6x4 = 24 cells = 6 O-blocks (easily solvable)
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 }, { x: 6, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 }, { x: 6, y: 2, z: 0 },
+            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 },
+            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 },
         ],
         pieces: [
-            TETRIS.I('i1', '#00BCD4'),
-            TETRIS.O('o1', '#FFEB3B'),
-            TETRIS.T('t1', '#9C27B0'),
-            TETRIS.L('l1', '#FF9800'),
-            TETRIS.J('j1', '#2196F3'),
+            TETRIS.O('o1', '#00BCD4'),
+            TETRIS.O('o2', '#FFEB3B'),
+            TETRIS.O('o3', '#9C27B0'),
+            TETRIS.O('o4', '#FF9800'),
+            TETRIS.O('o5', '#2196F3'),
+            TETRIS.O('o6', '#4CAF50'),
         ],
         difficulty: 'easy',
     },
@@ -502,22 +502,25 @@ export const presetLevels: LevelConfig[] = [
         id: 'med_1',
         name: 'Plus Sign',
         type: '2D',
-        gridSize: [7, 7, 1],
+        gridSize: [8, 8, 1],
         targetVoxels: [
-            // Cross shape = 20 cells
-            { x: 3, y: 1, z: 0 },
-            { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
-            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 },
-            { x: 2, y: 5, z: 0 }, { x: 3, y: 5, z: 0 }, { x: 4, y: 5, z: 0 },
-            { x: 3, y: 6, z: 0 },
+            // Plus shape = 20 cells = 5 O-blocks
+            // Top stem 2x2
+            { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 },
+            { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
+            // Cross bar 6x2
+            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 },
+            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 },
+            // Bottom stem 2x2
+            { x: 3, y: 5, z: 0 }, { x: 4, y: 5, z: 0 },
+            { x: 3, y: 6, z: 0 }, { x: 4, y: 6, z: 0 },
         ],
         pieces: [
-            TETRIS.T('t1', '#9C27B0'),
-            TETRIS.T('t2', '#E91E63'),
-            TETRIS.I('i1', '#00BCD4'),
-            TETRIS.L('l1', '#FF9800'),
-            TETRIS.J('j1', '#2196F3'),
+            TETRIS.O('o1', '#FFEB3B'),
+            TETRIS.O('o2', '#4CAF50'),
+            TETRIS.O('o3', '#00BCD4'),
+            TETRIS.O('o4', '#9C27B0'),
+            TETRIS.O('o5', '#E91E63'),
         ],
         difficulty: 'medium',
     },
@@ -525,21 +528,21 @@ export const presetLevels: LevelConfig[] = [
         id: 'med_2',
         name: 'Staircase',
         type: '2D',
-        gridSize: [8, 6, 1],
+        gridSize: [8, 5, 1],
         targetVoxels: [
-            // Stair pattern = 24 cells = 6 pieces
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
+            // Simple stair pattern = 20 cells = 5 tetrominoes
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 },
             { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
             { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 },
-            { x: 1, y: 5, z: 0 }, { x: 2, y: 5, z: 0 }, { x: 3, y: 5, z: 0 }, { x: 4, y: 5, z: 0 }, { x: 5, y: 5, z: 0 }, { x: 6, y: 5, z: 0 },
+            { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 },
+            { x: 5, y: 1, z: 0 }, { x: 6, y: 1, z: 0 }, { x: 5, y: 2, z: 0 }, { x: 6, y: 2, z: 0 },
         ],
         pieces: [
             TETRIS.O('o1', '#FFEB3B'),
             TETRIS.O('o2', '#4CAF50'),
-            TETRIS.I('i1', '#00BCD4'),
-            TETRIS.S('s1', '#4CAF50'),
-            TETRIS.Z('z1', '#F44336'),
+            TETRIS.O('o3', '#2196F3'),
+            TETRIS.O('o4', '#FF9800'),
+            TETRIS.O('o5', '#E91E63'),
         ],
         difficulty: 'medium',
     },
@@ -547,21 +550,20 @@ export const presetLevels: LevelConfig[] = [
         id: 'med_3',
         name: 'H-Shape',
         type: '2D',
-        gridSize: [7, 7, 1],
+        gridSize: [8, 6, 1],
         targetVoxels: [
-            // H pattern = 24 cells = 6 pieces
+            // H pattern = 20 cells = 5 tetrominoes
             { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 5, y: 1, z: 0 }, { x: 6, y: 1, z: 0 },
             { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 5, y: 2, z: 0 }, { x: 6, y: 2, z: 0 },
             { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 },
-            { x: 1, y: 5, z: 0 }, { x: 2, y: 5, z: 0 }, { x: 5, y: 5, z: 0 }, { x: 6, y: 5, z: 0 },
+            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 },
+            { x: 1, y: 5, z: 0 }, { x: 2, y: 5, z: 0 },
         ],
         pieces: [
             TETRIS.O('o1', '#FFEB3B'),
             TETRIS.O('o2', '#4CAF50'),
             TETRIS.O('o3', '#2196F3'),
             TETRIS.I('i1', '#00BCD4'),
-            TETRIS.I('i2', '#9C27B0'),
             TETRIS.O('o4', '#E91E63'),
         ],
         difficulty: 'medium',
@@ -572,9 +574,9 @@ export const presetLevels: LevelConfig[] = [
         id: 'hard_1',
         name: 'Tetris Master',
         type: '2D',
-        gridSize: [8, 7, 1],
+        gridSize: [8, 5, 1],
         targetVoxels: [
-            // 5x5 = 25 cells (need mixed pieces)
+            // 6x4 = 24 cells = 6 tetrominoes
             { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 }, { x: 6, y: 1, z: 0 },
             { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 }, { x: 6, y: 2, z: 0 },
             { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 },
@@ -582,56 +584,59 @@ export const presetLevels: LevelConfig[] = [
         ],
         pieces: [
             TETRIS.I('i1', '#00BCD4'),
+            TETRIS.I('i2', '#26A69A'),
             TETRIS.O('o1', '#FFEB3B'),
-            TETRIS.T('t1', '#9C27B0'),
-            TETRIS.S('s1', '#4CAF50'),
-            TETRIS.L('l1', '#FF9800'),
-            TETRIS.J('j1', '#2196F3'),
+            TETRIS.O('o2', '#FFC107'),
+            TETRIS.O('o3', '#FF9800'),
+            TETRIS.O('o4', '#E91E63'),
         ],
         difficulty: 'hard',
     },
     {
         id: 'hard_2',
-        name: 'All Seven',
+        name: 'Big Rectangle',
         type: '2D',
-        gridSize: [10, 6, 1],
+        gridSize: [10, 5, 1],
         targetVoxels: [
-            // 7x4 = 28 cells = all 7 tetrominoes
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 }, { x: 6, y: 1, z: 0 }, { x: 7, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 }, { x: 6, y: 2, z: 0 }, { x: 7, y: 2, z: 0 },
-            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 }, { x: 7, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 }, { x: 7, y: 4, z: 0 },
+            // 8x4 = 32 cells = 8 O-blocks
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 }, { x: 6, y: 1, z: 0 }, { x: 7, y: 1, z: 0 }, { x: 8, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 }, { x: 6, y: 2, z: 0 }, { x: 7, y: 2, z: 0 }, { x: 8, y: 2, z: 0 },
+            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 }, { x: 7, y: 3, z: 0 }, { x: 8, y: 3, z: 0 },
+            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 }, { x: 7, y: 4, z: 0 }, { x: 8, y: 4, z: 0 },
         ],
         pieces: [
-            TETRIS.I('i1', '#00BCD4'),
-            TETRIS.O('o1', '#FFEB3B'),
-            TETRIS.T('t1', '#9C27B0'),
-            TETRIS.S('s1', '#4CAF50'),
-            TETRIS.Z('z1', '#F44336'),
-            TETRIS.J('j1', '#2196F3'),
-            TETRIS.L('l1', '#FF9800'),
+            TETRIS.O('o1', '#00BCD4'),
+            TETRIS.O('o2', '#26A69A'),
+            TETRIS.O('o3', '#FFEB3B'),
+            TETRIS.O('o4', '#FFC107'),
+            TETRIS.O('o5', '#9C27B0'),
+            TETRIS.O('o6', '#4CAF50'),
+            TETRIS.O('o7', '#2196F3'),
+            TETRIS.O('o8', '#E91E63'),
         ],
         difficulty: 'hard',
     },
     {
         id: 'hard_3',
-        name: 'Pentomino Challenge',
+        name: 'Long Board',
         type: '2D',
-        gridSize: [9, 6, 1],
+        gridSize: [10, 5, 1],
         targetVoxels: [
-            // 5x5 = 25 cells (5 pentominoes)
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 },
-            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 },
-            { x: 1, y: 5, z: 0 }, { x: 2, y: 5, z: 0 }, { x: 3, y: 5, z: 0 }, { x: 4, y: 5, z: 0 }, { x: 5, y: 5, z: 0 },
+            // 8x4 = 32 cells = 8 I-blocks (rotated vertically)
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 }, { x: 6, y: 1, z: 0 }, { x: 7, y: 1, z: 0 }, { x: 8, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 }, { x: 6, y: 2, z: 0 }, { x: 7, y: 2, z: 0 }, { x: 8, y: 2, z: 0 },
+            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 }, { x: 7, y: 3, z: 0 }, { x: 8, y: 3, z: 0 },
+            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 }, { x: 7, y: 4, z: 0 }, { x: 8, y: 4, z: 0 },
         ],
         pieces: [
-            PENTOMINO.F('f1', '#E91E63'),
-            PENTOMINO.P('p1', '#3F51B5'),
-            PENTOMINO.U('u1', '#009688'),
-            PENTOMINO.W('w1', '#FF5722'),
-            TETRIS.I('i1', '#00BCD4'),
+            TETRIS.I('i1', '#E91E63'),
+            TETRIS.I('i2', '#3F51B5'),
+            TETRIS.I('i3', '#009688'),
+            TETRIS.I('i4', '#FF5722'),
+            TETRIS.I('i5', '#FFEB3B'),
+            TETRIS.I('i6', '#00BCD4'),
+            TETRIS.I('i7', '#4CAF50'),
+            TETRIS.I('i8', '#9C27B0'),
         ],
         difficulty: 'hard',
     },
@@ -663,48 +668,42 @@ export const presetLevels: LevelConfig[] = [
     // ===== EXPERT LEVELS (Full Pentomino Set) =====
     {
         id: 'expert_1',
-        name: 'Pentomino 5x6',
+        name: 'Pentomino Rectangle',
         type: '2D',
-        gridSize: [8, 8, 1],
+        gridSize: [8, 6, 1],
         targetVoxels: [
-            // 5x6 = 30 cells (6 pentominoes)
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 }, { x: 6, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 }, { x: 6, y: 2, z: 0 },
-            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 },
-            { x: 1, y: 5, z: 0 }, { x: 2, y: 5, z: 0 }, { x: 3, y: 5, z: 0 }, { x: 4, y: 5, z: 0 }, { x: 5, y: 5, z: 0 }, { x: 6, y: 5, z: 0 },
+            // 5x4 = 20 cells = 4 pentominoes
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 },
+            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 },
+            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 },
         ],
         pieces: [
             PENTOMINO.I('pi1', '#E91E63'),
             PENTOMINO.L('pl1', '#3F51B5'),
-            PENTOMINO.T('pt1', '#009688'),
             PENTOMINO.V('pv1', '#FF5722'),
-            PENTOMINO.N('pn1', '#795548'),
-            PENTOMINO.Y('py1', '#607D8B'),
+            PENTOMINO.P('pp1', '#795548'),
         ],
         difficulty: 'hard',
     },
     {
         id: 'expert_2',
-        name: 'Pentomino X-Cross',
+        name: 'Wide Grid',
         type: '2D',
-        gridSize: [9, 9, 1],
+        gridSize: [9, 5, 1],
         targetVoxels: [
-            // Cross shape using 5 pentominoes = 25 cells
-            { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 },
-            { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 },
-            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 }, { x: 7, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 }, { x: 7, y: 4, z: 0 },
-            { x: 3, y: 5, z: 0 }, { x: 4, y: 5, z: 0 }, { x: 5, y: 5, z: 0 },
-            { x: 3, y: 6, z: 0 }, { x: 4, y: 6, z: 0 }, { x: 5, y: 6, z: 0 },
+            // 8x3 = 24 cells = 6 O-blocks
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 }, { x: 6, y: 1, z: 0 }, { x: 7, y: 1, z: 0 }, { x: 8, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 }, { x: 6, y: 2, z: 0 }, { x: 7, y: 2, z: 0 }, { x: 8, y: 2, z: 0 },
+            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 }, { x: 7, y: 3, z: 0 }, { x: 8, y: 3, z: 0 },
         ],
         pieces: [
-            PENTOMINO.X('px1', '#E91E63'),
-            PENTOMINO.F('pf1', '#3F51B5'),
-            PENTOMINO.Z('pz1', '#009688'),
-            PENTOMINO.W('pw1', '#FF5722'),
-            PENTOMINO.U('pu1', '#795548'),
-            TETRIS.I('ti1', '#00BCD4'),
+            TETRIS.I('i1', '#E91E63'),
+            TETRIS.I('i2', '#3F51B5'),
+            TETRIS.I('i3', '#009688'),
+            TETRIS.I('i4', '#FF5722'),
+            TETRIS.I('i5', '#FFEB3B'),
+            TETRIS.I('i6', '#00BCD4'),
         ],
         difficulty: 'hard',
     },
@@ -751,80 +750,110 @@ export const presetLevels: LevelConfig[] = [
         difficulty: 'easy',
     },
 
-    // 3D Medium #1: L-Corner 3D
+    // 3D Medium #1: Cube Tower
     {
         id: '3d_med_1',
-        name: 'L-Corner 3D',
+        name: 'Cube Tower',
         type: '3D',
-        gridSize: [5, 5, 4],
+        gridSize: [4, 4, 5],
         targetVoxels: [
-            // 3D L-shape = 16 cells
-            // Base layer
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 1, y: 3, z: 0 },
-            // Second layer
-            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 }, { x: 3, y: 1, z: 1 },
-            { x: 1, y: 2, z: 1 }, { x: 1, y: 3, z: 1 },
-            // Third layer
+            // 2x2x4 tower = 16 cells = 4 Cube2x2 pieces
+            // Layer 0
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
+            // Layer 1
+            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 },
+            { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 },
+            // Layer 2
             { x: 1, y: 1, z: 2 }, { x: 2, y: 1, z: 2 },
-            { x: 1, y: 2, z: 2 }, { x: 1, y: 3, z: 2 },
-            // Top
-            { x: 1, y: 1, z: 3 }, { x: 1, y: 2, z: 3 },
+            { x: 1, y: 2, z: 2 }, { x: 2, y: 2, z: 2 },
+            // Layer 3
+            { x: 1, y: 1, z: 3 }, { x: 2, y: 1, z: 3 },
+            { x: 1, y: 2, z: 3 }, { x: 2, y: 2, z: 3 },
         ],
         pieces: [
-            POLYCUBE_3D.Corner3D('c1', '#00BCD4'),
-            POLYCUBE_3D.Corner3D('c2', '#9C27B0'),
-            POLYCUBE_3D.L3D('l1', '#FF5722'),
-            POLYCUBE_3D.T3D('t1', '#4CAF50'),
+            POLYCUBE_3D.Cube2x2('c1', '#FF9800'),
+            POLYCUBE_3D.Cube2x2('c2', '#4CAF50'),
+            POLYCUBE_3D.Cube2x2('c3', '#2196F3'),
+            POLYCUBE_3D.Cube2x2('c4', '#9C27B0'),
         ],
         difficulty: 'medium',
     },
 
-    // 3D Medium #2: Cross Platform
+    // 3D Medium #2: Double Cube
     {
         id: '3d_med_2',
-        name: 'Cross Platform',
+        name: 'Double Cube',
         type: '3D',
-        gridSize: [6, 5, 3],
+        gridSize: [5, 4, 3],
         targetVoxels: [
-            // Cross on base layer
-            { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
-            { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 },
-            // Cross on second layer
-            { x: 2, y: 1, z: 1 }, { x: 3, y: 1, z: 1 },
-            { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 }, { x: 3, y: 2, z: 1 }, { x: 4, y: 2, z: 1 },
-            { x: 2, y: 3, z: 1 }, { x: 3, y: 3, z: 1 },
-            // Center column on top
-            { x: 2, y: 2, z: 2 }, { x: 3, y: 2, z: 2 },
+            // Two 2x2x2 cubes side by side = 16 cells
+            // First cube
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
+            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 },
+            { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 },
+            // Second cube
+            { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 },
+            { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
+            { x: 3, y: 1, z: 1 }, { x: 4, y: 1, z: 1 },
+            { x: 3, y: 2, z: 1 }, { x: 4, y: 2, z: 1 },
         ],
         pieces: [
-            POLYCUBE_3D.T3D('t1', '#E91E63'),
-            POLYCUBE_3D.T3D('t2', '#3F51B5'),
-            POLYCUBE_3D.Cube2x2('c1', '#FF9800'),
-            POLYCUBE_3D.Step3D('s1', '#4CAF50'),
-            TETRIS.O('o1', '#00BCD4'),
+            POLYCUBE_3D.Cube2x2x2('c1', '#E91E63'),
+            POLYCUBE_3D.Cube2x2x2('c2', '#3F51B5'),
         ],
         difficulty: 'medium',
     },
 
-    // 3D Medium #3: Stairs 3D
+    // 3D Medium #3: Flat Platform
     {
         id: '3d_med_3',
-        name: 'Stairs 3D',
+        name: 'Flat Platform',
         type: '3D',
-        gridSize: [6, 6, 5],
+        gridSize: [6, 6, 3],
         targetVoxels: [
-            // Staircase going up: 4 steps, each 2 cells wide
-            // Step 1 (z=0)
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
-            // Step 2 (z=0, z=1)
-            { x: 2, y: 2, z: 1 }, { x: 3, y: 2, z: 1 }, { x: 2, y: 3, z: 1 }, { x: 3, y: 3, z: 1 },
-            { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 },
-            // Step 3 (z=0-2)
-            { x: 3, y: 3, z: 2 }, { x: 4, y: 3, z: 2 }, { x: 3, y: 4, z: 2 }, { x: 4, y: 4, z: 2 },
-            // Step 4 (z=3)
-            { x: 4, y: 4, z: 3 }, { x: 5, y: 4, z: 3 }, { x: 4, y: 5, z: 3 }, { x: 5, y: 5, z: 3 },
+            // 4x4x1 platform = 16 cells
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
+            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 },
+            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 },
+        ],
+        pieces: [
+            POLYCUBE_3D.Cube2x2('c1', '#FF9800'),
+            POLYCUBE_3D.Cube2x2('c2', '#4CAF50'),
+            POLYCUBE_3D.Cube2x2('c3', '#2196F3'),
+            POLYCUBE_3D.Cube2x2('c4', '#E91E63'),
+        ],
+        difficulty: 'medium',
+    },
+
+    // 3D Hard #1: Tall Tower
+    {
+        id: '3d_hard_1',
+        name: 'Tall Tower',
+        type: '3D',
+        gridSize: [4, 4, 7],
+        targetVoxels: [
+            // 2x2x6 tower = 24 cells = 6 Cube2x2 pieces
+            // Layer 0
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
+            // Layer 1
+            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 },
+            { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 },
+            // Layer 2
+            { x: 1, y: 1, z: 2 }, { x: 2, y: 1, z: 2 },
+            { x: 1, y: 2, z: 2 }, { x: 2, y: 2, z: 2 },
+            // Layer 3
+            { x: 1, y: 1, z: 3 }, { x: 2, y: 1, z: 3 },
+            { x: 1, y: 2, z: 3 }, { x: 2, y: 2, z: 3 },
+            // Layer 4
+            { x: 1, y: 1, z: 4 }, { x: 2, y: 1, z: 4 },
+            { x: 1, y: 2, z: 4 }, { x: 2, y: 2, z: 4 },
+            // Layer 5
+            { x: 1, y: 1, z: 5 }, { x: 2, y: 1, z: 5 },
+            { x: 1, y: 2, z: 5 }, { x: 2, y: 2, z: 5 },
         ],
         pieces: [
             POLYCUBE_3D.Cube2x2('c1', '#FF9800'),
@@ -832,107 +861,63 @@ export const presetLevels: LevelConfig[] = [
             POLYCUBE_3D.Cube2x2('c3', '#2196F3'),
             POLYCUBE_3D.Cube2x2('c4', '#9C27B0'),
             POLYCUBE_3D.Cube2x2('c5', '#E91E63'),
-        ],
-        difficulty: 'medium',
-    },
-
-    // 3D Hard #1: Fortress
-    {
-        id: '3d_hard_1',
-        name: 'Fortress',
-        type: '3D',
-        gridSize: [6, 6, 4],
-        targetVoxels: [
-            // Hollow square base with walls going up
-            // Base layer (3x3 hollow)
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
-            { x: 1, y: 3, z: 0 }, { x: 4, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 },
-            // Second layer (walls)
-            { x: 1, y: 1, z: 1 }, { x: 4, y: 1, z: 1 },
-            { x: 1, y: 4, z: 1 }, { x: 4, y: 4, z: 1 },
-            // Corner towers
-            { x: 1, y: 1, z: 2 }, { x: 4, y: 1, z: 2 },
-            { x: 1, y: 4, z: 2 }, { x: 4, y: 4, z: 2 },
-            // Tower tops
-            { x: 1, y: 1, z: 3 }, { x: 4, y: 1, z: 3 },
-            { x: 1, y: 4, z: 3 }, { x: 4, y: 4, z: 3 },
-        ],
-        pieces: [
-            POLYCUBE_3D.Tower4('t1', '#795548'),
-            POLYCUBE_3D.Tower4('t2', '#795548'),
-            POLYCUBE_3D.Tower4('t3', '#795548'),
-            POLYCUBE_3D.Tower4('t4', '#795548'),
-            TETRIS.I('i1', '#9E9E9E'),
-            TETRIS.I('i2', '#9E9E9E'),
+            POLYCUBE_3D.Cube2x2('c6', '#795548'),
         ],
         difficulty: 'hard',
     },
 
-    // 3D Hard #2: Spiral Tower
+    // 3D Hard #2: Triple Stack
     {
         id: '3d_hard_2',
-        name: 'Spiral Tower',
+        name: 'Triple Stack',
         type: '3D',
-        gridSize: [5, 5, 6],
+        gridSize: [5, 5, 4],
         targetVoxels: [
-            // Spiral going up
-            // Layer 0
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 },
-            { x: 3, y: 2, z: 0 }, { x: 3, y: 3, z: 0 },
-            // Layer 1
-            { x: 3, y: 3, z: 1 }, { x: 2, y: 3, z: 1 }, { x: 1, y: 3, z: 1 },
-            { x: 1, y: 2, z: 1 },
-            // Layer 2
-            { x: 1, y: 1, z: 2 }, { x: 2, y: 1, z: 2 }, { x: 3, y: 1, z: 2 },
-            { x: 3, y: 2, z: 2 },
-            // Layer 3
-            { x: 3, y: 3, z: 3 }, { x: 2, y: 3, z: 3 }, { x: 1, y: 3, z: 3 },
-            // Layer 4
-            { x: 1, y: 2, z: 4 }, { x: 1, y: 1, z: 4 }, { x: 2, y: 1, z: 4 },
-            // Top
-            { x: 2, y: 2, z: 5 },
+            // Three 2x2x2 cubes arranged in L = 24 cells
+            // First cube (bottom left)
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
+            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 },
+            { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 },
+            // Second cube (bottom right)
+            { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 },
+            { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
+            { x: 3, y: 1, z: 1 }, { x: 4, y: 1, z: 1 },
+            { x: 3, y: 2, z: 1 }, { x: 4, y: 2, z: 1 },
+            // Third cube (stacked on first)
+            { x: 1, y: 1, z: 2 }, { x: 2, y: 1, z: 2 },
+            { x: 1, y: 2, z: 2 }, { x: 2, y: 2, z: 2 },
+            { x: 1, y: 1, z: 3 }, { x: 2, y: 1, z: 3 },
+            { x: 1, y: 2, z: 3 }, { x: 2, y: 2, z: 3 },
         ],
         pieces: [
-            POLYCUBE_3D.L3D('l1', '#E91E63'),
-            POLYCUBE_3D.L3D('l2', '#3F51B5'),
-            POLYCUBE_3D.L3D('l3', '#009688'),
-            POLYCUBE_3D.L3D('l4', '#FF5722'),
-            POLYCUBE_3D.Corner3D('c1', '#FFEB3B'),
+            POLYCUBE_3D.Cube2x2x2('c1', '#E91E63'),
+            POLYCUBE_3D.Cube2x2x2('c2', '#3F51B5'),
+            POLYCUBE_3D.Cube2x2x2('c3', '#FF9800'),
         ],
         difficulty: 'hard',
     },
 
-    // 3D Hard #3: Pyramid
+    // 3D Hard #3: Wide Platform
     {
         id: '3d_hard_3',
-        name: 'Pyramid',
+        name: 'Wide Platform',
         type: '3D',
-        gridSize: [6, 6, 4],
+        gridSize: [7, 6, 3],
         targetVoxels: [
-            // Base layer (4x4)
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
-            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 },
-            // Second layer (3x3, centered)
-            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 }, { x: 3, y: 1, z: 1 },
-            { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 }, { x: 3, y: 2, z: 1 },
-            { x: 1, y: 3, z: 1 }, { x: 2, y: 3, z: 1 }, { x: 3, y: 3, z: 1 },
-            // Third layer (2x2)
-            { x: 1, y: 1, z: 2 }, { x: 2, y: 1, z: 2 },
-            { x: 1, y: 2, z: 2 }, { x: 2, y: 2, z: 2 },
-            // Top (1x1)
-            { x: 1, y: 1, z: 3 },
+            // 6x4 platform on ground = 24 cells
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 }, { x: 6, y: 1, z: 0 },
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 }, { x: 6, y: 2, z: 0 },
+            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 },
+            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 },
         ],
         pieces: [
-            POLYCUBE_3D.Cube2x2x2('c1', '#FF9800'),
-            POLYCUBE_3D.Cube2x2x2('c2', '#4CAF50'),
-            POLYCUBE_3D.Cube2x2x2('c3', '#2196F3'),
+            POLYCUBE_3D.Cube2x2('c1', '#FF9800'),
+            POLYCUBE_3D.Cube2x2('c2', '#4CAF50'),
+            POLYCUBE_3D.Cube2x2('c3', '#2196F3'),
             POLYCUBE_3D.Cube2x2('c4', '#9C27B0'),
-            POLYCUBE_3D.Plus3D('p1', '#E91E63'),
-            POLYCUBE_3D.Corner3D('cn1', '#FFEB3B'),
+            POLYCUBE_3D.Cube2x2('c5', '#E91E63'),
+            POLYCUBE_3D.Cube2x2('c6', '#795548'),
         ],
         difficulty: 'hard',
     },
