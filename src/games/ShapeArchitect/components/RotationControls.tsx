@@ -14,6 +14,7 @@ interface RotationControlsProps {
     onRotateY: () => void;
     onRotateZ: () => void;
     disabled?: boolean;
+    mode?: '2D' | '3D';
 }
 
 // ========================================
@@ -148,6 +149,7 @@ export function RotationControls({
     onRotateY,
     onRotateZ,
     disabled = false,
+    mode,
 }: RotationControlsProps) {
     const handlers: Record<AxisKey, () => void> = {
         x: onRotateX,
@@ -164,7 +166,8 @@ export function RotationControls({
     // Keyboard shortcuts are handled by the parent component
     // This is just for reference in tooltips
 
-    const axisOrder: AxisKey[] = ['x', 'y', 'z'];
+    // In 2D mode, only show Z-axis rotation (X/Y would flip pieces out of the 2D plane)
+    const axisOrder: AxisKey[] = mode === '2D' ? ['z'] : ['x', 'y', 'z'];
 
     return (
         <div

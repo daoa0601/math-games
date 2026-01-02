@@ -424,15 +424,15 @@ export function ShapeArchitectGame() {
                     }
                     break;
                 case 't':
-                    // Rotate X axis (pitch)
-                    if (selectedPiece) {
+                    // Rotate X axis (pitch) - disabled in 2D mode
+                    if (selectedPiece && gameState.level.type !== '2D') {
                         handleRotateAxis('x');
                         playSound('click');
                     }
                     break;
                 case 'y':
-                    // Rotate Y axis (yaw)
-                    if (selectedPiece) {
+                    // Rotate Y axis (yaw) - disabled in 2D mode
+                    if (selectedPiece && gameState.level.type !== '2D') {
                         handleRotateAxis('y');
                         playSound('click');
                     }
@@ -455,7 +455,7 @@ export function ShapeArchitectGame() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [gameState.isSolved, showTimeUp, selectedPiece, gameState.selectedPieceId, gameState.placedPieces.length, handleRotateAxis, undoLastPiece]);
+    }, [gameState.isSolved, showTimeUp, selectedPiece, gameState.selectedPieceId, gameState.placedPieces.length, gameState.level.type, handleRotateAxis, undoLastPiece]);
 
     // Swipe gestures for piece rotation (mobile)
     const { ref: swipeRef, handlers: swipeHandlers } = useSwipe({
@@ -694,6 +694,7 @@ export function ShapeArchitectGame() {
                             onRotateY={() => handleRotateAxis('y')}
                             onRotateZ={() => handleRotateAxis('z')}
                             disabled={!selectedPiece || showTimeUp || gameState.isSolved}
+                            mode={gameState.level.type}
                         />
                         {showRotationHint && selectedPiece && (
                             <div className="rotation-hint-tooltip">
