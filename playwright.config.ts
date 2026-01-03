@@ -17,14 +17,15 @@ import { defineConfig, devices } from '@playwright/test';
  * Usage:
  * - npm run test:e2e        → Mobile browsers only (fast local dev)
  * - npm run test:e2e:desktop → Desktop browsers only
- * - npm run test:e2e:full   → All 5 browsers (CI mode)
- * - BROWSERS=all npm run test:e2e → Override to run all browsers
+ * - npm run test:e2e:full   → All 5 browsers (local full coverage)
+ * - CI=true                 → 3 browsers (Chromium + Mobile Chrome + Mobile Safari)
  *
  * @see https://playwright.dev/docs/test-configuration
  */
 
 const isCI = !!process.env.CI;
-const browserMode = process.env.BROWSERS || (isCI ? 'all' : 'mobile');
+// Local: mobile-first for fast iteration. CI: 3 essential browsers. 'all' for full coverage.
+const browserMode = process.env.BROWSERS || (isCI ? 'ci' : 'mobile');
 
 // Mobile browsers (primary - students use phones)
 const mobileProjects = [
@@ -38,7 +39,7 @@ const mobileProjects = [
   },
 ];
 
-// Desktop browsers (secondary - for completeness)
+// Desktop browsers (for full coverage testing)
 const desktopProjects = [
   {
     name: 'chromium',
@@ -63,13 +64,28 @@ const desktopProjects = [
   },
 ];
 
+// CI browsers: Essential coverage without Firefox/WebKit desktop
+// (Mobile Safari covers WebKit, Firefox rarely catches unique bugs)
+const ciProjects = [
+  {
+    name: 'chromium',
+    use: {
+      ...devices['Desktop Chrome'],
+      viewport: { width: 1280, height: 720 },
+    },
+  },
+  ...mobileProjects,
+];
+
 // Select projects based on environment
 const projects =
   browserMode === 'desktop'
     ? desktopProjects
     : browserMode === 'all'
       ? [...mobileProjects, ...desktopProjects]
-      : mobileProjects;
+      : browserMode === 'ci'
+        ? ciProjects
+        : mobileProjects;
 
 export default defineConfig({
   testDir: './e2e',
@@ -86,8 +102,8 @@ export default defineConfig({
   // Retry on CI only
   retries: process.env.CI ? 2 : 0,
 
-  // Workers: 1 on CI (resource-constrained), 4 locally (fewer browsers = less memory pressure)
-  workers: isCI ? 1 : 4,
+  // Workers: 2 on CI for parallelism, 4 locally (fewer browsers = less memory pressure)
+  workers: isCI ? 2 : 4,
 
   // Reduced timeout (routes are pre-warmed, should load fast)
   timeout: 30000,

@@ -13,6 +13,10 @@ export { MagicGraphIcon, SequenceRaceIcon, ShapeArchitectIcon } from './icons';
 // Tutorial
 export * from './Tutorial';
 
+// Learn Modal
+export { LearnModal } from './LearnModal';
+export type { GameId } from './LearnModal';
+
 // Overlays
 export { GameOverlay } from './overlays';
 export type { GameOverlayProps } from './overlays';

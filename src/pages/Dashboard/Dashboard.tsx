@@ -3,7 +3,7 @@ import { usePlayer } from '@/shared/contexts';
 import { DashboardTabs, type DashboardTabId } from '@/shared/components/layout';
 import { ACHIEVEMENTS } from '@/shared/services/achievements';
 import { CompactHeader } from './CompactHeader';
-import { PlayTab, StatsTab, AchievementsTab } from './tabs';
+import { PlayTab, StatsTab, AchievementsTab, LearnTab } from './tabs';
 import './Dashboard.css';
 
 export function Dashboard() {
@@ -39,6 +39,7 @@ export function Dashboard() {
         {activeTab === 'play' && <PlayTab />}
         {activeTab === 'stats' && <StatsTab />}
         {activeTab === 'achievements' && <AchievementsTab />}
+        {activeTab === 'learn' && <LearnTab />}
       </main>
     </div>
   );

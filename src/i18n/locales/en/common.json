@@ -5,7 +5,8 @@
         "tabs": {
             "play": "Play",
             "stats": "Stats",
-            "achievements": "Achievements"
+            "achievements": "Achievements",
+            "learn": "Learn"
         },
         "tabsLabel": "Dashboard navigation"
     },
@@ -215,6 +216,20 @@
         "tied": "Matched your best!",
         "best": "Your best",
         "first": "First Completion!"
+    },
+    "learn": {
+        "intro": "Discover the math behind each game",
+        "howToPlay": "How to play",
+        "close": "Close",
+        "magicGraph": {
+            "tagline": "Sums & Logic"
+        },
+        "sequenceRace": {
+            "tagline": "Patterns & Strategy"
+        },
+        "shapeArchitect": {
+            "tagline": "3D Geometry"
+        }
     },
     "announcements": {
         "puzzleSolved": "Congratulations! Puzzle solved in {{time}} seconds.",

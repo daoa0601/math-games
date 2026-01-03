@@ -125,18 +125,24 @@
 }
 
 @keyframes aiBannerPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 0 0 hsla(0, 80%, 50%, 0.3);
     }
+
     50% {
         box-shadow: 0 0 12px 4px hsla(0, 80%, 50%, 0.2);
     }
 }
 
 @keyframes aiBannerBounce {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-3px);
     }
@@ -186,14 +192,15 @@
     right: 0;
     height: 20px;
     background: linear-gradient(180deg,
-        transparent 0%,
-        hsla(120, 50%, 45%, 0.3) 100%);
+            transparent 0%,
+            hsla(120, 50%, 45%, 0.3) 100%);
     pointer-events: none;
 }
 
 .track-wrapper {
     position: relative;
-    height: 100px;
+    height: 140px;
+    /* Increased from 100px to fit two lanes */
     margin-bottom: var(--space-lg);
     z-index: 1;
 }
@@ -228,8 +235,7 @@
             transparent 0px,
             transparent 30px,
             var(--game-race-lane) 30px,
-            var(--game-race-lane) 32px
-        ),
+            var(--game-race-lane) 32px),
         /* Track surface - refined Championship colors */
         linear-gradient(90deg,
             var(--game-race-track) 0%,
@@ -301,6 +307,16 @@
     border: 3px solid hsl(160, 60%, 55%);
 }
 
+.player-avatar--player {
+    top: 30%;
+    /* Top lane for player */
+}
+
+.player-avatar--ai {
+    top: 70%;
+    /* Bottom lane for AI */
+}
+
 /* Accessibility: Pattern indicator for player - solid double border */
 .player-avatar--player {
     /* Double solid ring indicates player */
@@ -331,7 +347,8 @@
 
 /* Hide emoji when using stick figure */
 .player-avatar--stick-figure {
-    font-size: 0; /* Hide emoji text */
+    font-size: 0;
+    /* Hide emoji text */
     position: relative;
 }
 
@@ -512,6 +529,13 @@
     animation: sr-thinkSway 1s ease-in-out infinite;
 }
 
+/* Hints Panel Layering */
+.hints-panel {
+    position: relative;
+    z-index: 30;
+    /* Ensure hints are always on top */
+}
+
 /* ========================================
    Enhanced Dust Trail Effect
    ======================================== */
@@ -552,18 +576,22 @@
         opacity: 0.8;
         transform: translateX(0) translateY(0) scale(0.5);
     }
+
     20% {
         opacity: 0.7;
         transform: translateX(-8px) translateY(-2px) scale(0.9);
     }
+
     50% {
         opacity: 0.4;
         transform: translateX(-16px) translateY(-4px) scale(1.1);
     }
+
     80% {
         opacity: 0.15;
         transform: translateX(-22px) translateY(-6px) scale(0.8);
     }
+
     100% {
         opacity: 0;
         transform: translateX(-28px) translateY(-8px) scale(0.4);
@@ -575,18 +603,22 @@
         opacity: 0.6;
         transform: translateX(0) translateY(0) scale(0.4);
     }
+
     25% {
         opacity: 0.5;
         transform: translateX(-6px) translateY(2px) scale(0.8);
     }
+
     50% {
         opacity: 0.3;
         transform: translateX(-12px) translateY(3px) scale(1);
     }
+
     75% {
         opacity: 0.12;
         transform: translateX(-18px) translateY(4px) scale(0.7);
     }
+
     100% {
         opacity: 0;
         transform: translateX(-24px) translateY(5px) scale(0.3);
@@ -737,13 +769,18 @@
     background: var(--surface-card);
     color: var(--text-primary);
     cursor: pointer;
+    cursor: pointer;
     transition: all var(--transition-fast);
+    z-index: 5;
+    /* Base z-index */
 }
 
 .step-card:hover:not(:disabled) {
     background: var(--color-primary-dark);
     transform: translateY(-4px);
     box-shadow: 0 8px 20px var(--accent-purple-strong);
+    z-index: 50;
+    /* Bring to front on hover */
 }
 
 .step-card:disabled {
@@ -794,7 +831,11 @@
     padding: var(--space-sm) var(--space-lg);
     border-radius: var(--radius-full);
     font-weight: 600;
+    font-weight: 600;
     animation: pulse 1.5s ease-in-out infinite;
+    position: relative;
+    z-index: 20;
+    /* Ensure it floats above track elements */
 }
 
 .turn-indicator--player {

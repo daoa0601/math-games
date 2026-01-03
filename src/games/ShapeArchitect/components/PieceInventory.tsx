@@ -23,6 +23,15 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
         data: { piece, rotation },
     });
 
+    // Handle click separately from drag - only select if not dragging
+    const handleClick = (e: React.MouseEvent) => {
+        // Prevent selection during/after drag
+        if (!isDragging) {
+            e.stopPropagation();
+            onSelect();
+        }
+    };
+
     // Check if piece has 3D depth (z > 0)
     const is3DPiece = piece.layout.some((p) => p.z > 0);
 
@@ -55,30 +64,42 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
             ref={setNodeRef}
             className={`piece-card ${isSelected ? 'piece-card--selected' : ''} ${isDragging ? 'piece-card--dragging' : ''}`}
             style={style}
-            onClick={onSelect}
-            {...listeners}
             {...attributes}
         >
-            {is3DPiece ? (
-                <div className="piece-preview" aria-label={`${piece.name} piece`}>
-                    <IsometricPiecePreview piece={piece} size={48} />
-                </div>
-            ) : (
-                <div className="piece-preview" aria-label={`${piece.name} piece`}>
-                    {[...previewGrid].reverse().map((row, y) => (
-                        <div key={y} className="piece-preview-row">
-                            {row.map((filled, x) => (
-                                <div
-                                    key={x}
-                                    className={`piece-preview-cell ${filled ? patternClass : 'piece-preview-cell--empty'}`}
-                                    style={{ backgroundColor: filled ? piece.color : undefined }}
-                                />
+            {/* Clickable selection area - separate from drag handle */}
+            <div
+                className="piece-card__clickable"
+                onClick={handleClick}
+                onKeyDown={(e) => e.key === 'Enter' && onSelect()}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isSelected}
+                aria-label={`Select ${piece.name} piece`}
+            >
+                {/* Drag handle - only this area initiates drag */}
+                <div className="piece-card__drag-handle" {...listeners}>
+                    {is3DPiece ? (
+                        <div className="piece-preview" aria-label={`${piece.name} piece`}>
+                            <IsometricPiecePreview piece={piece} size={48} />
+                        </div>
+                    ) : (
+                        <div className="piece-preview" aria-label={`${piece.name} piece`}>
+                            {[...previewGrid].reverse().map((row, y) => (
+                                <div key={y} className="piece-preview-row">
+                                    {row.map((filled, x) => (
+                                        <div
+                                            key={x}
+                                            className={`piece-preview-cell ${filled ? patternClass : 'piece-preview-cell--empty'}`}
+                                            style={{ backgroundColor: filled ? piece.color : undefined }}
+                                        />
+                                    ))}
+                                </div>
                             ))}
                         </div>
-                    ))}
+                    )}
                 </div>
-            )}
-            <span className="piece-name">{piece.name}</span>
+                <span className="piece-name">{piece.name}</span>
+            </div>
         </div>
     );
 }

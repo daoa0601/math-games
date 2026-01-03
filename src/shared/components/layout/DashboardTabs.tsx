@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import './DashboardTabs.css';
 
-export type DashboardTabId = 'play' | 'stats' | 'achievements';
+export type DashboardTabId = 'play' | 'stats' | 'achievements' | 'learn';
 
 interface DashboardTabsProps {
   activeTab: DashboardTabId;
@@ -19,6 +19,7 @@ const TABS: TabConfig[] = [
   { id: 'play', icon: '🎮', labelKey: 'dashboard.tabs.play' },
   { id: 'stats', icon: '📊', labelKey: 'dashboard.tabs.stats' },
   { id: 'achievements', icon: '🏆', labelKey: 'dashboard.tabs.achievements' },
+  { id: 'learn', icon: '📖', labelKey: 'dashboard.tabs.learn' },
 ];
 
 export function DashboardTabs({ activeTab, onTabChange, achievementCount }: DashboardTabsProps) {

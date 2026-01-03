@@ -5,7 +5,8 @@
         "tabs": {
             "play": "Chơi",
             "stats": "Thống kê",
-            "achievements": "Thành tựu"
+            "achievements": "Thành tựu",
+            "learn": "Học"
         },
         "tabsLabel": "Điều hướng bảng điều khiển"
     },
@@ -215,6 +216,20 @@
         "tied": "Đã bằng kỷ lục!",
         "best": "Kỷ lục của bạn",
         "first": "Lần Hoàn Thành Đầu Tiên!"
+    },
+    "learn": {
+        "intro": "Khám phá toán học đằng sau mỗi trò chơi",
+        "howToPlay": "Cách chơi",
+        "close": "Đóng",
+        "magicGraph": {
+            "tagline": "Tổng & Logic"
+        },
+        "sequenceRace": {
+            "tagline": "Quy luật & Chiến thuật"
+        },
+        "shapeArchitect": {
+            "tagline": "Hình học 3D"
+        }
     },
     "announcements": {
         "puzzleSolved": "Chúc mừng! Giải xong trong {{time}} giây.",

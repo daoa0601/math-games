@@ -349,6 +349,7 @@ export function SequenceRaceGame() {
   return (
     <GameLayout
       title={t('title')}
+      gameId="sequence-race"
       headerRight={
         <>
           <HelpButton gameId="sequence-race" onShowTutorial={() => setShowTutorial(true)} />

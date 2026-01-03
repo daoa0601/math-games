@@ -572,6 +572,7 @@ export function MagicGraphGame() {
     return (
         <GameLayout
             title={t('title')}
+            gameId="magic-graph"
             headerRight={
                 <>
                     <HelpButton gameId="magic-graph" onShowTutorial={() => setShowTutorial(true)} />
