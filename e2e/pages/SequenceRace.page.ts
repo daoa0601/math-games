@@ -154,7 +154,7 @@ export class SequenceRacePage {
    * @param daily - Whether to navigate to daily challenge mode
    */
   async goto(daily = false) {
-    const url = daily ? '/math-games/#/sequence-race?daily=true' : '/math-games/#/sequence-race';
+    const url = daily ? '/sequence-race?daily=true' : '/sequence-race';
     await this.page.goto(url);
     await this.gameTitle.waitFor({ state: 'visible' });
   }

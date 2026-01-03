@@ -20,9 +20,12 @@ import {
   magicTrianglePuzzle,
   diamondPuzzle,
   magicSquarePuzzle,
-  // Note: mShapePuzzle and starPuzzle excluded - they have structural issues
-  // (lines with different node counts can't have the same target sum)
 } from './puzzles';
+import {
+  easyLetters,
+  mediumLetters,
+  hardLetters,
+} from './alphabetPuzzles';
 import { solve, checkSolvability } from './solver';
 
 // ============================================================================
@@ -49,12 +52,13 @@ const DIFFICULTY_HINTS: Record<Difficulty, number> = {
 
 /**
  * Puzzle templates organized by difficulty for seeded selection.
+ * Includes both base geometric puzzles and alphabet letter puzzles.
  * Only includes puzzles verified to be solvable.
  */
 const TEMPLATES_BY_DIFFICULTY: Record<'easy' | 'medium' | 'hard', Array<Omit<PuzzleConfig, 'id'>>> = {
-  easy: [linePuzzle, crossPuzzle],
-  medium: [crossPuzzle, magicTrianglePuzzle, diamondPuzzle],
-  hard: [diamondPuzzle, magicSquarePuzzle], // Only verified solvable puzzles
+  easy: [linePuzzle, crossPuzzle, ...easyLetters],
+  medium: [crossPuzzle, magicTrianglePuzzle, diamondPuzzle, ...mediumLetters],
+  hard: [diamondPuzzle, magicSquarePuzzle, ...hardLetters],
 };
 
 // ============================================================================

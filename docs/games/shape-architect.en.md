@@ -280,7 +280,7 @@ Original (0°, 0°, 0°):    After Y-rotation 90° (0°, 90°, 0°):
 
 ---
 
-## Preset Levels (18 Total)
+## Preset Levels (21 Total)
 
 ### 2D Easy Levels (4 levels)
 

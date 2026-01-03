@@ -248,7 +248,7 @@ Một số kết hợp đích/nhóm nhất định tạo ra *vị trí đối x�
 
 ## 5. Trò Chơi Cấu Hình
 
-SequenceRace bao gồm **11 trò chơi cấu hình được thiết kế cẩn thận** trải dài trên tất cả bảy loại dãy số và ba cấp độ khó. Mỗi cấu hình đã được xác thực về tính công bằng bằng phân tích minimax.
+SequenceRace bao gồm **12 trò chơi cấu hình được thiết kế cẩn thận** trải dài trên tất cả bảy loại dãy số và ba cấp độ khó. Mỗi cấu hình đã được xác thực về tính công bằng bằng phân tích minimax.
 
 ### Cấu Hình Dễ (2 trò chơi)
 
@@ -314,7 +314,7 @@ SequenceRace bao gồm **11 trò chơi cấu hình được thiết kế cẩn t
 
 ---
 
-### Cấu Hình Khó (4 trò chơi)
+### Cấu Hình Khó (5 trò chơi)
 
 #### Giờ Nguyên Tố
 - **ID**: `prime_28`
@@ -662,7 +662,7 @@ Quan trọng nhất, SequenceRace làm cho toán học **vui chơi, chiến lư�
 
 ## Phụ Lục: Bảng Tham Khảo Nhanh
 
-### Tất Cả 11 Cấu Hình Một Cái Nhìn
+### Tất Cả 12 Cấu Hình Một Cái Nhìn
 
 | Tên Cấu Hình | ID | Độ Khó | Đích | Bước | Loại Dãy | AI Đi Trước? |
 |-------------|-----|-----------|--------|-------|---------------|-----------|

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { ShapeArchitectPage } from './pages/ShapeArchitect.page';
+import { waitForCanvasReady } from './fixtures/test-utils';
 
 test.describe('ShapeArchitect Game', () => {
   let game: ShapeArchitectPage;
@@ -100,8 +101,8 @@ test.describe('ShapeArchitect Game', () => {
       await expect(game.view3DButton).toHaveAttribute('aria-pressed', 'true');
       await expect(game.view2DButton).toHaveAttribute('aria-pressed', 'false');
 
-      // Canvas should be visible (may take time to render)
-      await expect(game.canvas3D).toBeVisible({ timeout: 5000 });
+      // Canvas should be visible and WebGL ready (may take time to render)
+      await waitForCanvasReady(game.page, 'canvas', 15000);
 
       // 2D grid should be hidden
       await expect(game.gridBoard).not.toBeVisible();
@@ -110,7 +111,7 @@ test.describe('ShapeArchitect Game', () => {
     test('should switch from 3D back to 2D view', async () => {
       // Switch to 3D first
       await game.switchTo3D();
-      await expect(game.canvas3D).toBeVisible({ timeout: 5000 });
+      await waitForCanvasReady(game.page, 'canvas', 15000);
 
       // Switch back to 2D
       await game.switchTo2D();
@@ -129,7 +130,7 @@ test.describe('ShapeArchitect Game', () => {
 
       // Switch to 3D
       await game.switchTo3D();
-      await expect(game.canvas3D).toBeVisible({ timeout: 5000 });
+      await waitForCanvasReady(game.page, 'canvas', 15000);
 
       // Camera preset buttons should appear
       await expect(game.cameraPresetButtons).toBeVisible();
@@ -140,7 +141,7 @@ test.describe('ShapeArchitect Game', () => {
     test.beforeEach(async () => {
       // Switch to 3D mode for these tests
       await game.switchTo3D();
-      await expect(game.canvas3D).toBeVisible({ timeout: 5000 });
+      await waitForCanvasReady(game.page, 'canvas', 15000);
     });
 
     test('should render 3D canvas without errors', async () => {
@@ -446,7 +447,7 @@ test.describe('ShapeArchitect Game', () => {
 
     test('should handle direct URL navigation', async ({ page }) => {
       // Navigate directly to game URL
-      await page.goto('/math-games/#/shape-architect');
+      await page.goto('/shape-architect');
 
       // Game should load
       await expect(game.gameTitle).toBeVisible({ timeout: 10000 });

@@ -5,7 +5,18 @@ import { threeMinifier } from '@yushijinhun/three-minifier-rollup'
 import viteCompression from 'vite-plugin-compression'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // Pre-transform frequently used files during dev server startup
+  // Eliminates cold-start delays when E2E tests first access game routes
+  server: {
+    warmup: {
+      clientFiles: [
+        './src/games/MagicGraph/index.ts',
+        './src/games/SequenceRace/index.ts',
+        './src/games/ShapeArchitect/index.ts',
+      ],
+    },
+  },
   plugins: [
     // Three.js minifier - removes unused code from three.js bundle
     // Expected reduction: ~40-60% of three.js bundle size
@@ -15,8 +26,8 @@ export default defineConfig({
     viteCompression({ algorithm: 'gzip' }),
     viteCompression({ algorithm: 'brotliCompress', ext: '.br' }),
   ],
-  // Base path for GitHub Pages deployment
-  base: '/math-games/',
+  // Base path: '/math-games/' for production (GitHub Pages), '/' for dev
+  base: command === 'build' ? '/math-games/' : '/',
   // Path aliases matching tsconfig.app.json
   resolve: {
     alias: {
@@ -45,4 +56,4 @@ export default defineConfig({
     // Increase chunk size warning limit (three.js is expected to be large even after minification)
     chunkSizeWarningLimit: 600,
   },
-})
+}))

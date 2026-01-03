@@ -373,6 +373,44 @@ Every row, column sums to 15. This puzzle has been studied for over 2,000 years 
 
 ---
 
+### Alphabet Letter Puzzles (A-Z)
+
+MagicGraph includes a complete set of **26 alphabet letter puzzles**, inspired by the Hanoi Open Mathematics Competition format. Each letter is designed as a graph structure where all lines contain exactly 3 nodes - a key mathematical constraint that ensures solvability.
+
+**Mathematical Constraint:**
+Every line in alphabet puzzles has exactly 3 nodes, following the competition math format. This means each line represents an equation: `a + b + c = target_sum`.
+
+**Difficulty Classification:**
+
+| Difficulty | Letters | Line Count | Node Count |
+|------------|---------|------------|------------|
+| Easy | I, L, T, V, X, Y, Z | 2-3 lines | 5-6 nodes |
+| Medium | A, C, E, F, H, J, K, N, U | 3-5 lines | 6-9 nodes |
+| Hard | B, D, G, M, O, P, Q, R, S, W | 3-6 lines | 6-9 nodes |
+
+**Example: Letter H (Medium)**
+```
+[○]       [○]       [○]
+ │         │         │
+ │    ─────┼─────    │
+ │         │         │
+[○]       [○]       [○]
+
+Nodes: 6
+Lines: 3 (left vertical, horizontal bar, right vertical)
+Each line: 3 nodes summing to target
+```
+
+**Educational Value:**
+- Students recognize familiar letter shapes, making abstract math more accessible
+- Letter puzzles bridge visual pattern recognition with algebraic constraints
+- Progressive difficulty through letter complexity encourages exploration of the full alphabet
+
+**Daily Challenges:**
+The seeded puzzle generator includes alphabet letters in daily challenges, weighted by difficulty level. Students may encounter different letters across easy, medium, and hard daily puzzles.
+
+---
+
 ## 6. The Solver Algorithm (Teacher-Friendly Explanation)
 
 ### How the Computer Solves MagicGraph

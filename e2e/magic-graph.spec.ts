@@ -18,8 +18,8 @@ test.describe('MagicGraph Game', () => {
     await setupFreshTestState(page);
     // Navigate to MagicGraph game
     await page.goto('/magic-graph');
-    // Wait for page to load
-    await page.waitForLoadState('networkidle');
+    // Wait for puzzle board to be visible (element-based wait avoids networkidle timeout from game timer)
+    await page.locator('.puzzle-board').waitFor({ state: 'visible' });
   });
 
   test.describe('Game Initialization', () => {
@@ -427,7 +427,7 @@ test.describe('MagicGraph Game', () => {
 
       // Reload page
       await page.reload();
-      await page.waitForLoadState('networkidle');
+      await page.locator('.puzzle-board').waitFor({ state: 'visible' });
 
       // Should still be in practice mode
       const practiceBtn = page.getByRole('radio', { name: /practice/i });
@@ -684,7 +684,7 @@ test.describe('MagicGraph Game', () => {
     test('should show daily challenge badge when in daily mode', async ({ page }) => {
       // Navigate to daily challenge
       await page.goto('/magic-graph?daily=true');
-      await page.waitForLoadState('networkidle');
+      await page.locator('.puzzle-board').waitFor({ state: 'visible' });
 
       // Should show daily badge
       const dailyBadge = page.locator('.daily-badge');
@@ -695,7 +695,7 @@ test.describe('MagicGraph Game', () => {
     test('should hide difficulty selector in daily mode', async ({ page }) => {
       // Navigate to daily challenge
       await page.goto('/magic-graph?daily=true');
-      await page.waitForLoadState('networkidle');
+      await page.locator('.puzzle-board').waitFor({ state: 'visible' });
 
       // Difficulty selector should not be visible
       const difficultySelector = page.locator('.difficulty-selector');
@@ -705,7 +705,7 @@ test.describe('MagicGraph Game', () => {
     test('should hide level selector in daily mode', async ({ page }) => {
       // Navigate to daily challenge
       await page.goto('/magic-graph?daily=true');
-      await page.waitForLoadState('networkidle');
+      await page.locator('.puzzle-board').waitFor({ state: 'visible' });
 
       // Level selector should not be visible
       const levelSelector = page.locator('.level-selector');

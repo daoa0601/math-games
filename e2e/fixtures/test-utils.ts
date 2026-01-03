@@ -17,11 +17,11 @@ export function getTodayDate(): string {
   return new Date().toISOString().split('T')[0];
 }
 
-// Storage keys used by the app (must match src/shared/constants/storageKeys.ts)
+// Storage keys used by the app (must match src/shared/services/*.ts)
 export const STORAGE_KEYS = {
   PLAYER_PROFILE: 'math-games-player',
   DAILY_CHALLENGE: 'math-games-daily-challenge',
-  TUTORIAL_PROGRESS: 'math-games-tutorial-progress',
+  TUTORIAL_PROGRESS: 'tutorial-progress', // Used by tutorialProgress.ts
   SOUND_ENABLED: 'math-games-sound-enabled',
   LANGUAGE: 'math-games-lang',
 } as const;
@@ -144,13 +144,21 @@ export async function updatePlayerProfile(
 
 /**
  * Mark a tutorial as completed
+ * Format matches tutorialProgress.ts schema with all required fields
  */
 export async function completeTutorial(page: Page, gameId: string): Promise<void> {
   await page.evaluate(
     ({ key, gameId }) => {
       const data = localStorage.getItem(key);
-      const progress = data ? JSON.parse(data) : {};
-      progress[gameId] = true;
+      const progress = data
+        ? JSON.parse(data)
+        : { completedTutorials: {}, skippedTutorials: {}, lastCompletedStep: {} };
+      // Ensure all required fields exist
+      progress.completedTutorials = progress.completedTutorials || {};
+      progress.skippedTutorials = progress.skippedTutorials || {};
+      progress.lastCompletedStep = progress.lastCompletedStep || {};
+      // Mark tutorial as completed
+      progress.completedTutorials[gameId] = true;
       localStorage.setItem(key, JSON.stringify(progress));
     },
     { key: STORAGE_KEYS.TUTORIAL_PROGRESS, gameId }
@@ -213,4 +221,41 @@ export async function waitForReactHydration(page: Page): Promise<void> {
   });
   // Small delay for hydration to settle
   await page.waitForTimeout(100);
+}
+
+/**
+ * Wait for Three.js canvas with WebGL context to be ready
+ * Use this instead of simple visibility checks for 3D scenes (ShapeArchitect)
+ */
+export async function waitForCanvasReady(
+  page: Page,
+  selector = 'canvas',
+  timeout = 15000
+): Promise<void> {
+  // First wait for canvas element to be visible
+  await page.waitForSelector(selector, { state: 'visible', timeout });
+
+  // Then wait for WebGL context to be initialized
+  await page.waitForFunction(
+    (sel: string) => {
+      const canvas = document.querySelector(sel) as HTMLCanvasElement;
+      if (!canvas) return false;
+      // Check for WebGL context (Three.js uses WebGL or WebGL2)
+      try {
+        return !!(canvas.getContext('webgl') || canvas.getContext('webgl2'));
+      } catch {
+        return false;
+      }
+    },
+    selector,
+    { timeout }
+  );
+}
+
+/**
+ * Wait for animation frame to ensure React render completed
+ * Useful after state changes that trigger animations
+ */
+export async function waitForNextFrame(page: Page): Promise<void> {
+  await page.evaluate(() => new Promise(requestAnimationFrame));
 }

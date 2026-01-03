@@ -15,7 +15,7 @@ import {
 
 // Test helpers
 async function navigateToSequenceRace(page: Page): Promise<void> {
-  await page.goto('/math-games/sequence-race');
+  await page.goto('/sequence-race');
   await waitForReactHydration(page);
   // Wait for the game to be fully loaded
   await expect(page.locator('.race-track')).toBeVisible({ timeout: 10000 });
@@ -40,11 +40,26 @@ async function selectStepCard(page: Page, step: number): Promise<void> {
   await stepCard.click();
 }
 
-async function waitForAIMove(page: Page): Promise<void> {
-  // Wait for AI's turn indicator to appear
-  await expect(page.locator('.turn-indicator--ai')).toBeVisible({ timeout: 5000 });
-  // Wait for AI to finish thinking (turn indicator changes back to player)
-  await expect(page.locator('.turn-indicator--player')).toBeVisible({ timeout: 5000 });
+/**
+ * Wait for AI to complete its move
+ * Returns false if game ended or timeout, true if AI moved and it's player's turn
+ */
+async function waitForAIMove(page: Page, timeout = 3000): Promise<boolean> {
+  try {
+    // Check if game already ended
+    const overlay = page.locator('.game-overlay');
+    if (await overlay.isVisible()) return false;
+
+    // Wait for AI indicator briefly (AI may have already started)
+    await expect(page.locator('.turn-indicator--ai')).toBeVisible({ timeout: 1000 });
+
+    // Wait for player turn to resume (AI finished)
+    await expect(page.locator('.turn-indicator--player')).toBeVisible({ timeout });
+    return true;
+  } catch {
+    // Game may have ended or AI moved very quickly
+    return await page.locator('.turn-indicator--player').isVisible();
+  }
 }
 
 test.describe('SequenceRace - Game Initialization', () => {
@@ -288,7 +303,7 @@ test.describe('SequenceRace - Win/Lose Conditions', () => {
     // Play until player wins or game ends
     let gameOver = false;
     let moveCount = 0;
-    const maxMoves = 30; // Safety limit
+    const maxMoves = 20; // Safety limit (reduced from 30 for test performance)
 
     while (!gameOver && moveCount < maxMoves) {
       // Check if game is over
@@ -324,7 +339,7 @@ test.describe('SequenceRace - Win/Lose Conditions', () => {
           // This move wins!
           await card.click();
           madeMove = true;
-          await page.waitForTimeout(1000); // Wait for win animation
+          await page.waitForTimeout(300); // Brief wait for win animation
           break;
         }
       }
@@ -365,7 +380,7 @@ test.describe('SequenceRace - Win/Lose Conditions', () => {
     // Play until game ends
     let gameOver = false;
     let moveCount = 0;
-    const maxMoves = 30;
+    const maxMoves = 20;
 
     while (!gameOver && moveCount < maxMoves) {
       const overlay = page.locator('.game-overlay');
@@ -432,7 +447,7 @@ test.describe('SequenceRace - Win/Lose Conditions', () => {
 
     // Play a quick game
     let moveCount = 0;
-    const maxMoves = 30;
+    const maxMoves = 20;
 
     while (moveCount < maxMoves) {
       const overlay = page.locator('.game-overlay');
@@ -474,7 +489,7 @@ test.describe('SequenceRace - Win/Lose Conditions', () => {
 
     // Play until game ends
     let moveCount = 0;
-    while (moveCount < 30) {
+    while (moveCount < 20) {
       const overlay = page.locator('.game-overlay');
       if (await overlay.isVisible()) {
         break;

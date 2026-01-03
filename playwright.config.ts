@@ -8,10 +8,74 @@ import { defineConfig, devices } from '@playwright/test';
  * - Fixtures: './e2e/fixtures/test-utils.ts' - localStorage helpers and test data
  * - Page Objects: './e2e/pages/*.page.ts' - Reusable page object models
  *
+ * Performance Optimizations:
+ * - Mobile-first locally (students use phones, not computers)
+ * - All 5 browsers on CI for full coverage
+ * - Global setup pre-warms routes to eliminate cold-start delays
+ * - Vite warmup pre-compiles game bundles at server start
+ *
+ * Usage:
+ * - npm run test:e2e        → Mobile browsers only (fast local dev)
+ * - npm run test:e2e:desktop → Desktop browsers only
+ * - npm run test:e2e:full   → All 5 browsers (CI mode)
+ * - BROWSERS=all npm run test:e2e → Override to run all browsers
+ *
  * @see https://playwright.dev/docs/test-configuration
  */
+
+const isCI = !!process.env.CI;
+const browserMode = process.env.BROWSERS || (isCI ? 'all' : 'mobile');
+
+// Mobile browsers (primary - students use phones)
+const mobileProjects = [
+  {
+    name: 'Mobile Chrome',
+    use: { ...devices['Pixel 5'] },
+  },
+  {
+    name: 'Mobile Safari',
+    use: { ...devices['iPhone 12'] },
+  },
+];
+
+// Desktop browsers (secondary - for completeness)
+const desktopProjects = [
+  {
+    name: 'chromium',
+    use: {
+      ...devices['Desktop Chrome'],
+      viewport: { width: 1280, height: 720 },
+    },
+  },
+  {
+    name: 'firefox',
+    use: {
+      ...devices['Desktop Firefox'],
+      viewport: { width: 1280, height: 720 },
+    },
+  },
+  {
+    name: 'webkit',
+    use: {
+      ...devices['Desktop Safari'],
+      viewport: { width: 1280, height: 720 },
+    },
+  },
+];
+
+// Select projects based on environment
+const projects =
+  browserMode === 'desktop'
+    ? desktopProjects
+    : browserMode === 'all'
+      ? [...mobileProjects, ...desktopProjects]
+      : mobileProjects;
+
 export default defineConfig({
   testDir: './e2e',
+
+  // Global setup pre-warms all routes before tests run
+  globalSetup: './e2e/global-setup.ts',
 
   // Run tests in files in parallel
   fullyParallel: true,
@@ -22,14 +86,14 @@ export default defineConfig({
   // Retry on CI only
   retries: process.env.CI ? 2 : 0,
 
-  // Opt out of parallel tests on CI
-  workers: process.env.CI ? 1 : undefined,
+  // Workers: 1 on CI (resource-constrained), 4 locally (fewer browsers = less memory pressure)
+  workers: isCI ? 1 : 4,
+
+  // Reduced timeout (routes are pre-warmed, should load fast)
+  timeout: 30000,
 
   // Reporter to use
-  reporter: [
-    ['html', { outputFolder: 'playwright-report' }],
-    ['list'],
-  ],
+  reporter: [['html', { outputFolder: 'playwright-report' }], ['list']],
 
   // Shared settings for all the projects below
   use: {
@@ -44,45 +108,14 @@ export default defineConfig({
 
     // Video on retry
     video: 'retain-on-failure',
+
+    // Balanced timeouts - fast feedback while allowing game initialization
+    actionTimeout: 8000, // 8s per action (games need 6+ seconds to initialize)
+    navigationTimeout: 15000, // 15s for navigation
   },
 
-  // Configure projects for major browsers
-  projects: [
-    {
-      name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        // Viewport for desktop testing
-        viewport: { width: 1280, height: 720 },
-      },
-    },
-
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
-        viewport: { width: 1280, height: 720 },
-      },
-    },
-
-    {
-      name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
-        viewport: { width: 1280, height: 720 },
-      },
-    },
-
-    // Test against mobile viewports
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    },
-  ],
+  // Browser projects (mobile-first locally, all on CI)
+  projects,
 
   // Run your local dev server before starting the tests
   webServer: {

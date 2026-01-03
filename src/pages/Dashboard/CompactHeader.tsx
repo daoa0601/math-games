@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { PlayerProfile } from '@/shared/schemas';
 import type { RankThreshold } from '@/shared/services/rank';
-import { LanguageSwitcher, SoundToggle } from '@/shared/components';
+import { LanguageSwitcher, SoundToggle, ThemeToggle } from '@/shared/components';
 import './CompactHeader.css';
 
 interface CompactHeaderProps {
@@ -34,6 +34,7 @@ export function CompactHeader({ profile, rankInfo, streak }: CompactHeaderProps)
         )}
       </div>
       <div className="compact-header__controls">
+        <ThemeToggle />
         <SoundToggle />
         <LanguageSwitcher />
       </div>

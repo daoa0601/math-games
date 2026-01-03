@@ -248,7 +248,7 @@ For games with target T and pool P, if T can be expressed as a symmetric partiti
 
 ## 5. Preset Games
 
-SequenceRace includes **11 carefully designed preset games** spanning all seven sequence types and three difficulty levels. Each preset has been validated for fairness using minimax analysis.
+SequenceRace includes **12 carefully designed preset games** spanning all seven sequence types and three difficulty levels. Each preset has been validated for fairness using minimax analysis.
 
 ### Easy Presets (2 games)
 
@@ -314,7 +314,7 @@ SequenceRace includes **11 carefully designed preset games** spanning all seven 
 
 ---
 
-### Hard Presets (4 games)
+### Hard Presets (5 games)
 
 #### Prime Time
 - **ID**: `prime_28`
@@ -662,7 +662,7 @@ Most importantly, SequenceRace makes mathematics **playful, strategic, and socia
 
 ## Appendix: Quick Reference Tables
 
-### All 11 Presets At-a-Glance
+### All 12 Presets At-a-Glance
 
 | Preset Name | ID | Difficulty | Target | Steps | Sequence Type | AI First? |
 |-------------|-----|-----------|--------|-------|---------------|-----------|

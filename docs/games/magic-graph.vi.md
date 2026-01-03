@@ -373,6 +373,44 @@ Mỗi hàng, cột có tổng 15. Câu đố này đã được nghiên cứu h�
 
 ---
 
+### Câu đố Chữ cái A-Z
+
+MagicGraph bao gồm bộ hoàn chỉnh **26 câu đố chữ cái**, lấy cảm hứng từ định dạng Cuộc thi Toán học Mở Hà Nội. Mỗi chữ cái được thiết kế như cấu trúc đồ thị trong đó tất cả các đường đều chứa đúng 3 nút - một ràng buộc toán học quan trọng đảm bảo khả năng giải được.
+
+**Ràng buộc toán học:**
+Mỗi đường trong câu đố chữ cái có đúng 3 nút, theo định dạng toán học thi đấu. Điều này có nghĩa mỗi đường biểu diễn một phương trình: `a + b + c = tổng_đích`.
+
+**Phân loại độ khó:**
+
+| Độ khó | Chữ cái | Số đường | Số nút |
+|--------|---------|----------|--------|
+| Dễ | I, L, T, V, X, Y, Z | 2-3 đường | 5-6 nút |
+| Trung bình | A, C, E, F, H, J, K, N, U | 3-5 đường | 6-9 nút |
+| Khó | B, D, G, M, O, P, Q, R, S, W | 3-6 đường | 6-9 nút |
+
+**Ví dụ: Chữ H (Trung bình)**
+```
+[○]       [○]       [○]
+ │         │         │
+ │    ─────┼─────    │
+ │         │         │
+[○]       [○]       [○]
+
+Nút: 6
+Đường: 3 (dọc trái, thanh ngang, dọc phải)
+Mỗi đường: 3 nút có tổng bằng đích
+```
+
+**Giá trị giáo dục:**
+- Học sinh nhận ra các hình dạng chữ cái quen thuộc, làm cho toán học trừu tượng dễ tiếp cận hơn
+- Câu đố chữ cái kết nối nhận dạng mẫu trực quan với các ràng buộc đại số
+- Độ khó tăng dần qua độ phức tạp của chữ cái khuyến khích khám phá toàn bộ bảng chữ cái
+
+**Thử thách hàng ngày:**
+Trình tạo câu đố có hạt giống bao gồm các chữ cái trong thử thách hàng ngày, được cân nhắc theo cấp độ khó. Học sinh có thể gặp các chữ cái khác nhau trong các câu đố hàng ngày dễ, trung bình và khó.
+
+---
+
 ## 6. Thuật toán giải (Giải thích thân thiện với giáo viên)
 
 ### Máy tính giải MagicGraph như thế nào

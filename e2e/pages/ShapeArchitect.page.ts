@@ -229,7 +229,7 @@ export class ShapeArchitectPage {
    * @param daily - Whether to navigate to daily challenge mode
    */
   async goto(daily = false) {
-    const url = daily ? '/math-games/#/shape-architect?daily=true' : '/math-games/#/shape-architect';
+    const url = daily ? '/shape-architect?daily=true' : '/shape-architect';
     await this.page.goto(url);
     await this.gameTitle.waitFor({ state: 'visible' });
   }

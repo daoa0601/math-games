@@ -4,6 +4,7 @@
 // ========================================
 
 import type { PuzzleConfig } from './types';
+import { easyLetters, mediumLetters, hardLetters } from './alphabetPuzzles';
 
 /**
  * Line puzzle - 3 nodes in a row (simplest valid puzzle)
@@ -201,10 +202,13 @@ export const magicSquarePuzzle: Omit<PuzzleConfig, 'id'> = {
     isSolvable: true,
 };
 
+// Import alphabet puzzles for inclusion in templates
+import { alphabetPuzzles } from './alphabetPuzzles';
+
 /**
- * Verified solvable puzzle templates.
- * Note: mShapePuzzle and starPuzzle are excluded due to structural issues
- * (lines with different node counts cannot have the same target sum)
+ * All verified solvable puzzle templates including alphabet letters.
+ * Note: mShapePuzzle and starPuzzle have been replaced by proper alphabet letter puzzles
+ * which follow the mathematical constraint: all lines must have exactly 3 nodes.
  */
 export const puzzleTemplates = [
     linePuzzle,
@@ -212,7 +216,18 @@ export const puzzleTemplates = [
     magicTrianglePuzzle,
     diamondPuzzle,
     magicSquarePuzzle,
+    ...alphabetPuzzles,
 ];
+
+// Re-export alphabet puzzles for use in other modules
+export {
+    alphabetPuzzles,
+    easyLetters,
+    mediumLetters,
+    hardLetters,
+    getAlphabetPuzzlesForDifficulty,
+    type LetterPuzzle,
+} from './alphabetPuzzles';
 
 // ========================================
 // Random Puzzle Generator
@@ -273,12 +288,12 @@ export function generateRandomPuzzle(difficulty: 'easy' | 'medium' | 'hard'): Pu
 
 function getRandomShapes(difficulty: 'easy' | 'medium' | 'hard') {
     if (difficulty === 'easy') {
-        return [linePuzzle, crossPuzzle];
+        return [linePuzzle, crossPuzzle, ...easyLetters.slice(0, 3)];
     } else if (difficulty === 'medium') {
-        return [crossPuzzle, magicTrianglePuzzle, diamondPuzzle];
+        return [crossPuzzle, magicTrianglePuzzle, diamondPuzzle, ...mediumLetters.slice(0, 3)];
     } else {
-        // Only verified solvable puzzles for hard difficulty
-        return [diamondPuzzle, magicSquarePuzzle];
+        // Include verified solvable puzzles + hard alphabet letters
+        return [diamondPuzzle, magicSquarePuzzle, ...hardLetters.slice(0, 3)];
     }
 }
 
