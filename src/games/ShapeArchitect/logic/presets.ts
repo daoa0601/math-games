@@ -405,6 +405,134 @@ const POLYCUBE_3D = {
 };
 
 // ========================================
+// Themed Shapes - Fun recognizable shapes
+// ========================================
+
+export const THEMED_SHAPES = {
+    // Cat face (simplified) - 8 cells
+    Cat: (id: string, color: string): Piece => ({
+        id,
+        name: 'Cat',
+        color,
+        layout: [
+            // Body (2x2)
+            { x: 0, y: 0, z: 0 }, { x: 1, y: 0, z: 0 },
+            { x: 0, y: 1, z: 0 }, { x: 1, y: 1, z: 0 },
+            // Ears
+            { x: 0, y: 2, z: 0 }, { x: 1, y: 2, z: 0 },
+            // Tail (extends right)
+            { x: 2, y: 0, z: 0 }, { x: 3, y: 0, z: 0 },
+        ],
+    }),
+
+    // Dog (side view) - 9 cells
+    Dog: (id: string, color: string): Piece => ({
+        id,
+        name: 'Dog',
+        color,
+        layout: [
+            // Body
+            { x: 0, y: 0, z: 0 }, { x: 1, y: 0, z: 0 }, { x: 2, y: 0, z: 0 },
+            { x: 0, y: 1, z: 0 }, { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
+            // Head
+            { x: 3, y: 1, z: 0 },
+            // Legs
+            { x: 0, y: -1, z: 0 }, { x: 2, y: -1, z: 0 },
+        ],
+    }),
+
+    // Bird - 7 cells
+    Bird: (id: string, color: string): Piece => ({
+        id,
+        name: 'Bird',
+        color,
+        layout: [
+            // Body
+            { x: 1, y: 0, z: 0 }, { x: 2, y: 0, z: 0 },
+            { x: 1, y: 1, z: 0 },
+            // Wing
+            { x: 0, y: 1, z: 0 },
+            // Head and beak
+            { x: 3, y: 0, z: 0 }, { x: 4, y: 0, z: 0 },
+            // Tail
+            { x: 0, y: 0, z: 0 },
+        ],
+    }),
+
+    // Car (side view) - 8 cells
+    Car: (id: string, color: string): Piece => ({
+        id,
+        name: 'Car',
+        color,
+        layout: [
+            // Body
+            { x: 0, y: 1, z: 0 }, { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 },
+            // Roof
+            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
+            // Wheels
+            { x: 0, y: 0, z: 0 }, { x: 3, y: 0, z: 0 },
+        ],
+    }),
+
+    // Heart - 8 cells
+    Heart: (id: string, color: string): Piece => ({
+        id,
+        name: 'Heart',
+        color,
+        layout: [
+            // Top bumps
+            { x: 0, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
+            // Middle row
+            { x: 0, y: 1, z: 0 }, { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
+            // Bottom point
+            { x: 0, y: 0, z: 0 }, { x: 1, y: 0, z: 0 }, { x: 2, y: 0, z: 0 },
+        ],
+    }),
+
+    // Star (5-pointed, simplified) - 9 cells
+    Star: (id: string, color: string): Piece => ({
+        id,
+        name: 'Star',
+        color,
+        layout: [
+            // Center cross
+            { x: 2, y: 0, z: 0 },
+            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 },
+            { x: 0, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
+            { x: 1, y: 3, z: 0 }, { x: 3, y: 3, z: 0 },
+        ],
+    }),
+
+    // House - 9 cells
+    House: (id: string, color: string): Piece => ({
+        id,
+        name: 'House',
+        color,
+        layout: [
+            // Base (2x2)
+            { x: 0, y: 0, z: 0 }, { x: 1, y: 0, z: 0 }, { x: 2, y: 0, z: 0 },
+            { x: 0, y: 1, z: 0 }, { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
+            // Roof (triangle)
+            { x: 0, y: 2, z: 0 }, { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
+        ],
+    }),
+
+    // Tree - 7 cells
+    Tree: (id: string, color: string): Piece => ({
+        id,
+        name: 'Tree',
+        color,
+        layout: [
+            // Trunk
+            { x: 1, y: 0, z: 0 }, { x: 1, y: 1, z: 0 },
+            // Leaves (triangle)
+            { x: 0, y: 2, z: 0 }, { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
+            { x: 0, y: 3, z: 0 }, { x: 2, y: 3, z: 0 },
+        ],
+    }),
+};
+
+// ========================================
 // Preset Levels - ALL require 4+ pieces
 // ========================================
 
@@ -921,6 +1049,9 @@ export const presetLevels: LevelConfig[] = [
         ],
         difficulty: 'hard',
     },
+
+    // Note: THEMED_SHAPES collection is exported above for future themed levels
+    // Creating solvable levels with complex themed pieces requires careful puzzle design
 ];
 
 /**

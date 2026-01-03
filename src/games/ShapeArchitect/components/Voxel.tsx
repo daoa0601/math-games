@@ -8,6 +8,7 @@ interface VoxelProps {
     isTarget?: boolean;
     isPreview?: boolean;
     isPreviewValid?: boolean;
+    isPreviewLocked?: boolean;
     onClick?: () => void;
     onPointerEnter?: () => void;
 }
@@ -22,6 +23,7 @@ export function Voxel({
     isTarget = false,
     isPreview = false,
     isPreviewValid = true,
+    isPreviewLocked = false,
     onClick,
     onPointerEnter,
 }: VoxelProps) {
@@ -40,7 +42,10 @@ export function Voxel({
     // Animate preview blocks
     useFrame((state) => {
         if (meshRef.current && isPreview) {
-            meshRef.current.scale.setScalar(0.9 + Math.sin(state.clock.elapsedTime * 4) * 0.05);
+            // Locked previews pulse slower and slightly larger
+            const speed = isPreviewLocked ? 2 : 4;
+            const amplitude = isPreviewLocked ? 0.08 : 0.05;
+            meshRef.current.scale.setScalar(0.9 + Math.sin(state.clock.elapsedTime * speed) * amplitude);
         }
     });
 
@@ -56,7 +61,7 @@ export function Voxel({
     };
 
     const getOpacity = () => {
-        if (isPreview) return 0.6;
+        if (isPreview) return isPreviewLocked ? 0.75 : 0.6;
         if (isTarget) return 0.3;
         return 1;
     };

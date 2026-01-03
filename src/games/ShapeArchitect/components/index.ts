@@ -10,3 +10,4 @@ export { RotationControls } from './RotationControls';
 export type { Rotation3D as RotationControlsRotation } from './RotationControls';
 export { LayerControls } from './LayerControls';
 export { ShapeArchitectTutorial } from './ShapeArchitectTutorial';
+export { PreviewLockButton } from './PreviewLockButton';

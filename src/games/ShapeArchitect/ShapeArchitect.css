@@ -105,6 +105,77 @@
     background: var(--color-primary);
 }
 
+.view-mode-toggle__badge {
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-magic);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    animation: badgePulse 2s ease-in-out infinite;
+    align-self: center;
+}
+
+@keyframes badgePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+/* Preview Lock Button */
+.preview-lock-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--surface-card);
+    border: 2px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.preview-lock-btn:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--surface-hover);
+}
+
+.preview-lock-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.preview-lock-btn--locked {
+    background: var(--color-magic);
+    border-color: var(--color-magic);
+    color: white;
+    animation: lockedPulse 2s ease-in-out infinite;
+}
+
+.preview-lock-btn--locked:hover:not(:disabled) {
+    background: hsl(270, 70%, 55%);
+    border-color: hsl(270, 70%, 55%);
+    color: white;
+}
+
+.preview-lock-btn__label {
+    display: none;
+}
+
+@media (min-width: 600px) {
+    .preview-lock-btn__label {
+        display: inline;
+    }
+}
+
+@keyframes lockedPulse {
+    0%, 100% { box-shadow: 0 0 0 0 hsla(270, 75%, 60%, 0.4); }
+    50% { box-shadow: 0 0 0 4px hsla(270, 75%, 60%, 0); }
+}
+
 .grid-row {
     display: flex;
     gap: 2px;
@@ -157,11 +228,14 @@
 
 /* Blueprint target pulse - subtle glow effect only on target cells */
 @keyframes sa-blueprintTargetPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
         border-color: hsl(200, 65%, 55%);
         box-shadow: 0 0 0 0 hsla(200, 70%, 55%, 0);
     }
+
     50% {
         opacity: 0.9;
         border-color: hsl(200, 75%, 60%);
@@ -238,9 +312,12 @@
 }
 
 @keyframes previewPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 0.6;
     }
+
     50% {
         opacity: 0.9;
     }
@@ -281,6 +358,25 @@
 .ghost-cell--invalid {
     opacity: 0.3;
     border: 2px dashed var(--color-error);
+}
+
+.ghost-cell--locked {
+    animation: sa-lockedPreviewPulse 1.5s ease-in-out infinite;
+    border-width: 3px;
+    box-shadow:
+        0 0 8px hsla(270, 75%, 60%, 0.5),
+        var(--shadow-glow-success);
+}
+
+@keyframes sa-lockedPreviewPulse {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
 }
 
 /* Responsive ghost overlay - match grid-board padding on smaller screens */
@@ -367,6 +463,22 @@
     transform: scale(1.05);
 }
 
+/* Clickable area for selection (entire card) */
+.piece-card__clickable {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    width: 100%;
+}
+
+/* Drag handle - visual area that initiates drag */
+.piece-card__drag-handle {
+    cursor: grab;
+    touch-action: none;
+}
+
 .piece-preview {
     display: flex;
     flex-direction: column;
@@ -406,9 +518,7 @@
     width: var(--cell-size);
     height: var(--cell-size);
     transform:
-        translateX(calc(var(--cell-x) * var(--cell-size)))
-        translateY(calc(var(--cell-y) * var(--cell-size)))
-        translateZ(calc(var(--cell-z) * var(--cell-size)));
+        translateX(calc(var(--cell-x) * var(--cell-size))) translateY(calc(var(--cell-y) * var(--cell-size))) translateZ(calc(var(--cell-z) * var(--cell-size)));
     border: 1px solid rgba(0, 0, 0, 0.2);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
@@ -448,9 +558,12 @@
 }
 
 @keyframes rotatePulse {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 0 0 hsla(250, 84%, 54%, 0.5);
     }
+
     50% {
         box-shadow: 0 0 0 8px transparent;
     }
@@ -483,8 +596,15 @@
 }
 
 @keyframes tooltipBounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(-4px); }
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(-4px);
+    }
 }
 
 /* Swipe hint for mobile rotation */
@@ -608,8 +728,7 @@
             transparent 35%,
             hsla(145, 70%, 45%, 0.12) 36%,
             hsla(145, 70%, 45%, 0.12) 42%,
-            transparent 43%
-        );
+            transparent 43%);
     border: 4px solid hsla(145, 70%, 45%, 0.6);
     border-radius: 50%;
     box-shadow:
@@ -632,8 +751,7 @@
     background:
         radial-gradient(circle at center,
             hsla(145, 70%, 45%, 0.08) 0%,
-            transparent 70%
-        );
+            transparent 70%);
     border: 2px dashed hsla(145, 70%, 45%, 0.4);
     border-radius: 50%;
     animation: sa-stampApprovalInner 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards;
@@ -647,16 +765,20 @@
         transform: translate(-50%, -50%) rotate(-15deg) scale(0);
         opacity: 0;
     }
+
     40% {
         transform: translate(-50%, -50%) rotate(-15deg) scale(1.2);
         opacity: 1;
     }
+
     60% {
         transform: translate(-50%, -50%) rotate(-12deg) scale(0.95);
     }
+
     80% {
         transform: translate(-50%, -50%) rotate(-15deg) scale(1.05);
     }
+
     100% {
         transform: translate(-50%, -50%) rotate(-15deg) scale(1);
         opacity: 0.9;
@@ -668,10 +790,12 @@
         transform: translate(-50%, -50%) rotate(-15deg) scale(0);
         opacity: 0;
     }
+
     50% {
         transform: translate(-50%, -50%) rotate(-15deg) scale(1.15);
         opacity: 1;
     }
+
     100% {
         transform: translate(-50%, -50%) rotate(-15deg) scale(1);
         opacity: 0.7;
@@ -949,18 +1073,15 @@
     padding: 6px;
     background:
         /* Wood grain texture */
-        repeating-linear-gradient(
-            90deg,
+        repeating-linear-gradient(90deg,
             transparent 0px,
             transparent 20px,
             hsla(30, 40%, 35%, 0.04) 20px,
-            hsla(30, 40%, 35%, 0.04) 21px
-        ),
+            hsla(30, 40%, 35%, 0.04) 21px),
         /* Base wood color */
         linear-gradient(180deg,
             hsl(32, 35%, 82%) 0%,
-            hsl(30, 32%, 76%) 100%
-        );
+            hsl(30, 32%, 76%) 100%);
     border-radius: var(--radius-lg);
     border: 2px solid hsl(30, 35%, 60%);
     box-shadow:
@@ -984,8 +1105,7 @@
         linear-gradient(180deg,
             hsl(35, 25%, 95%) 0%,
             hsl(32, 20%, 90%) 50%,
-            hsl(30, 18%, 86%) 100%
-        );
+            hsl(30, 18%, 86%) 100%);
     border: 1px solid hsla(30, 30%, 50%, 0.3);
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -1005,8 +1125,7 @@
         linear-gradient(180deg,
             hsl(38, 30%, 97%) 0%,
             hsl(35, 25%, 93%) 50%,
-            hsl(32, 22%, 88%) 100%
-        );
+            hsl(32, 22%, 88%) 100%);
     transform: translateY(-1px);
     box-shadow:
         inset 0 1px 0 hsla(40, 40%, 100%, 0.7),
@@ -1027,8 +1146,7 @@
         linear-gradient(180deg,
             hsl(45, 95%, 70%) 0%,
             hsl(42, 90%, 58%) 50%,
-            hsl(38, 85%, 52%) 100%
-        );
+            hsl(38, 85%, 52%) 100%);
     color: hsl(30, 50%, 18%);
     border-color: hsl(38, 70%, 45%);
     box-shadow:
@@ -1043,8 +1161,7 @@
         linear-gradient(180deg,
             hsl(46, 95%, 72%) 0%,
             hsl(43, 92%, 60%) 50%,
-            hsl(40, 88%, 54%) 100%
-        );
+            hsl(40, 88%, 54%) 100%);
 }
 
 .camera-preset__icon {
@@ -1143,19 +1260,16 @@
     padding: 6px 10px;
     background:
         /* Brushed metal texture */
-        repeating-linear-gradient(
-            90deg,
+        repeating-linear-gradient(90deg,
             transparent 0px,
             transparent 2px,
             hsla(220, 10%, 50%, 0.03) 2px,
-            hsla(220, 10%, 50%, 0.03) 3px
-        ),
+            hsla(220, 10%, 50%, 0.03) 3px),
         /* Base metal gradient */
         linear-gradient(180deg,
             hsl(220, 12%, 88%) 0%,
             hsl(220, 10%, 82%) 50%,
-            hsl(220, 8%, 78%) 100%
-        );
+            hsl(220, 8%, 78%) 100%);
     border-radius: var(--radius-lg);
     border: 2px solid hsl(220, 10%, 65%);
     box-shadow:
@@ -1198,13 +1312,11 @@
         /* Dial face gradient */
         radial-gradient(ellipse 80% 60% at 50% 20%,
             var(--white-30) 0%,
-            transparent 50%
-        ),
+            transparent 50%),
         linear-gradient(180deg,
             hsl(0, 0%, 96%) 0%,
             hsl(0, 0%, 92%) 40%,
-            hsl(0, 0%, 88%) 100%
-        );
+            hsl(0, 0%, 88%) 100%);
     border: 2px solid;
     border-color: hsla(0, 0%, 50%, 0.2);
     border-radius: var(--radius-md);
@@ -1224,13 +1336,11 @@
     background:
         radial-gradient(ellipse 80% 60% at 50% 20%,
             hsla(0, 0%, 100%, 0.5) 0%,
-            transparent 50%
-        ),
+            transparent 50%),
         linear-gradient(180deg,
             hsl(0, 0%, 98%) 0%,
             hsl(0, 0%, 94%) 40%,
-            hsl(0, 0%, 90%) 100%
-        );
+            hsl(0, 0%, 90%) 100%);
     border-color: var(--dial-color);
     transform: translateY(-1px);
     box-shadow:
@@ -1250,13 +1360,11 @@
     background:
         radial-gradient(ellipse 80% 60% at 50% 20%,
             hsla(0, 0%, 100%, 0.4) 0%,
-            transparent 50%
-        ),
+            transparent 50%),
         linear-gradient(180deg,
             color-mix(in srgb, var(--dial-color) 25%, white) 0%,
             color-mix(in srgb, var(--dial-color) 35%, white) 40%,
-            color-mix(in srgb, var(--dial-color) 45%, white) 100%
-        );
+            color-mix(in srgb, var(--dial-color) 45%, white) 100%);
     border-color: var(--dial-color);
     box-shadow:
         inset 0 1px 0 hsla(0, 0%, 100%, 0.5),
@@ -1654,8 +1762,7 @@
         linear-gradient(135deg,
             hsl(32, 20%, 92%) 0%,
             hsl(30, 18%, 88%) 50%,
-            hsl(28, 16%, 85%) 100%
-        );
+            hsl(28, 16%, 85%) 100%);
     border-radius: var(--radius-lg);
     border: 2px solid hsl(30, 35%, 60%);
     box-shadow:
@@ -1715,8 +1822,7 @@
         linear-gradient(180deg,
             hsl(30, 15%, 75%) 0%,
             hsl(28, 12%, 80%) 50%,
-            hsl(30, 15%, 75%) 100%
-        );
+            hsl(30, 15%, 75%) 100%);
     border-radius: 4px;
     border: 1px solid hsla(30, 30%, 50%, 0.4);
     box-shadow:
@@ -1732,8 +1838,7 @@
         radial-gradient(circle at 30% 30%,
             hsl(45, 95%, 70%) 0%,
             hsl(42, 90%, 55%) 60%,
-            hsl(38, 85%, 45%) 100%
-        );
+            hsl(38, 85%, 45%) 100%);
     border-radius: 50%;
     border: 2px solid hsl(38, 70%, 45%);
     box-shadow:
@@ -1759,8 +1864,7 @@
         radial-gradient(circle at 30% 30%,
             hsl(45, 95%, 70%) 0%,
             hsl(42, 90%, 55%) 60%,
-            hsl(38, 85%, 45%) 100%
-        );
+            hsl(38, 85%, 45%) 100%);
     border-radius: 50%;
     border: 2px solid hsl(38, 70%, 45%);
     box-shadow:
@@ -1780,8 +1884,7 @@
     background:
         linear-gradient(180deg,
             hsl(35, 20%, 96%) 0%,
-            hsl(32, 15%, 92%) 100%
-        );
+            hsl(32, 15%, 92%) 100%);
     border-radius: var(--radius-sm);
     border: 1px solid hsla(30, 30%, 50%, 0.25);
     font-family: var(--font-display);
@@ -1810,8 +1913,7 @@
         linear-gradient(180deg,
             hsl(35, 25%, 95%) 0%,
             hsl(32, 20%, 90%) 50%,
-            hsl(30, 18%, 86%) 100%
-        );
+            hsl(30, 18%, 86%) 100%);
     border: 1px solid hsla(30, 30%, 50%, 0.3);
     border-radius: var(--radius-sm);
     cursor: pointer;
@@ -1831,8 +1933,7 @@
     background:
         linear-gradient(180deg,
             hsl(38, 30%, 97%) 0%,
-            hsl(35, 25%, 93%) 100%
-        );
+            hsl(35, 25%, 93%) 100%);
     transform: translateY(-1px);
     box-shadow:
         inset 0 1px 0 hsla(40, 40%, 100%, 0.7),
@@ -1852,6 +1953,7 @@
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
+
     .layer-controls__slider::-webkit-slider-thumb,
     .layer-controls__btn {
         transition: none;

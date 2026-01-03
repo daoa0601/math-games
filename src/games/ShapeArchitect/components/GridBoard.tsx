@@ -67,6 +67,7 @@ interface GridBoardProps {
     hoverPosition?: Position3D | null;
     onCellHover?: (position: Position3D | null) => void;
     justPlacedPositions?: Set<string>; // Positions that were just placed (for snap animation)
+    isPreviewLocked?: boolean; // Whether the preview position is locked
 }
 
 export const GridBoard = memo(function GridBoard({
@@ -80,6 +81,7 @@ export const GridBoard = memo(function GridBoard({
     hoverPosition,
     onCellHover,
     justPlacedPositions,
+    isPreviewLocked = false,
 }: GridBoardProps) {
     const [width, height] = gridSize;
 
@@ -300,11 +302,16 @@ export const GridBoard = memo(function GridBoard({
                     {ghostCells.map(({ x, y, key }) => {
                         // Convert grid Y to visual Y (flip for display)
                         const visualY = height - 1 - y;
+                        const ghostClass = [
+                            'ghost-cell',
+                            previewData.isValid ? 'ghost-cell--valid' : 'ghost-cell--invalid',
+                            isPreviewLocked ? 'ghost-cell--locked' : '',
+                        ].filter(Boolean).join(' ');
 
                         return (
                             <div
                                 key={key}
-                                className={`ghost-cell ${previewData.isValid ? 'ghost-cell--valid' : 'ghost-cell--invalid'}`}
+                                className={ghostClass}
                                 style={{
                                     gridColumn: x + 1,
                                     gridRow: visualY + 1,

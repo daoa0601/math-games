@@ -23,6 +23,8 @@ interface GridBoard3DProps {
     cameraPreset?: CameraPreset;
     /** Maximum visible z-layer (for layer slicing). Layers above this are hidden. */
     maxVisibleLayer?: number;
+    /** Whether the preview position is locked */
+    isPreviewLocked?: boolean;
 }
 
 /**
@@ -41,6 +43,7 @@ export function GridBoard3D({
     onCellHover,
     cameraPreset = 'isometric',
     maxVisibleLayer,
+    isPreviewLocked = false,
 }: GridBoard3DProps) {
     const [width, height, depth] = gridSize;
 
@@ -143,6 +146,7 @@ export function GridBoard3D({
                                 color={selectedPiece?.color ?? '#6366f1'}
                                 isPreview
                                 isPreviewValid={previewData.isValid}
+                                isPreviewLocked={isPreviewLocked}
                             />
                         );
                         continue; // Don't render the underlying cell when showing preview
@@ -191,7 +195,7 @@ export function GridBoard3D({
 
     return (
         <div className="grid-board-3d" onPointerLeave={() => onCellHover?.(null)}>
-            <Canvas shadows>
+            <Canvas shadows frameloop="demand">
                 <Suspense fallback={null}>
                     <Scene3DContent
                         voxels={voxels}
@@ -209,15 +213,18 @@ export function GridBoard3D({
  * Camera animation component that smoothly transitions between presets
  */
 function CameraAnimator({ preset }: { preset: CameraPreset }) {
-    const { camera } = useThree();
+    const { camera, invalidate } = useThree();
     const controlsRef = useRef<OrbitControlsImpl>(null);
     const targetPosition = useRef(new THREE.Vector3(...CAMERA_PRESETS[preset].position));
     const targetLookAt = useRef(new THREE.Vector3(...CAMERA_PRESETS[preset].target));
+    const isAnimatingRef = useRef(false);
 
     useEffect(() => {
         targetPosition.current.set(...CAMERA_PRESETS[preset].position);
         targetLookAt.current.set(...CAMERA_PRESETS[preset].target);
-    }, [preset]);
+        isAnimatingRef.current = true;
+        invalidate(); // Start animation loop
+    }, [preset, invalidate]);
 
     useFrame(() => {
         // Smoothly interpolate camera position
@@ -227,6 +234,14 @@ function CameraAnimator({ preset }: { preset: CameraPreset }) {
         if (controlsRef.current) {
             controlsRef.current.target.lerp(targetLookAt.current, 0.08);
             controlsRef.current.update();
+        }
+
+        // Check if animation is complete (close enough to target)
+        const positionDist = camera.position.distanceTo(targetPosition.current);
+        if (positionDist > 0.01) {
+            invalidate(); // Continue animation
+        } else {
+            isAnimatingRef.current = false;
         }
     });
 
@@ -238,6 +253,7 @@ function CameraAnimator({ preset }: { preset: CameraPreset }) {
             enableRotate={true}
             minDistance={5}
             maxDistance={25}
+            onChange={() => invalidate()}
         />
     );
 }
@@ -257,8 +273,15 @@ function Scene3DContent({
     gridSize: [number, number, number];
     cameraPreset: CameraPreset;
 }) {
+    const { invalidate } = useThree();
+
     // Cleanup Three.js resources on unmount to prevent GPU memory leaks
     useThreeCleanup();
+
+    // Invalidate render when voxels or camera preset changes
+    useEffect(() => {
+        invalidate();
+    }, [voxels, cameraPreset, invalidate]);
 
     return (
         <>
