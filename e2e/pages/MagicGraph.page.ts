@@ -36,10 +36,14 @@ export class MagicGraphPage {
   readonly targetSumDisplay: Locator;
   readonly numberInventory: Locator;
 
-  // Win overlay
-  readonly winOverlay: Locator;
-  readonly winMessage: Locator;
-  readonly playAgainButton: Locator;
+  // Win bottom sheet
+  readonly winBottomSheet: Locator;
+  readonly winSheetBackdrop: Locator;
+  readonly winSheetTitle: Locator;
+  readonly winSheetTime: Locator;
+  readonly winSheetNextButton: Locator;
+  readonly winSheetInsight: Locator;
+  readonly winSheetPersonalBest: Locator;
 
   // Tutorial
   readonly tutorialOverlay: Locator;
@@ -74,10 +78,14 @@ export class MagicGraphPage {
     this.targetSumDisplay = page.locator('.target-sum, .puzzle-info').first();
     this.numberInventory = page.locator('.number-inventory');
 
-    // Win overlay
-    this.winOverlay = page.locator('.win-overlay, .game-complete');
-    this.winMessage = this.winOverlay.locator('.win-message, h2');
-    this.playAgainButton = this.winOverlay.getByRole('button', { name: /play again|chơi lại/i });
+    // Win/Lose modal (centered)
+    this.winBottomSheet = page.locator('.game-modal');
+    this.winSheetBackdrop = page.locator('.game-modal__backdrop');
+    this.winSheetTitle = this.winBottomSheet.locator('.game-modal__title');
+    this.winSheetTime = this.winBottomSheet.locator('.game-modal__time');
+    this.winSheetNextButton = this.winBottomSheet.locator('.btn--primary');
+    this.winSheetInsight = this.winBottomSheet.locator('.game-modal__insight');
+    this.winSheetPersonalBest = this.winBottomSheet.locator('.personal-best');
 
     // Tutorial
     this.tutorialOverlay = page.locator('.tutorial-overlay, .magic-graph-tutorial');
@@ -273,25 +281,33 @@ export class MagicGraphPage {
   }
 
   /**
-   * Check if puzzle is solved (win overlay visible)
+   * Check if puzzle is solved (win bottom sheet visible)
    */
   async isPuzzleSolved(): Promise<boolean> {
-    return this.winOverlay.isVisible();
+    return this.winBottomSheet.isVisible();
   }
 
   /**
-   * Get win message text
+   * Get win title text
    */
-  async getWinMessage(): Promise<string | null> {
+  async getWinTitle(): Promise<string | null> {
     if (!(await this.isPuzzleSolved())) return null;
-    return this.winMessage.textContent();
+    return this.winSheetTitle.textContent();
   }
 
   /**
-   * Click "Play Again" button after winning
+   * Get win time display
    */
-  async playAgain(): Promise<void> {
-    await this.playAgainButton.click();
+  async getWinTime(): Promise<string | null> {
+    if (!(await this.isPuzzleSolved())) return null;
+    return this.winSheetTime.textContent();
+  }
+
+  /**
+   * Click "Next Puzzle" button after winning
+   */
+  async nextPuzzle(): Promise<void> {
+    await this.winSheetNextButton.click();
     // Wait for new puzzle
     await this.page.waitForTimeout(500);
   }

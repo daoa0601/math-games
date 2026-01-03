@@ -435,35 +435,43 @@ test.describe('MagicGraph Game', () => {
     });
   });
 
-  test.describe('Game Completion', () => {
-    test('should detect puzzle completion and show win overlay', async ({ page }) => {
-      // This test requires solving a puzzle
-      // We'll use a simple strategy: switch to easy mode and try to solve programmatically
+  test.describe('Win Modal', () => {
+    // Note: These tests verify the modal CSS structure.
+    // Full win state testing requires puzzle solving which is not yet implemented.
 
-      // For E2E testing, we might need to either:
-      // 1. Know a puzzle solution in advance
-      // 2. Solve it programmatically
-      // 3. Mock the completion state
+    test('win modal should not be visible initially', async ({ page }) => {
+      // Wait for game to fully load
+      await page.locator('.puzzle-board').waitFor({ state: 'visible', timeout: 10000 });
 
-      // Let's test that IF the puzzle is solved, the overlay appears
-      // We can simulate this by directly setting the state via evaluation
-
-      // First, let's just verify the win overlay elements exist in the DOM (even if hidden)
-      // and can be triggered
-
-      // Skip actual solving for now, but verify overlay would work
-      // This is a limitation - ideally we'd have a known solvable puzzle
-
-      // Instead, let's test the overlay by placing a few numbers and checking behavior
-      test.skip(); // Mark as skip until we implement solution logic
+      // The modal should only appear on win
+      const modal = page.locator('.game-modal');
+      await expect(modal).not.toBeVisible();
     });
 
-    test('should show personal best indicator on completion', async ({ page }) => {
-      test.skip(); // Requires completing a puzzle
-    });
+    test('should have fade-in animation keyframes defined', async ({ page }) => {
+      // Wait for game to fully load (ensures CSS is loaded)
+      await page.locator('.puzzle-board').waitFor({ state: 'visible', timeout: 10000 });
 
-    test('should allow navigation back to dashboard from win overlay', async ({ page }) => {
-      test.skip(); // Requires completing a puzzle
+      // Check that the animation keyframes exist in loaded stylesheets
+      const hasAnimation = await page.evaluate(() => {
+        const styleSheets = Array.from(document.styleSheets);
+        for (const sheet of styleSheets) {
+          try {
+            const rules = Array.from(sheet.cssRules || []);
+            for (const rule of rules) {
+              if (rule instanceof CSSKeyframesRule && rule.name === 'modalFadeIn') {
+                return true;
+              }
+            }
+          } catch {
+            // Cross-origin stylesheets may throw - skip them
+            continue;
+          }
+        }
+        return false;
+      });
+
+      expect(hasAnimation).toBe(true);
     });
   });
 
