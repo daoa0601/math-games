@@ -11,6 +11,7 @@ interface GameConfig {
   path: string;
   tags: string[];
   levelCount: number;
+  disabled?: boolean;
 }
 
 const GAME_CONFIGS: GameConfig[] = [
@@ -31,6 +32,7 @@ const GAME_CONFIGS: GameConfig[] = [
     path: '/shape-architect',
     tags: ['3D', 'spatial'],
     levelCount: 10,
+    disabled: true,
   },
 ];
 
@@ -100,6 +102,7 @@ export function PlayTab() {
             tags={game.tags}
             to={game.path}
             progress={game.progress}
+            disabled={game.disabled}
           />
         ))}
       </div>

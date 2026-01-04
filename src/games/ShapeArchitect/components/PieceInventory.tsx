@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import type { Piece, Rotation3D } from '../logic/types';
 import { getExplicitPattern } from '@/shared/utils';
@@ -17,19 +18,37 @@ interface DraggablePieceProps {
     rotation: Rotation3D;
 }
 
+// Minimum distance (in pixels) to consider as a drag vs click
+const DRAG_THRESHOLD = 5;
+
 function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePieceProps) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: piece.id,
         data: { piece, rotation },
     });
 
-    // Handle click separately from drag - only select if not dragging
+    // Track mouse position at start of interaction to distinguish clicks from drags
+    const mouseDownPos = useRef<{ x: number; y: number } | null>(null);
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        mouseDownPos.current = { x: e.clientX, y: e.clientY };
+    };
+
     const handleClick = (e: React.MouseEvent) => {
-        // Prevent selection during/after drag
-        if (!isDragging) {
+        // Calculate distance moved since mousedown
+        const movedDistance = mouseDownPos.current
+            ? Math.hypot(
+                e.clientX - mouseDownPos.current.x,
+                e.clientY - mouseDownPos.current.y
+            )
+            : 0;
+
+        // Only treat as click if mouse didn't move much (not a drag)
+        if (movedDistance < DRAG_THRESHOLD) {
             e.stopPropagation();
             onSelect();
         }
+        mouseDownPos.current = null;
     };
 
     // Check if piece has 3D depth (z > 0)
@@ -69,6 +88,7 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
             {/* Clickable selection area - separate from drag handle */}
             <div
                 className="piece-card__clickable"
+                onMouseDown={handleMouseDown}
                 onClick={handleClick}
                 onKeyDown={(e) => e.key === 'Enter' && onSelect()}
                 role="button"

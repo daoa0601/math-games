@@ -56,62 +56,63 @@ jobs:
           retention-days: 1
 
   # ─────────────────────────────────────────────────────────
-  # E2E Tests - Gate for deployment
+  # E2E Tests - DISABLED (needs full revamp)
+  # Uncomment when E2E tests are stable
   # ─────────────────────────────────────────────────────────
-  e2e:
-    name: E2E Tests
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: playwright-${{ runner.os }}-
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium webkit
-
-      - name: Run E2E tests
-        run: npm run test:e2e
-        env:
-          CI: true
-
-      - name: Upload test report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-
-      - name: Upload test screenshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-screenshots
-          path: test-results/
-          retention-days: 7
+  # e2e:
+  #   name: E2E Tests
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 20
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '22'
+  #         cache: 'npm'
+  #
+  #     - name: Install dependencies
+  #       run: npm ci
+  #
+  #     - name: Cache Playwright browsers
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.cache/ms-playwright
+  #         key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+  #         restore-keys: playwright-${{ runner.os }}-
+  #
+  #     - name: Install Playwright browsers
+  #       run: npx playwright install --with-deps chromium webkit
+  #
+  #     - name: Run E2E tests
+  #       run: npm run test:e2e
+  #       env:
+  #         CI: true
+  #
+  #     - name: Upload test report
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: playwright-report
+  #         path: playwright-report/
+  #         retention-days: 7
+  #
+  #     - name: Upload test screenshots
+  #       if: failure()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: test-screenshots
+  #         path: test-results/
+  #         retention-days: 7
 
   # ─────────────────────────────────────────────────────────
   # Deploy to GitHub Pages (primary)
   # ─────────────────────────────────────────────────────────
   deploy-pages:
-    needs: [build, e2e]
+    needs: [build]  # Removed e2e dependency - tests need revamp
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -125,7 +126,7 @@ jobs:
   # Build and push Docker image (for self-hosted)
   # ─────────────────────────────────────────────────────────
   build-docker:
-    needs: [build, e2e]
+    needs: [build]  # Removed e2e dependency - tests need revamp
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

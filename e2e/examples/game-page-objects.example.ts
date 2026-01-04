@@ -21,6 +21,7 @@ test.describe('SequenceRace Page Object Examples', () => {
 
     // Check initial state
     const target = await sequenceRace.getTargetNumber();
+    expect(target).toBeGreaterThan(0); // Target should be a positive number
     const position = await sequenceRace.getCurrentPosition();
     expect(position).toBe(0);
 

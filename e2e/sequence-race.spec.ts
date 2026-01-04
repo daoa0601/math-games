@@ -10,15 +10,16 @@ import { test, expect, type Page } from '@playwright/test';
 import {
   setupFreshTestState,
   DEFAULT_TEST_PLAYER,
-  waitForReactHydration,
+  waitForSequenceRaceReady,
+  TEST_TIMEOUTS,
+  MAX_GAME_MOVES,
 } from './fixtures/test-utils';
 
 // Test helpers
 async function navigateToSequenceRace(page: Page): Promise<void> {
   await page.goto('/sequence-race');
-  await waitForReactHydration(page);
-  // Wait for the game to be fully loaded
-  await expect(page.locator('.race-track')).toBeVisible({ timeout: 10000 });
+  // Wait for the game to be fully loaded (race track, step cards, info panel)
+  await waitForSequenceRaceReady(page);
 }
 
 async function getGameState(page: Page) {
@@ -33,18 +34,11 @@ async function getGameState(page: Page) {
   };
 }
 
-async function selectStepCard(page: Page, step: number): Promise<void> {
-  const stepCard = page.locator(`.step-card[data-step="${step}"]`);
-  await expect(stepCard).toBeVisible();
-  await expect(stepCard).toBeEnabled();
-  await stepCard.click();
-}
-
 /**
  * Wait for AI to complete its move
  * Returns false if game ended or timeout, true if AI moved and it's player's turn
  */
-async function waitForAIMove(page: Page, timeout = 3000): Promise<boolean> {
+async function waitForAIMove(page: Page, timeout = TEST_TIMEOUTS.aiMove): Promise<boolean> {
   try {
     // Check if game already ended
     const overlay = page.locator('.game-overlay');
@@ -233,13 +227,11 @@ test.describe('SequenceRace - Gameplay Mechanics', () => {
     await navigateToSequenceRace(page);
 
     const state = await getGameState(page);
-    const maxStep = state.target; // Any step larger than remaining distance
 
     // Check if there are any disabled step cards
     const allStepCards = page.locator('.step-card');
     const totalCards = await allStepCards.count();
 
-    let hasDisabledCards = false;
     for (let i = 0; i < totalCards; i++) {
       const card = allStepCards.nth(i);
       const isDisabled = await card.isDisabled();
@@ -249,7 +241,6 @@ test.describe('SequenceRace - Gameplay Mechanics', () => {
       // If this step would exceed the target from position 0, it should be disabled
       if (step > state.target) {
         expect(isDisabled).toBe(true);
-        hasDisabledCards = true;
       }
     }
 
@@ -303,7 +294,13 @@ test.describe('SequenceRace - Win/Lose Conditions', () => {
     // Play until player wins or game ends
     let gameOver = false;
     let moveCount = 0;
-    const maxMoves = 20; // Safety limit (reduced from 30 for test performance)
+
+    // speed up test by seeding near win if supported, or just use reduced moves
+    // Note: Since we haven't implemented the app-side seeding yet, effective testing relies on MAX_GAME_MOVES
+    // Once app supports URL seeding, we can enable:
+    // await seedSequenceRaceNearWin(page, 2, 'easy');
+
+    const maxMoves = MAX_GAME_MOVES;
 
     while (!gameOver && moveCount < maxMoves) {
       // Check if game is over
@@ -380,7 +377,7 @@ test.describe('SequenceRace - Win/Lose Conditions', () => {
     // Play until game ends
     let gameOver = false;
     let moveCount = 0;
-    const maxMoves = 20;
+    const maxMoves = MAX_GAME_MOVES;
 
     while (!gameOver && moveCount < maxMoves) {
       const overlay = page.locator('.game-overlay');
@@ -447,7 +444,7 @@ test.describe('SequenceRace - Win/Lose Conditions', () => {
 
     // Play a quick game
     let moveCount = 0;
-    const maxMoves = 20;
+    const maxMoves = MAX_GAME_MOVES;
 
     while (moveCount < maxMoves) {
       const overlay = page.locator('.game-overlay');
@@ -489,7 +486,7 @@ test.describe('SequenceRace - Win/Lose Conditions', () => {
 
     // Play until game ends
     let moveCount = 0;
-    while (moveCount < 20) {
+    while (moveCount < MAX_GAME_MOVES) {
       const overlay = page.locator('.game-overlay');
       if (await overlay.isVisible()) {
         break;
@@ -680,8 +677,8 @@ test.describe('SequenceRace - Practice Mode', () => {
     const newTime = await page.locator('.timer-display__time').textContent();
 
     // In practice mode, time counts up, so new time should be greater
-    // Note: This is a simple check; exact timing may vary
     expect(newTime).toBeTruthy();
+    expect(newTime).not.toBe(initialTime); // Time should have changed
   });
 });
 

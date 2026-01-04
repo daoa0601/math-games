@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { setupFreshTestState, getPlayerProfile, DEFAULT_TEST_PLAYER } from './fixtures/test-utils';
+import {
+  setupFreshTestState,
+  getPlayerProfile,
+  waitForMagicGraphReady,
+  waitForNextFrame
+} from './fixtures/test-utils';
 
 /**
  * MagicGraph E2E Tests
@@ -18,8 +23,8 @@ test.describe('MagicGraph Game', () => {
     await setupFreshTestState(page);
     // Navigate to MagicGraph game
     await page.goto('/magic-graph');
-    // Wait for puzzle board to be visible (element-based wait avoids networkidle timeout from game timer)
-    await page.locator('.puzzle-board').waitFor({ state: 'visible' });
+    // Wait for game to be fully ready (board, nodes, inventory)
+    await waitForMagicGraphReady(page);
   });
 
   test.describe('Game Initialization', () => {
@@ -116,9 +121,37 @@ test.describe('MagicGraph Game', () => {
   });
 
   test.describe('Gameplay Interactions', () => {
+    // Select a template that has empty nodes (not all fixed)
+    test.beforeEach(async ({ page }) => {
+      // Close any win modal that might have appeared from auto-solved puzzle
+      const winModal = page.locator('.game-modal');
+      if (await winModal.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await page.getByRole('button', { name: /next puzzle/i }).click();
+        await waitForNextFrame(page);
+      }
+
+      // Select "Cross" template which has empty nodes on easy difficulty
+      const crossBtn = page.getByRole('button', { name: /cross/i });
+      if (await crossBtn.isVisible()) {
+        await crossBtn.click();
+        // Wait for puzzle animation to complete (CSS animation is 0.2s)
+        await page.waitForTimeout(300);
+      }
+
+      // Close any new win modal if this template also auto-solved
+      if (await winModal.isVisible({ timeout: 500 }).catch(() => false)) {
+        await page.getByRole('button', { name: /next puzzle/i }).click();
+        await page.waitForTimeout(300);
+      }
+
+      // Wait for nodes to be stable (no animations running)
+      await page.locator('.puzzle-node--empty').first().waitFor({ state: 'visible' });
+      await waitForNextFrame(page);
+    });
+
     test('should allow clicking a node to select it', async ({ page }) => {
       // Find an interactive (non-fixed) node
-      const emptyNode = page.locator('.puzzle-node--empty').first();
+      const emptyNode = page.getByRole('button', { name: /Empty node/i }).first();
       await expect(emptyNode).toBeVisible();
 
       // Click the node
@@ -139,7 +172,7 @@ test.describe('MagicGraph Game', () => {
 
     test('should place a number on a node', async ({ page }) => {
       // Click an empty node
-      const emptyNode = page.locator('.puzzle-node--empty').first();
+      const emptyNode = page.getByRole('button', { name: /Empty node/i }).first();
       await emptyNode.click();
 
       // Wait for picker to appear
@@ -167,7 +200,7 @@ test.describe('MagicGraph Game', () => {
 
     test('should close number picker when clicking close button', async ({ page }) => {
       // Click an empty node
-      const emptyNode = page.locator('.puzzle-node--empty').first();
+      const emptyNode = page.getByRole('button', { name: /Empty node/i }).first();
       await emptyNode.click();
 
       // Wait for picker
@@ -184,7 +217,7 @@ test.describe('MagicGraph Game', () => {
 
     test('should close number picker when pressing Escape', async ({ page }) => {
       // Click an empty node
-      const emptyNode = page.locator('.puzzle-node--empty').first();
+      const emptyNode = page.getByRole('button', { name: /Empty node/i }).first();
       await emptyNode.click();
 
       // Wait for picker
@@ -203,21 +236,32 @@ test.describe('MagicGraph Game', () => {
       const undoBtn = page.getByRole('button', { name: /undo/i });
       await expect(undoBtn).toBeDisabled();
 
-      // Place a number
-      await page.locator('.puzzle-node--empty').first().click();
-      await page.locator('.number-picker__option').first().click();
+      // Click empty node and wait for number picker
+      await page.getByRole('button', { name: /Empty node/i }).first().click();
+      const picker = page.locator('.number-picker');
+      await expect(picker).toBeVisible();
+
+      // Wait for option to be ready and click
+      const firstOption = page.locator('.number-picker__option').first();
+      await expect(firstOption).toBeVisible();
+      await firstOption.click();
+      await expect(picker).not.toBeVisible();
 
       // Undo should now be enabled
       await expect(undoBtn).not.toBeDisabled();
     });
 
     test('should undo a placed number', async ({ page }) => {
-      // Place a number
-      const emptyNode = page.locator('.puzzle-node--empty').first();
+      // Click empty node and wait for picker
+      const emptyNode = page.getByRole('button', { name: /Empty node/i }).first();
       await emptyNode.click();
+      const picker = page.locator('.number-picker');
+      await expect(picker).toBeVisible();
+
       const firstNumber = page.locator('.number-picker__option').first();
       const numberText = await firstNumber.textContent();
       await firstNumber.click();
+      await expect(picker).not.toBeVisible();
 
       // Verify number was placed
       await expect(page.locator('.puzzle-node__text').filter({ hasText: numberText?.trim() || '' })).toBeVisible();
@@ -231,11 +275,16 @@ test.describe('MagicGraph Game', () => {
     });
 
     test('should redo an undone action', async ({ page }) => {
-      // Place a number
-      await page.locator('.puzzle-node--empty').first().click();
+      // Click node and wait for picker
+      await page.getByRole('button', { name: /Empty node/i }).first().click();
+      const picker = page.locator('.number-picker');
+      await expect(picker).toBeVisible();
+
       const firstNumber = page.locator('.number-picker__option').first();
+      await expect(firstNumber).toBeVisible();
       const numberText = await firstNumber.textContent();
       await firstNumber.click();
+      await expect(picker).not.toBeVisible();
 
       // Undo
       await page.getByRole('button', { name: /undo/i }).click();
@@ -252,36 +301,40 @@ test.describe('MagicGraph Game', () => {
     });
 
     test('should reset puzzle to initial state', async ({ page }) => {
-      // Place a number
-      await page.locator('.puzzle-node--empty').first().click();
+      // Open picker and place a number
+      await page.getByRole('button', { name: /Empty node/i }).first().click();
+      const picker = page.locator('.number-picker');
+      await expect(picker).toBeVisible();
       await page.locator('.number-picker__option').first().click();
+      await expect(picker).not.toBeVisible();
 
-      // Click reset
-      await page.getByRole('button', { name: /reset/i }).click();
+      // Click reset (force: true for mobile overlap issues)
+      const resetBtn = page.getByRole('button', { name: /reset/i });
+      await resetBtn.click({ force: true });
 
-      // Progress should be back to initial state (only fixed nodes filled)
-      const progressValue = page.locator('.puzzle-info__value').filter({ hasText: /\d+\/\d+/ });
-      const progressText = await progressValue.textContent();
-
-      // After reset, we might have some fixed nodes, but user-placed nodes should be gone
-      // We can check that undo is disabled again
+      // We can check that undo is disabled again (puzzle reset)
       const undoBtn = page.getByRole('button', { name: /undo/i });
       await expect(undoBtn).toBeDisabled();
     });
 
     test('should not allow placing same number twice', async ({ page }) => {
-      // Place first number
-      await page.locator('.puzzle-node--empty').first().click();
+      // Open picker and place first number
+      await page.getByRole('button', { name: /Empty node/i }).first().click();
+      const picker = page.locator('.number-picker');
+      await expect(picker).toBeVisible();
+
       const firstOption = page.locator('.number-picker__option').first();
+      await expect(firstOption).toBeVisible();
       const numberText = await firstOption.textContent();
       const numberValue = numberText?.trim();
       await firstOption.click();
+      await expect(picker).not.toBeVisible();
 
       // Click another empty node
-      await page.locator('.puzzle-node--empty').first().click();
+      await page.getByRole('button', { name: /Empty node/i }).first().click();
+      await expect(picker).toBeVisible();
 
       // The previously used number should not be available
-      const picker = page.locator('.number-picker');
       const availableNumbers = picker.locator('.number-picker__option');
       const availableTexts = await availableNumbers.allTextContents();
       const normalizedTexts = availableTexts.map(t => t.trim());
@@ -290,17 +343,19 @@ test.describe('MagicGraph Game', () => {
     });
 
     test('should allow clearing a placed number', async ({ page }) => {
-      // Place a number
-      const emptyNode = page.locator('.puzzle-node--empty').first();
+      // Open picker and place a number
+      const emptyNode = page.getByRole('button', { name: /Empty node/i }).first();
       await emptyNode.click();
+      const picker = page.locator('.number-picker');
+      await expect(picker).toBeVisible();
       await page.locator('.number-picker__option').first().click();
+      await expect(picker).not.toBeVisible();
 
       // Click the same node again to edit
       const filledNode = page.locator('.puzzle-node').filter({ has: page.locator('.puzzle-node__text') }).first();
       await filledNode.click();
 
       // Picker should show with clear button
-      const picker = page.locator('.number-picker');
       await expect(picker).toBeVisible();
 
       const clearBtn = picker.locator('.number-picker__clear');
@@ -340,6 +395,15 @@ test.describe('MagicGraph Game', () => {
   });
 
   test.describe('Difficulty Changes', () => {
+    test.beforeEach(async ({ page }) => {
+      // Close any win modal that might have appeared from auto-solved puzzle
+      const winModal = page.locator('.game-modal');
+      if (await winModal.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await page.getByRole('button', { name: /next puzzle/i }).click();
+        await waitForNextFrame(page);
+      }
+    });
+
     test('should change difficulty level', async ({ page }) => {
       // Initially on easy difficulty
       const easyBtn = page.locator('.difficulty-btn--easy');
@@ -359,15 +423,10 @@ test.describe('MagicGraph Game', () => {
     });
 
     test('should load different puzzles on next button click', async ({ page }) => {
-      // Get initial puzzle name
-      const puzzleNameElement = page.locator('.puzzle-info__value').last();
-      const initialPuzzle = await puzzleNameElement.textContent();
-
       // Click next puzzle
       await page.getByRole('button', { name: /next puzzle/i }).click();
 
-      // Puzzle name might change (unless there's only one puzzle in the difficulty)
-      // At minimum, the puzzle should be reset
+      // Puzzle should be reset (undo button disabled)
       const undoBtn = page.getByRole('button', { name: /undo/i });
       await expect(undoBtn).toBeDisabled();
     });
@@ -379,7 +438,7 @@ test.describe('MagicGraph Game', () => {
 
       // Should show generating state or complete quickly
       // Wait for puzzle to be ready (undo disabled means fresh puzzle)
-      await page.waitForTimeout(500); // Give time for async generation
+      await waitForNextFrame(page);
 
       const undoBtn = page.getByRole('button', { name: /undo/i });
       await expect(undoBtn).toBeDisabled();
@@ -404,10 +463,6 @@ test.describe('MagicGraph Game', () => {
     });
 
     test('should not save stats in practice mode', async ({ page }) => {
-      // Get initial stats
-      const initialProfile = await getPlayerProfile(page);
-      const initialSolved = initialProfile?.stats.magicGraphSolved || 0;
-
       // Switch to practice mode
       await page.getByRole('radio', { name: /practice/i }).click();
 
@@ -510,8 +565,15 @@ test.describe('MagicGraph Game', () => {
       const timerDisplay = page.locator('.timer-display__time');
       const initialTime = await timerDisplay.textContent();
 
-      // Wait a few seconds
-      await page.waitForTimeout(3000);
+      // Wait a few seconds for timer to tick
+      await page.waitForFunction(
+        (time) => {
+          const el = document.querySelector('.timer-display__time');
+          return el && el.textContent !== time;
+        },
+        initialTime,
+        { timeout: 5000 }
+      );
 
       // Time should have decreased
       const newTime = await timerDisplay.textContent();
@@ -530,8 +592,17 @@ test.describe('MagicGraph Game', () => {
       const timerDisplay = page.locator('.timer-display__time');
       const pausedTime = await timerDisplay.textContent();
 
-      // Wait
-      await page.waitForTimeout(2000);
+      // Wait for timer to tick
+      await page.waitForFunction(
+        (time) => {
+          const el = document.querySelector('.timer-display__time');
+          return el && el.textContent === time;
+        },
+        pausedTime,
+        { timeout: 3000 }
+      ).catch(() => {
+        // Timer didn't change, which is expected for paused state
+      });
 
       // Time should not have changed
       const stillPausedTime = await timerDisplay.textContent();
@@ -552,8 +623,15 @@ test.describe('MagicGraph Game', () => {
       const timerDisplay = page.locator('.timer-display__time');
       const initialTime = await timerDisplay.textContent();
 
-      // Wait a bit
-      await page.waitForTimeout(2000);
+      // Wait for timer to change
+      await page.waitForFunction(
+        (time) => {
+          const el = document.querySelector('.timer-display__time');
+          return el && el.textContent !== time;
+        },
+        initialTime,
+        { timeout: 5000 }
+      );
 
       const newTime = await timerDisplay.textContent();
 
@@ -565,7 +643,7 @@ test.describe('MagicGraph Game', () => {
   test.describe('Visual Feedback', () => {
     test('should highlight selected node', async ({ page }) => {
       // Click a node
-      const emptyNode = page.locator('.puzzle-node--empty').first();
+      const emptyNode = page.getByRole('button', { name: /Empty node/i }).first();
       await emptyNode.click();
 
       // Node should have selected class
@@ -575,7 +653,7 @@ test.describe('MagicGraph Game', () => {
 
     test('should show animation on number placement', async ({ page }) => {
       // Place a number
-      await page.locator('.puzzle-node--empty').first().click();
+      await page.getByRole('button', { name: /Empty node/i }).first().click();
       await page.locator('.number-picker__option').first().click();
 
       // Should see just-placed animation class (briefly)

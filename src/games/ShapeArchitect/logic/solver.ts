@@ -156,6 +156,7 @@ function findCandidatePositions(
     piece: Piece,
     rotation: Rotation3D,
     targetCell: Position3D,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _gridSize: [number, number, number]
 ): Position3D[] {
     const rotatedLayout = rotatePieceLayout3D(piece.layout, rotation);

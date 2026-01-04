@@ -405,7 +405,7 @@ export class MagicGraphPage {
         await this.page.waitForTimeout(200); // Brief pause between placements
       } catch (error) {
         // Continue if placement fails
-        console.warn(`Failed to place ${number} on node ${node.id}`);
+        console.warn(`Failed to place ${number} on node ${node.id}:`, error);
       }
 
       // Check if we won

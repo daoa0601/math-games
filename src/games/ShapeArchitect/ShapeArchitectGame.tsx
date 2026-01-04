@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { DndContext, pointerWithin } from '@dnd-kit/core';
@@ -13,8 +13,6 @@ import type { CameraPreset } from './components/CameraPresetButtons';
 import type { Position3D, LevelConfig } from './logic/types';
 import { DEFAULT_ROTATION } from './logic/types';
 import { createGameState, removePieceFromGrid } from './logic/engine';
-import { presetLevels } from './logic/presets';
-import { getDailyShapeArchitectLevel } from './logic/seededGenerator';
 import { useShapeArchitectState, usePiecePlacement, useKeyboardControls } from './hooks';
 import {
     isLevelCompleted,
@@ -327,7 +325,7 @@ export function ShapeArchitectGame() {
             selectedPieceId: null,
             isSolved: false,
         });
-    }, [gameState]);
+    }, [gameState, setGameState]);
 
     // Keyboard shortcuts via hook
     useKeyboardControls({
@@ -504,6 +502,8 @@ export function ShapeArchitectGame() {
                             className={`view-mode-btn ${viewMode === '3d' ? 'view-mode-btn--active' : ''}`}
                             onClick={() => setViewMode('3d')}
                             aria-pressed={viewMode === '3d'}
+                            disabled={gameState.level.type === '2D'}
+                            title={gameState.level.type === '2D' ? t('viewMode.2dOnlyLevel', 'This level is 2D only') : undefined}
                         >
                             3D
                         </button>

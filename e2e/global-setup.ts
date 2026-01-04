@@ -24,12 +24,24 @@ export default async function globalSetup() {
   const page = await browser.newPage();
 
   try {
-    // Pre-warm all routes (triggers lazy bundle compilation)
+    // Pre-warm all routes with element waits (ensures bundles are fully compiled)
     // The order matches typical user flow: dashboard → games
+
+    // Dashboard
     await page.goto(baseURL);
+    await page.waitForSelector('.dashboard', { state: 'visible', timeout: 30000 });
+
+    // MagicGraph - wait for puzzle board
     await page.goto(`${baseURL}/magic-graph`);
+    await page.waitForSelector('.puzzle-board', { state: 'visible', timeout: 30000 });
+
+    // SequenceRace - wait for race track
     await page.goto(`${baseURL}/sequence-race`);
+    await page.waitForSelector('.race-track', { state: 'visible', timeout: 30000 });
+
+    // ShapeArchitect - wait for grid board (skip 3D to avoid WebGL overhead)
     await page.goto(`${baseURL}/shape-architect`);
+    await page.waitForSelector('.grid-board', { state: 'visible', timeout: 30000 });
   } finally {
     await browser.close();
   }

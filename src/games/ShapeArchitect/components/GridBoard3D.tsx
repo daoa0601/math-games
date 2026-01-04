@@ -152,8 +152,23 @@ export function GridBoard3D({
                         continue; // Don't render the underlying cell when showing preview
                     }
 
-                    // Skip empty cells (only after preview check)
-                    if (cell === 0) continue;
+                    // Skip or render empty cells based on whether piece is selected
+                    if (cell === 0) {
+                        // Only show empty voxels when a piece is selected for placement
+                        if (selectedPiece) {
+                            result.push(
+                                <Voxel
+                                    key={`empty-${posKey}`}
+                                    position={position}
+                                    color="#1e1e2e"
+                                    isEmpty
+                                    onClick={() => handleCellClick(x, y, z)}
+                                    onPointerEnter={() => handleCellHover(x, y, z)}
+                                />
+                            );
+                        }
+                        continue;
+                    }
 
                     if (cell === 1) {
                         // Target cell - can place pieces here
@@ -191,6 +206,7 @@ export function GridBoard3D({
         handleCellClick,
         handleCellHover,
         effectiveMaxLayer,
+        isPreviewLocked,
     ]);
 
     return (

@@ -185,7 +185,7 @@ export async function completeDailyChallenge(
       }
       localStorage.setItem(key, JSON.stringify(challenges));
     },
-    { key: STORAGE_KEYS.DAILY_CHALLENGES, gameId, date }
+    { key: STORAGE_KEYS.DAILY_CHALLENGE, gameId, date }
   );
 }
 
@@ -203,6 +203,13 @@ export async function setupFreshTestState(
   // Navigate to app first - localStorage requires a valid origin
   await page.goto('/');
   await clearLocalStorage(page);
+
+  // Set language to English BEFORE seeding profile
+  // i18n reads from 'math-games-lang' key directly, not from player profile
+  await page.evaluate((langKey) => {
+    localStorage.setItem(langKey, 'en');
+  }, STORAGE_KEYS.LANGUAGE);
+
   await seedPlayerProfile(page, profile);
   // Mark all tutorials as completed to avoid overlays
   await completeTutorial(page, 'magic-graph');
@@ -259,3 +266,216 @@ export async function waitForCanvasReady(
 export async function waitForNextFrame(page: Page): Promise<void> {
   await page.evaluate(() => new Promise(requestAnimationFrame));
 }
+
+// ============================================================================
+// GAME STATE SEEDING FOR FASTER TESTS
+// ============================================================================
+
+/**
+ * CI detection for conditional test behavior
+ */
+export const isCI = !!process.env.CI;
+
+/**
+ * Optimized timeouts for CI vs local development
+ */
+export const TEST_TIMEOUTS = {
+  aiMove: isCI ? 2000 : 3000,
+  animation: isCI ? 200 : 300,
+  gameLoad: isCI ? 8000 : 10000,
+};
+
+/**
+ * Max iterations for game-loop tests (reduced on CI)
+ */
+export const MAX_GAME_MOVES = isCI ? 8 : 15;
+
+/**
+ * Sequence Race game state for localStorage seeding
+ * This allows tests to start games near completion
+ */
+export interface SequenceRaceState {
+  position: number;
+  target: number;
+  turn: 'player' | 'ai';
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+/**
+ * Seed SequenceRace game state via URL params or localStorage
+ * This bypasses the need to play through many turns
+ * 
+ * @param page - Playwright page
+ * @param stepsFromTarget - How many steps away from target (2-3 for quick win)
+ * @param difficulty - Game difficulty level
+ */
+export async function seedSequenceRaceNearWin(
+  page: Page,
+  stepsFromTarget: number = 2,
+  difficulty: 'easy' | 'medium' | 'hard' = 'easy'
+): Promise<void> {
+  // Navigate with query params to seed near-win state
+  // The game should detect these params and initialize accordingly
+  await page.goto(`/sequence-race?test_mode=true&steps_from_target=${stepsFromTarget}&difficulty=${difficulty}`);
+}
+
+/**
+ * Alternative: Inject game state directly via window object
+ * Use this if URL params aren't supported by the game
+ */
+export async function injectSequenceRaceState(
+  page: Page,
+  position: number,
+  target: number
+): Promise<void> {
+  await page.evaluate(({ pos, tgt }) => {
+    // Try to access game state via window (if exposed for testing)
+    const win = window as unknown as { __TEST_GAME_STATE__?: { position: number; target: number } };
+    if (win.__TEST_GAME_STATE__) {
+      win.__TEST_GAME_STATE__.position = pos;
+      win.__TEST_GAME_STATE__.target = tgt;
+    }
+  }, { pos: position, tgt: target });
+}
+
+/**
+ * Force game completion by triggering win condition
+ * Useful for testing post-game UI without playing through
+ */
+export async function triggerGameEnd(
+  page: Page,
+  result: 'win' | 'lose' | 'timeout'
+): Promise<void> {
+  await page.evaluate((outcome) => {
+    // Dispatch custom event that games can listen for in test mode
+    window.dispatchEvent(new CustomEvent('__TEST_GAME_END__', {
+      detail: { result: outcome }
+    }));
+  }, result);
+}
+
+// ============================================================================
+// GAME-SPECIFIC READY HELPERS
+// These ensure all critical game elements are loaded before tests proceed
+// ============================================================================
+
+/**
+ * Wait for MagicGraph game to be fully ready
+ * Checks for puzzle board, nodes, and number inventory
+ */
+export async function waitForMagicGraphReady(
+  page: Page,
+  timeout = TEST_TIMEOUTS.gameLoad
+): Promise<void> {
+  // Wait for main puzzle board
+  await page.locator('.puzzle-board').waitFor({ state: 'visible', timeout });
+
+  // Wait for at least one puzzle node to be rendered
+  await page.locator('.puzzle-node').first().waitFor({ state: 'visible', timeout: 5000 });
+
+  // Wait for number inventory to be populated
+  await page.locator('.number-inventory').waitFor({ state: 'visible', timeout: 5000 });
+
+  // Small delay for React state to settle
+  await waitForNextFrame(page);
+}
+
+/**
+ * Wait for SequenceRace game to be fully ready
+ * Checks for race track and step cards
+ */
+export async function waitForSequenceRaceReady(
+  page: Page,
+  timeout = TEST_TIMEOUTS.gameLoad
+): Promise<void> {
+  // Wait for race track
+  await page.locator('.race-track').waitFor({ state: 'visible', timeout });
+
+  // Wait for step cards to be rendered
+  await page.locator('.step-card').first().waitFor({ state: 'visible', timeout: 5000 });
+
+  // Wait for game info panel
+  await page.locator('.game-info-panel').waitFor({ state: 'visible', timeout: 5000 });
+
+  await waitForNextFrame(page);
+}
+
+/**
+ * Wait for ShapeArchitect game to be fully ready (2D mode)
+ * Checks for grid board and piece inventory
+ */
+export async function waitForShapeArchitectReady(
+  page: Page,
+  timeout = TEST_TIMEOUTS.gameLoad
+): Promise<void> {
+  // Wait for grid board
+  await page.locator('.grid-board').waitFor({ state: 'visible', timeout });
+
+  // Wait for piece inventory
+  await page.locator('.piece-inventory').waitFor({ state: 'visible', timeout: 5000 });
+
+  // Wait for at least one piece to be available
+  await page.locator('.piece-item').first().waitFor({ state: 'visible', timeout: 5000 });
+
+  await waitForNextFrame(page);
+}
+
+/**
+ * Wait for Dashboard to be fully ready
+ * Checks for tabs and game cards
+ */
+export async function waitForDashboardReady(
+  page: Page,
+  timeout = TEST_TIMEOUTS.gameLoad
+): Promise<void> {
+  // Wait for dashboard container
+  await page.locator('.dashboard').waitFor({ state: 'visible', timeout });
+
+  // Wait for tab list
+  await page.locator('[role="tablist"]').waitFor({ state: 'visible', timeout: 5000 });
+
+  // Wait for at least one game card
+  await page.locator('.game-card').first().waitFor({ state: 'visible', timeout: 5000 });
+
+  await waitForNextFrame(page);
+}
+
+/**
+ * Wait for element state change after an action
+ * More reliable than arbitrary timeouts
+ */
+export async function waitForStateChange(
+  page: Page,
+  selector: string,
+  expectedState: 'visible' | 'hidden' | 'attached' | 'detached' = 'visible',
+  timeout = 3000
+): Promise<void> {
+  await page.locator(selector).waitFor({ state: expectedState, timeout });
+}
+
+/**
+ * Retry an action until it succeeds or times out
+ * Useful for flaky click operations
+ */
+export async function retryAction(
+  action: () => Promise<void>,
+  maxRetries = 3,
+  delayMs = 500
+): Promise<void> {
+  let lastError: Error | undefined;
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await action();
+      return;
+    } catch (error) {
+      lastError = error as Error;
+      if (i < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    }
+  }
+
+  throw lastError;
+}
+

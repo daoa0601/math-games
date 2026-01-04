@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { usePlayer } from '@/shared/contexts';
 import { DashboardTabs, type DashboardTabId } from '@/shared/components/layout';
+import { SkipLinks } from '@/shared/components';
 import { ACHIEVEMENTS } from '@/shared/services/achievements';
 import { CompactHeader } from './CompactHeader';
 import { PlayTab, StatsTab, AchievementsTab, LearnTab } from './tabs';
@@ -25,6 +26,7 @@ export function Dashboard() {
 
   return (
     <div className="dashboard">
+      <SkipLinks mainId="dashboard-main" />
       <CompactHeader
         profile={profile}
         rankInfo={currentRankInfo}
@@ -35,7 +37,7 @@ export function Dashboard() {
         onTabChange={setActiveTab}
         achievementCount={achievementCount}
       />
-      <main className="dashboard__content">
+      <main id="dashboard-main" tabIndex={-1} className="dashboard__content">
         {activeTab === 'play' && <PlayTab />}
         {activeTab === 'stats' && <StatsTab />}
         {activeTab === 'achievements' && <AchievementsTab />}

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useThrottledHover } from '../useThrottledHover';
-import type { Position3D } from '../../logic/types';
 
 describe('useThrottledHover', () => {
     beforeEach(() => {

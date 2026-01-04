@@ -46,7 +46,7 @@
 
 .skip-link {
   position: absolute;
-  top: -9999px;
+  top: var(--space-md);
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-tooltip);
@@ -57,11 +57,16 @@
   font-family: var(--font-display);
   font-weight: 700;
   text-decoration: none;
-  transition: top var(--transition-fast);
+  /* Use clip-path to hide - more accessible than top: -9999px
+     This keeps the element in tab order for all browsers including Safari */
+  clip-path: inset(100%);
+  white-space: nowrap;
+  overflow: hidden;
+  transition: clip-path var(--transition-fast);
 }
 
 .skip-link:focus {
-  top: var(--space-md);
+  clip-path: none;
   outline: 3px solid var(--color-accent);
   outline-offset: 2px;
 }

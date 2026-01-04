@@ -57,21 +57,24 @@ export const AllUnlocked: Story = {
   },
 };
 
-export const Interactive: Story = {
-  render: () => {
-    const [activeTab, setActiveTab] = useState<DashboardTabId>('play');
+// Wrapper component to properly use hooks in Storybook
+function InteractiveDemo() {
+  const [activeTab, setActiveTab] = useState<DashboardTabId>('play');
 
-    return (
-      <div>
-        <DashboardTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          achievementCount={{ unlocked: 5, total: 10 }}
-        />
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
-          <p>Current tab: <strong>{activeTab}</strong></p>
-        </div>
+  return (
+    <div>
+      <DashboardTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        achievementCount={{ unlocked: 5, total: 10 }}
+      />
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <p>Current tab: <strong>{activeTab}</strong></p>
       </div>
-    );
-  },
+    </div>
+  );
+}
+
+export const Interactive: Story = {
+  render: () => <InteractiveDemo />,
 };

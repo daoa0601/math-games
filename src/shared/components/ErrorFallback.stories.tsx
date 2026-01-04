@@ -90,7 +90,6 @@ export const ProductionMode: Story = {
   decorators: [
     (Story) => {
       // Simulate production environment by hiding error details
-      const originalEnv = import.meta.env.DEV
       // Note: This is for demonstration - in actual use, the component reads import.meta.env.DEV
       return (
         <div data-env="production">

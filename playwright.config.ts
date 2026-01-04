@@ -99,11 +99,11 @@ export default defineConfig({
   // Fail the build on CI if you accidentally left test.only in the source code
   forbidOnly: !!process.env.CI,
 
-  // Retry on CI only
-  retries: process.env.CI ? 2 : 0,
+  // Retry on CI only (reduced from 2 to 1 for speed - tests should be stable)
+  retries: process.env.CI ? 1 : 0,
 
-  // Workers: 2 on CI for parallelism, 4 locally (fewer browsers = less memory pressure)
-  workers: isCI ? 2 : 4,
+  // Workers: 3 on CI for better parallelism (was 2), 4 locally
+  workers: isCI ? 3 : 4,
 
   // Reduced timeout (routes are pre-warmed, should load fast)
   timeout: 30000,
@@ -126,8 +126,9 @@ export default defineConfig({
     video: 'retain-on-failure',
 
     // Balanced timeouts - fast feedback while allowing game initialization
-    actionTimeout: 8000, // 8s per action (games need 6+ seconds to initialize)
-    navigationTimeout: 15000, // 15s for navigation
+    // Tighter timeouts on CI to fail fast
+    actionTimeout: isCI ? 6000 : 8000,
+    navigationTimeout: isCI ? 10000 : 15000,
   },
 
   // Browser projects (mobile-first locally, all on CI)

@@ -144,11 +144,7 @@ test.describe('Navigation', () => {
     // Click on a game card
     await page.getByRole('link', { name: /magic graph/i }).click();
 
-    // The loading spinner should appear briefly (may be very fast in development)
-    // We're checking if it exists at all in the DOM, even if not visible
-    const loadingSpinner = page.locator('.loading-spinner');
-
-    // Either the spinner appears or the game loads immediately
+    // Either the loading spinner appears or the game loads immediately
     const spinnerOrGame = page.locator('.loading-spinner, .magic-graph-game');
     await expect(spinnerOrGame.first()).toBeVisible({ timeout: 5000 });
 

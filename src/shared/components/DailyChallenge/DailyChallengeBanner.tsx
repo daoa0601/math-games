@@ -14,7 +14,7 @@ interface GameInfo {
 const GAMES: GameInfo[] = [
   { id: 'magic-graph', path: '/magic-graph?daily=true', icon: '✨' },
   { id: 'sequence-race', path: '/sequence-race?daily=true', icon: '🏃' },
-  { id: 'shape-architect', path: '/shape-architect?daily=true', icon: '🧱' },
+  // ShapeArchitect removed until fixed
 ];
 
 interface DailyChallengeBannerProps {

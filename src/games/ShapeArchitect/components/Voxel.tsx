@@ -9,6 +9,8 @@ interface VoxelProps {
     isPreview?: boolean;
     isPreviewValid?: boolean;
     isPreviewLocked?: boolean;
+    /** Empty cell voxel - transparent but clickable for piece placement */
+    isEmpty?: boolean;
     onClick?: () => void;
     onPointerEnter?: () => void;
 }
@@ -24,6 +26,7 @@ export function Voxel({
     isPreview = false,
     isPreviewValid = true,
     isPreviewLocked = false,
+    isEmpty = false,
     onClick,
     onPointerEnter,
 }: VoxelProps) {
@@ -51,6 +54,9 @@ export function Voxel({
 
     // Calculate visual properties based on state
     const getColor = () => {
+        if (isEmpty) {
+            return hovered ? '#6366f1' : '#1e1e2e'; // highlight on hover
+        }
         if (isPreview) {
             return isPreviewValid ? '#22c55e' : '#ef4444'; // green/red
         }
@@ -61,6 +67,7 @@ export function Voxel({
     };
 
     const getOpacity = () => {
+        if (isEmpty) return hovered ? 0.3 : 0.1; // very transparent, more visible on hover
         if (isPreview) return isPreviewLocked ? 0.75 : 0.6;
         if (isTarget) return 0.3;
         return 1;
@@ -89,9 +96,9 @@ export function Voxel({
             <boxGeometry args={[0.95, 0.95, 0.95]} />
             <meshStandardMaterial
                 color={getColor()}
-                transparent={isTarget || isPreview}
+                transparent={isTarget || isPreview || isEmpty}
                 opacity={getOpacity()}
-                wireframe={isTarget && !hovered}
+                wireframe={isTarget && !hovered && !isEmpty}
             />
             {/* Add edge highlight for filled blocks (only after geometry is available) */}
             {!isTarget && !isPreview && geometry && (

@@ -231,7 +231,8 @@ export class ShapeArchitectPage {
   async goto(daily = false) {
     const url = daily ? '/shape-architect?daily=true' : '/shape-architect';
     await this.page.goto(url);
-    await this.gameTitle.waitFor({ state: 'visible' });
+    // ShapeArchitect loads three.js which can be slow, especially on mobile
+    await this.gameTitle.waitFor({ state: 'visible', timeout: 15000 });
   }
 
   /**

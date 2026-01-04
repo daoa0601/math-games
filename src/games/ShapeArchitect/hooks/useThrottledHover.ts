@@ -14,8 +14,10 @@ export function useThrottledHover(
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const handlerRef = useRef(handler);
 
-    // Keep handler ref up to date
-    handlerRef.current = handler;
+    // Keep handler ref up to date (in effect to avoid accessing refs during render)
+    useEffect(() => {
+        handlerRef.current = handler;
+    });
 
     // Cleanup on unmount
     useEffect(() => {

@@ -98,9 +98,9 @@ test.describe('Dashboard', () => {
       // Verify tablist role
       await expect(dashboard.tabList).toBeVisible();
 
-      // Verify all tabs have correct roles
+      // Verify all tabs have correct roles (Play, Stats, Achievements, Learn)
       const tabs = page.locator('[role="tab"]');
-      await expect(tabs).toHaveCount(3);
+      await expect(tabs).toHaveCount(4);
 
       // Verify each tab controls a tabpanel (using bilingual selectors from page object)
       await expect(dashboard.playTab).toHaveAttribute('aria-controls', 'tabpanel-play');
@@ -309,8 +309,7 @@ test.describe('Dashboard', () => {
 
       // The rank text should be different in different languages
       expect(newRank).toBeTruthy();
-      // In most cases, the text will be different
-      // (e.g., "Beginner" vs "Người mới")
+      expect(newRank).not.toBe(initialRank); // Language text should change
     });
   });
 
@@ -351,11 +350,11 @@ test.describe('Dashboard', () => {
       // Verify layout is visible
       await expect(page.locator('.dashboard')).toBeVisible();
 
-      // Tabs might show icons only on mobile (<600px)
+      // Tabs might show icons only on mobile (<600px) - 4 tabs: Play, Stats, Achievements, Learn
       const tabs = page.locator('[role="tab"]');
-      await expect(tabs).toHaveCount(3);
+      await expect(tabs).toHaveCount(4);
 
-      // Game cards should stack vertically
+      // Game cards should stack vertically (3 games: MagicGraph, SequenceRace, ShapeArchitect)
       const gameCards = page.locator('.game-card');
       await expect(gameCards).toHaveCount(3);
       await expect(gameCards.first()).toBeVisible();
