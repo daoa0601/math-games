@@ -13,3 +13,6 @@ export { ShapeArchitectTutorial } from './ShapeArchitectTutorial';
 export { PreviewLockButton } from './PreviewLockButton';
 export { InstancedVoxels } from './InstancedVoxels';
 export type { VoxelData } from './InstancedVoxels';
+export { PlacedPieceControls } from './PlacedPieceControls';
+export { PlacementModal } from './PlacementModal';
+export type { PlacementModalProps } from './PlacementModal';

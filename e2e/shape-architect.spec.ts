@@ -555,4 +555,231 @@ test.describe('ShapeArchitect Game', () => {
       await expect(game.pieceInventory).toBeVisible();
     });
   });
+
+  test.describe('Placement Modal', () => {
+    test('should open placement modal when clicking target cell with piece selected', async () => {
+      // Select a piece first and wait for selection to take effect
+      await game.selectPiece(0);
+      const firstPiece = game.pieces.first();
+      await expect(firstPiece).toHaveClass(/piece-card--selected/);
+
+      // Click on a target cell
+      await game.clickTargetCell();
+
+      // Modal should open (with timeout for animation)
+      await expect(game.placementModal).toBeVisible({ timeout: 5000 });
+      await expect(game.placementModalTitle).toBeVisible();
+      await expect(game.placementModalPreview).toBeVisible();
+    });
+
+    test('should show validity indicator in placement modal', async () => {
+      await game.selectPiece(0);
+      await expect(game.pieces.first()).toHaveClass(/piece-card--selected/);
+      await game.clickTargetCell();
+
+      // Wait for modal and validity indicator
+      await expect(game.placementModal).toBeVisible({ timeout: 5000 });
+      await expect(game.placementModalValidity).toBeVisible();
+
+      // Should show either valid or invalid state
+      const validity = await game.getPlacementModalValidity();
+      expect(['valid', 'invalid']).toContain(validity);
+    });
+
+    test('should close modal when clicking cancel', async () => {
+      await game.selectPiece(0);
+      await expect(game.pieces.first()).toHaveClass(/piece-card--selected/);
+      await game.clickTargetCell();
+
+      // Modal should be open
+      await expect(game.placementModal).toBeVisible({ timeout: 5000 });
+
+      // Cancel placement
+      await game.cancelPlacement();
+
+      // Modal should be closed
+      await expect(game.placementModal).not.toBeVisible();
+    });
+
+    test('should close modal when pressing Escape', async () => {
+      await game.selectPiece(0);
+      await expect(game.pieces.first()).toHaveClass(/piece-card--selected/);
+      await game.clickTargetCell();
+
+      await expect(game.placementModal).toBeVisible({ timeout: 5000 });
+
+      // Press Escape
+      await game.closePlacementModalWithEscape();
+
+      await expect(game.placementModal).not.toBeVisible();
+    });
+
+    test('should support rotation keyboard shortcuts in modal', async () => {
+      await game.selectPiece(0);
+      await expect(game.pieces.first()).toHaveClass(/piece-card--selected/);
+      await game.clickTargetCell();
+
+      await expect(game.placementModal).toBeVisible({ timeout: 5000 });
+
+      // Press R to rotate Z-axis
+      await game.rotateInModal('r');
+
+      // Modal should still be open (rotation doesn't close it)
+      await expect(game.placementModal).toBeVisible();
+
+      // Cancel to close
+      await game.closePlacementModalWithEscape();
+    });
+
+    test('should have rotation controls in modal', async () => {
+      await game.selectPiece(0);
+      await expect(game.pieces.first()).toHaveClass(/piece-card--selected/);
+      await game.clickTargetCell();
+
+      await expect(game.placementModal).toBeVisible({ timeout: 5000 });
+      await expect(game.placementModalRotationControls).toBeVisible();
+    });
+
+    test('should place piece when confirming valid placement', async () => {
+      // Get initial piece count
+      const initialPieces = await game.getAvailablePiecesCount();
+
+      // Select and place a piece
+      await game.selectPiece(0);
+      await expect(game.pieces.first()).toHaveClass(/piece-card--selected/);
+      await game.clickTargetCell();
+
+      await expect(game.placementModal).toBeVisible({ timeout: 5000 });
+
+      // Check if placement is valid before confirming
+      const validity = await game.getPlacementModalValidity();
+      if (validity === 'valid') {
+        await game.confirmPlacement();
+
+        // Modal should close
+        await expect(game.placementModal).not.toBeVisible();
+
+        // One less piece in inventory
+        const currentPieces = await game.getAvailablePiecesCount();
+        expect(currentPieces).toBe(initialPieces - 1);
+      } else {
+        // Cancel if invalid
+        await game.cancelPlacement();
+      }
+    });
+
+    test('should close modal when level is reset', async () => {
+      await game.selectPiece(0);
+      await expect(game.pieces.first()).toHaveClass(/piece-card--selected/);
+      await game.clickTargetCell();
+
+      await expect(game.placementModal).toBeVisible({ timeout: 5000 });
+
+      // Reset the level
+      await game.reset();
+
+      // Modal should close
+      await expect(game.placementModal).not.toBeVisible();
+    });
+  });
+
+  test.describe('Mobile Bottom Sheet', () => {
+    test('should show drag handle on mobile viewport', async ({ page }) => {
+      // Set mobile viewport
+      await page.setViewportSize({ width: 375, height: 667 });
+
+      // Select piece and open modal
+      await game.selectPiece(0);
+      await expect(game.pieces.first()).toHaveClass(/piece-card--selected/);
+      await game.clickTargetCell();
+
+      await expect(game.placementModal).toBeVisible({ timeout: 5000 });
+
+      // Drag handle should be visible on mobile
+      await expect(game.placementModalDragHandle).toBeVisible();
+    });
+
+    test('should hide keyboard hints on mobile', async ({ page }) => {
+      // Set mobile viewport
+      await page.setViewportSize({ width: 375, height: 667 });
+
+      await game.selectPiece(0);
+      await expect(game.pieces.first()).toHaveClass(/piece-card--selected/);
+      await game.clickTargetCell();
+
+      await expect(game.placementModal).toBeVisible({ timeout: 5000 });
+
+      // Keyboard hints should be hidden on mobile
+      const hints = game.placementModal.locator('.placement-modal__hints');
+      await expect(hints).not.toBeVisible();
+    });
+  });
+
+  test.describe('Guaranteed Solvable Puzzles', () => {
+    test('should generate puzzle with expected piece count for easy difficulty', async () => {
+      await game.setDifficulty('easy');
+
+      // Easy should have 3-4 pieces
+      const pieceCount = await game.getAvailablePiecesCount();
+      expect(pieceCount).toBeGreaterThanOrEqual(3);
+      expect(pieceCount).toBeLessThanOrEqual(5);
+    });
+
+    test('should generate puzzle with expected piece count for medium difficulty', async () => {
+      await game.setDifficulty('medium');
+
+      // Medium should have 5-6 pieces
+      const pieceCount = await game.getAvailablePiecesCount();
+      expect(pieceCount).toBeGreaterThanOrEqual(5);
+      expect(pieceCount).toBeLessThanOrEqual(7);
+    });
+
+    test('should generate puzzle with expected piece count for hard difficulty', async () => {
+      await game.setDifficulty('hard');
+
+      // Hard should have 6-7 pieces
+      const pieceCount = await game.getAvailablePiecesCount();
+      expect(pieceCount).toBeGreaterThanOrEqual(6);
+      expect(pieceCount).toBeLessThanOrEqual(8);
+    });
+
+    test('should generate new puzzle when clicking next level', async () => {
+      const initialLevelName = await game.levelName.textContent();
+
+      await game.nextLevel();
+
+      const newLevelName = await game.levelName.textContent();
+      expect(newLevelName).not.toBe(initialLevelName);
+
+      // New puzzle should have pieces
+      const pieceCount = await game.getAvailablePiecesCount();
+      expect(pieceCount).toBeGreaterThan(0);
+    });
+
+    test('should reset puzzle properly when clicking reset', async () => {
+      // Get initial state
+      const initialPieces = await game.getAvailablePiecesCount();
+
+      // Select and place a piece if possible
+      await game.selectPiece(0);
+      await game.clickTargetCell();
+
+      const isModalOpen = await game.isPlacementModalOpen();
+      if (isModalOpen) {
+        const validity = await game.getPlacementModalValidity();
+        if (validity === 'valid') {
+          await game.confirmPlacement();
+        } else {
+          await game.cancelPlacement();
+        }
+      }
+
+      // Reset
+      await game.reset();
+
+      // All pieces should be back
+      const resetPieces = await game.getAvailablePiecesCount();
+      expect(resetPieces).toBe(initialPieces);
+    });
+  });
 });

@@ -12,6 +12,10 @@ interface VoxelProps {
     isPreviewLocked?: boolean;
     /** Empty cell voxel - transparent but clickable for piece placement */
     isEmpty?: boolean;
+    /** Just placed - triggers snap animation */
+    isJustPlaced?: boolean;
+    /** Selected for movement - shows selection highlight */
+    isSelectedForMove?: boolean;
     onClick?: () => void;
     onPointerEnter?: () => void;
 }
@@ -28,6 +32,8 @@ export function Voxel({
     isPreviewValid = true,
     isPreviewLocked = false,
     isEmpty = false,
+    isJustPlaced = false,
+    isSelectedForMove = false,
     onClick,
     onPointerEnter,
 }: VoxelProps) {
@@ -36,13 +42,27 @@ export function Voxel({
     // Use shared geometry singleton for better GPU memory efficiency
     const sharedGeometry = useSharedBoxGeometry();
 
-    // Animate preview blocks
+    // Animate preview, just-placed, and selected blocks
     useFrame((state) => {
-        if (meshRef.current && isPreview) {
-            // Locked previews pulse slower and slightly larger
-            const speed = isPreviewLocked ? 2 : 4;
-            const amplitude = isPreviewLocked ? 0.08 : 0.05;
-            meshRef.current.scale.setScalar(0.9 + Math.sin(state.clock.elapsedTime * speed) * amplitude);
+        if (meshRef.current) {
+            if (isPreview) {
+                // Locked previews pulse slower and slightly larger
+                const speed = isPreviewLocked ? 2 : 4;
+                const amplitude = isPreviewLocked ? 0.08 : 0.05;
+                meshRef.current.scale.setScalar(0.9 + Math.sin(state.clock.elapsedTime * speed) * amplitude);
+            } else if (isJustPlaced) {
+                // Snap animation - quick bounce effect
+                const elapsed = state.clock.elapsedTime * 8;
+                const bounce = Math.max(0, Math.sin(elapsed) * Math.exp(-elapsed * 0.3));
+                meshRef.current.scale.setScalar(1 + bounce * 0.15);
+            } else if (isSelectedForMove) {
+                // Pulsing scale for selected piece
+                const pulse = 1 + Math.sin(state.clock.elapsedTime * 3) * 0.03;
+                meshRef.current.scale.setScalar(pulse);
+            } else {
+                // Reset scale for normal blocks
+                meshRef.current.scale.setScalar(1);
+            }
         }
     });
 
@@ -98,7 +118,11 @@ export function Voxel({
             {!isTarget && !isPreview && !isEmpty && (
                 <lineSegments>
                     <edgesGeometry args={[sharedGeometry]} />
-                    <lineBasicMaterial color="#ffffff" transparent opacity={0.3} />
+                    <lineBasicMaterial
+                        color={isSelectedForMove ? '#a855f7' : (onClick && hovered ? '#c4b5fd' : '#ffffff')}
+                        transparent
+                        opacity={isSelectedForMove ? 0.9 : (onClick && hovered ? 0.6 : 0.3)}
+                    />
                 </lineSegments>
             )}
         </mesh>

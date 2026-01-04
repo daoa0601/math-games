@@ -1,9 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import type { DragEndEvent } from '@dnd-kit/core';
 import type { GameState, Position3D, Piece, Rotation3D } from '../logic/types';
 import { DEFAULT_ROTATION } from '../logic/types';
 import {
-    tryPlacePiece,
     placePiece,
     checkSolved,
     findNearestValidPosition,
@@ -18,7 +17,8 @@ export interface UsePiecePlacementOptions {
 }
 
 export interface UsePiecePlacementReturn {
-    handlePlacement: (position: Position3D) => boolean;
+    /** Place a piece at position. Pass optional rotation to override gameState.rotation */
+    handlePlacement: (position: Position3D, rotationOverride?: Rotation3D) => boolean;
     handleDragEnd: (event: DragEndEvent) => boolean;
     justPlacedPositions: Set<string>;
 }
@@ -33,16 +33,33 @@ export function usePiecePlacement({
 }: UsePiecePlacementOptions): UsePiecePlacementReturn {
     const [justPlacedPositions, setJustPlacedPositions] = useState<Set<string>>(new Set());
 
+    // Ref to track animation timeout for cleanup
+    const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Cleanup animation timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (animationTimeoutRef.current) {
+                clearTimeout(animationTimeoutRef.current);
+            }
+        };
+    }, []);
+
     // Trigger snap animation for placed cells
     const triggerSnapAnimation = useCallback((positions: Position3D[]) => {
         const posSet = new Set(positions.map(p => `${p.x},${p.y},${p.z}`));
         setJustPlacedPositions(posSet);
-        setTimeout(() => setJustPlacedPositions(new Set()), ANIMATION_DURATION);
+
+        // Clear any existing timeout before setting a new one
+        if (animationTimeoutRef.current) {
+            clearTimeout(animationTimeoutRef.current);
+        }
+        animationTimeoutRef.current = setTimeout(() => setJustPlacedPositions(new Set()), ANIMATION_DURATION);
         return posSet;
     }, []);
 
     // Handle click placement
-    const handlePlacement = useCallback((position: Position3D): boolean => {
+    const handlePlacement = useCallback((position: Position3D, rotationOverride?: Rotation3D): boolean => {
         if (disabled) {
             return false;
         }
@@ -52,27 +69,50 @@ export function usePiecePlacement({
             return false;
         }
 
-        const newState = tryPlacePiece(gameState, position);
-        if (newState) {
-            // Calculate placed positions for animation
-            const piece = gameState.remainingPieces.find(p => p.id === gameState.selectedPieceId);
-            if (piece) {
-                const snappedPos = findNearestValidPosition(
-                    gameState.grid, piece, position, gameState.rotation, gameState.level.gridSize, 2
-                );
-                if (snappedPos) {
-                    const positions = getPieceWorldPositions(piece, snappedPos, gameState.rotation);
-                    const posSet = triggerSnapAnimation(positions);
-                    onPlace(newState, posSet);
-                    return true;
-                }
-            }
-            onPlace(newState, new Set());
-            return true;
+        // Use override rotation if provided, otherwise use gameState rotation
+        const rotation = rotationOverride ?? gameState.rotation;
+
+        // Try placement with the specified rotation
+        const piece = gameState.remainingPieces.find(p => p.id === gameState.selectedPieceId);
+        if (!piece) {
+            onError?.('selectFirst');
+            return false;
         }
 
-        onError?.('cannotPlace');
-        return false;
+        // Find valid position with snap-to-nearest
+        const snappedPos = findNearestValidPosition(
+            gameState.grid, piece, position, rotation, gameState.level.gridSize, 2
+        );
+
+        if (!snappedPos) {
+            onError?.('cannotPlace');
+            return false;
+        }
+
+        // Place the piece
+        const newGrid = placePiece(gameState.grid, piece, snappedPos, rotation);
+        const newRemaining = gameState.remainingPieces.filter((p) => p.id !== piece.id);
+        const isSolved = checkSolved(newGrid, gameState.level.targetVoxels);
+
+        // Trigger snap animation
+        const positions = getPieceWorldPositions(piece, snappedPos, rotation);
+        const posSet = triggerSnapAnimation(positions);
+
+        const newState: GameState = {
+            ...gameState,
+            grid: newGrid,
+            placedPieces: [
+                ...gameState.placedPieces,
+                { pieceId: piece.id, position: snappedPos, rotation: { ...rotation }, color: piece.color },
+            ],
+            remainingPieces: newRemaining,
+            selectedPieceId: null,
+            rotation: { ...DEFAULT_ROTATION },
+            isSolved,
+        };
+
+        onPlace(newState, posSet);
+        return true;
     }, [gameState, disabled, onPlace, onError, triggerSnapAnimation]);
 
     // Handle drag-and-drop placement

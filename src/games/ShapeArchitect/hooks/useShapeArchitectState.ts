@@ -10,6 +10,12 @@ export interface UseShapeArchitectStateOptions {
     initialDifficulty?: 'easy' | 'medium' | 'hard';
 }
 
+export interface PlacementModalState {
+    isOpen: boolean;
+    targetPosition: Position3D | null;
+    rotation: { x: number; y: number; z: number };
+}
+
 export interface UseShapeArchitectStateReturn {
     // State
     gameState: GameState;
@@ -25,6 +31,9 @@ export interface UseShapeArchitectStateReturn {
     hoverPosition: Position3D | null;
     effectivePreviewPosition: Position3D | null;
 
+    // Placement modal state
+    placementModal: PlacementModalState;
+
     // Actions
     handleSelectPiece: (pieceId: string) => void;
     handleRotateAxis: (axis: RotationAxis) => void;
@@ -37,6 +46,11 @@ export interface UseShapeArchitectStateReturn {
     setViewMode: (mode: '2d' | '3d') => void;
     togglePreviewLock: () => void;
     setHoverPosition: (position: Position3D | null) => void;
+
+    // Placement modal actions
+    openPlacementModal: (position: Position3D) => void;
+    closePlacementModal: () => void;
+    rotateModalPiece: (axis: RotationAxis) => void;
 
     // Setters for external state management
     setGameState: React.Dispatch<React.SetStateAction<GameState>>;
@@ -67,6 +81,13 @@ export function useShapeArchitectState(
     const [lockedPosition, setLockedPosition] = useState<Position3D | null>(null);
     const [hoverPosition, setHoverPosition] = useState<Position3D | null>(null);
 
+    // Placement modal state
+    const [placementModal, setPlacementModal] = useState<PlacementModalState>({
+        isOpen: false,
+        targetPosition: null,
+        rotation: { x: 0, y: 0, z: 0 },
+    });
+
     // Filter levels by difficulty
     const filteredLevels = useMemo(() =>
         presetLevels.filter(l => l.difficulty === difficulty),
@@ -77,8 +98,8 @@ export function useShapeArchitectState(
         if (isDailyMode && dailyLevelRef.current) {
             return createGameState(dailyLevelRef.current);
         }
-        const easyLevels = presetLevels.filter(l => l.difficulty === initialDifficulty);
-        return createGameState(easyLevels[0] || presetLevels[0]);
+        // Generate random puzzle on mount (no preset levels)
+        return createGameState(generateRandomLevel(initialDifficulty));
     });
 
     // Get selected piece
@@ -131,6 +152,8 @@ export function useShapeArchitectState(
         setPreviewLocked(false);
         setLockedPosition(null);
         setHoverPosition(null);
+        // Close placement modal
+        setPlacementModal({ isOpen: false, targetPosition: null, rotation: { x: 0, y: 0, z: 0 } });
     }, [filteredLevels]);
 
     // Reset current level
@@ -138,6 +161,8 @@ export function useShapeArchitectState(
         setGameState(createGameState(gameState.level));
         setPreviewLocked(false);
         setLockedPosition(null);
+        // Close placement modal
+        setPlacementModal({ isOpen: false, targetPosition: null, rotation: { x: 0, y: 0, z: 0 } });
     }, [gameState.level]);
 
     // Next level
@@ -159,17 +184,21 @@ export function useShapeArchitectState(
         setViewMode(level.type === '3D' ? '3d' : '2d');
         setPreviewLocked(false);
         setLockedPosition(null);
+        // Close placement modal
+        setPlacementModal({ isOpen: false, targetPosition: null, rotation: { x: 0, y: 0, z: 0 } });
     }, [difficulty]);
 
-    // Change difficulty
+    // Change difficulty - generates a new random puzzle
     const setDifficulty = useCallback((newDifficulty: 'easy' | 'medium' | 'hard') => {
         setDifficultyState(newDifficulty);
-        const newLevels = presetLevels.filter(l => l.difficulty === newDifficulty);
-        if (newLevels.length > 0) {
-            setCurrentLevelIndex(0);
-            setGameState(createGameState(newLevels[0]));
-            setViewMode(newLevels[0].type === '3D' ? '3d' : '2d');
-        }
+        // Generate a new random puzzle for the new difficulty
+        const level = generateRandomLevel(newDifficulty);
+        setGameState(createGameState(level));
+        setViewMode(level.type === '3D' ? '3d' : '2d');
+        setPreviewLocked(false);
+        setLockedPosition(null);
+        // Close placement modal
+        setPlacementModal({ isOpen: false, targetPosition: null, rotation: { x: 0, y: 0, z: 0 } });
     }, []);
 
     // Toggle preview lock
@@ -183,6 +212,32 @@ export function useShapeArchitectState(
         }
     }, [previewLocked, hoverPosition]);
 
+    // Open placement modal with current rotation
+    const openPlacementModal = useCallback((position: Position3D) => {
+        setPlacementModal({
+            isOpen: true,
+            targetPosition: position,
+            rotation: { ...gameState.rotation },
+        });
+    }, [gameState.rotation]);
+
+    // Close placement modal
+    const closePlacementModal = useCallback(() => {
+        setPlacementModal({
+            isOpen: false,
+            targetPosition: null,
+            rotation: { x: 0, y: 0, z: 0 },
+        });
+    }, []);
+
+    // Rotate piece in modal
+    const rotateModalPiece = useCallback((axis: RotationAxis) => {
+        setPlacementModal(prev => ({
+            ...prev,
+            rotation: rotateBy90OnAxis(prev.rotation, axis),
+        }));
+    }, []);
+
     return {
         gameState,
         currentLevelIndex,
@@ -194,6 +249,7 @@ export function useShapeArchitectState(
         lockedPosition,
         hoverPosition,
         effectivePreviewPosition,
+        placementModal,
         handleSelectPiece,
         handleRotateAxis,
         loadLevel,
@@ -205,6 +261,9 @@ export function useShapeArchitectState(
         setViewMode,
         togglePreviewLock,
         setHoverPosition,
+        openPlacementModal,
+        closePlacementModal,
+        rotateModalPiece,
         setGameState,
     };
 }

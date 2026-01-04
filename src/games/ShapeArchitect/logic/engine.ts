@@ -331,6 +331,8 @@ export function createGameState(level: LevelConfig): GameState {
         selectedPieceId: null,
         rotation: { ...DEFAULT_ROTATION },
         isSolved: false,
+        interactionMode: 'idle',
+        selectedPlacedPieceId: null,
     };
 }
 
@@ -380,6 +382,166 @@ export function tryPlacePiece(
         selectedPieceId: null,
         rotation: { ...DEFAULT_ROTATION },
         isSolved,
+    };
+}
+
+// ========================================
+// Piece Movement (for placed pieces)
+// ========================================
+
+/**
+ * Create a copy of the grid with a specific placed piece removed.
+ * Used to check if the piece can be moved to a new position.
+ */
+export function createGridWithoutPiece(
+    grid: CellState[][][],
+    piece: Piece,
+    placedPiece: PlacedPiece,
+    targetVoxels: Position3D[]
+): CellState[][][] {
+    return removePieceFromGrid(grid, piece, placedPiece, targetVoxels);
+}
+
+/**
+ * Check if a placed piece can be moved to a new position with new rotation.
+ * The check is performed on a grid with the piece temporarily removed.
+ */
+export function canMovePlacedPiece(
+    state: GameState,
+    placedPieceId: string,
+    newPosition: Position3D,
+    newRotation: Rotation3D
+): boolean {
+    // Find the placed piece
+    const placedPieceIndex = state.placedPieces.findIndex(
+        (pp) => pp.pieceId === placedPieceId
+    );
+    if (placedPieceIndex === -1) return false;
+
+    const placedPiece = state.placedPieces[placedPieceIndex];
+
+    // Find the original piece definition
+    const piece = state.level.pieces.find((p) => p.id === placedPieceId);
+    if (!piece) return false;
+
+    // Create grid without this piece
+    const gridWithoutPiece = createGridWithoutPiece(
+        state.grid,
+        piece,
+        placedPiece,
+        state.level.targetVoxels
+    );
+
+    // Check if piece can be placed at new position
+    return canPlacePiece(
+        gridWithoutPiece,
+        piece,
+        newPosition,
+        newRotation,
+        state.level.gridSize
+    );
+}
+
+/**
+ * Move a placed piece to a new position with optional new rotation.
+ * Returns null if the move is invalid.
+ */
+export function movePlacedPiece(
+    state: GameState,
+    placedPieceId: string,
+    newPosition: Position3D,
+    newRotation: Rotation3D
+): GameState | null {
+    // Validate the move first
+    if (!canMovePlacedPiece(state, placedPieceId, newPosition, newRotation)) {
+        return null;
+    }
+
+    // Find the placed piece
+    const placedPieceIndex = state.placedPieces.findIndex(
+        (pp) => pp.pieceId === placedPieceId
+    );
+    if (placedPieceIndex === -1) return null;
+
+    const placedPiece = state.placedPieces[placedPieceIndex];
+
+    // Early return if position and rotation are unchanged (no-op move)
+    if (
+        placedPiece.position.x === newPosition.x &&
+        placedPiece.position.y === newPosition.y &&
+        placedPiece.position.z === newPosition.z &&
+        placedPiece.rotation.x === newRotation.x &&
+        placedPiece.rotation.y === newRotation.y &&
+        placedPiece.rotation.z === newRotation.z
+    ) {
+        return null; // No change needed
+    }
+
+    // Find the original piece definition
+    const piece = state.level.pieces.find((p) => p.id === placedPieceId);
+    if (!piece) return null;
+
+    // Remove piece from grid
+    const gridWithoutPiece = createGridWithoutPiece(
+        state.grid,
+        piece,
+        placedPiece,
+        state.level.targetVoxels
+    );
+
+    // Place piece at new position
+    const newGrid = placePiece(gridWithoutPiece, piece, newPosition, newRotation);
+
+    // Update placed pieces array
+    const newPlacedPieces = [...state.placedPieces];
+    newPlacedPieces[placedPieceIndex] = {
+        ...placedPiece,
+        position: newPosition,
+        rotation: newRotation,
+    };
+
+    // Check if puzzle is solved
+    const isSolved = checkSolved(newGrid, state.level.targetVoxels);
+
+    return {
+        ...state,
+        grid: newGrid,
+        placedPieces: newPlacedPieces,
+        isSolved,
+        interactionMode: 'idle',
+        selectedPlacedPieceId: null,
+    };
+}
+
+/**
+ * Select a placed piece for movement.
+ * Changes interaction mode to 'move'.
+ */
+export function selectPlacedPieceForMove(
+    state: GameState,
+    placedPieceId: string
+): GameState | null {
+    // Verify the piece exists
+    const exists = state.placedPieces.some((pp) => pp.pieceId === placedPieceId);
+    if (!exists) return null;
+
+    return {
+        ...state,
+        interactionMode: 'move',
+        selectedPlacedPieceId: placedPieceId,
+        selectedPieceId: null, // Clear any selected unplaced piece
+    };
+}
+
+/**
+ * Clear piece movement selection.
+ * Returns to idle mode.
+ */
+export function clearMovementSelection(state: GameState): GameState {
+    return {
+        ...state,
+        interactionMode: 'idle',
+        selectedPlacedPieceId: null,
     };
 }
 

@@ -26,6 +26,12 @@ interface GridBoard3DProps {
     maxVisibleLayer?: number;
     /** Whether the preview position is locked */
     isPreviewLocked?: boolean;
+    /** Positions that were just placed (for snap animation) */
+    justPlacedPositions?: Set<string>;
+    /** ID of placed piece currently selected for movement */
+    selectedPlacedPieceId?: string | null;
+    /** Callback when a placed piece is clicked (for movement selection) */
+    onPlacedPieceClick?: (pieceId: string) => void;
 }
 
 /**
@@ -45,6 +51,9 @@ export function GridBoard3D({
     cameraPreset = 'isometric',
     maxVisibleLayer,
     isPreviewLocked = false,
+    justPlacedPositions,
+    selectedPlacedPieceId,
+    onPlacedPieceClick,
 }: GridBoard3DProps) {
     const [width, height, depth] = gridSize;
 
@@ -58,19 +67,34 @@ export function GridBoard3D({
         -depth / 2 + 0.5,
     ], [width, height, depth]);
 
-    // Build a map of cell positions to colors based on placed pieces
+    // Build a map of cell positions to colors and piece IDs based on placed pieces
     const cellColorMap = useMemo(() => {
-        const colorMap = new Map<string, string>();
+        const colorMap = new Map<string, { color: string; pieceId: string }>();
         for (const placed of placedPieces) {
             const piece = levelPieces.find((p) => p.id === placed.pieceId);
             if (!piece) continue;
             const positions = getPieceWorldPositions(piece, placed.position, placed.rotation);
             for (const pos of positions) {
-                colorMap.set(`${pos.x},${pos.y},${pos.z}`, placed.color);
+                colorMap.set(`${pos.x},${pos.y},${pos.z}`, {
+                    color: placed.color,
+                    pieceId: placed.pieceId,
+                });
             }
         }
         return colorMap;
     }, [placedPieces, levelPieces]);
+
+    // Get positions of the currently selected placed piece (for highlighting)
+    const selectedPlacedPiecePositions = useMemo(() => {
+        if (!selectedPlacedPieceId) return new Set<string>();
+        const positions = new Set<string>();
+        cellColorMap.forEach((data, posKey) => {
+            if (data.pieceId === selectedPlacedPieceId) {
+                positions.add(posKey);
+            }
+        });
+        return positions;
+    }, [selectedPlacedPieceId, cellColorMap]);
 
     // Calculate preview positions based on hover, using snap-to-nearest
     const previewData = useMemo(() => {
@@ -185,9 +209,19 @@ export function GridBoard3D({
                         );
                     } else if (cell === 2) {
                         // Filled cell
-                        const color = cellColorMap.get(posKey) ?? '#6366f1';
+                        const cellData = cellColorMap.get(posKey);
+                        const color = cellData?.color ?? '#6366f1';
+                        const isJustPlaced = justPlacedPositions?.has(posKey) ?? false;
+                        const isSelectedForMove = selectedPlacedPiecePositions.has(posKey);
                         result.push(
-                            <Voxel key={`filled-${posKey}`} position={position} color={color} />
+                            <Voxel
+                                key={`filled-${posKey}`}
+                                position={position}
+                                color={color}
+                                isJustPlaced={isJustPlaced}
+                                isSelectedForMove={isSelectedForMove}
+                                onClick={onPlacedPieceClick && cellData ? () => onPlacedPieceClick(cellData.pieceId) : undefined}
+                            />
                         );
                     }
                 }
@@ -208,6 +242,9 @@ export function GridBoard3D({
         handleCellHover,
         effectiveMaxLayer,
         isPreviewLocked,
+        justPlacedPositions,
+        selectedPlacedPiecePositions,
+        onPlacedPieceClick,
     ]);
 
     // Detect device capabilities for adaptive rendering

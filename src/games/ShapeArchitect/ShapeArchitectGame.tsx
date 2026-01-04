@@ -3,22 +3,18 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { DndContext, pointerWithin } from '@dnd-kit/core';
 import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, PersonalBestIndicator, HelpButton } from '../../shared/components';
-import { useGameTimer, useGameRewards, useSwipe, useSwipeNavigation, useAnnounce } from '../../shared/hooks';
+import { useGameTimer, useGameRewards, useSwipe, useAnnounce } from '../../shared/hooks';
 import { usePlayer } from '../../shared/contexts';
 import { playSound, showConfetti } from '../../shared/utils';
 import { isDailyCompleted, completeDailyChallenge } from '../../shared/services/daily';
 import { shouldShowTutorial } from '@/shared/services/tutorialProgress';
-import { GridBoard, GridBoard3D, PieceInventory, LevelEditor, CameraPresetButtons, RotationControls, LayerControls, ShapeArchitectTutorial, PreviewLockButton } from './components';
+import { GridBoard, GridBoard3D, PieceInventory, LevelEditor, CameraPresetButtons, RotationControls, LayerControls, ShapeArchitectTutorial, PreviewLockButton, PlacedPieceControls, PlacementModal } from './components';
 import type { CameraPreset } from './components/CameraPresetButtons';
 import type { Position3D, LevelConfig } from './logic/types';
 import { DEFAULT_ROTATION } from './logic/types';
 import { createGameState, removePieceFromGrid } from './logic/engine';
-import { useShapeArchitectState, usePiecePlacement, useKeyboardControls } from './hooks';
-import {
-    isLevelCompleted,
-    getBestTime,
-    getTotalScore,
-} from '../../shared/utils';
+import { useShapeArchitectState, usePiecePlacement, usePlacedPieceMovement, useKeyboardControls } from './hooks';
+import { getTotalScore } from '../../shared/utils';
 import './ShapeArchitect.css';
 
 // Geometry hint keys for failure state
@@ -42,7 +38,6 @@ export function ShapeArchitectGame() {
     const {
         gameState,
         setGameState,
-        currentLevelIndex,
         difficulty,
         filteredLevels,
         selectedPiece,
@@ -54,12 +49,15 @@ export function ShapeArchitectGame() {
         setHoverPosition,
         handleSelectPiece,
         handleRotateAxis,
-        loadLevel,
         resetLevel: resetLevelState,
         nextLevel: nextLevelState,
-        previousLevel: previousLevelState,
         startRandomLevel: startRandomLevelState,
         setDifficulty,
+        // Placement modal state and actions
+        placementModal,
+        openPlacementModal,
+        closePlacementModal,
+        rotateModalPiece,
     } = useShapeArchitectState({ isDailyMode });
 
     const [showHints, setShowHints] = useState(false);
@@ -179,6 +177,32 @@ export function ShapeArchitectGame() {
         disabled: showTimeUp || gameState.isSolved,
     });
 
+    // Use movement hook for moving already-placed pieces
+    const {
+        selectedPlacedPieceId,
+        selectPlacedPiece,
+        clearSelection: clearMoveSelection,
+        handleMoveToPosition,
+        handleDragEnd: handleMoveDragEnd,
+        setPreviewPosition: setMovePreviewPosition,
+        isPreviewValid: isMovePreviewValid,
+        justMovedPositions,
+        moveRotation,
+        rotateMoveAxis,
+    } = usePlacedPieceMovement({
+        gameState,
+        onMove: (newState) => {
+            playSound('place');
+            setGameState(newState);
+        },
+        onError: (errorKey) => {
+            playSound('error');
+            setPlacementError(t(`errors.${errorKey}`));
+            setTimeout(() => setPlacementError(null), 2000);
+        },
+        disabled: showTimeUp || gameState.isSolved,
+    });
+
     // Save progress and show confetti when solved
     useEffect(() => {
         if (gameState.isSolved) {
@@ -225,25 +249,45 @@ export function ShapeArchitectGame() {
         }
     }, [handleRotateAxis, showRotationHint]);
 
-    // Wrap cell click to clear error state first
+    // Wrap cell click to handle both placement and movement
     const handleCellClick = useCallback((position: Position3D) => {
         setPlacementError(null);
-        handlePlacementCore(position);
-    }, [handlePlacementCore]);
 
-    // Wrap drag end
+        // If a placed piece is selected for movement, try to move it
+        if (selectedPlacedPieceId) {
+            handleMoveToPosition(position);
+            return;
+        }
+
+        // If a piece from inventory is selected, open placement modal
+        if (selectedPiece) {
+            openPlacementModal(position);
+            return;
+        }
+    }, [selectedPlacedPieceId, handleMoveToPosition, selectedPiece, openPlacementModal]);
+
+    // Handle confirmation from placement modal
+    const handleModalConfirm = useCallback(() => {
+        if (!placementModal.targetPosition) return;
+
+        // Place the piece using the modal's rotation
+        handlePlacementCore(placementModal.targetPosition, placementModal.rotation);
+        closePlacementModal();
+    }, [placementModal.targetPosition, placementModal.rotation, handlePlacementCore, closePlacementModal]);
+
+    // Wrap drag end to handle both placement and movement drags
     const handleDragEnd = useCallback((event: import('@dnd-kit/core').DragEndEvent) => {
         setPlacementError(null);
-        handleDragEndCore(event);
-    }, [handleDragEndCore]);
 
-    // Wrap level loading to include timer reset and UI state
-    const loadLevelWithReset = useCallback((index: number) => {
-        loadLevel(index);
-        setShowHints(false);
-        setMaxVisibleLayer(gameState.level.gridSize[2] - 1);
-        resetTimer();
-    }, [loadLevel, gameState.level.gridSize, resetTimer]);
+        // If a placed piece is selected for movement, handle move drag
+        if (selectedPlacedPieceId) {
+            handleMoveDragEnd(event);
+            return;
+        }
+
+        // Otherwise, handle normal placement drag
+        handleDragEndCore(event);
+    }, [handleDragEndCore, selectedPlacedPieceId, handleMoveDragEnd]);
 
     // Change difficulty
     const handleDifficultyChange = useCallback((newDifficulty: 'easy' | 'medium' | 'hard') => {
@@ -281,20 +325,6 @@ export function ShapeArchitectGame() {
         resetTimer();
     }, [nextLevelState, resetTimer]);
 
-    // Previous level with timer reset
-    const previousLevel = useCallback(() => {
-        previousLevelState();
-        setShowHints(false);
-        resetTimer();
-    }, [previousLevelState, resetTimer]);
-
-    // Swipe navigation for level selector (mobile)
-    const { ref: levelSwipeRef, handlers: levelSwipeHandlers } = useSwipeNavigation({
-        onNext: nextLevel,
-        onPrevious: previousLevel,
-        enabled: !isDailyMode && !gameState.isSolved && !showTimeUp,
-    });
-
     // Undo last piece placement
     const undoLastPiece = useCallback(() => {
         if (gameState.placedPieces.length === 0) return;
@@ -327,17 +357,26 @@ export function ShapeArchitectGame() {
         });
     }, [gameState, setGameState]);
 
+    // Handle escape key - clears both piece selection and movement selection
+    const handleEscape = useCallback(() => {
+        if (selectedPlacedPieceId) {
+            clearMoveSelection();
+        } else {
+            setGameState(prev => ({ ...prev, selectedPieceId: null, rotation: { ...DEFAULT_ROTATION } }));
+        }
+    }, [selectedPlacedPieceId, clearMoveSelection, setGameState]);
+
     // Keyboard shortcuts via hook
     useKeyboardControls({
-        onRotateX: () => handleRotateWithHint('x'),
-        onRotateY: () => handleRotateWithHint('y'),
-        onRotateZ: () => handleRotateWithHint('z'),
+        onRotateX: () => selectedPlacedPieceId ? rotateMoveAxis('x') : handleRotateWithHint('x'),
+        onRotateY: () => selectedPlacedPieceId ? rotateMoveAxis('y') : handleRotateWithHint('y'),
+        onRotateZ: () => selectedPlacedPieceId ? rotateMoveAxis('z') : handleRotateWithHint('z'),
         onUndo: undoLastPiece,
-        onEscape: () => setGameState(prev => ({ ...prev, selectedPieceId: null, rotation: { ...DEFAULT_ROTATION } })),
+        onEscape: handleEscape,
         onTogglePreviewLock: togglePreviewLock,
         enabled: !gameState.isSolved && !showTimeUp,
         levelType: gameState.level.type,
-        hasSelectedPiece: !!selectedPiece,
+        hasSelectedPiece: !!selectedPiece || !!selectedPlacedPieceId,
     });
 
     // Swipe gestures for piece rotation (mobile)
@@ -359,8 +398,12 @@ export function ShapeArchitectGame() {
         enabled: !!selectedPiece && !showTimeUp && !gameState.isSolved,
     });
 
-    // Random hint for failure
-    const failureHintKey = GEOMETRY_HINT_KEYS[Math.floor(Math.random() * GEOMETRY_HINT_KEYS.length)];
+    // Random hint for failure - memoized to prevent re-randomization on every render
+    const failureHintKey = useMemo(
+        () => GEOMETRY_HINT_KEYS[Math.floor(Math.random() * GEOMETRY_HINT_KEYS.length)],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [showTimeUp] // Only recalculate when time-up state changes
+    );
 
     return (
         <DndContext onDragEnd={handleDragEnd} collisionDetection={pointerWithin}>
@@ -420,40 +463,14 @@ export function ShapeArchitectGame() {
                         </div>
                     )}
 
-                    {/* Level Selector (hidden in daily mode) - Swipeable on mobile */}
+                    {/* Editor Access Button (hidden in daily mode) */}
                     {!isDailyMode && (
-                        <div
-                            className="level-selector"
-                            ref={levelSwipeRef as React.RefObject<HTMLDivElement>}
-                            {...levelSwipeHandlers}
+                        <button
+                            className="btn btn--secondary btn--editor"
+                            onClick={() => setShowEditor(true)}
                         >
-                            {filteredLevels.map((level, index) => {
-                                const unlocked = true; // All levels always accessible
-                                const completed = isLevelCompleted('shape-architect', level.id);
-                                const bestTime = getBestTime('shape-architect', level.id);
-
-                                return (
-                                    <button
-                                        key={level.id}
-                                        className={`level-btn ${index === currentLevelIndex ? 'level-btn--active' : ''} ${completed ? 'level-btn--completed' : ''} ${!unlocked ? 'level-btn--locked' : ''}`}
-                                        onClick={() => unlocked && loadLevelWithReset(index)}
-                                        disabled={!unlocked}
-                                        title={!unlocked ? tc('completePreviousLevel') : bestTime ? `${tc('best')}: ${bestTime}s` : undefined}
-                                    >
-                                        {!unlocked && '🔒 '}
-                                        {completed && '✓ '}
-                                        {level.name}
-                                        {bestTime && <span className="level-btn__time">{bestTime}s</span>}
-                                    </button>
-                                );
-                            })}
-                            <button className="btn btn--secondary" onClick={startRandomLevel}>
-                                🎲 {tc('buttons.random')}
-                            </button>
-                            <button className="btn btn--secondary" onClick={() => setShowEditor(true)}>
-                                ✏️ {t('editor.openEditor')}
-                            </button>
-                        </div>
+                            ✏️ {t('editor.openEditor')}
+                        </button>
                     )}
 
                     {/* Level Info */}
@@ -475,11 +492,24 @@ export function ShapeArchitectGame() {
                     </div>
 
                     {/* Instructions */}
-                    <div className="instructions">
-                        {selectedPiece
-                            ? t('instructions.placePiece', { piece: selectedPiece.name })
-                            : t('instructions.selectPiece')
-                        }
+                    <div className={`instructions ${selectedPlacedPieceId ? 'instructions--move-mode' : ''}`}>
+                        {selectedPlacedPieceId ? (
+                            <>
+                                <span className="instructions__move-icon">✋</span>
+                                {t('instructions.movePiece', 'Click a target cell to move the selected piece. Press Esc to cancel.')}
+                                <button
+                                    className="btn btn--sm btn--ghost instructions__cancel"
+                                    onClick={clearMoveSelection}
+                                    aria-label={t('instructions.cancelMove', 'Cancel move')}
+                                >
+                                    ✕
+                                </button>
+                            </>
+                        ) : selectedPiece ? (
+                            t('instructions.placePiece', { piece: selectedPiece.name })
+                        ) : (
+                            t('instructions.selectPiece')
+                        )}
                     </div>
 
                     {/* Placement Error Feedback */}
@@ -519,15 +549,19 @@ export function ShapeArchitectGame() {
                                 <GridBoard
                                     grid={gameState.grid}
                                     gridSize={gameState.level.gridSize}
-                                    selectedPiece={selectedPiece}
-                                    rotation={gameState.rotation}
+                                    selectedPiece={selectedPlacedPieceId ? null : selectedPiece}
+                                    rotation={selectedPlacedPieceId ? moveRotation : gameState.rotation}
                                     placedPieces={gameState.placedPieces}
                                     levelPieces={gameState.level.pieces}
                                     onCellClick={handleCellClick}
                                     hoverPosition={effectivePreviewPosition}
-                                    onCellHover={setHoverPosition}
-                                    justPlacedPositions={justPlacedPositions}
+                                    onCellHover={selectedPlacedPieceId ? setMovePreviewPosition : setHoverPosition}
+                                    justPlacedPositions={justMovedPositions.size > 0 ? justMovedPositions : justPlacedPositions}
                                     isPreviewLocked={previewLocked}
+                                    selectedPlacedPieceId={selectedPlacedPieceId}
+                                    onPlacedPieceClick={selectPlacedPiece}
+                                    isMovePreviewValid={isMovePreviewValid}
+                                    moveRotation={moveRotation}
                                 />
                             ) : (
                                 <>
@@ -546,16 +580,19 @@ export function ShapeArchitectGame() {
                                     <GridBoard3D
                                         grid={gameState.grid}
                                         gridSize={gameState.level.gridSize}
-                                        selectedPiece={selectedPiece}
-                                        rotation={gameState.rotation}
+                                        selectedPiece={selectedPlacedPieceId ? null : selectedPiece}
+                                        rotation={selectedPlacedPieceId ? moveRotation : gameState.rotation}
                                         placedPieces={gameState.placedPieces}
                                         levelPieces={gameState.level.pieces}
                                         onCellClick={handleCellClick}
                                         hoverPosition={effectivePreviewPosition}
-                                        onCellHover={setHoverPosition}
+                                        onCellHover={selectedPlacedPieceId ? setMovePreviewPosition : setHoverPosition}
                                         cameraPreset={cameraPreset}
                                         maxVisibleLayer={maxVisibleLayer}
                                         isPreviewLocked={previewLocked}
+                                        justPlacedPositions={justMovedPositions.size > 0 ? justMovedPositions : justPlacedPositions}
+                                        selectedPlacedPieceId={selectedPlacedPieceId}
+                                        onPlacedPieceClick={selectPlacedPiece}
                                     />
                                 </>
                             )}
@@ -577,11 +614,11 @@ export function ShapeArchitectGame() {
                             ↩️
                         </button>
                         <RotationControls
-                            rotation={gameState.rotation}
-                            onRotateX={() => handleRotateAxis('x')}
-                            onRotateY={() => handleRotateAxis('y')}
-                            onRotateZ={() => handleRotateAxis('z')}
-                            disabled={!selectedPiece || showTimeUp || gameState.isSolved}
+                            rotation={selectedPlacedPieceId ? moveRotation : gameState.rotation}
+                            onRotateX={() => selectedPlacedPieceId ? rotateMoveAxis('x') : handleRotateAxis('x')}
+                            onRotateY={() => selectedPlacedPieceId ? rotateMoveAxis('y') : handleRotateAxis('y')}
+                            onRotateZ={() => selectedPlacedPieceId ? rotateMoveAxis('z') : handleRotateAxis('z')}
+                            disabled={(!selectedPiece && !selectedPlacedPieceId) || showTimeUp || gameState.isSolved}
                             mode={gameState.level.type}
                         />
                         <PreviewLockButton
@@ -751,6 +788,30 @@ export function ShapeArchitectGame() {
                         is3DMode={viewMode === '3d'}
                     />
                 )}
+
+                {/* Mobile Controls for Moving Pieces */}
+                <PlacedPieceControls
+                    selectedPieceId={selectedPlacedPieceId}
+                    rotation={moveRotation}
+                    onRotateAxis={rotateMoveAxis}
+                    onCancel={clearMoveSelection}
+                    is2DMode={gameState.level.type === '2D'}
+                    disabled={showTimeUp || gameState.isSolved}
+                />
+
+                {/* Placement Modal for rotation preview before placing */}
+                <PlacementModal
+                    isOpen={placementModal.isOpen}
+                    piece={selectedPiece}
+                    position={placementModal.targetPosition}
+                    rotation={placementModal.rotation}
+                    grid={gameState.grid}
+                    gridSize={gameState.level.gridSize}
+                    viewMode={viewMode}
+                    onRotate={rotateModalPiece}
+                    onConfirm={handleModalConfirm}
+                    onCancel={closePlacementModal}
+                />
 
                 {/* Level Editor Modal */}
                 {showEditor && (

@@ -4,11 +4,15 @@ import { useShapeArchitectState } from '../useShapeArchitectState';
 import { presetLevels } from '../../logic/presets';
 
 describe('useShapeArchitectState', () => {
-    it('initializes with first level of selected difficulty', () => {
+    it('initializes with random level of selected difficulty', () => {
         const { result } = renderHook(() => useShapeArchitectState());
-        const easyLevels = presetLevels.filter(l => l.difficulty === 'easy');
-        expect(result.current.gameState.level.id).toBe(easyLevels[0].id);
+        // Guaranteed-solvable levels have IDs starting with 'guaranteed_'
+        expect(result.current.gameState.level.id).toMatch(/^guaranteed_/);
+        expect(result.current.gameState.level.difficulty).toBe('easy');
         expect(result.current.gameState.isSolved).toBe(false);
+        // Easy difficulty should have 3-4 pieces
+        expect(result.current.gameState.level.pieces.length).toBeGreaterThanOrEqual(3);
+        expect(result.current.gameState.level.pieces.length).toBeLessThanOrEqual(5);
     });
 
     it('auto-selects first piece on level load', () => {
@@ -43,16 +47,22 @@ describe('useShapeArchitectState', () => {
         }
     });
 
-    it('changes difficulty and loads first level of new difficulty', () => {
+    it('changes difficulty and generates new random level', () => {
         const { result } = renderHook(() => useShapeArchitectState());
+        const initialLevelId = result.current.gameState.level.id;
 
         act(() => {
             result.current.setDifficulty('medium');
         });
 
         expect(result.current.difficulty).toBe('medium');
-        const mediumLevels = presetLevels.filter(l => l.difficulty === 'medium');
-        expect(result.current.gameState.level.id).toBe(mediumLevels[0].id);
+        // Guaranteed-solvable level ID should start with 'guaranteed_'
+        expect(result.current.gameState.level.id).toMatch(/^guaranteed_/);
+        // Level ID should have changed
+        expect(result.current.gameState.level.id).not.toBe(initialLevelId);
+        // Medium difficulty should have 5-6 pieces
+        expect(result.current.gameState.level.pieces.length).toBeGreaterThanOrEqual(5);
+        expect(result.current.gameState.level.pieces.length).toBeLessThanOrEqual(7);
     });
 
     it('auto-switches viewMode to 3d for 3D levels', () => {

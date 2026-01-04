@@ -5,6 +5,8 @@
 
 import type { LevelConfig, Piece } from './types';
 import { validateAllLevels, type LevelValidation } from './engine';
+import { createSeededRandom } from '@/shared/utils';
+import { generateGuaranteedSolvableWithRetry } from './seededGenerator';
 
 // ========================================
 // All 7 Classic Tetris Pieces (Tetrominoes)
@@ -1054,62 +1056,31 @@ export const presetLevels: LevelConfig[] = [
     // Creating solvable levels with complex themed pieces requires careful puzzle design
 ];
 
-/**
- * Fisher-Yates shuffle for unbiased randomization
- */
-function shuffleArray<T>(array: T[]): T[] {
-    const result = [...array];
-    for (let i = result.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [result[i], result[j]] = [result[j], result[i]];
-    }
-    return result;
-}
+// ========================================
+// Random Level Generator (Guaranteed Solvable)
+// ========================================
 
 /**
- * Generate random level - always 4+ pieces
+ * Generate a random guaranteed-solvable level.
+ *
+ * Uses reverse generation algorithm:
+ * 1. Select random pieces based on difficulty
+ * 2. Place them on a grid in valid positions
+ * 3. Extract occupied cells as the target shape
+ *
+ * Since we place pieces first, the puzzle is always solvable!
+ *
+ * Difficulty affects both piece count and piece types:
+ * - Easy: 3-4 tetrominoes only
+ * - Medium: 5-6 pieces, mix of tetrominoes and pentominoes
+ * - Hard: 6-7 pieces, mostly pentominoes
  */
 export function generateRandomLevel(difficulty: 'easy' | 'medium' | 'hard'): LevelConfig {
-    const allTetris = [TETRIS.I, TETRIS.O, TETRIS.T, TETRIS.S, TETRIS.Z, TETRIS.J, TETRIS.L];
-    const colors = ['#00BCD4', '#FFEB3B', '#9C27B0', '#4CAF50', '#F44336', '#2196F3', '#FF9800', '#E91E63'];
+    // Create unique seed from timestamp + random for variety
+    const seed = `random_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const rng = createSeededRandom(seed);
 
-    // Minimum 4 pieces for easy, more for harder
-    let pieceCount: number;
-    if (difficulty === 'easy') pieceCount = 4 + Math.floor(Math.random() * 2); // 4-5
-    else if (difficulty === 'medium') pieceCount = 5 + Math.floor(Math.random() * 2); // 5-6
-    else pieceCount = 6 + Math.floor(Math.random() * 2); // 6-7
-
-    const pieces: Piece[] = [];
-    const shuffled = shuffleArray(allTetris);
-    for (let i = 0; i < pieceCount; i++) {
-        const factory = shuffled[i % shuffled.length];
-        pieces.push(factory(`p${i}`, colors[i % colors.length]));
-    }
-
-    const totalCells = pieces.reduce((sum, p) => sum + p.layout.length, 0);
-
-    // Create rectangular target
-    const width = Math.ceil(Math.sqrt(totalCells * 1.3));
-    const height = Math.ceil(totalCells / width);
-
-    const targetVoxels: { x: number; y: number; z: number }[] = [];
-    let cellsAdded = 0;
-    for (let y = 1; y <= height && cellsAdded < totalCells; y++) {
-        for (let x = 1; x <= width && cellsAdded < totalCells; x++) {
-            targetVoxels.push({ x, y, z: 0 });
-            cellsAdded++;
-        }
-    }
-
-    return {
-        id: `random_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        name: `Random ${pieceCount} Pieces`,
-        type: '2D',
-        gridSize: [width + 3, height + 3, 1],
-        targetVoxels,
-        pieces,
-        difficulty,
-    };
+    return generateGuaranteedSolvableWithRetry(rng, difficulty);
 }
 
 // ========================================

@@ -56,6 +56,9 @@ export interface LevelConfig {
     difficulty: 'easy' | 'medium' | 'hard';
 }
 
+/** Interaction mode for the game */
+export type InteractionMode = 'idle' | 'place' | 'move';
+
 export interface GameState {
     level: LevelConfig;
     grid: CellState[][][];
@@ -64,4 +67,8 @@ export interface GameState {
     selectedPieceId: string | null;
     rotation: Rotation3D; // Current rotation for piece being placed
     isSolved: boolean;
+    /** Current interaction mode */
+    interactionMode: InteractionMode;
+    /** ID of placed piece being moved (when in 'move' mode) */
+    selectedPlacedPieceId: string | null;
 }
