@@ -115,6 +115,16 @@ export class ShapeArchitectPage {
   readonly levelEditorOverlay: Locator;
   readonly levelEditor: Locator;
 
+  // Placement Modal
+  readonly placementModal: Locator;
+  readonly placementModalTitle: Locator;
+  readonly placementModalPreview: Locator;
+  readonly placementModalValidity: Locator;
+  readonly placementModalConfirmButton: Locator;
+  readonly placementModalCancelButton: Locator;
+  readonly placementModalRotationControls: Locator;
+  readonly placementModalDragHandle: Locator;
+
   constructor(page: Page) {
     this.page = page;
 
@@ -222,6 +232,16 @@ export class ShapeArchitectPage {
     // Level Editor
     this.levelEditorOverlay = page.locator('.level-editor-overlay');
     this.levelEditor = page.locator('.level-editor');
+
+    // Placement Modal
+    this.placementModal = page.locator('.placement-modal');
+    this.placementModalTitle = this.placementModal.locator('.placement-modal__title');
+    this.placementModalPreview = this.placementModal.locator('.placement-modal__preview');
+    this.placementModalValidity = this.placementModal.locator('.placement-modal__validity');
+    this.placementModalConfirmButton = this.placementModal.getByRole('button', { name: /place/i });
+    this.placementModalCancelButton = this.placementModal.getByRole('button', { name: /cancel/i });
+    this.placementModalRotationControls = this.placementModal.locator('.rotation-controls');
+    this.placementModalDragHandle = this.placementModal.locator('.placement-modal__drag-handle');
   }
 
   /**
@@ -231,8 +251,9 @@ export class ShapeArchitectPage {
   async goto(daily = false) {
     const url = daily ? '/shape-architect?daily=true' : '/shape-architect';
     await this.page.goto(url);
-    // ShapeArchitect loads three.js which can be slow, especially on mobile
-    await this.gameTitle.waitFor({ state: 'visible', timeout: 15000 });
+    // Wait for the game to be ready - use piece inventory as indicator since title may be
+    // scrolled out of view on mobile
+    await this.pieceInventory.waitFor({ state: 'visible', timeout: 15000 });
   }
 
   /**
@@ -547,5 +568,60 @@ export class ShapeArchitectPage {
    */
   async clickSkipLevel() {
     await this.skipLevelButton.click();
+  }
+
+  /**
+   * Check if placement modal is open
+   */
+  async isPlacementModalOpen(): Promise<boolean> {
+    return await this.placementModal.isVisible();
+  }
+
+  /**
+   * Get placement modal validity status
+   */
+  async getPlacementModalValidity(): Promise<'valid' | 'invalid'> {
+    const validityClass = await this.placementModalValidity.getAttribute('class');
+    return validityClass?.includes('--valid') ? 'valid' : 'invalid';
+  }
+
+  /**
+   * Confirm placement in modal
+   */
+  async confirmPlacement() {
+    await this.placementModalConfirmButton.click();
+  }
+
+  /**
+   * Cancel placement in modal
+   */
+  async cancelPlacement() {
+    await this.placementModalCancelButton.click();
+  }
+
+  /**
+   * Close placement modal with Escape key
+   */
+  async closePlacementModalWithEscape() {
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * Rotate piece in placement modal using keyboard
+   * @param axis - 'r' (Z), 't' (X), or 'y' (Y)
+   */
+  async rotateInModal(axis: 'r' | 't' | 'y') {
+    await this.page.keyboard.press(axis);
+  }
+
+  /**
+   * Click a target cell to open placement modal
+   */
+  async clickTargetCell() {
+    const targetCells = this.gridBoard.locator('.grid-cell--target');
+    const count = await targetCells.count();
+    if (count > 0) {
+      await targetCells.first().click();
+    }
   }
 }

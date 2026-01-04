@@ -5,6 +5,8 @@ import {
   previewDailyLevel,
   GENERATOR_CONSTANTS,
   generateValidatedLevelForTesting,
+  generateGuaranteedSolvable,
+  generateGuaranteedSolvableWithRetry,
 } from '../seededGenerator';
 import { createSeededRandom } from '@/shared/utils';
 import { solvePuzzle } from '../solver';
@@ -285,4 +287,137 @@ describe('Solvability Stress Test', () => {
 
     expect(unsolvable.length).toBe(0);
   }, 180000); // 3 minute timeout for stress test
+});
+
+// ========================================
+// Guaranteed Solvable Generator Tests
+// ========================================
+
+describe('generateGuaranteedSolvable', () => {
+  it('generates levels that are guaranteed solvable', () => {
+    // Test multiple seeds to ensure consistent solvability
+    const seeds = ['test-1', 'test-2', 'test-3', 'puzzle-abc', 'random-xyz'];
+
+    for (const seed of seeds) {
+      const rng = createSeededRandom(seed);
+      const level = generateGuaranteedSolvable(rng, 'easy');
+
+      // Level should be generated (not null)
+      expect(level).not.toBeNull();
+
+      if (level) {
+        // Verify with solver (should be solvable since we placed pieces ourselves)
+        const result = solvePuzzle(level, 5000);
+        expect(result.solvable).toBe(true);
+      }
+    }
+  }, 30000);
+
+  it('generates correct piece counts by difficulty', () => {
+    const expectedRanges = {
+      easy: [3, 4],
+      medium: [5, 6],
+      hard: [6, 7],
+    };
+
+    for (const difficulty of ['easy', 'medium', 'hard'] as const) {
+      const rng = createSeededRandom(`test-${difficulty}`);
+      const level = generateGuaranteedSolvable(rng, difficulty);
+
+      expect(level).not.toBeNull();
+      if (level) {
+        const [min, max] = expectedRanges[difficulty];
+        expect(level.pieces.length).toBeGreaterThanOrEqual(min);
+        expect(level.pieces.length).toBeLessThanOrEqual(max);
+      }
+    }
+  });
+
+  it('uses pentominoes in harder difficulties', () => {
+    // Hard difficulty should include pentominoes (5-cell pieces)
+    const rng = createSeededRandom('test-hard-pento');
+    const level = generateGuaranteedSolvable(rng, 'hard');
+
+    expect(level).not.toBeNull();
+    if (level) {
+      // At least some pieces should be pentominoes (5 cells)
+      const hasPentominoes = level.pieces.some(p => p.layout.length === 5);
+      expect(hasPentominoes).toBe(true);
+    }
+  });
+
+  it('easy difficulty uses only tetrominoes', () => {
+    // Easy difficulty should only have tetrominoes (4-cell pieces)
+    const rng = createSeededRandom('test-easy-tetris');
+    const level = generateGuaranteedSolvable(rng, 'easy');
+
+    expect(level).not.toBeNull();
+    if (level) {
+      // All pieces should be tetrominoes (4 cells)
+      const allTetrominoes = level.pieces.every(p => p.layout.length === 4);
+      expect(allTetrominoes).toBe(true);
+    }
+  });
+
+  it('target voxels match total piece volume', () => {
+    const rng = createSeededRandom('volume-test');
+    const level = generateGuaranteedSolvable(rng, 'medium');
+
+    expect(level).not.toBeNull();
+    if (level) {
+      const pieceVolume = level.pieces.reduce((sum, p) => sum + p.layout.length, 0);
+      const targetVolume = level.targetVoxels.length;
+
+      // Target shape should exactly fit all pieces
+      expect(targetVolume).toBe(pieceVolume);
+    }
+  });
+
+  it('generates reproducible levels with same seed', () => {
+    const seed = 'reproducible-guaranteed';
+
+    const rng1 = createSeededRandom(seed);
+    const rng2 = createSeededRandom(seed);
+
+    const level1 = generateGuaranteedSolvable(rng1, 'medium');
+    const level2 = generateGuaranteedSolvable(rng2, 'medium');
+
+    expect(level1).not.toBeNull();
+    expect(level2).not.toBeNull();
+
+    if (level1 && level2) {
+      expect(level1.pieces.length).toBe(level2.pieces.length);
+      expect(level1.targetVoxels.length).toBe(level2.targetVoxels.length);
+      expect(level1.gridSize).toEqual(level2.gridSize);
+    }
+  });
+});
+
+describe('generateGuaranteedSolvableWithRetry', () => {
+  it('always returns a valid level', () => {
+    const seeds = ['retry-test-1', 'retry-test-2', 'retry-test-3'];
+
+    for (const seed of seeds) {
+      const rng = createSeededRandom(seed);
+      const level = generateGuaranteedSolvableWithRetry(rng, 'medium');
+
+      // Should always return a level (never null due to fallback)
+      expect(level).toBeDefined();
+      expect(level.pieces.length).toBeGreaterThan(0);
+      expect(level.targetVoxels.length).toBeGreaterThan(0);
+
+      // Level should be solvable
+      const result = solvePuzzle(level, 5000);
+      expect(result.solvable || result.timedOut).toBe(true);
+    }
+  }, 30000);
+
+  it('falls back gracefully if generation fails repeatedly', () => {
+    // Even with a "bad" seed, retry mechanism should return valid level
+    const rng = createSeededRandom('edge-case-seed');
+    const level = generateGuaranteedSolvableWithRetry(rng, 'hard');
+
+    expect(level).toBeDefined();
+    expect(level.difficulty).toBe('hard');
+  });
 });

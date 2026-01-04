@@ -68,6 +68,70 @@ interface GridBoardProps {
     onCellHover?: (position: Position3D | null) => void;
     justPlacedPositions?: Set<string>; // Positions that were just placed (for snap animation)
     isPreviewLocked?: boolean; // Whether the preview position is locked
+    /** ID of placed piece currently selected for movement */
+    selectedPlacedPieceId?: string | null;
+    /** Callback when a placed piece is clicked (for movement selection) */
+    onPlacedPieceClick?: (pieceId: string) => void;
+    /** Whether movement preview is valid */
+    isMovePreviewValid?: boolean;
+    /** Rotation for the piece being moved */
+    moveRotation?: Rotation3D;
+}
+
+/**
+ * Custom comparison for GridBoard memo to ensure proper updates.
+ * Uses reference equality for complex objects (which are replaced on state changes)
+ * and value equality for rotation (small object that may be recreated).
+ */
+function arePropsEqual(prevProps: GridBoardProps, nextProps: GridBoardProps): boolean {
+    // Reference equality for arrays/objects that are replaced on state change
+    if (prevProps.grid !== nextProps.grid) return false;
+    if (prevProps.placedPieces !== nextProps.placedPieces) return false;
+    if (prevProps.levelPieces !== nextProps.levelPieces) return false;
+    if (prevProps.justPlacedPositions !== nextProps.justPlacedPositions) return false;
+
+    // Reference equality for selected piece (null-safe)
+    if (prevProps.selectedPiece !== nextProps.selectedPiece) return false;
+
+    // Deep equality for rotation (small object, may be recreated with same values)
+    if (prevProps.rotation.x !== nextProps.rotation.x ||
+        prevProps.rotation.y !== nextProps.rotation.y ||
+        prevProps.rotation.z !== nextProps.rotation.z) return false;
+
+    // Tuple equality for gridSize
+    if (prevProps.gridSize[0] !== nextProps.gridSize[0] ||
+        prevProps.gridSize[1] !== nextProps.gridSize[1] ||
+        prevProps.gridSize[2] !== nextProps.gridSize[2]) return false;
+
+    // Deep equality for hoverPosition (null-safe)
+    if (prevProps.hoverPosition === null && nextProps.hoverPosition !== null) return false;
+    if (prevProps.hoverPosition !== null && nextProps.hoverPosition === null) return false;
+    if (prevProps.hoverPosition && nextProps.hoverPosition) {
+        if (prevProps.hoverPosition.x !== nextProps.hoverPosition.x ||
+            prevProps.hoverPosition.y !== nextProps.hoverPosition.y ||
+            prevProps.hoverPosition.z !== nextProps.hoverPosition.z) return false;
+    }
+
+    // Primitive equality
+    if (prevProps.isPreviewLocked !== nextProps.isPreviewLocked) return false;
+    if (prevProps.selectedPlacedPieceId !== nextProps.selectedPlacedPieceId) return false;
+    if (prevProps.isMovePreviewValid !== nextProps.isMovePreviewValid) return false;
+
+    // Deep equality for moveRotation (null-safe)
+    if (prevProps.moveRotation && nextProps.moveRotation) {
+        if (prevProps.moveRotation.x !== nextProps.moveRotation.x ||
+            prevProps.moveRotation.y !== nextProps.moveRotation.y ||
+            prevProps.moveRotation.z !== nextProps.moveRotation.z) return false;
+    } else if (prevProps.moveRotation !== nextProps.moveRotation) {
+        return false;
+    }
+
+    // Callbacks - reference equality (should be stable via useCallback upstream)
+    if (prevProps.onCellClick !== nextProps.onCellClick) return false;
+    if (prevProps.onCellHover !== nextProps.onCellHover) return false;
+    if (prevProps.onPlacedPieceClick !== nextProps.onPlacedPieceClick) return false;
+
+    return true;
 }
 
 export const GridBoard = memo(function GridBoard({
@@ -82,12 +146,19 @@ export const GridBoard = memo(function GridBoard({
     onCellHover,
     justPlacedPositions,
     isPreviewLocked = false,
+    selectedPlacedPieceId,
+    onPlacedPieceClick,
+    isMovePreviewValid: _isMovePreviewValid = false,
+    moveRotation: _moveRotation,
 }: GridBoardProps) {
+    // Future use: movement preview rendering
+    void _isMovePreviewValid;
+    void _moveRotation;
     const [width, height] = gridSize;
 
-    // Build a map of cell positions to colors and patterns based on placed pieces
+    // Build a map of cell positions to colors, patterns, and piece IDs based on placed pieces
     const cellColorMap = useMemo(() => {
-        const colorMap = new Map<string, { color: string; pattern: PatternClass }>();
+        const colorMap = new Map<string, { color: string; pattern: PatternClass; pieceId: string }>();
         for (const placed of placedPieces) {
             const piece = levelPieces.find(p => p.id === placed.pieceId);
             if (!piece) continue;
@@ -96,12 +167,25 @@ export const GridBoard = memo(function GridBoard({
             for (const pos of positions) {
                 colorMap.set(`${pos.x},${pos.y},${pos.z}`, {
                     color: placed.color,
-                    pattern
+                    pattern,
+                    pieceId: placed.pieceId,
                 });
             }
         }
         return colorMap;
     }, [placedPieces, levelPieces]);
+
+    // Get positions of the currently selected placed piece (for highlighting)
+    const selectedPlacedPiecePositions = useMemo(() => {
+        if (!selectedPlacedPieceId) return new Set<string>();
+        const positions = new Set<string>();
+        cellColorMap.forEach((data, posKey) => {
+            if (data.pieceId === selectedPlacedPieceId) {
+                positions.add(posKey);
+            }
+        });
+        return positions;
+    }, [selectedPlacedPieceId, cellColorMap]);
 
     // Calculate preview positions based on hover, using snap-to-nearest
     const previewData = useMemo(() => {
@@ -254,6 +338,14 @@ export const GridBoard = memo(function GridBoard({
                                     if (justPlacedPositions?.has(posKey)) {
                                         cellClass += ' grid-cell--just-placed grid-cell--dust-effect';
                                     }
+                                    // Highlight selected placed piece
+                                    if (selectedPlacedPiecePositions.has(posKey)) {
+                                        cellClass += ' grid-cell--selected-for-move';
+                                    }
+                                    // Add movable class if pieces can be moved
+                                    if (onPlacedPieceClick) {
+                                        cellClass += ' grid-cell--movable';
+                                    }
                                 }
 
                                 // Add preview styling
@@ -267,8 +359,25 @@ export const GridBoard = memo(function GridBoard({
                                 const canPlaceHere = !!(selectedPiece && cell === 1 &&
                                     findNearestValidPosition(grid, selectedPiece, position, rotation, gridSize, 2));
 
+                                // Get cell data for filled cells
+                                const cellData = cell === 2 ? cellColorMap.get(posKey) : null;
+
+                                // Click handler: handles both placement (target cells) and selection (filled cells)
+                                const handleClick = () => {
+                                    if (cell === 1) {
+                                        // Target cell - place piece or move selected piece here
+                                        onCellClick(position);
+                                    } else if (cell === 2 && cellData && onPlacedPieceClick) {
+                                        // Filled cell - select this piece for movement
+                                        onPlacedPieceClick(cellData.pieceId);
+                                    }
+                                };
+
                                 // Roving tabindex: only first cell is tabbable, rest use -1
                                 const cellTabIndex = (x === 0 && y === 0) ? 0 : -1;
+
+                                // Cell is interactive if it's a target or a movable filled cell
+                                const isInteractive = cell === 1 || (cell === 2 && !!onPlacedPieceClick);
 
                                 return (
                                     <DroppableCell
@@ -276,8 +385,8 @@ export const GridBoard = memo(function GridBoard({
                                         position={position}
                                         cellClass={cellClass}
                                         bgColor={cell === 2 ? bgColor : undefined}
-                                        canPlace={canPlaceHere}
-                                        onClick={() => cell === 1 && onCellClick(position)}
+                                        canPlace={canPlaceHere || isInteractive}
+                                        onClick={handleClick}
                                         onMouseEnter={() => cell === 1 && handleMouseEnter(position)}
                                         onKeyDown={(e) => handleGridKeyDown(e, x, y, cell)}
                                         isTarget={cell === 1}
@@ -324,4 +433,4 @@ export const GridBoard = memo(function GridBoard({
             )}
         </div>
     );
-});
+}, arePropsEqual);
