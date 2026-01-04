@@ -6,6 +6,8 @@ interface RaceTrackProps {
     gameMode: GameMode;
     isAIThinking?: boolean;
     aiReaction?: 'confident' | 'worried' | 'neutral';
+    /** Preview position to show ghost marker when hovering step cards */
+    previewPosition?: number | null;
 }
 
 // CSS Stick Figure Component
@@ -26,7 +28,7 @@ function StickFigure() {
     );
 }
 
-export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral' }: RaceTrackProps) {
+export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral', previewPosition }: RaceTrackProps) {
     const { target, currentPosition, gameOver, winner } = state;
     const prevPositionRef = useRef(currentPosition);
     const [isMoving, setIsMoving] = useState(false);
@@ -92,6 +94,15 @@ export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral
                 >
                     <StickFigure />
                 </div>
+
+                {/* Preview Ghost Marker (shows where player would land on hover) */}
+                {previewPosition !== null && previewPosition !== undefined && previewPosition !== currentPosition && previewPosition <= target && (
+                    <div
+                        className="preview-marker"
+                        style={{ left: `${(previewPosition / target) * 100}%` }}
+                        aria-hidden="true"
+                    />
+                )}
 
                 {/* AI Opponent (only in vs-ai mode) */}
                 {gameMode === 'vs-ai' && (

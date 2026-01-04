@@ -113,12 +113,14 @@ export function SequenceRaceGame() {
     validMoves,
     analysis,
     sequenceInfo,
+    canUndo,
     setGameState,
     startGame,
     startRandomGame,
     restartGame,
     handleDifficultyChange,
     handleModeChange: handleModeChangeBase,
+    undoLastMove,
   } = useSequenceRaceState({ onResetTimer: resetTimer });
 
   // ─────────────────────────────────────────────────────────────────
@@ -147,8 +149,15 @@ export function SequenceRaceGame() {
     gameMode,
     difficulty,
     showTimeUp,
+    aiMovesFirst: currentConfig.aiMovesFirst,
     onAIMove: setGameState,
   });
+
+  // ─────────────────────────────────────────────────────────────────
+  // Move Preview (ghost marker on hover)
+  // ─────────────────────────────────────────────────────────────────
+
+  const [previewPosition, setPreviewPosition] = useState<number | null>(null);
 
   // ─────────────────────────────────────────────────────────────────
   // Turn and Game State Announcements
@@ -467,6 +476,7 @@ export function SequenceRaceGame() {
             gameMode={gameMode}
             isAIThinking={isAIThinking}
             aiReaction={aiReaction}
+            previewPosition={previewPosition}
           />
         </div>
 
@@ -501,7 +511,19 @@ export function SequenceRaceGame() {
           onSelectStep={handlePlayerMove}
           currentPosition={gameState.currentPosition}
           targetNumber={currentConfig.target}
+          onPreviewPosition={setPreviewPosition}
         />
+
+        {/* Undo Button */}
+        {canUndo && (
+          <button
+            className="btn btn--secondary undo-btn"
+            onClick={undoLastMove}
+            aria-label={t('undo', 'Undo')}
+          >
+            ↩️ {t('undo', 'Undo')}
+          </button>
+        )}
 
         {/* Hint Toggle */}
         <button className="btn btn--secondary hint-toggle" onClick={toggleHints}>

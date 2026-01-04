@@ -24,6 +24,8 @@ export interface UseAIOpponentOptions {
   difficulty: 'easy' | 'medium' | 'hard';
   /** Whether time is up */
   showTimeUp: boolean;
+  /** Whether AI moves first in this configuration */
+  aiMovesFirst?: boolean;
   /** Callback to update game state after AI move */
   onAIMove: (newState: SequenceState) => void;
 }
@@ -42,12 +44,15 @@ export interface UseAIOpponentReturn {
 /** Delay before AI makes a move (ms) - creates "thinking" effect */
 const AI_THINKING_DELAY = 800;
 
+/** Longer delay for AI's first move when AI moves first - gives player time to read banner */
+const AI_FIRST_MOVE_DELAY = 2000;
+
 // ═══════════════════════════════════════════════════════════════════
 // HOOK
 // ═══════════════════════════════════════════════════════════════════
 
 export function useAIOpponent(options: UseAIOpponentOptions): UseAIOpponentReturn {
-  const { gameState, gameMode, difficulty, showTimeUp, onAIMove } = options;
+  const { gameState, gameMode, difficulty, showTimeUp, aiMovesFirst, onAIMove } = options;
 
   const [isAIThinking, setIsAIThinking] = useState(false);
 
@@ -87,6 +92,11 @@ export function useAIOpponent(options: UseAIOpponentOptions): UseAIOpponentRetur
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsAIThinking(true);
 
+    // Use longer delay for AI's first move when AI moves first
+    // This gives the player time to read the "AI moves first" banner
+    const isFirstMove = gameState.history.length === 0 && aiMovesFirst;
+    const delay = isFirstMove ? AI_FIRST_MOVE_DELAY : AI_THINKING_DELAY;
+
     const timer = setTimeout(() => {
       try {
         const aiMove = getAIMove(gameState, difficulty);
@@ -96,10 +106,10 @@ export function useAIOpponent(options: UseAIOpponentOptions): UseAIOpponentRetur
         console.error('AI error:', error);
       }
       setIsAIThinking(false);
-    }, AI_THINKING_DELAY);
+    }, delay);
 
     return () => clearTimeout(timer);
-  }, [gameState, difficulty, showTimeUp, gameMode, onAIMove]);
+  }, [gameState, difficulty, showTimeUp, gameMode, aiMovesFirst, onAIMove]);
 
   return {
     isAIThinking,

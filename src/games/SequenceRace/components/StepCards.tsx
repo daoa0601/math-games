@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface StepCardsProps {
@@ -9,6 +9,8 @@ interface StepCardsProps {
     currentPosition?: number;
     targetNumber?: number;
     selectedStep?: number;
+    /** Callback to notify parent of preview position when hovering */
+    onPreviewPosition?: (position: number | null) => void;
 }
 
 export function StepCards({
@@ -19,9 +21,21 @@ export function StepCards({
     currentPosition,
     targetNumber,
     selectedStep,
+    onPreviewPosition,
 }: StepCardsProps) {
     const { t } = useTranslation('sequenceRace');
     const containerRef = useRef<HTMLDivElement>(null);
+    const [hoveredStep, setHoveredStep] = useState<number | null>(null);
+
+    // Notify parent of preview position when hover changes
+    useEffect(() => {
+        if (onPreviewPosition) {
+            const previewPos = hoveredStep !== null && currentPosition !== undefined
+                ? currentPosition + hoveredStep
+                : null;
+            onPreviewPosition(previewPos);
+        }
+    }, [hoveredStep, currentPosition, onPreviewPosition]);
 
     // Generate descriptive aria-label for each step button
     const getStepAriaLabel = (step: number, isValid: boolean): string => {
@@ -98,6 +112,10 @@ export function StepCards({
                         disabled={isDisabled}
                         onClick={() => onSelectStep(step)}
                         onKeyDown={(e) => handleStepKeyDown(e, step)}
+                        onMouseEnter={() => !isDisabled && setHoveredStep(step)}
+                        onMouseLeave={() => setHoveredStep(null)}
+                        onFocus={() => !isDisabled && setHoveredStep(step)}
+                        onBlur={() => setHoveredStep(null)}
                         aria-label={getStepAriaLabel(step, isValid)}
                         tabIndex={isDisabled ? -1 : 0}
                     >

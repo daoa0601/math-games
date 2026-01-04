@@ -5,7 +5,7 @@
  * Extracted from SequenceRaceGame to reduce component complexity.
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { SequenceState, GameConfig, GameMode } from '../logic/types';
 import { createGameState, getValidMoves, analyzePosition } from '../logic/engine';
 import { presetGames, generateRandomConfig, SEQUENCE_INFO } from '../logic/presets';
@@ -32,6 +32,9 @@ export interface UseSequenceRaceStateReturn {
   analysis: ReturnType<typeof analyzePosition> | null;
   sequenceInfo: (typeof SEQUENCE_INFO)[keyof typeof SEQUENCE_INFO];
 
+  // Undo state
+  canUndo: boolean;
+
   // Actions
   setGameState: React.Dispatch<React.SetStateAction<SequenceState>>;
   startGame: (config: GameConfig) => void;
@@ -39,6 +42,7 @@ export interface UseSequenceRaceStateReturn {
   restartGame: () => void;
   handleDifficultyChange: (newDifficulty: 'easy' | 'medium' | 'hard') => void;
   handleModeChange: (newMode: GameMode) => void;
+  undoLastMove: () => void;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -60,6 +64,70 @@ export function useSequenceRaceState(
   const [gameState, setGameState] = useState<SequenceState>(() =>
     createGameState({ ...presetGames[0], mode: 'vs-ai' })
   );
+
+  // ─────────────────────────────────────────────────────────────────
+  // Undo state - tracks previous game states for undo functionality
+  // ─────────────────────────────────────────────────────────────────
+
+  const previousStateRef = useRef<SequenceState | null>(null);
+  const lastHistoryLengthRef = useRef<number>(0);
+
+  // Track state changes to enable undo
+  // We save state BEFORE each move, so undo restores the pre-move state
+  useEffect(() => {
+    const currentHistoryLength = gameState.history.length;
+
+    // Only save state when a new move is made (history grows)
+    if (currentHistoryLength > lastHistoryLengthRef.current && currentHistoryLength > 0) {
+      // The previous state is the one before this move was made
+      // We construct it by removing the last move from history
+      const lastMove = gameState.history[gameState.history.length - 1];
+      const previousState: SequenceState = {
+        ...gameState,
+        currentPosition: gameState.currentPosition - lastMove.step,
+        history: gameState.history.slice(0, -1),
+        turn: lastMove.player as SequenceState['turn'],
+        gameOver: false,
+        winner: null,
+      };
+      previousStateRef.current = previousState;
+    }
+
+    // Track history length to detect new moves
+    lastHistoryLengthRef.current = currentHistoryLength;
+  }, [gameState]);
+
+  // Reset undo state when game restarts
+  useEffect(() => {
+    if (gameState.history.length === 0) {
+      previousStateRef.current = null;
+      lastHistoryLengthRef.current = 0;
+    }
+  }, [gameState.history.length]);
+
+  // Track whether undo is available (updated via effect to avoid ref access during render)
+  const [canUndo, setCanUndo] = useState(false);
+
+  // Update canUndo when relevant state changes
+  // Can only undo if:
+  // 1. There's a previous state to restore
+  // 2. Game is not over
+  // 3. It's the player's turn (can't undo during AI's turn)
+  // Note: This setState in effect is intentional - we sync derived state from ref changes
+  useEffect(() => {
+    const isPlayerTurn = gameState.turn === 'player' || gameState.turn === 'player1' || gameState.turn === 'player2';
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCanUndo(previousStateRef.current !== null && !gameState.gameOver && isPlayerTurn);
+  }, [gameState.gameOver, gameState.turn, gameState.history.length]);
+
+  const undoLastMove = useCallback(() => {
+    if (!previousStateRef.current) return;
+
+    const stateToRestore = previousStateRef.current;
+    previousStateRef.current = null; // Clear after use (single undo only)
+    setCanUndo(false); // Immediately update canUndo
+    setGameState(stateToRestore);
+  }, []);
 
   // ─────────────────────────────────────────────────────────────────
   // Derived state (memoized)
@@ -144,6 +212,9 @@ export function useSequenceRaceState(
     analysis,
     sequenceInfo,
 
+    // Undo
+    canUndo,
+
     // Actions
     setGameState,
     startGame,
@@ -151,5 +222,6 @@ export function useSequenceRaceState(
     restartGame,
     handleDifficultyChange,
     handleModeChange,
+    undoLastMove,
   };
 }

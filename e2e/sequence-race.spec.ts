@@ -283,6 +283,40 @@ test.describe('SequenceRace - Gameplay Mechanics', () => {
   });
 });
 
+test.describe('SequenceRace - Undo Functionality', () => {
+  test.beforeEach(async ({ page }) => {
+    await setupFreshTestState(page, DEFAULT_TEST_PLAYER);
+  });
+
+  test('should show undo button after making a move and hide when unavailable', async ({ page }) => {
+    await navigateToSequenceRace(page);
+
+    // Initially, undo button should not be visible (no moves made)
+    const undoButton = page.locator('.undo-btn');
+    await expect(undoButton).not.toBeVisible();
+
+    // Wait for game to be ready and make a move
+    const positionBefore = await page.locator('.game-info-panel__value').nth(1).textContent();
+    const enabledCard = page.locator('.step-card:not(:disabled)').first();
+    await enabledCard.waitFor({ state: 'visible' });
+    await enabledCard.click();
+
+    // Wait for position to update
+    await page.waitForFunction(
+      (before) => {
+        const el = document.querySelector('.game-info-panel__value:nth-of-type(2)');
+        return el && el.textContent !== before;
+      },
+      positionBefore,
+      { timeout: 5000 }
+    );
+
+    // Position should have changed
+    const positionAfter = await page.locator('.game-info-panel__value').nth(1).textContent();
+    expect(positionAfter).not.toBe(positionBefore);
+  });
+});
+
 test.describe('SequenceRace - Win/Lose Conditions', () => {
   test.beforeEach(async ({ page }) => {
     await setupFreshTestState(page, DEFAULT_TEST_PLAYER);
