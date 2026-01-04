@@ -468,17 +468,14 @@ export function SequenceRaceGame() {
         </div>
 
         {/* Race Track */}
-        <div
-          className={`track-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'track-wrapper--urgent' : ''}`}
-        >
-          <RaceTrack
-            state={gameState}
-            gameMode={gameMode}
-            isAIThinking={isAIThinking}
-            aiReaction={aiReaction}
-            previewPosition={previewPosition}
-          />
-        </div>
+        <RaceTrack
+          state={gameState}
+          gameMode={gameMode}
+          isAIThinking={isAIThinking}
+          aiReaction={aiReaction}
+          previewPosition={previewPosition}
+          isUrgent={!isPracticeMode && timeLeft <= 10}
+        />
 
         {/* AI First Move Banner */}
         {currentConfig.aiMovesFirst && gameState.history.length === 0 && gameState.turn === 'ai' && (

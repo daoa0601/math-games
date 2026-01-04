@@ -842,17 +842,15 @@
     color: var(--color-error);
 }
 
-/* Turn Indicator - Repositioned to top-right to avoid track overlap */
+/* Turn Indicator - Inline banner between track and step cards */
 .turn-indicator {
-    position: absolute;
-    top: var(--space-sm);
-    right: var(--space-sm);
+    display: inline-block;
     padding: var(--space-xs) var(--space-md);
     border-radius: var(--radius-full);
     font-weight: 600;
     font-size: 0.875rem;
     animation: pulse 1.5s ease-in-out infinite;
-    z-index: 20;
+    text-align: center;
     white-space: nowrap;
 }
 
@@ -992,8 +990,8 @@
     color: var(--text-secondary);
 }
 
-/* Track urgency */
-.track-wrapper--urgent .race-track {
+/* Track urgency - applied directly when time is low */
+.race-track--urgent {
     border-color: var(--color-error);
     box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.4);
     animation: urgentPulse 1s ease infinite;

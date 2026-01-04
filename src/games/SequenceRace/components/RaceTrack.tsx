@@ -8,6 +8,8 @@ interface RaceTrackProps {
     aiReaction?: 'confident' | 'worried' | 'neutral';
     /** Preview position to show ghost marker when hovering step cards */
     previewPosition?: number | null;
+    /** Apply urgent styling (red border, pulsing) when time is low */
+    isUrgent?: boolean;
 }
 
 // CSS Stick Figure Component
@@ -28,7 +30,7 @@ function StickFigure() {
     );
 }
 
-export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral', previewPosition }: RaceTrackProps) {
+export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral', previewPosition, isUrgent }: RaceTrackProps) {
     const { target, currentPosition, gameOver, winner } = state;
     const prevPositionRef = useRef(currentPosition);
     const [isMoving, setIsMoving] = useState(false);
@@ -60,7 +62,7 @@ export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral
     }
 
     return (
-        <div className="race-track">
+        <div className={`race-track${isUrgent ? ' race-track--urgent' : ''}`}>
             <div className="track-wrapper">
                 {/* Track Line */}
                 <div className="track-line" />
