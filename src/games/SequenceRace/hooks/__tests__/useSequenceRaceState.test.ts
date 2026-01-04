@@ -24,7 +24,7 @@ describe('useSequenceRaceState - undo', () => {
                 result.current.setGameState(prev => ({
                     ...prev,
                     currentPosition: prev.currentPosition + move,
-                    history: [...prev.history, { player: 'player', step: move }],
+                    history: [...prev.history, { actor: 'player', step: move, position: prev.currentPosition + move }],
                     turn: 'ai' as const,
                 }));
             }

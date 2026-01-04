@@ -86,7 +86,7 @@ export function useSequenceRaceState(
         ...gameState,
         currentPosition: gameState.currentPosition - lastMove.step,
         history: gameState.history.slice(0, -1),
-        turn: lastMove.player as SequenceState['turn'],
+        turn: lastMove.actor as SequenceState['turn'],
         gameOver: false,
         winner: null,
       };

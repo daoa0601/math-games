@@ -6,3 +6,4 @@ export type { UsePiecePlacementOptions, UsePiecePlacementReturn } from './usePie
 export { useKeyboardControls } from './useKeyboardControls';
 export type { UseKeyboardControlsOptions } from './useKeyboardControls';
 export { useThrottledHover } from './useThrottledHover';
+export { useSharedBoxGeometry, getSharedBoxGeometry } from './useSharedGeometry';

@@ -9,6 +9,7 @@ import { Voxel } from './Voxel';
 import { GridFloor } from './GridFloor';
 import { useThreeCleanup } from '../hooks';
 import { CAMERA_PRESETS, type CameraPreset } from './CameraPresetButtons';
+import { useDeviceCapabilities } from '@/shared/hooks';
 
 interface GridBoard3DProps {
     grid: CellState[][][];
@@ -209,9 +210,20 @@ export function GridBoard3D({
         isPreviewLocked,
     ]);
 
+    // Detect device capabilities for adaptive rendering
+    const { enableAntialias, enableShadows, pixelRatio } = useDeviceCapabilities();
+
     return (
         <div className="grid-board-3d" onPointerLeave={() => onCellHover?.(null)}>
-            <Canvas shadows frameloop="demand">
+            <Canvas
+                shadows={enableShadows}
+                frameloop="demand"
+                gl={{
+                    antialias: enableAntialias,
+                    powerPreference: 'high-performance',
+                }}
+                dpr={[1, pixelRatio]}
+            >
                 <Suspense fallback={null}>
                     <Scene3DContent
                         voxels={voxels}
@@ -307,13 +319,13 @@ function Scene3DContent({
             {/* Lighting - Enhanced for 3D depth */}
             <ambientLight intensity={0.4} />
 
-            {/* Key light with shadows */}
+            {/* Key light with shadows (reduced resolution for better mobile perf) */}
             <directionalLight
                 position={[10, 10, 5]}
                 intensity={1.2}
                 castShadow
-                shadow-mapSize-width={2048}
-                shadow-mapSize-height={2048}
+                shadow-mapSize-width={1024}
+                shadow-mapSize-height={1024}
                 shadow-bias={-0.0001}
                 shadow-camera-left={-10}
                 shadow-camera-right={10}

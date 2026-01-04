@@ -11,3 +11,5 @@ export type { Rotation3D as RotationControlsRotation } from './RotationControls'
 export { LayerControls } from './LayerControls';
 export { ShapeArchitectTutorial } from './ShapeArchitectTutorial';
 export { PreviewLockButton } from './PreviewLockButton';
+export { InstancedVoxels } from './InstancedVoxels';
+export type { VoxelData } from './InstancedVoxels';

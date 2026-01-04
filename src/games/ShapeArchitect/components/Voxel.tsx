@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import type { Mesh, BoxGeometry } from 'three';
+import type { Mesh } from 'three';
+import { useSharedBoxGeometry } from '../hooks';
 
 interface VoxelProps {
     position: [number, number, number];
@@ -32,15 +33,8 @@ export function Voxel({
 }: VoxelProps) {
     const meshRef = useRef<Mesh>(null);
     const [hovered, setHovered] = useState(false);
-    // Store geometry in state to avoid accessing ref during render
-    const [geometry, setGeometry] = useState<BoxGeometry | null>(null);
-
-    // Capture geometry after mount (refs are only available after render)
-    useEffect(() => {
-        if (meshRef.current?.geometry) {
-            setGeometry(meshRef.current.geometry as BoxGeometry);
-        }
-    }, []);
+    // Use shared geometry singleton for better GPU memory efficiency
+    const sharedGeometry = useSharedBoxGeometry();
 
     // Animate preview blocks
     useFrame((state) => {
@@ -73,8 +67,8 @@ export function Voxel({
         return 1;
     };
 
-    // Solid blocks cast shadows, all blocks receive shadows
-    const shouldCastShadow = !isTarget && !isPreview;
+    // Only placed (filled) blocks cast shadows - not targets, previews, or empty cells
+    const shouldCastShadow = !isTarget && !isPreview && !isEmpty;
 
     return (
         <mesh
@@ -92,18 +86,18 @@ export function Voxel({
                 onPointerEnter?.();
             }}
             onPointerLeave={() => setHovered(false)}
+            geometry={sharedGeometry}
         >
-            <boxGeometry args={[0.95, 0.95, 0.95]} />
             <meshStandardMaterial
                 color={getColor()}
                 transparent={isTarget || isPreview || isEmpty}
                 opacity={getOpacity()}
                 wireframe={isTarget && !hovered && !isEmpty}
             />
-            {/* Add edge highlight for filled blocks (only after geometry is available) */}
-            {!isTarget && !isPreview && geometry && (
+            {/* Add edge highlight for filled blocks */}
+            {!isTarget && !isPreview && !isEmpty && (
                 <lineSegments>
-                    <edgesGeometry args={[geometry]} />
+                    <edgesGeometry args={[sharedGeometry]} />
                     <lineBasicMaterial color="#ffffff" transparent opacity={0.3} />
                 </lineSegments>
             )}
