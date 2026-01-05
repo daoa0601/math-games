@@ -29,7 +29,7 @@ export function GameLayout({ title, children, headerRight, gameId }: GameLayoutP
                     {headerRight}
                     {gameId && (
                         <button
-                            className="btn btn--ghost learn-button"
+                            className="game-btn game-btn--ghost learn-button"
                             onClick={() => setShowLearn(true)}
                             aria-label={t('learn.howToPlay')}
                         >
@@ -38,7 +38,7 @@ export function GameLayout({ title, children, headerRight, gameId }: GameLayoutP
                     )}
                     <ThemeToggle />
                     <LanguageSwitcher />
-                    <Link to="/" className="btn btn--secondary">
+                    <Link to="/" className="game-btn game-btn--secondary">
                         ← {t('backToGames')}
                     </Link>
                 </div>

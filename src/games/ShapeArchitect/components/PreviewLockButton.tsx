@@ -11,7 +11,7 @@ interface PreviewLockButtonProps {
 export function PreviewLockButton({ locked, onToggle, disabled = false }: PreviewLockButtonProps) {
     return (
         <button
-            className={`preview-lock-btn ${locked ? 'preview-lock-btn--locked' : ''}`}
+            className={`sa-lock-btn ${locked ? 'sa-lock-btn--locked' : ''}`}
             onClick={onToggle}
             disabled={disabled}
             aria-pressed={locked}
@@ -19,7 +19,7 @@ export function PreviewLockButton({ locked, onToggle, disabled = false }: Previe
             type="button"
         >
             {locked ? <UnlockIcon /> : <LockIcon />}
-            <span className="preview-lock-btn__label">
+            <span className="sa-lock-btn__label">
                 {locked ? 'Unlock' : 'Lock'}
             </span>
         </button>

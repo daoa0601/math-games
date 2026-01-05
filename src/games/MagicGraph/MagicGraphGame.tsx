@@ -13,6 +13,7 @@ import { generatePuzzle, isPuzzleSolved, getLineStatus, findImpossibleLines, fin
 import { puzzleTemplates, getHints, getProgressHint, createRandomBasePuzzle } from './logic/puzzles';
 import { getDailyMagicGraphPuzzle } from './logic/seededGenerator';
 import { useHistory, useWorkerSolver } from './hooks';
+import '@/shared/styles/game-base.css';
 import './MagicGraph.css';
 
 interface PickerState {
@@ -580,13 +581,13 @@ export function MagicGraphGame() {
                 </>
             }
         >
-            <div className="puzzle-container">
+            <div className="mg-container">
                 {/* Daily Challenge Badge */}
                 {isDailyMode && (
-                    <div className="daily-badge">
-                        <span className="daily-badge__icon">📅</span>
-                        <span className="daily-badge__text">{tc('daily.dailyChallenge')}</span>
-                        {dailyCompleted && <span className="daily-badge__check">✓</span>}
+                    <div className="mg-daily">
+                        <span>📅</span>
+                        <span>{tc('daily.dailyChallenge')}</span>
+                        {dailyCompleted && <span className="mg-daily__check">✓</span>}
                     </div>
                 )}
 
@@ -613,36 +614,35 @@ export function MagicGraphGame() {
                 )}
 
                 {/* Game Rules */}
-                <div className="game-rules">
-                    <span className="game-rules__icon">📜</span>
-                    <p className="game-rules__text">{t('rules')}</p>
+                <div className="mg-rules">
+                    <span>📜</span> {t('rules')}
                 </div>
 
                 {/* Level Selector (hidden in daily mode) - Swipeable on mobile */}
                 {!isDailyMode && (
                     <div
-                        className="level-selector"
+                        className="mg-levels"
                         ref={levelSwipeRef as React.RefObject<HTMLDivElement>}
                         {...levelSwipeHandlers}
                     >
                         {filteredTemplates.map((template, index) => (
                             <button
                                 key={template.name}
-                                className={`level-btn ${index === currentTemplateIndex ? 'level-btn--active' : ''}`}
+                                className={`mg-level ${index === currentTemplateIndex ? 'mg-level--active' : ''}`}
                                 onClick={() => loadTemplate(index, filteredTemplates)}
                             >
                                 {template.name}
                             </button>
                         ))}
                         <button
-                            className="btn btn--secondary"
+                            className="game-btn"
                             onClick={handleRandomPuzzle}
                             disabled={isGenerating || isWorkerBusy}
                         >
                             {isGenerating || isWorkerBusy ? `⏳ ${tc('generating')}` : `🎲 ${tc('buttons.random')}`}
                         </button>
                         <button
-                            className="btn btn--secondary"
+                            className="game-btn"
                             onClick={() => setShowEditor(true)}
                         >
                             ✏️ {t('editor.openEditor')}
@@ -652,29 +652,29 @@ export function MagicGraphGame() {
 
                 {/* Generation Loading */}
                 {isGenerating && (
-                    <div className="generating-overlay">
-                        <div className="generating-spinner">🔮</div>
+                    <div className="mg-loading">
+                        <div className="mg-loading__spinner">🔮</div>
                         <p>{tc('generatingPuzzle')}</p>
                     </div>
                 )}
 
                 {/* Puzzle Info */}
-                <div className="puzzle-info">
+                <div className="game-info">
                     {difficulty === 'grandmaster' ? (
                         <>
                             {/* Grandmaster mode: Optimization goal selector */}
-                            <div className="puzzle-info__item puzzle-info__item--goal">
-                                <span className="puzzle-info__label">{t('goal')}</span>
-                                <div className="optimization-toggle" role="group" aria-label="Optimization goal">
+                            <div className="game-info__item">
+                                <span className="game-info__label">{t('goal')}</span>
+                                <div className="mode-toggle" role="group" aria-label="Optimization goal">
                                     <button
-                                        className={`opt-btn ${optimizationGoal === 'minimize' ? 'opt-btn--active' : ''}`}
+                                        className={`mode-toggle__btn ${optimizationGoal === 'minimize' ? 'mode-toggle__btn--active' : ''}`}
                                         onClick={() => setOptimizationGoal('minimize')}
                                         aria-pressed={optimizationGoal === 'minimize'}
                                     >
                                         📉 {t('minimize')}
                                     </button>
                                     <button
-                                        className={`opt-btn ${optimizationGoal === 'maximize' ? 'opt-btn--active' : ''}`}
+                                        className={`mode-toggle__btn ${optimizationGoal === 'maximize' ? 'mode-toggle__btn--active' : ''}`}
                                         onClick={() => setOptimizationGoal('maximize')}
                                         aria-pressed={optimizationGoal === 'maximize'}
                                     >
@@ -684,9 +684,9 @@ export function MagicGraphGame() {
                             </div>
                             {/* Show valid sum range */}
                             {computedOptimalResult && (
-                                <div className="puzzle-info__item puzzle-info__item--range">
-                                    <span className="puzzle-info__label">{t('validRange')}</span>
-                                    <span className="puzzle-info__value puzzle-info__value--range">
+                                <div className="game-info__item">
+                                    <span className="game-info__label">{t('validRange')}</span>
+                                    <span className="game-info__value">
                                         {computedOptimalResult.minSum} – {computedOptimalResult.maxSum}
                                     </span>
                                 </div>
@@ -694,38 +694,39 @@ export function MagicGraphGame() {
                         </>
                     ) : (
                         <>
-                            <div className="puzzle-info__item">
-                                <span className="puzzle-info__label">{t('targetSum')}</span>
+                            <div className="game-info__item">
+                                <span className="game-info__label">{t('targetSum')}</span>
                                 {difficulty === 'master' && !targetRevealed ? (
-                                    <span className="puzzle-info__value puzzle-info__value--mystery">
-                                        <span className="mystery-value">?</span>
+                                    <span className="game-info__value" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                                        <span>?</span>
                                         <button
-                                            className="btn btn--tiny btn--ghost"
+                                            className="game-btn"
                                             onClick={() => setTargetRevealed(true)}
                                             title={t('revealTargetSum')}
+                                            style={{ padding: 'var(--space-xs)' }}
                                         >
                                             👁️
                                         </button>
                                     </span>
                                 ) : (
-                                    <span className="puzzle-info__value puzzle-info__value--glow">{puzzle.targetSum}</span>
+                                    <span className="game-info__value--accent">{puzzle.targetSum}</span>
                                 )}
                             </div>
                             {difficulty === 'master' && (
-                                <div className="puzzle-info__item puzzle-info__item--hint">
-                                    <span className="puzzle-info__label">{t('hint')}</span>
-                                    <span className="puzzle-info__value puzzle-info__value--small">{t('allLinesSameValue')}</span>
+                                <div className="game-info__item">
+                                    <span className="game-info__label">{t('hint')}</span>
+                                    <span className="game-info__value" style={{ fontSize: 'var(--text-sm)' }}>{t('allLinesSameValue')}</span>
                                 </div>
                             )}
                         </>
                     )}
-                    <div className="puzzle-info__item">
-                        <span className="puzzle-info__label">{t('puzzle')}</span>
-                        <span className="puzzle-info__value">{puzzle.name}</span>
+                    <div className="game-info__item">
+                        <span className="game-info__label">{t('puzzle')}</span>
+                        <span className="game-info__value">{puzzle.name}</span>
                     </div>
-                    <div className="puzzle-info__item">
-                        <span className="puzzle-info__label">{t('progress')}</span>
-                        <span className="puzzle-info__value">{filledCount}/{puzzle.nodes.length}</span>
+                    <div className="game-info__item">
+                        <span className="game-info__label">{t('progress')}</span>
+                        <span className="game-info__value">{filledCount}/{puzzle.nodes.length}</span>
                     </div>
                 </div>
 
@@ -738,7 +739,7 @@ export function MagicGraphGame() {
                 ) : (
                     <div
                         ref={puzzleBoardRef}
-                        className={`board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'board-wrapper--urgent' : ''}`}
+                        className={`mg-board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'mg-board-wrapper--urgent' : ''}`}
                     >
                         <PuzzleBoard
                             nodes={puzzle.nodes}
@@ -769,8 +770,8 @@ export function MagicGraphGame() {
                 )}
 
                 {/* Number Inventory (display-only reference) */}
-                <div className="number-inventory-wrapper">
-                    <span className="inventory-label">{tc('availableNumbers')}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                    <span className="game-info__label">{tc('availableNumbers')}</span>
                     <NumberInventory
                         availableNumbers={puzzle.availableNumbers}
                         usedNumbers={usedNumbers}
@@ -781,16 +782,16 @@ export function MagicGraphGame() {
 
                 {/* Unsolvable Button (appears after 45 seconds for seeded puzzles) */}
                 {showUnsolvableButton && !showWin && !showTimeUp && (
-                    <div className="unsolvable-section">
+                    <div className="mg-unsolvable">
                         <button
-                            className={`btn btn--unsolvable ${unsolvableFeedback?.type === 'wrong' ? 'btn--shake' : ''}`}
+                            className={`mg-unsolvable-btn ${unsolvableFeedback?.type === 'wrong' ? 'flash-shake' : ''}`}
                             onClick={handleDeclareUnsolvable}
                             disabled={unsolvableFeedback?.type === 'correct'}
                         >
                             🚫 {t('unsolvable.button', 'Declare Unsolvable')}
                         </button>
                         {unsolvableFeedback && (
-                            <div className={`unsolvable-feedback unsolvable-feedback--${unsolvableFeedback.type}`}>
+                            <div className={`mg-unsolvable-feedback mg-unsolvable-feedback--${unsolvableFeedback.type}`}>
                                 {unsolvableFeedback.type === 'correct' ? '✓' : '✗'} {unsolvableFeedback.message}
                             </div>
                         )}
@@ -799,7 +800,7 @@ export function MagicGraphGame() {
 
                 {/* Hint Toggle */}
                 <button
-                    className="btn btn--secondary hint-toggle"
+                    className="game-btn"
                     onClick={() => setShowHints(!showHints)}
                 >
                     💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
@@ -807,10 +808,10 @@ export function MagicGraphGame() {
 
                 {/* Hints Panel */}
                 {showHints && (
-                    <div className="hints-panel">
+                    <div className="mg-hints">
                         {/* Auditor Warning */}
                         {impossibleLineIds.size > 0 && (
-                            <div className="hint-card hint-card--auditor">
+                            <div className="mg-hint mg-hint--auditor">
                                 <h4>⚠️ {t('hints.auditor.title')}</h4>
                                 <p>
                                     {impossibleLineIds.size === 1
@@ -822,30 +823,30 @@ export function MagicGraphGame() {
                         )}
                         {/* Starter Hint */}
                         {starterHint && starterHint.validOptions.length > 0 && (
-                            <div className="hint-card hint-card--starter">
+                            <div className="mg-hint mg-hint--starter">
                                 <h4>💡 {t('hints.starter.title')}</h4>
                                 <p>{starterHint.reason}</p>
-                                <p className="hint-card__subtext">{t('hints.starter.subtext')}</p>
+                                <p style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>{t('hints.starter.subtext')}</p>
                             </div>
                         )}
                         {/* Algebraist Hints */}
                         {algebraicHints.length > 0 && (
-                            <div className="hint-card hint-card--algebraist">
+                            <div className="mg-hint">
                                 <h4>📐 {t('hints.algebraist.title')}</h4>
                                 {algebraicHints.map((hint, i) => (
-                                    <div key={i} className="algebra-hint">
-                                        <code className="algebra-equation">{hint.equation}</code>
-                                        <p className="algebra-explanation">{hint.explanation}</p>
+                                    <div key={i} style={{ marginTop: 'var(--space-sm)' }}>
+                                        <code style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>{hint.equation}</code>
+                                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>{hint.explanation}</p>
                                     </div>
                                 ))}
                             </div>
                         )}
-                        <div className="hint-card hint-card--progress">
+                        <div className="mg-hint">
                             <h4>{progressHint.title}</h4>
                             <p>{progressHint.message}</p>
                         </div>
                         {conceptHints.map((hint, i) => (
-                            <div key={i} className={`hint-card hint-card--${hint.type}`}>
+                            <div key={i} className="mg-hint">
                                 <h4>{hint.title}</h4>
                                 <p>{hint.message}</p>
                             </div>
@@ -854,9 +855,9 @@ export function MagicGraphGame() {
                 )}
 
                 {/* Actions */}
-                <div className="puzzle-actions">
+                <div className="mg-actions">
                     <button
-                        className="btn btn--icon"
+                        className="game-btn"
                         onClick={nodeValuesHistory.undo}
                         disabled={!nodeValuesHistory.canUndo}
                         title={`${t('undo')} (Ctrl+Z)`}
@@ -864,17 +865,17 @@ export function MagicGraphGame() {
                         ↩️
                     </button>
                     <button
-                        className="btn btn--icon"
+                        className="game-btn"
                         onClick={nodeValuesHistory.redo}
                         disabled={!nodeValuesHistory.canRedo}
                         title={`${t('redo')} (Ctrl+Y)`}
                     >
                         ↪️
                     </button>
-                    <button className="btn btn--secondary" onClick={resetPuzzle}>
+                    <button className="game-btn" onClick={resetPuzzle}>
                         🔄 {tc('buttons.reset')}
                     </button>
-                    <button className="btn btn--primary" onClick={nextPuzzle}>
+                    <button className="game-btn game-btn--primary" onClick={nextPuzzle}>
                         {tc('buttons.nextPuzzle')} →
                     </button>
                 </div>
@@ -921,11 +922,11 @@ export function MagicGraphGame() {
 
                                 <div className="game-modal__actions">
                                     {!grandmasterFeedback.isOptimal && (
-                                        <button className="btn btn--secondary btn--large" onClick={resetPuzzle}>
+                                        <button className="game-btn" onClick={resetPuzzle}>
                                             {tc('buttons.tryAgain')}
                                         </button>
                                     )}
-                                    <button className="btn btn--primary btn--large" onClick={nextPuzzle}>
+                                    <button className="game-btn game-btn--primary" onClick={nextPuzzle}>
                                         {tc('buttons.nextPuzzle')} →
                                     </button>
                                 </div>
@@ -946,13 +947,13 @@ export function MagicGraphGame() {
                                     <span className="game-modal__time">{elapsedTime}s</span>
                                 </div>
 
-                                <div className="game-modal__action">
+                                <div className="game-modal__actions">
                                     {isDailyMode ? (
-                                        <a href="/math-games/" className="btn btn--primary btn--large">
+                                        <a href="/math-games/" className="game-btn game-btn--primary">
                                             {tc('backToGames')}
                                         </a>
                                     ) : (
-                                        <button className="btn btn--primary btn--large" onClick={nextPuzzle}>
+                                        <button className="game-btn game-btn--primary" onClick={nextPuzzle}>
                                             {tc('buttons.nextPuzzle')} →
                                         </button>
                                     )}
@@ -983,8 +984,8 @@ export function MagicGraphGame() {
                             </h2>
                         </div>
 
-                        <div className="game-modal__action">
-                            <button className="btn btn--primary btn--large" onClick={resetPuzzle}>
+                        <div className="game-modal__actions">
+                            <button className="game-btn game-btn--primary" onClick={resetPuzzle}>
                                 {tc('buttons.tryAgain')}
                             </button>
                         </div>

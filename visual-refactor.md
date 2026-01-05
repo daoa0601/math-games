@@ -116,13 +116,14 @@ The minimal design means minimal CSS. If you find yourself writing complex selec
   --space-lg: 16px;
   --space-xl: 24px;
   
-  /* Colors: ONLY THESE */
-  --bg: #000;
-  --surface: #0a0a0a;
-  --border: #222;
-  --text: #fff;
-  --muted: #666;
-  --accent: #22c55e;
+  /* Colors: Deep Navy palette (6 only) */
+  --bg: #0a0f1a;        /* Deep navy base */
+  --surface: #111827;   /* Card backgrounds */
+  --border: #1e3a5f;    /* Subtle blue-tinted borders */
+  --text: #f8fafc;      /* Warm white */
+  --muted: #64748b;     /* Slate gray */
+  --accent: #60a5fa;    /* Sky blue for feedback */
+  --success: #4ade80;   /* Green for correct answers */
   
   /* Touch */
   --touch-min: 44px;

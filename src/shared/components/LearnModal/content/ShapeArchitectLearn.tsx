@@ -104,52 +104,50 @@ export function ShapeArchitectLearn({ lang }: ShapeArchitectLearnProps) {
             fill="none"
             aria-hidden="true"
           >
-            {/* Isometric cube stack */}
-            {/* Bottom layer */}
+            {/* Isometric cube stack - Linear Editorial style */}
+            {/* Bottom layer - left cube */}
             <g transform="translate(90, 90)">
-              {/* Back left cube */}
               <path
                 d="M-40,-20 L-20,-30 L0,-20 L-20,-10 Z"
-                fill="var(--color-primary-bg)"
-                stroke="var(--color-primary)"
+                fill="#111827"
+                stroke="#2dd4bf"
                 strokeWidth="2"
               />
               <path
                 d="M-40,-20 L-40,0 L-20,10 L-20,-10 Z"
-                fill="var(--color-primary)"
+                fill="#14b8a6"
                 fillOpacity="0.3"
-                stroke="var(--color-primary)"
+                stroke="#2dd4bf"
                 strokeWidth="2"
               />
               <path
                 d="M-20,-10 L-20,10 L0,0 L0,-20 Z"
-                fill="var(--color-primary)"
+                fill="#14b8a6"
                 fillOpacity="0.5"
-                stroke="var(--color-primary)"
+                stroke="#2dd4bf"
                 strokeWidth="2"
               />
             </g>
+            {/* Bottom layer - right cube */}
             <g transform="translate(90, 90)">
-              {/* Front right cube */}
               <path
                 d="M0,-20 L20,-30 L40,-20 L20,-10 Z"
-                fill="var(--game-build-primary)"
-                fillOpacity="0.2"
-                stroke="var(--game-build-primary)"
+                fill="#111827"
+                stroke="#2dd4bf"
                 strokeWidth="2"
               />
               <path
                 d="M0,-20 L0,0 L20,10 L20,-10 Z"
-                fill="var(--game-build-primary)"
+                fill="#14b8a6"
                 fillOpacity="0.3"
-                stroke="var(--game-build-primary)"
+                stroke="#2dd4bf"
                 strokeWidth="2"
               />
               <path
                 d="M20,-10 L20,10 L40,0 L40,-20 Z"
-                fill="var(--game-build-primary)"
+                fill="#14b8a6"
                 fillOpacity="0.5"
-                stroke="var(--game-build-primary)"
+                stroke="#2dd4bf"
                 strokeWidth="2"
               />
             </g>
@@ -157,22 +155,22 @@ export function ShapeArchitectLearn({ lang }: ShapeArchitectLearnProps) {
             <g transform="translate(90, 60)">
               <path
                 d="M-20,-20 L0,-30 L20,-20 L0,-10 Z"
-                fill="var(--color-secondary-bg)"
-                stroke="var(--color-secondary)"
+                fill="#111827"
+                stroke="#60a5fa"
                 strokeWidth="2"
               />
               <path
                 d="M-20,-20 L-20,0 L0,10 L0,-10 Z"
-                fill="var(--color-secondary)"
+                fill="#60a5fa"
                 fillOpacity="0.3"
-                stroke="var(--color-secondary)"
+                stroke="#60a5fa"
                 strokeWidth="2"
               />
               <path
                 d="M0,-10 L0,10 L20,0 L20,-20 Z"
-                fill="var(--color-secondary)"
+                fill="#60a5fa"
                 fillOpacity="0.5"
-                stroke="var(--color-secondary)"
+                stroke="#60a5fa"
                 strokeWidth="2"
               />
             </g>

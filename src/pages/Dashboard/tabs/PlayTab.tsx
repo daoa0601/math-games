@@ -84,21 +84,16 @@ export function PlayTab() {
   }, []);
 
   return (
-    <div role="tabpanel" id="tabpanel-play" aria-labelledby="tab-play">
+    <div role="tabpanel" id="panel-home">
       {/* Games Grid */}
-      <div className="games-grid" style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: 'var(--space-lg)',
-        marginBottom: 'var(--space-xl)',
-      }}>
+      <div className="grid">
         {gamesWithProgress.map((game) => (
           <GameCard
             key={game.id}
             id={game.id}
             title={t(`games.${game.id}.title`)}
             description={t(`games.${game.id}.description`)}
-            icon="" // Using custom icons from GameCard component
+            icon=""
             tags={game.tags}
             to={game.path}
             progress={game.progress}

@@ -366,13 +366,13 @@ export function PlacementModal({
 
                 <footer className="placement-modal__footer">
                     <button
-                        className="btn btn--secondary"
+                        className="game-btn game-btn--secondary"
                         onClick={onCancel}
                     >
                         {t('modal.cancel', 'Cancel')}
                     </button>
                     <button
-                        className="btn btn--primary"
+                        className="game-btn game-btn--primary"
                         onClick={onConfirm}
                         disabled={!isValid}
                     >

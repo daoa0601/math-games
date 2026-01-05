@@ -1,6 +1,4 @@
-/**
- * AchievementsTab Styles
- */
+/* AchievementsTab - Linear Editorial */
 
 .achievements-tab {
   max-width: 900px;
@@ -8,10 +6,7 @@
   padding: var(--space-lg);
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   Header
-   ───────────────────────────────────────────────────────────────── */
-
+/* Header */
 .achievements-tab__header {
   margin-bottom: var(--space-xl);
   text-align: center;
@@ -19,16 +14,12 @@
 
 .achievements-tab__title {
   font-family: var(--font-display);
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--color-text);
+  font-size: var(--text-xl);
+  color: var(--text);
   margin: 0;
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   Categories
-   ───────────────────────────────────────────────────────────────── */
-
+/* Categories */
 .achievements-tab__categories {
   display: flex;
   flex-direction: column;
@@ -36,8 +27,8 @@
 }
 
 .achievements-category {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: var(--space-lg);
 }
 
@@ -47,61 +38,47 @@
   gap: var(--space-sm);
   margin: 0 0 var(--space-lg) 0;
   font-family: var(--font-display);
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--color-text);
+  font-size: var(--text-lg);
+  color: var(--text);
 }
 
 .achievements-category__icon {
-  font-size: var(--font-size-xl);
+  font-size: var(--text-xl);
 }
 
 .achievements-category__name {
   flex: 1;
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   Achievement Grid
-   ───────────────────────────────────────────────────────────────── */
-
+/* Achievement Grid */
 .achievements-category__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--space-md);
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   Achievement Card
-   ───────────────────────────────────────────────────────────────── */
-
+/* Achievement Card */
 .achievement-card {
   display: flex;
   gap: var(--space-md);
   padding: var(--space-md);
-  background: var(--color-background);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  transition: opacity var(--motion-fast) var(--ease-out);
 }
 
 .achievement-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  opacity: 0.8;
 }
 
 /* Locked state */
 .achievement-card--locked {
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 /* Unlocked state */
 .achievement-card--unlocked {
-  border-left: 4px solid var(--color-success);
-  background: linear-gradient(
-    to right,
-    rgba(var(--color-success-rgb, 76, 175, 80), 0.05),
-    var(--color-background)
-  );
+  border-left: 2px solid var(--success);
 }
 
 .achievement-card__icon {
@@ -117,51 +94,45 @@
 
 .achievement-card__name {
   font-family: var(--font-display);
-  font-size: var(--font-size-md);
-  font-weight: 700;
-  color: var(--color-text);
+  font-size: var(--text-base);
+  color: var(--text);
   margin: 0 0 var(--space-xs) 0;
 }
 
 .achievement-card__rarity {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 var(--space-sm) 0;
 }
 
 .achievement-card__description {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--muted);
   margin: 0;
   line-height: 1.4;
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   Rarity Colors
-   ───────────────────────────────────────────────────────────────── */
-
+/* Rarity Colors */
 .rarity-common {
-  color: var(--color-text-muted);
+  color: var(--muted);
 }
 
 .rarity-rare {
-  color: var(--color-secondary);
+  color: var(--accent);
 }
 
 .rarity-epic {
-  color: var(--color-magic);
+  color: #a78bfa;
 }
 
 .rarity-legendary {
-  color: var(--color-accent);
+  color: #fbbf24;
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   Responsive
-   ───────────────────────────────────────────────────────────────── */
-
+/* Responsive */
 @media (max-width: 768px) {
   .achievements-tab {
     padding: var(--space-md);

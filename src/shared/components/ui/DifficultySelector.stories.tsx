@@ -131,7 +131,7 @@ export const AllDifficulties: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <div>
-        <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>
+        <h3 style={{ marginBottom: '1rem', color: 'var(--text)' }}>
           Standard (3 levels)
         </h3>
         <DifficultyWrapper
@@ -140,7 +140,7 @@ export const AllDifficulties: Story = {
         />
       </div>
       <div>
-        <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>
+        <h3 style={{ marginBottom: '1rem', color: 'var(--text)' }}>
           Extended (5 levels)
         </h3>
         <DifficultyWrapper
@@ -149,7 +149,7 @@ export const AllDifficulties: Story = {
         />
       </div>
       <div>
-        <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>
+        <h3 style={{ marginBottom: '1rem', color: 'var(--text)' }}>
           Simple (2 levels)
         </h3>
         <DifficultyWrapper
@@ -158,7 +158,7 @@ export const AllDifficulties: Story = {
         />
       </div>
       <div>
-        <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>
+        <h3 style={{ marginBottom: '1rem', color: 'var(--text)' }}>
           Advanced Only
         </h3>
         <DifficultyWrapper
@@ -174,7 +174,7 @@ export const AllStates: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div>
-        <p style={{ marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+        <p style={{ marginBottom: '0.5rem', color: 'var(--muted)', fontSize: '0.875rem' }}>
           Easy selected
         </p>
         <DifficultyWrapper
@@ -183,7 +183,7 @@ export const AllStates: Story = {
         />
       </div>
       <div>
-        <p style={{ marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+        <p style={{ marginBottom: '0.5rem', color: 'var(--muted)', fontSize: '0.875rem' }}>
           Medium selected
         </p>
         <DifficultyWrapper
@@ -192,7 +192,7 @@ export const AllStates: Story = {
         />
       </div>
       <div>
-        <p style={{ marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+        <p style={{ marginBottom: '0.5rem', color: 'var(--muted)', fontSize: '0.875rem' }}>
           Hard selected
         </p>
         <DifficultyWrapper

@@ -1,6 +1,4 @@
-/* ========================================
-   Stats Tab
-   ======================================== */
+/* StatsTab - Linear Editorial */
 
 .stats-tab {
   display: flex;
@@ -11,24 +9,21 @@
 }
 
 .stats-tab__section {
-  background: var(--surface-card);
-  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: var(--space-lg);
-  box-shadow: var(--shadow-sm);
 }
 
 .stats-tab__heading {
   font-family: var(--font-display);
   font-size: var(--text-lg);
-  font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text);
   margin: 0 0 var(--space-md) 0;
   padding-bottom: var(--space-sm);
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 1px solid var(--border);
 }
 
-/* ---- Overall Stats Grid ---- */
-
+/* Overall Stats Grid */
 .stats-tab__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -41,8 +36,8 @@
   align-items: center;
   gap: var(--space-xs);
   padding: var(--space-md);
-  background: var(--bg-subtle);
-  border-radius: var(--radius-md);
+  background: var(--bg);
+  border: 1px solid var(--border);
   text-align: center;
 }
 
@@ -53,17 +48,16 @@
 .stats-tab__card-value {
   font-family: var(--font-display);
   font-size: var(--text-2xl);
-  font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text);
 }
 
 .stats-tab__card-label {
+  font-family: var(--font-mono);
   font-size: var(--text-sm);
-  color: var(--text-muted);
+  color: var(--muted);
 }
 
-/* ---- Rank Progress ---- */
-
+/* Rank Progress */
 .stats-tab__rank-card {
   display: flex;
   align-items: center;
@@ -81,12 +75,12 @@
 .stats-tab__rank-badge {
   width: 64px;
   height: 64px;
-  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-  box-shadow: var(--shadow-md);
+  background: var(--bg);
+  border: 2px solid var(--accent);
 }
 
 .stats-tab__rank-info {
@@ -98,13 +92,13 @@
 .stats-tab__rank-name {
   font-family: var(--font-display);
   font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text);
 }
 
 .stats-tab__rank-next {
+  font-family: var(--font-mono);
   font-size: var(--text-sm);
-  color: var(--text-muted);
+  color: var(--muted);
 }
 
 .stats-tab__rank-progress {
@@ -117,12 +111,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
+  font-family: var(--font-mono);
   font-size: var(--text-sm);
-  color: var(--text-secondary);
+  color: var(--muted);
 }
 
-/* ---- Game Breakdown ---- */
-
+/* Game Breakdown */
 .stats-tab__breakdown {
   display: flex;
   flex-direction: column;
@@ -134,25 +128,25 @@
   grid-template-columns: 1fr auto auto;
   gap: var(--space-md);
   padding: var(--space-sm) var(--space-md);
-  background: var(--bg-subtle);
-  border-radius: var(--radius-md);
+  background: var(--bg);
+  border: 1px solid var(--border);
   align-items: center;
 }
 
 .stats-tab__game-name {
-  font-weight: 600;
-  color: var(--text-primary);
+  font-family: var(--font-mono);
+  color: var(--text);
 }
 
 .stats-tab__game-stat {
+  font-family: var(--font-mono);
   font-size: var(--text-sm);
-  color: var(--text-secondary);
+  color: var(--muted);
   text-align: right;
   min-width: 80px;
 }
 
-/* ---- Responsive ---- */
-
+/* Responsive */
 @media (max-width: 600px) {
   .stats-tab__rank-card {
     flex-direction: column;

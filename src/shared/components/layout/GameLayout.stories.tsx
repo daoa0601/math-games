@@ -69,24 +69,24 @@ export const WithComplexContent: Story = {
         }}>
           <div style={{
             padding: '1rem',
-            background: 'var(--color-surface)',
-            borderRadius: '8px'
+            background: 'var(--surface)',
+            border: '1px solid var(--border)'
           }}>
             <h3>Controls</h3>
             <p>WASD to move</p>
           </div>
           <div style={{
             padding: '1rem',
-            background: 'var(--color-surface)',
-            borderRadius: '8px'
+            background: 'var(--surface)',
+            border: '1px solid var(--border)'
           }}>
             <h3>Stats</h3>
             <p>Score: 100</p>
           </div>
           <div style={{
             padding: '1rem',
-            background: 'var(--color-surface)',
-            borderRadius: '8px'
+            background: 'var(--surface)',
+            border: '1px solid var(--border)'
           }}>
             <h3>Timer</h3>
             <p>02:30</p>

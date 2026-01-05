@@ -58,22 +58,22 @@ export function NumberPicker({
     return (
         <div
             ref={pickerRef}
-            className="number-picker"
+            className="mg-picker"
             style={{
                 left: position.x,
                 top: position.y,
             }}
         >
-            <div className="number-picker__header">
+            <div className="mg-picker__header">
                 <span>{t('picker.chooseNumber')}</span>
-                <button className="number-picker__close" onClick={onClose}>×</button>
+                <button className="mg-picker__close" onClick={onClose}>×</button>
             </div>
 
-            <div className="number-picker__grid">
+            <div className="mg-picker__grid">
                 {availableForSelection.map((num) => (
                     <button
                         key={num}
-                        className={`number-picker__option ${currentValue === num ? 'number-picker__option--current' : ''}`}
+                        className={`mg-picker__option ${currentValue === num ? 'mg-picker__option--current' : ''}`}
                         onClick={() => onSelect(num)}
                     >
                         {num}
@@ -83,7 +83,7 @@ export function NumberPicker({
 
             {currentValue !== null && currentValue !== undefined && onClear && (
                 <button
-                    className="number-picker__clear"
+                    className="mg-picker__clear"
                     onClick={onClear}
                 >
                     {tc('buttons.reset')}
@@ -91,7 +91,7 @@ export function NumberPicker({
             )}
 
             {availableForSelection.length === 0 && (
-                <p className="number-picker__empty">{t('picker.noNumbersAvailable')}</p>
+                <p className="mg-picker__empty">{t('picker.noNumbersAvailable')}</p>
             )}
         </div>
     );

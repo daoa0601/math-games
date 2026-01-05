@@ -39,8 +39,8 @@ export const InHeader: Story = {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '1rem',
-      background: 'var(--color-surface)',
-      borderRadius: '8px'
+      background: 'var(--surface)',
+      border: '1px solid var(--border)'
     }}>
       <h2 style={{ margin: 0 }}>Game Title</h2>
       <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -58,8 +58,8 @@ export const InGroup: Story = {
       gap: '1rem',
       alignItems: 'center',
       padding: '1rem',
-      background: 'var(--color-surface)',
-      borderRadius: '8px'
+      background: 'var(--surface)',
+      border: '1px solid var(--border)'
     }}>
       <span>Audio:</span>
       <SoundToggle />
@@ -71,8 +71,8 @@ export const InSettingsPanel: Story = {
   render: () => (
     <div style={{
       padding: '1.5rem',
-      background: 'var(--color-surface)',
-      borderRadius: '8px',
+      background: 'var(--surface)',
+      border: '1px solid var(--border)',
       maxWidth: '400px'
     }}>
       <h3 style={{ marginTop: 0 }}>Settings</h3>
@@ -117,7 +117,7 @@ export const MultipleInstances: Story = {
       <SoundToggle />
       <SoundToggle />
       <SoundToggle />
-      <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginLeft: '1rem' }}>
+      <p style={{ fontSize: '0.875rem', color: 'var(--muted)', marginLeft: '1rem' }}>
         All instances share the same localStorage state
       </p>
     </div>
@@ -130,8 +130,8 @@ export const AllSettings: Story = {
       display: 'flex',
       gap: '0.5rem',
       padding: '1rem',
-      background: 'var(--color-surface)',
-      borderRadius: '8px'
+      background: 'var(--surface)',
+      border: '1px solid var(--border)'
     }}>
       <SoundToggle />
       <button className="lang-switcher">🇬🇧 EN</button>

@@ -54,10 +54,10 @@ export function ShapeArchitectTutorial({ onComplete, is3DMode }: ShapeArchitectT
       </TutorialStep>
 
       {/* Step 2: Target Shape - highlight the grid board with target cells */}
-      <TutorialStep step={2} highlightSelector={is3DMode ? '.grid-board-3d' : '.grid-board'}>
+      <TutorialStep step={2} highlightSelector={is3DMode ? '.sa-board-3d' : '.sa-board'}>
         <TutorialTooltip
           position="bottom"
-          targetSelector={is3DMode ? '.grid-board-3d' : '.grid-board'}
+          targetSelector={is3DMode ? '.sa-board-3d' : '.sa-board'}
           showPrevious
         >
           <h3>{t('shapeArchitect.tutorial.step2Title')}</h3>
@@ -66,24 +66,24 @@ export function ShapeArchitectTutorial({ onComplete, is3DMode }: ShapeArchitectT
       </TutorialStep>
 
       {/* Step 3: Your Pieces - highlight the piece inventory */}
-      <TutorialStep step={3} highlightSelector=".piece-inventory">
-        <TutorialTooltip position="top" targetSelector=".piece-inventory" showPrevious>
+      <TutorialStep step={3} highlightSelector=".sa-inventory">
+        <TutorialTooltip position="top" targetSelector=".sa-inventory" showPrevious>
           <h3>{t('shapeArchitect.tutorial.step3Title')}</h3>
           <p>{t('shapeArchitect.tutorial.step3')}</p>
         </TutorialTooltip>
       </TutorialStep>
 
       {/* Step 4: Rotating Pieces - highlight rotation controls */}
-      <TutorialStep step={4} highlightSelector=".rotation-controls">
-        <TutorialTooltip position="bottom" targetSelector=".rotation-controls" showPrevious>
+      <TutorialStep step={4} highlightSelector=".sa-rotation">
+        <TutorialTooltip position="bottom" targetSelector=".sa-rotation" showPrevious>
           <h3>{t('shapeArchitect.tutorial.step4Title')}</h3>
           <p>{t('shapeArchitect.tutorial.step4')}</p>
         </TutorialTooltip>
       </TutorialStep>
 
       {/* Step 5: Placing Pieces - highlight target cells on the grid */}
-      <TutorialStep step={5} highlightSelector=".grid-cell--target">
-        <TutorialTooltip position="right" targetSelector=".grid-cell--target" showPrevious>
+      <TutorialStep step={5} highlightSelector=".sa-cell--target">
+        <TutorialTooltip position="right" targetSelector=".sa-cell--target" showPrevious>
           <h3>{t('shapeArchitect.tutorial.step5Title')}</h3>
           <p>{t('shapeArchitect.tutorial.step5')}</p>
         </TutorialTooltip>
@@ -91,8 +91,8 @@ export function ShapeArchitectTutorial({ onComplete, is3DMode }: ShapeArchitectT
 
       {/* Step 6: 3D Mode - only shown when in 3D mode, highlight camera presets */}
       {is3DMode && (
-        <TutorialStep step={6} highlightSelector=".camera-presets">
-          <TutorialTooltip position="bottom" targetSelector=".camera-presets" showPrevious>
+        <TutorialStep step={6} highlightSelector=".sa-camera">
+          <TutorialTooltip position="bottom" targetSelector=".sa-camera" showPrevious>
             <h3>{t('shapeArchitect.tutorial.step6Title')}</h3>
             <p>{t('shapeArchitect.tutorial.step6')}</p>
           </TutorialTooltip>

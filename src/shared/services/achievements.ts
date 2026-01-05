@@ -277,19 +277,19 @@ export function getAchievementStats(unlockedAchievements: string[]): {
 }
 
 /**
- * Get rarity color for CSS styling
+ * Get rarity color for CSS styling (Linear Editorial palette)
  */
 export function getRarityColor(rarity: AchievementRarity): string {
   switch (rarity) {
     case 'common':
-      return 'var(--color-text-muted)';
+      return 'var(--muted)';
     case 'rare':
-      return 'var(--color-secondary)';
+      return 'var(--accent)';
     case 'epic':
-      return 'var(--color-magic)';
+      return '#a78bfa'; // Violet
     case 'legendary':
-      return 'var(--color-accent)';
+      return '#fbbf24'; // Amber/Gold
     default:
-      return 'var(--color-text)';
+      return 'var(--text)';
   }
 }

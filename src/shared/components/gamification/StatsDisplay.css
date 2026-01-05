@@ -1,11 +1,4 @@
-/**
- * Stats Display Styles
- * Shows player stats and rank with progress indicator
- */
-
-/* ═══════════════════════════════════════════════════════════════════
-   BASE
-   ═══════════════════════════════════════════════════════════════════ */
+/* Stats Display - Linear Editorial */
 
 .stats-display {
   display: flex;
@@ -13,10 +6,7 @@
   gap: var(--space-md);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   RANK BADGE
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Rank Badge */
 .stats-display__rank {
   display: flex;
   align-items: center;
@@ -31,14 +21,10 @@
 .stats-display__rank-name {
   font-family: var(--font-display);
   font-size: var(--text-lg);
-  font-weight: 700;
-  color: var(--color-text);
+  color: var(--text);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   DETAILED STATS
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Detailed Stats */
 .stats-display__detailed {
   display: flex;
   justify-content: center;
@@ -49,54 +35,50 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2xs);
+  gap: 2px;
 }
 
 .stats-display__stat-value {
   font-family: var(--font-display);
   font-size: var(--text-2xl);
-  font-weight: 700;
-  color: var(--color-primary);
+  color: var(--accent);
 }
 
 .stats-display__stat-label {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   COMPACT STATS
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Compact Stats */
 .stats-display__compact {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
+  font-family: var(--font-mono);
   font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  color: var(--muted);
 }
 
 .stats-display__compact-stat {
-  color: var(--color-text);
+  color: var(--text);
 }
 
 .stats-display__separator {
-  color: var(--color-text-muted);
   opacity: 0.5;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   PROGRESS TO NEXT RANK
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Progress to Next Rank */
 .stats-display__progress {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
   padding: var(--space-md);
-  border-radius: var(--radius-md);
-  background: var(--bg-soft);
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
 .stats-display__progress-header {
@@ -107,47 +89,25 @@
 }
 
 .stats-display__progress-label {
-  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  color: var(--muted);
 }
 
 .stats-display__progress-target {
   font-family: var(--font-display);
-  font-weight: 600;
-  color: var(--color-text);
+  color: var(--text);
 }
 
 .stats-display__progress-bar {
-  height: 8px;
-  border-radius: var(--radius-full);
-  background: var(--bg-page);
+  height: 4px;
+  background: var(--bg);
   overflow: hidden;
 }
 
 .stats-display__progress-fill {
-  position: relative;
-  overflow: hidden;
   height: 100%;
-  border-radius: var(--radius-full);
-  background: linear-gradient(90deg,
-    hsl(174, 50%, 45%) 0%,
-    hsl(12, 70%, 58%) 100%);
-  transition: width 600ms var(--spring-gentle);
-}
-
-.stats-display__progress-fill::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    hsla(0, 0%, 100%, 0.4) 50%,
-    transparent 100%);
-  animation: shimmer 2s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  background: var(--accent);
+  transition: width var(--motion-normal) var(--ease-out);
 }
 
 .stats-display__progress-detail {
@@ -155,24 +115,21 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
+  font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--color-text-muted);
+  color: var(--muted);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   DETAILED VARIANT
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Detailed Variant */
 .stats-display--detailed {
   padding: var(--space-lg);
-  border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  border: 1px solid var(--border-color);
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
 .stats-display--detailed .stats-display__rank {
   padding-bottom: var(--space-md);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border);
   margin-bottom: var(--space-sm);
 }
 
@@ -184,10 +141,7 @@
   font-size: var(--text-xl);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   MOBILE
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Mobile */
 @media (max-width: 480px) {
   .stats-display__detailed {
     gap: var(--space-md);
@@ -199,15 +153,5 @@
 
   .stats-display--detailed {
     padding: var(--space-md);
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   REDUCED MOTION
-   ═══════════════════════════════════════════════════════════════════ */
-
-@media (prefers-reduced-motion: reduce) {
-  .stats-display__progress-fill::after {
-    display: none;
   }
 }

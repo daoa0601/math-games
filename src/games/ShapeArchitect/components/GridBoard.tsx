@@ -40,7 +40,7 @@ function DroppableCell({
     return (
         <div
             ref={setNodeRef}
-            className={`${cellClass} ${isOver ? 'grid-cell--drag-over' : ''}`}
+            className={`${cellClass} ${isOver ? 'sa-cell--drag-over' : ''}`}
             style={{
                 backgroundColor: bgColor,
                 cursor: canPlace ? 'pointer' : undefined,
@@ -301,7 +301,7 @@ export const GridBoard = memo(function GridBoard({
 
     return (
         <div
-            className="grid-board"
+            className="sa-board"
             onMouseLeave={handleMouseLeave}
             role="grid"
             aria-label={`Shape puzzle grid, ${width} columns by ${height} rows. Fill all target cells with pieces.`}
@@ -309,7 +309,7 @@ export const GridBoard = memo(function GridBoard({
             {Array(height)
                 .fill(null)
                 .map((_, y) => (
-                    <div key={y} className="grid-row" role="row">
+                    <div key={y} className="sa-row" role="row">
                         {Array(width)
                             .fill(null)
                             .map((_, x) => {
@@ -318,41 +318,41 @@ export const GridBoard = memo(function GridBoard({
                                 const position: Position3D = { x, y: cellY, z: 0 };
                                 const posKey = `${x},${cellY},0`;
 
-                                let cellClass = 'grid-cell';
+                                let cellClass = 'sa-cell';
                                 let bgColor = undefined;
 
                                 if (cell === 0) {
-                                    cellClass += ' grid-cell--empty';
+                                    cellClass += ' sa-cell--empty';
                                 } else if (cell === 1) {
-                                    cellClass += ' grid-cell--target';
+                                    cellClass += ' sa-cell--target';
                                 } else if (cell === 2) {
-                                    cellClass += ' grid-cell--filled';
+                                    cellClass += ' sa-cell--filled';
                                     // Get the actual color and pattern from the placed piece
                                     const cellData = cellColorMap.get(posKey);
-                                    bgColor = cellData?.color ?? 'var(--color-primary)';
+                                    bgColor = cellData?.color ?? 'var(--accent)';
                                     // Apply pattern class for accessibility
                                     if (cellData?.pattern) {
                                         cellClass += ` ${cellData.pattern}`;
                                     }
                                     // Add snap animation for just-placed cells
                                     if (justPlacedPositions?.has(posKey)) {
-                                        cellClass += ' grid-cell--just-placed grid-cell--dust-effect';
+                                        cellClass += ' sa-cell--just-placed';
                                     }
                                     // Highlight selected placed piece
                                     if (selectedPlacedPiecePositions.has(posKey)) {
-                                        cellClass += ' grid-cell--selected-for-move';
+                                        cellClass += ' sa-cell--selected-for-move';
                                     }
                                     // Add movable class if pieces can be moved
                                     if (onPlacedPieceClick) {
-                                        cellClass += ' grid-cell--movable';
+                                        cellClass += ' sa-cell--movable';
                                     }
                                 }
 
                                 // Add preview styling
                                 if (previewData.positions.has(posKey)) {
                                     cellClass += previewData.isValid
-                                        ? ' grid-cell--preview-valid'
-                                        : ' grid-cell--preview-invalid';
+                                        ? ' sa-cell--preview-valid'
+                                        : ' sa-cell--preview-invalid';
                                 }
 
                                 // Check if clicking here could place a piece (using snap-to-nearest)
@@ -401,7 +401,7 @@ export const GridBoard = memo(function GridBoard({
             {/* Ghost overlay showing piece shape at hover position */}
             {selectedPiece && ghostCells.length > 0 && (
                 <div
-                    className="ghost-overlay"
+                    className="sa-ghost"
                     aria-hidden="true"
                     style={{
                         '--grid-cols': width,
@@ -412,9 +412,9 @@ export const GridBoard = memo(function GridBoard({
                         // Convert grid Y to visual Y (flip for display)
                         const visualY = height - 1 - y;
                         const ghostClass = [
-                            'ghost-cell',
-                            previewData.isValid ? 'ghost-cell--valid' : 'ghost-cell--invalid',
-                            isPreviewLocked ? 'ghost-cell--locked' : '',
+                            'sa-ghost__cell',
+                            previewData.isValid ? 'sa-ghost__cell--valid' : 'sa-ghost__cell--invalid',
+                            isPreviewLocked ? 'sa-ghost__cell--locked' : '',
                         ].filter(Boolean).join(' ');
 
                         return (

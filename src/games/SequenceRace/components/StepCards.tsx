@@ -93,7 +93,7 @@ export function StepCards({
     return (
         <div
             ref={containerRef}
-            className="step-cards"
+            className="sr-steps"
             role="listbox"
             aria-label={t('yourTurn', 'Available step options')}
         >
@@ -108,7 +108,7 @@ export function StepCards({
                         role="option"
                         aria-selected={selectedStep === step}
                         aria-disabled={isDisabled}
-                        className={`step-card ${!isValid ? 'step-card--invalid' : ''}`}
+                        className="sr-step"
                         disabled={isDisabled}
                         onClick={() => onSelectStep(step)}
                         onKeyDown={(e) => handleStepKeyDown(e, step)}
@@ -119,8 +119,8 @@ export function StepCards({
                         aria-label={getStepAriaLabel(step, isValid)}
                         tabIndex={isDisabled ? -1 : 0}
                     >
-                        <span className="step-card__value" aria-hidden="true">+{step}</span>
-                        <span className="step-card__label" aria-hidden="true">step</span>
+                        <span aria-hidden="true">+{step}</span>
+                        <span className="sr-step__label" aria-hidden="true">step</span>
                     </button>
                 );
             })}

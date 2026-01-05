@@ -1,0 +1,31 @@
+/* type.css - Linear Editorial typography */
+/* Playfair Display (serif headlines) + JetBrains Mono (UI/data) */
+
+:root {
+  /* Font families */
+  --font-display: 'Playfair Display', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Type scale - mobile first */
+  --text-xs: 10px;
+  --text-sm: 11px;
+  --text-base: 13px;
+  --text-lg: 16px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-hero: 48px;
+
+  /* Weights */
+  --weight-light: 300;
+  --weight-normal: 400;
+  --weight-medium: 500;
+}
+
+/* Tablet+ scale */
+@media (min-width: 768px) {
+  :root {
+    --text-xl: 32px;
+    --text-2xl: 48px;
+    --text-hero: 72px;
+  }
+}

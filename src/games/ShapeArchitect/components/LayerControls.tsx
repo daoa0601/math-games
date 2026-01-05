@@ -18,7 +18,7 @@ interface LayerControlsProps {
 // Layer icons for the visibility control
 function LayersIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" className="layer-controls__icon">
+        <svg viewBox="0 0 24 24" fill="none" className="sa-layer__icon">
             {/* Stack of layers */}
             <path
                 d="M12 2L2 7L12 12L22 7L12 2Z"
@@ -66,20 +66,20 @@ export function LayerControls({
 
     return (
         <div
-            className={`layer-controls ${disabled ? 'layer-controls--disabled' : ''}`}
+            className={`sa-layer ${disabled ? 'sa-layer--disabled' : ''}`}
             role="group"
             aria-label="Layer visibility controls"
         >
-            <div className="layer-controls__header">
+            <div className="sa-layer__header">
                 <LayersIcon />
-                <span className="layer-controls__title">Layers</span>
+                <span className="sa-layer__title">Layers</span>
             </div>
 
-            <div className="layer-controls__slider-wrapper">
-                <span className="layer-controls__label layer-controls__label--min">1</span>
+            <div className="sa-layer__slider-wrapper">
+                <span className="sa-layer__label sa-layer__label--min">1</span>
                 <input
                     type="range"
-                    className="layer-controls__slider"
+                    className="sa-layer__slider"
                     min={0}
                     max={depth - 1}
                     value={maxVisibleLayer}
@@ -90,17 +90,17 @@ export function LayerControls({
                     aria-valuemax={depth}
                     aria-valuenow={maxVisibleLayer + 1}
                 />
-                <span className="layer-controls__label layer-controls__label--max">{depth}</span>
+                <span className="sa-layer__label sa-layer__label--max">{depth}</span>
             </div>
 
-            <div className="layer-controls__display">
-                <span className="layer-controls__current">{displayLabel}</span>
+            <div className="sa-layer__display">
+                <span className="sa-layer__current">{displayLabel}</span>
             </div>
 
             {/* Quick buttons for common actions */}
-            <div className="layer-controls__buttons">
+            <div className="sa-layer__buttons">
                 <button
-                    className="layer-controls__btn"
+                    className="sa-layer__btn"
                     onClick={() => onChange(0)}
                     disabled={disabled || maxVisibleLayer === 0}
                     title="Show bottom layer only"
@@ -111,7 +111,7 @@ export function LayerControls({
                     </svg>
                 </button>
                 <button
-                    className="layer-controls__btn"
+                    className="sa-layer__btn"
                     onClick={() => onChange(Math.max(0, maxVisibleLayer - 1))}
                     disabled={disabled || maxVisibleLayer === 0}
                     title="Hide one layer"
@@ -122,7 +122,7 @@ export function LayerControls({
                     </svg>
                 </button>
                 <button
-                    className="layer-controls__btn"
+                    className="sa-layer__btn"
                     onClick={() => onChange(Math.min(depth - 1, maxVisibleLayer + 1))}
                     disabled={disabled || maxVisibleLayer >= depth - 1}
                     title="Show one more layer"
@@ -133,7 +133,7 @@ export function LayerControls({
                     </svg>
                 </button>
                 <button
-                    className="layer-controls__btn"
+                    className="sa-layer__btn"
                     onClick={() => onChange(depth - 1)}
                     disabled={disabled || maxVisibleLayer >= depth - 1}
                     title="Show all layers"

@@ -165,14 +165,14 @@ export function LevelEditor({ onLevelCreated, onCancel }: LevelEditorProps) {
     }, []);
 
     return (
-        <div className="level-editor" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
-            <div className="level-editor__header">
+        <div className="sa-editor" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+            <div className="sa-editor__header">
                 <h3>{t('editor.title')}</h3>
-                <p className="level-editor__instructions">{t('editor.instructions')}</p>
+                <p className="sa-editor__instructions">{t('editor.instructions')}</p>
             </div>
 
             {/* Grid size controls */}
-            <div className="level-editor__size">
+            <div className="sa-editor__size">
                 <label>
                     {t('editor.width')}:
                     <input
@@ -197,9 +197,9 @@ export function LevelEditor({ onLevelCreated, onCancel }: LevelEditorProps) {
             </div>
 
             {/* Drawing canvas */}
-            <div className="level-editor__canvas-wrapper">
+            <div className="sa-editor__canvas-wrapper">
                 <div
-                    className="level-editor__canvas"
+                    className="sa-editor__canvas"
                     style={{
                         display: 'grid',
                         gridTemplateColumns: `repeat(${gridWidth}, ${CELL_SIZE}px)`,
@@ -213,7 +213,7 @@ export function LevelEditor({ onLevelCreated, onCancel }: LevelEditorProps) {
                             return (
                                 <div
                                     key={key}
-                                    className={`editor-cell ${isTarget ? 'editor-cell--target' : ''}`}
+                                    className={`sa-editor-cell ${isTarget ? 'sa-editor-cell--target' : ''}`}
                                     onMouseDown={() => handleCellInteraction(x, y, true)}
                                     onMouseEnter={() => isPainting && handleCellInteraction(x, y, false)}
                                 />
@@ -221,34 +221,34 @@ export function LevelEditor({ onLevelCreated, onCancel }: LevelEditorProps) {
                         })
                     )}
                 </div>
-                <div className="level-editor__quick-actions">
-                    <button className="btn btn--small" onClick={fillAll}>{t('editor.fillAll')}</button>
-                    <button className="btn btn--small" onClick={clearAll}>{t('editor.clearAll')}</button>
+                <div className="sa-editor__quick-actions">
+                    <button className="game-btn game-btn--sm" onClick={fillAll}>{t('editor.fillAll')}</button>
+                    <button className="game-btn game-btn--sm" onClick={clearAll}>{t('editor.clearAll')}</button>
                 </div>
             </div>
 
             {/* Piece selector */}
-            <div className="level-editor__pieces">
-                <span className="level-editor__pieces-label">{t('editor.selectPieces')}:</span>
-                <div className="level-editor__piece-grid">
+            <div className="sa-editor__pieces">
+                <span className="sa-editor__pieces-label">{t('editor.selectPieces')}:</span>
+                <div className="sa-editor__piece-grid">
                     {PRESET_PIECES.map(piece => (
                         <button
                             key={piece.id}
-                            className={`piece-btn ${selectedPieces.has(piece.id) ? 'piece-btn--selected' : ''}`}
+                            className={`sa-piece-btn ${selectedPieces.has(piece.id) ? 'sa-piece-btn--selected' : ''}`}
                             style={{ borderColor: piece.color }}
                             onClick={() => togglePiece(piece.id)}
                             aria-pressed={selectedPieces.has(piece.id)}
                         >
-                            <span className="piece-btn__preview" style={{ backgroundColor: piece.color }} />
-                            <span className="piece-btn__name">{piece.name}</span>
-                            <span className="piece-btn__count">({piece.layout.length})</span>
+                            <span className="sa-piece-btn__preview" style={{ backgroundColor: piece.color }} />
+                            <span className="sa-piece-btn__name">{piece.name}</span>
+                            <span className="sa-piece-btn__count">({piece.layout.length})</span>
                         </button>
                     ))}
                 </div>
             </div>
 
             {/* Stats */}
-            <div className="level-editor__stats">
+            <div className="sa-editor__stats">
                 <span>{t('editor.targetCells')}: {targetVoxels.size}</span>
                 <span>{t('editor.pieceCells')}: {totalPieceCells}</span>
                 <span className={totalPieceCells === targetVoxels.size ? 'match' : 'mismatch'}>
@@ -258,18 +258,18 @@ export function LevelEditor({ onLevelCreated, onCancel }: LevelEditorProps) {
 
             {/* Error message */}
             {error && (
-                <div className="level-editor__error" role="alert">
+                <div className="sa-editor__error" role="alert">
                     {error}
                 </div>
             )}
 
             {/* Action buttons */}
-            <div className="level-editor__actions">
-                <button className="btn btn--secondary" onClick={onCancel}>
+            <div className="sa-editor__actions">
+                <button className="game-btn game-btn--secondary" onClick={onCancel}>
                     {t('editor.cancel')}
                 </button>
                 <button
-                    className="btn btn--primary"
+                    className="game-btn game-btn--primary"
                     onClick={createLevel}
                     disabled={targetVoxels.size === 0 || selectedPieces.size === 0 || totalPieceCells !== targetVoxels.size}
                 >

@@ -98,13 +98,13 @@ export function MagicGraphLearn({ lang }: MagicGraphLearnProps) {
             fill="none"
             aria-hidden="true"
           >
-            {/* Simple triangle with nodes */}
+            {/* Simple triangle with nodes - Linear Editorial style */}
             <line
               x1="100"
               y1="20"
               x2="40"
               y2="100"
-              stroke="var(--color-magic)"
+              stroke="#a78bfa"
               strokeWidth="3"
               strokeLinecap="round"
             />
@@ -113,7 +113,7 @@ export function MagicGraphLearn({ lang }: MagicGraphLearnProps) {
               y1="20"
               x2="160"
               y2="100"
-              stroke="var(--color-magic)"
+              stroke="#a78bfa"
               strokeWidth="3"
               strokeLinecap="round"
             />
@@ -122,7 +122,7 @@ export function MagicGraphLearn({ lang }: MagicGraphLearnProps) {
               y1="100"
               x2="160"
               y2="100"
-              stroke="var(--color-magic)"
+              stroke="#a78bfa"
               strokeWidth="3"
               strokeLinecap="round"
             />
@@ -131,32 +131,32 @@ export function MagicGraphLearn({ lang }: MagicGraphLearnProps) {
               cx="100"
               cy="20"
               r="18"
-              fill="var(--surface-card)"
-              stroke="var(--color-primary)"
-              strokeWidth="3"
+              fill="#111827"
+              stroke="#a78bfa"
+              strokeWidth="2"
             />
             <circle
               cx="40"
               cy="100"
               r="18"
-              fill="var(--surface-card)"
-              stroke="var(--color-primary)"
-              strokeWidth="3"
+              fill="#111827"
+              stroke="#a78bfa"
+              strokeWidth="2"
             />
             <circle
               cx="160"
               cy="100"
               r="18"
-              fill="var(--surface-card)"
-              stroke="var(--color-primary)"
-              strokeWidth="3"
+              fill="#111827"
+              stroke="#a78bfa"
+              strokeWidth="2"
             />
             {/* Numbers */}
             <text
               x="100"
               y="26"
               textAnchor="middle"
-              fill="var(--text-primary)"
+              fill="#f8fafc"
               fontWeight="bold"
               fontSize="16"
             >
@@ -166,7 +166,7 @@ export function MagicGraphLearn({ lang }: MagicGraphLearnProps) {
               x="40"
               y="106"
               textAnchor="middle"
-              fill="var(--text-primary)"
+              fill="#f8fafc"
               fontWeight="bold"
               fontSize="16"
             >
@@ -176,7 +176,7 @@ export function MagicGraphLearn({ lang }: MagicGraphLearnProps) {
               x="160"
               y="106"
               textAnchor="middle"
-              fill="var(--text-primary)"
+              fill="#f8fafc"
               fontWeight="bold"
               fontSize="16"
             >

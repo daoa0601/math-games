@@ -1,6 +1,4 @@
-/* ============================================
-   LearnModal - Mathematical Content Modal
-   ============================================ */
+/* LearnModal - Linear Editorial */
 
 .learn-modal {
   position: fixed;
@@ -15,18 +13,8 @@
 .learn-modal__backdrop {
   position: absolute;
   inset: 0;
-  background: hsla(220, 25%, 10%, 0.6);
-  backdrop-filter: blur(8px);
-  animation: learnModalBackdropIn 300ms ease-out;
-}
-
-@keyframes learnModalBackdropIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  background: rgba(0, 0, 0, 0.85);
+  animation: fade-in var(--motion-normal) var(--ease-out);
 }
 
 .learn-modal__card {
@@ -36,21 +24,9 @@
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  background: var(--surface-card);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-overlay);
-  animation: learnModalCardIn 400ms var(--spring-bounce);
-}
-
-@keyframes learnModalCardIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  background: var(--surface);
+  border: 1px solid var(--border);
+  animation: slide-up var(--motion-normal) var(--ease-out);
 }
 
 /* Header */
@@ -59,7 +35,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-lg);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
@@ -76,8 +52,7 @@
 .learn-modal__title {
   font-family: var(--font-display);
   font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text);
   margin: 0;
 }
 
@@ -87,21 +62,19 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: none;
-  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--muted);
   cursor: pointer;
-  transition: all 200ms var(--spring-snappy);
+  transition: opacity var(--motion-fast) var(--ease-out);
 }
 
 .learn-modal__close:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  opacity: 0.7;
 }
 
 .learn-modal__close:focus-visible {
-  outline: 3px solid var(--color-accent);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -113,15 +86,11 @@
   overscroll-behavior: contain;
 }
 
-/* ============================================
-   Learn Content Styles
-   ============================================ */
-
+/* Learn Content Styles */
 .learn-content {
-  font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: 1.7;
-  color: var(--text-primary);
+  color: var(--text);
 }
 
 .learn-content__section {
@@ -135,14 +104,13 @@
 .learn-content__section h3 {
   font-family: var(--font-display);
   font-size: var(--text-lg);
-  font-weight: 700;
-  color: var(--color-primary);
+  color: var(--accent);
   margin: 0 0 var(--space-sm) 0;
 }
 
 .learn-content__section p {
   margin: 0 0 var(--space-md) 0;
-  color: var(--text-secondary);
+  color: var(--muted);
 }
 
 .learn-content__section p:last-child {
@@ -154,8 +122,8 @@
   display: flex;
   justify-content: center;
   padding: var(--space-lg);
-  background: var(--surface-elevated);
-  border-radius: var(--radius-lg);
+  background: var(--bg);
+  border: 1px solid var(--border);
   margin: var(--space-md) 0;
 }
 
@@ -165,8 +133,8 @@
   align-items: center;
   gap: var(--space-xs);
   padding: var(--space-md);
-  background: var(--color-primary-bg);
-  border-radius: var(--radius-md);
+  background: var(--bg);
+  border: 1px solid var(--border);
   margin: var(--space-md) 0;
 }
 
@@ -174,12 +142,12 @@
   font-family: var(--font-mono);
   font-size: var(--text-xl);
   font-weight: 600;
-  color: var(--color-primary-dark);
+  color: var(--accent);
 }
 
 .learn-content__equation-label {
   font-size: var(--text-sm);
-  color: var(--text-muted);
+  color: var(--muted);
 }
 
 /* Tips list */
@@ -193,7 +161,7 @@
   position: relative;
   padding-left: var(--space-lg);
   margin-bottom: var(--space-sm);
-  color: var(--text-secondary);
+  color: var(--muted);
 }
 
 .learn-content__tips li:last-child {
@@ -201,50 +169,23 @@
 }
 
 .learn-content__tips li::before {
-  content: '';
+  content: '—';
   position: absolute;
   left: 0;
-  top: 0.6em;
-  width: 8px;
-  height: 8px;
-  background: var(--color-primary);
-  border-radius: var(--radius-full);
+  color: var(--accent);
 }
 
 /* Highlight box for key concepts */
 .learn-content__highlight {
   padding: var(--space-md);
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-bg),
-    var(--color-magic-bg)
-  );
-  border-left: 4px solid var(--color-primary);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--bg);
+  border-left: 2px solid var(--accent);
   margin: var(--space-md) 0;
 }
 
 .learn-content__highlight p {
   margin: 0;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-/* Dark mode adjustments */
-[data-theme='dark'] .learn-modal__backdrop {
-  background: hsla(220, 25%, 5%, 0.8);
-}
-
-[data-theme='dark'] .learn-content__example {
-  background: hsla(12, 70%, 58%, 0.1);
-}
-
-[data-theme='dark'] .learn-content__highlight {
-  background: linear-gradient(
-    135deg,
-    hsla(12, 70%, 58%, 0.1),
-    hsla(270, 55%, 55%, 0.1)
-  );
+  color: var(--text);
 }
 
 /* Reduced motion */
@@ -255,7 +196,7 @@
   }
 }
 
-/* Mobile adjustments */
+/* Mobile */
 @media (max-width: 600px) {
   .learn-modal {
     padding: var(--space-sm);
@@ -263,13 +204,9 @@
 
   .learn-modal__card {
     max-height: 90vh;
-    border-radius: var(--radius-lg);
   }
 
-  .learn-modal__header {
-    padding: var(--space-md);
-  }
-
+  .learn-modal__header,
   .learn-modal__body {
     padding: var(--space-md);
   }

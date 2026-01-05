@@ -45,8 +45,8 @@ export function PuzzleBoard({
     // Get status class for line (including impossible state from Auditor)
     const getLineClass = (line: LineWithStatus) => {
         const isImpossible = impossibleLineIds?.has(line.id);
-        const baseClass = `puzzle-line puzzle-line--${line.status}`;
-        return isImpossible ? `${baseClass} puzzle-line--impossible` : baseClass;
+        const baseClass = `mg-edge mg-edge--${line.status}`;
+        return isImpossible ? `${baseClass} mg-edge--impossible` : baseClass;
     };
 
     // Calculate scaled positions
@@ -136,7 +136,7 @@ export function PuzzleBoard({
 
     return (
         <svg
-            className={`puzzle-board${isCompleted ? ' puzzle-board--completed' : ''}`}
+            className={`mg-board${isCompleted ? ' mg-board--completed' : ''}`}
             width={BOARD_WIDTH}
             height={BOARD_HEIGHT}
             viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`}
@@ -188,12 +188,12 @@ export function PuzzleBoard({
                 const isJustPlaced = node.id === justPlacedNodeId;
 
                 const nodeClass = [
-                    'puzzle-node',
-                    isFixed && 'puzzle-node--fixed',
-                    isEmpty && 'puzzle-node--empty',
-                    isSelected && 'puzzle-node--selected',
-                    isRecommended && 'puzzle-node--recommended',
-                    isJustPlaced && 'puzzle-node--just-placed',
+                    'mg-node',
+                    isFixed && 'mg-node--fixed',
+                    isEmpty && 'mg-node--empty',
+                    isSelected && 'mg-node--selected',
+                    isRecommended && 'mg-node--recommended',
+                    isJustPlaced && 'mg-node--just-placed',
                 ]
                     .filter(Boolean)
                     .join(' ');
@@ -228,14 +228,14 @@ export function PuzzleBoard({
                         style={{ transformOrigin: `${pos.x}px ${pos.y}px` }}
                     >
                         <circle
-                            className="puzzle-node__circle"
+                            className="mg-node__circle"
                             cx={pos.x}
                             cy={pos.y}
                             r={NODE_RADIUS}
                         />
                         {/* Pattern overlay for accessibility - distinguishes node types beyond color */}
                         <circle
-                            className="puzzle-node__pattern"
+                            className="mg-node__pattern"
                             cx={pos.x}
                             cy={pos.y}
                             r={NODE_RADIUS - 2}
@@ -245,7 +245,7 @@ export function PuzzleBoard({
                         />
                         {!isEmpty && (
                             <text
-                                className="puzzle-node__text"
+                                className="mg-node__text"
                                 x={pos.x}
                                 y={pos.y}
                                 textAnchor="middle"

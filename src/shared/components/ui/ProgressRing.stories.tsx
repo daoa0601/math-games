@@ -128,23 +128,23 @@ export const AllProgressStates: Story = {
     <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <ProgressRing progress={0} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>0% - Primary</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>0% - Primary</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <ProgressRing progress={25} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>25% - Primary</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>25% - Primary</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <ProgressRing progress={50} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>50% - Warning</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>50% - Warning</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <ProgressRing progress={75} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>75% - Secondary</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>75% - Secondary</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <ProgressRing progress={100} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>100% - Success</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>100% - Success</span>
       </div>
     </div>
   ),
@@ -155,19 +155,19 @@ export const AllSizes: Story = {
     <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <ProgressRing progress={65} size={40} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>40px</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>40px</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <ProgressRing progress={65} size={60} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>60px (default)</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>60px (default)</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <ProgressRing progress={65} size={80} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>80px</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>80px</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <ProgressRing progress={65} size={120} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>120px</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>120px</span>
       </div>
     </div>
   ),
@@ -206,19 +206,19 @@ export const CompactVariants: CompactStory = {
     <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <CompactProgressRing completed={0} total={10} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Not started</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>Not started</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <CompactProgressRing completed={3} total={10} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>In progress</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>In progress</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <CompactProgressRing completed={7} total={10} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Almost done</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>Almost done</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
         <CompactProgressRing completed={10} total={10} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Complete</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>Complete</span>
       </div>
     </div>
   ),

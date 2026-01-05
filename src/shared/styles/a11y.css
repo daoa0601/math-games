@@ -1,13 +1,6 @@
-/* ========================================
-   Accessibility Utilities
-   WCAG AA Compliance Helpers
-   ======================================== */
+/* Accessibility Utilities - Linear Editorial */
 
-/* ----------------------------------------
-   Screen Reader Only
-   Visually hidden but accessible to screen readers
-   ---------------------------------------- */
-
+/* Screen Reader Only */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -20,7 +13,6 @@
   border: 0;
 }
 
-/* Focusable variant - becomes visible on focus */
 .sr-only-focusable:focus,
 .sr-only-focusable:active {
   position: static;
@@ -32,11 +24,7 @@
   white-space: normal;
 }
 
-/* ----------------------------------------
-   Skip Link
-   Skip to main content for keyboard users
-   ---------------------------------------- */
-
+/* Skip Link */
 .skip-links {
   position: absolute;
   top: 0;
@@ -51,31 +39,25 @@
   transform: translateX(-50%);
   z-index: var(--z-tooltip);
   padding: var(--space-sm) var(--space-lg);
-  background: var(--color-primary);
-  color: var(--text-on-primary);
-  border-radius: var(--radius-md);
-  font-family: var(--font-display);
-  font-weight: 700;
+  background: var(--text);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   text-decoration: none;
-  /* Use clip-path to hide - more accessible than top: -9999px
-     This keeps the element in tab order for all browsers including Safari */
   clip-path: inset(100%);
   white-space: nowrap;
   overflow: hidden;
-  transition: clip-path var(--transition-fast);
 }
 
 .skip-link:focus {
   clip-path: none;
-  outline: 3px solid var(--color-accent);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* ----------------------------------------
-   Live Regions
-   For dynamic content announcements
-   ---------------------------------------- */
-
+/* Live Regions */
 .live-region {
   position: absolute;
   width: 1px;
@@ -88,77 +70,45 @@
   border: 0;
 }
 
-/* Polite announcements (non-urgent) */
-.live-region--polite {
-  /* aria-live="polite" set in HTML */
-}
-
-/* Assertive announcements (urgent) */
-.live-region--assertive {
-  /* aria-live="assertive" set in HTML */
-}
-
-/* ----------------------------------------
-   Focus Utilities
-   Enhanced focus indicators
-   ---------------------------------------- */
-
-/* Focus ring variable for consistency */
+/* Focus Utilities */
 :root {
-  --focus-ring-width: 3px;
+  --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
-  --focus-ring-color: var(--color-accent);
-  --focus-ring-style: solid;
+  --focus-ring-color: var(--accent);
 }
 
-/* Enhanced focus visible styling */
 .focus-visible:focus-visible,
 *:focus-visible {
-  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: var(--focus-ring-offset);
 }
 
-/* Focus within for container highlighting */
 .focus-within:focus-within {
-  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: var(--focus-ring-offset);
 }
 
-/* Remove default focus for mouse users */
 .focus-visible:focus:not(:focus-visible) {
   outline: none;
 }
 
-/* ----------------------------------------
-   Reduced Motion
-   Already in index.css, but utility class version
-   ---------------------------------------- */
-
+/* Reduced Motion */
 .reduce-motion {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
 }
 
-/* ----------------------------------------
-   High Contrast Utilities
-   ---------------------------------------- */
-
-/* Force high contrast borders */
+/* High Contrast */
 .hc-border {
   border: 2px solid currentColor !important;
 }
 
-/* Force high contrast text */
 .hc-text {
-  color: var(--text-primary) !important;
+  color: var(--text) !important;
 }
 
-/* ----------------------------------------
-   Touch Target Sizing
-   Minimum 44x44px for WCAG compliance
-   ---------------------------------------- */
-
+/* Touch Target (min 44x44px) */
 .touch-target {
   min-width: 44px;
   min-height: 44px;
@@ -167,23 +117,12 @@
   justify-content: center;
 }
 
-/* Larger touch target (48px) */
 .touch-target--lg {
   min-width: 48px;
   min-height: 48px;
 }
 
-/* ----------------------------------------
-   Text Alternatives
-   For images and icons
-   ---------------------------------------- */
-
-/* Decorative image marker */
-.decorative {
-  /* Use with aria-hidden="true" and alt="" */
-}
-
-/* Icon with label */
+/* Icon with Label */
 .icon-label {
   display: inline-flex;
   align-items: center;
@@ -194,15 +133,7 @@
   flex-shrink: 0;
 }
 
-.icon-label__text {
-  /* Visible label text */
-}
-
-/* ----------------------------------------
-   Loading States
-   Accessible loading indicators
-   ---------------------------------------- */
-
+/* Loading States */
 .loading {
   position: relative;
 }
@@ -211,53 +142,33 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: hsla(0, 0%, 100%, 0.8);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Announce loading to screen readers */
-.loading[aria-busy="true"]::before {
-  content: '';
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  clip: rect(0, 0, 0, 0);
-}
-
-/* ----------------------------------------
-   Error States
-   Accessible error messaging
-   ---------------------------------------- */
-
+/* Error States */
 .error-message {
-  color: var(--color-error);
+  color: #ef4444;
   font-size: var(--text-sm);
   margin-top: var(--space-xs);
 }
 
 .error-message::before {
-  content: '⚠ ';
+  content: '— ';
 }
 
-/* Link error to input with aria-describedby */
 .input--error {
-  border-color: var(--color-error);
-  box-shadow: 0 0 0 2px hsla(0, 70%, 58%, 0.2);
+  border-color: #ef4444;
 }
 
-/* ----------------------------------------
-   Form Accessibility
-   ---------------------------------------- */
-
-/* Required field indicator */
+/* Form Accessibility */
 .required::after {
   content: ' *';
-  color: var(--color-error);
+  color: #ef4444;
 }
 
-/* Fieldset reset with accessibility */
 .fieldset-reset {
   border: none;
   padding: 0;
@@ -267,27 +178,17 @@
 .fieldset-reset legend {
   padding: 0;
   margin-bottom: var(--space-sm);
-  font-weight: 700;
+  font-weight: 600;
 }
 
-/* ----------------------------------------
-   Dialog/Modal Accessibility
-   ---------------------------------------- */
-
-/* Modal backdrop */
+/* Modal Backdrop */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: hsla(0, 0%, 0%, 0.5);
+  background: rgba(0, 0, 0, 0.85);
   z-index: var(--z-modal-backdrop);
 }
 
-/* Modal focus trap indicator (for debugging) */
-.focus-trap-active {
-  /* Applied to body when focus trap is active */
-}
-
-/* Prevent body scroll when modal open */
 .modal-open {
   overflow: hidden;
 }

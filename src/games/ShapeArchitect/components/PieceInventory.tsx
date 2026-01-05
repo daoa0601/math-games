@@ -81,13 +81,13 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
     return (
         <div
             ref={setNodeRef}
-            className={`piece-card ${isSelected ? 'piece-card--selected' : ''} ${isDragging ? 'piece-card--dragging' : ''}`}
+            className={`sa-card ${isSelected ? 'sa-card--selected' : ''} ${isDragging ? 'sa-card--dragging' : ''}`}
             style={style}
             {...attributes}
         >
             {/* Clickable selection area - separate from drag handle */}
             <div
-                className="piece-card__clickable"
+                className="sa-card__clickable"
                 onMouseDown={handleMouseDown}
                 onClick={handleClick}
                 onKeyDown={(e) => e.key === 'Enter' && onSelect()}
@@ -97,19 +97,19 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
                 aria-label={`Select ${piece.name} piece`}
             >
                 {/* Drag handle - only this area initiates drag */}
-                <div className="piece-card__drag-handle" {...listeners}>
+                <div className="sa-card__drag-handle" {...listeners}>
                     {is3DPiece ? (
-                        <div className="piece-preview" aria-label={`${piece.name} piece`}>
+                        <div className="sa-preview" aria-label={`${piece.name} piece`}>
                             <IsometricPiecePreview piece={piece} size={48} />
                         </div>
                     ) : (
-                        <div className="piece-preview" aria-label={`${piece.name} piece`}>
+                        <div className="sa-preview" aria-label={`${piece.name} piece`}>
                             {[...previewGrid].reverse().map((row, y) => (
-                                <div key={y} className="piece-preview-row">
+                                <div key={y} className="sa-preview__row">
                                     {row.map((filled, x) => (
                                         <div
                                             key={x}
-                                            className={`piece-preview-cell ${filled ? patternClass : 'piece-preview-cell--empty'}`}
+                                            className={`sa-preview__cell ${filled ? patternClass : 'sa-preview__cell--empty'}`}
                                             style={{ backgroundColor: filled ? piece.color : undefined }}
                                         />
                                     ))}
@@ -118,7 +118,7 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
                         </div>
                     )}
                 </div>
-                <span className="piece-name">{piece.name}</span>
+                <span className="sa-card__name">{piece.name}</span>
             </div>
         </div>
     );
@@ -127,8 +127,8 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
 export function PieceInventory({ pieces, selectedPieceId, onSelectPiece, rotation }: PieceInventoryProps) {
     if (pieces.length === 0) {
         return (
-            <div className="piece-inventory">
-                <p style={{ color: 'var(--text-muted)', margin: 0 }}>
+            <div className="sa-inventory">
+                <p style={{ color: 'var(--muted)', margin: 0 }}>
                     All pieces placed! 🎉
                 </p>
             </div>
@@ -136,7 +136,7 @@ export function PieceInventory({ pieces, selectedPieceId, onSelectPiece, rotatio
     }
 
     return (
-        <div className="piece-inventory">
+        <div className="sa-inventory">
             {pieces.map((piece) => (
                 <DraggablePiece
                     key={piece.id}

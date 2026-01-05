@@ -1,48 +1,37 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { usePlayer } from '@/shared/contexts';
-import { DashboardTabs, type DashboardTabId } from '@/shared/components/layout';
+import { BottomNav, type NavTabId } from '@/shared/components/layout';
 import { SkipLinks } from '@/shared/components';
-import { ACHIEVEMENTS } from '@/shared/services/achievements';
 import { CompactHeader } from './CompactHeader';
-import { PlayTab, StatsTab, AchievementsTab, LearnTab } from './tabs';
+import { PlayTab, ProfileTab, LearnTab, SettingsTab } from './tabs';
 import './Dashboard.css';
 
 export function Dashboard() {
   const { profile, currentRankInfo, checkStreak } = usePlayer();
-  const [activeTab, setActiveTab] = useState<DashboardTabId>('play');
+  const [activeTab, setActiveTab] = useState<NavTabId>('home');
 
   // Check streak on mount
   useEffect(() => {
     checkStreak();
   }, [checkStreak]);
 
-  const achievementCount = useMemo(
-    () => ({
-      unlocked: profile.achievements.length,
-      total: ACHIEVEMENTS.length,
-    }),
-    [profile.achievements]
-  );
-
   return (
-    <div className="dashboard">
+    <div className="page">
       <SkipLinks mainId="dashboard-main" />
-      <CompactHeader
-        profile={profile}
-        rankInfo={currentRankInfo}
-        streak={profile.streak}
-      />
-      <DashboardTabs
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        achievementCount={achievementCount}
-      />
-      <main id="dashboard-main" tabIndex={-1} className="dashboard__content">
-        {activeTab === 'play' && <PlayTab />}
-        {activeTab === 'stats' && <StatsTab />}
-        {activeTab === 'achievements' && <AchievementsTab />}
-        {activeTab === 'learn' && <LearnTab />}
-      </main>
+      <div className="content-wrap">
+        <CompactHeader
+          profile={profile}
+          rankInfo={currentRankInfo}
+          streak={profile.streak}
+        />
+        <main id="dashboard-main" tabIndex={-1}>
+          {activeTab === 'home' && <PlayTab />}
+          {activeTab === 'profile' && <ProfileTab />}
+          {activeTab === 'learn' && <LearnTab />}
+          {activeTab === 'settings' && <SettingsTab />}
+        </main>
+      </div>
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 }

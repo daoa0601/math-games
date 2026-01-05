@@ -25,7 +25,7 @@ export const CAMERA_PRESETS: Record<CameraPreset, CameraPosition> = {
 
 function IsometricIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" className="camera-preset__icon">
+        <svg viewBox="0 0 24 24" fill="none" className="sa-camera__icon">
             <path
                 d="M12 2L22 8V16L12 22L2 16V8L12 2Z"
                 stroke="currentColor"
@@ -44,7 +44,7 @@ function IsometricIcon() {
 
 function TopIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" className="camera-preset__icon">
+        <svg viewBox="0 0 24 24" fill="none" className="sa-camera__icon">
             <rect
                 x="4"
                 y="4"
@@ -62,7 +62,7 @@ function TopIcon() {
 
 function FrontIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" className="camera-preset__icon">
+        <svg viewBox="0 0 24 24" fill="none" className="sa-camera__icon">
             <rect
                 x="3"
                 y="6"
@@ -80,7 +80,7 @@ function FrontIcon() {
 
 function SideIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" className="camera-preset__icon">
+        <svg viewBox="0 0 24 24" fill="none" className="sa-camera__icon">
             <path
                 d="M6 6L18 6L18 18L6 18L6 6Z"
                 stroke="currentColor"
@@ -98,7 +98,7 @@ function SideIcon() {
 
 function ResetIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" className="camera-preset__icon">
+        <svg viewBox="0 0 24 24" fill="none" className="sa-camera__icon">
             <path
                 d="M4 12C4 7.58172 7.58172 4 12 4C15.0736 4 17.7297 5.67319 19.1654 8.14286"
                 stroke="currentColor"
@@ -179,7 +179,7 @@ export function CameraPresetButtons({ activePreset, onPresetChange }: CameraPres
     const presetOrder: CameraPreset[] = ['isometric', 'top', 'front', 'side', 'reset'];
 
     return (
-        <div className="camera-presets" role="group" aria-label="Camera view presets">
+        <div className="sa-camera" role="group" aria-label="Camera view presets">
             {presetOrder.map((preset) => {
                 const config = PRESET_CONFIG[preset];
                 const Icon = config.icon;
@@ -188,14 +188,14 @@ export function CameraPresetButtons({ activePreset, onPresetChange }: CameraPres
                 return (
                     <button
                         key={preset}
-                        className={`camera-preset__btn ${isActive ? 'camera-preset__btn--active' : ''}`}
+                        className={`sa-camera__btn ${isActive ? 'sa-camera__btn--active' : ''}`}
                         onClick={() => onPresetChange(preset)}
                         aria-pressed={isActive}
                         title={`${config.label} view (${config.shortcut})`}
                     >
                         <Icon />
-                        <span className="camera-preset__label">{config.label}</span>
-                        <span className="camera-preset__shortcut">{config.shortcut}</span>
+                        <span className="sa-camera__label">{config.label}</span>
+                        <span className="sa-camera__shortcut">{config.shortcut}</span>
                     </button>
                 );
             })}
