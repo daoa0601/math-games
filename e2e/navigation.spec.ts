@@ -36,7 +36,7 @@ test.describe('Navigation', () => {
     await expect(page).toHaveURL('/magic-graph');
 
     // Verify game loaded (look for game-specific elements)
-    await expect(page.locator('.magic-graph-game')).toBeVisible();
+    await expect(page.locator('[data-testid="magic-graph-game"]')).toBeVisible();
 
     // Go back to dashboard
     await page.goBack();
@@ -54,7 +54,7 @@ test.describe('Navigation', () => {
     await expect(page).toHaveURL('/sequence-race');
 
     // Verify game loaded
-    await expect(page.locator('.sequence-race-game')).toBeVisible();
+    await expect(page.locator('[data-testid="sequence-race-game"]')).toBeVisible();
 
     // Go back to dashboard
     await page.goBack();
@@ -72,7 +72,7 @@ test.describe('Navigation', () => {
     await expect(page).toHaveURL('/shape-architect');
 
     // Verify game loaded (3D canvas may take longer)
-    await expect(page.locator('.shape-architect-game')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="shape-architect-game"]')).toBeVisible({ timeout: 10000 });
 
     // Go back to dashboard
     await page.goBack();
@@ -93,9 +93,9 @@ test.describe('Navigation', () => {
 
     // Navigate to each game to trigger lazy loading
     const games = [
-      { name: /magic graph/i, url: '/magic-graph', selector: '.magic-graph-game' },
-      { name: /sequence race/i, url: '/sequence-race', selector: '.sequence-race-game' },
-      { name: /shape architect/i, url: '/shape-architect', selector: '.shape-architect-game' },
+      { name: /magic graph/i, url: '/magic-graph', selector: '[data-testid="magic-graph-game"]' },
+      { name: /sequence race/i, url: '/sequence-race', selector: '[data-testid="sequence-race-game"]' },
+      { name: /shape architect/i, url: '/shape-architect', selector: '[data-testid="shape-architect-game"]' },
     ];
 
     for (const game of games) {
@@ -124,17 +124,17 @@ test.describe('Navigation', () => {
 
     // Direct link to MagicGraph
     await page.goto('/magic-graph');
-    await expect(page.locator('.magic-graph-game')).toBeVisible();
+    await expect(page.locator('[data-testid="magic-graph-game"]')).toBeVisible();
     await expect(page).toHaveURL('/magic-graph');
 
     // Direct link to SequenceRace
     await page.goto('/sequence-race');
-    await expect(page.locator('.sequence-race-game')).toBeVisible();
+    await expect(page.locator('[data-testid="sequence-race-game"]')).toBeVisible();
     await expect(page).toHaveURL('/sequence-race');
 
     // Direct link to ShapeArchitect
     await page.goto('/shape-architect');
-    await expect(page.locator('.shape-architect-game')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="shape-architect-game"]')).toBeVisible({ timeout: 10000 });
     await expect(page).toHaveURL('/shape-architect');
   });
 
@@ -145,11 +145,11 @@ test.describe('Navigation', () => {
     await page.getByRole('link', { name: /magic graph/i }).click();
 
     // Either the loading spinner appears or the game loads immediately
-    const spinnerOrGame = page.locator('.loading-spinner, .magic-graph-game');
+    const spinnerOrGame = page.locator('.loading-spinner, [data-testid="magic-graph-game"]');
     await expect(spinnerOrGame.first()).toBeVisible({ timeout: 5000 });
 
     // Eventually the game should be visible
-    await expect(page.locator('.magic-graph-game')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="magic-graph-game"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should handle 404 for invalid routes', async ({ page }) => {
@@ -165,9 +165,9 @@ test.describe('Navigation', () => {
     await expect(dashboard).not.toBeVisible();
 
     // Verify we don't get any game
-    await expect(page.locator('.magic-graph-game')).not.toBeVisible();
-    await expect(page.locator('.sequence-race-game')).not.toBeVisible();
-    await expect(page.locator('.shape-architect-game')).not.toBeVisible();
+    await expect(page.locator('[data-testid="magic-graph-game"]')).not.toBeVisible();
+    await expect(page.locator('[data-testid="sequence-race-game"]')).not.toBeVisible();
+    await expect(page.locator('[data-testid="shape-architect-game"]')).not.toBeVisible();
 
     // Might show loading spinner indefinitely or blank page
     // This test ensures the app doesn't crash
@@ -176,14 +176,14 @@ test.describe('Navigation', () => {
   test('should preserve URL when refreshing game pages', async ({ page }) => {
     // Navigate to a game
     await page.goto('/magic-graph');
-    await expect(page.locator('.magic-graph-game')).toBeVisible();
+    await expect(page.locator('[data-testid="magic-graph-game"]')).toBeVisible();
 
     // Reload the page
     await page.reload();
 
     // Verify URL is preserved and game still loads
     await expect(page).toHaveURL('/magic-graph');
-    await expect(page.locator('.magic-graph-game')).toBeVisible();
+    await expect(page.locator('[data-testid="magic-graph-game"]')).toBeVisible();
   });
 
   test('should support browser back/forward navigation', async ({ page }) => {
