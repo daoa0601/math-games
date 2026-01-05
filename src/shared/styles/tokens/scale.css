@@ -12,6 +12,18 @@
   /* Touch targets */
   --touch-min: 44px;
 
+  /* Breakpoints (for reference in JS, CSS uses media queries) */
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1536px;
+
+  /* Content widths */
+  --content-sm: 600px;
+  --content-md: 900px;
+  --content-lg: 1200px;
+
   /* Z-index scale */
   --z-base: 0;
   --z-dropdown: 100;
