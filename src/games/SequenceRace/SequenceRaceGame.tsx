@@ -461,7 +461,7 @@ export function SequenceRaceGame() {
                 {game.name}
               </button>
             ))}
-            <button className="game-btn game-btn--secondary" onClick={startRandomGame}>
+            <button className="action action--secondary" onClick={startRandomGame}>
               🎲 {tc('buttons.random')}
             </button>
           </div>
@@ -537,7 +537,7 @@ export function SequenceRaceGame() {
         {/* Undo Button */}
         {canUndo && (
           <button
-            className="game-btn"
+            className="action action--secondary"
             onClick={undoLastMove}
             aria-label={t('undo', 'Undo')}
           >
@@ -546,7 +546,7 @@ export function SequenceRaceGame() {
         )}
 
         {/* Hint Toggle */}
-        <button className="game-btn" onClick={toggleHints}>
+        <button className="action action--secondary" onClick={toggleHints}>
           💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
         </button>
 
@@ -599,7 +599,7 @@ export function SequenceRaceGame() {
 
         {/* Actions */}
         <div className="sr-actions">
-          <button className="game-btn" onClick={restartGame}>
+          <button className="action action--secondary" onClick={restartGame}>
             🔄 {tc('buttons.restart')}
           </button>
         </div>
@@ -650,15 +650,15 @@ export function SequenceRaceGame() {
             )}
             {/* In daily mode, show Back to Games; otherwise show game buttons */}
             {isDailyMode ? (
-              <a href="/math-games/" className="game-btn game-btn--primary">
+              <a href="/math-games/" className="action action--primary">
                 {tc('backToGames')}
               </a>
             ) : (
               <>
-                <button className="game-btn game-btn--primary" onClick={restartGame}>
+                <button className="action action--primary" onClick={restartGame}>
                   {tc('buttons.playAgain')}
                 </button>
-                <button className="game-btn game-btn--secondary" onClick={startRandomGame}>
+                <button className="action action--secondary" onClick={startRandomGame}>
                   {tc('buttons.newGame')}
                 </button>
               </>
@@ -686,10 +686,10 @@ export function SequenceRaceGame() {
               </>
             }
           >
-            <button className="game-btn game-btn--primary" onClick={restartGame}>
+            <button className="action action--primary" onClick={restartGame}>
               {tc('buttons.tryAgain')}
             </button>
-            <button className="game-btn game-btn--secondary" onClick={startRandomGame}>
+            <button className="action action--secondary" onClick={startRandomGame}>
               {tc('buttons.newGame')}
             </button>
           </GameOverlay>

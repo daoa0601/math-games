@@ -635,14 +635,14 @@ export function MagicGraphGame() {
                             </button>
                         ))}
                         <button
-                            className="game-btn"
+                            className="action action--secondary"
                             onClick={handleRandomPuzzle}
                             disabled={isGenerating || isWorkerBusy}
                         >
                             {isGenerating || isWorkerBusy ? `⏳ ${tc('generating')}` : `🎲 ${tc('buttons.random')}`}
                         </button>
                         <button
-                            className="game-btn"
+                            className="action action--secondary"
                             onClick={() => setShowEditor(true)}
                         >
                             ✏️ {t('editor.openEditor')}
@@ -700,7 +700,7 @@ export function MagicGraphGame() {
                                     <span className="game-info__value" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
                                         <span>?</span>
                                         <button
-                                            className="game-btn"
+                                            className="action action--secondary"
                                             onClick={() => setTargetRevealed(true)}
                                             title={t('revealTargetSum')}
                                             style={{ padding: 'var(--space-xs)' }}
@@ -800,7 +800,7 @@ export function MagicGraphGame() {
 
                 {/* Hint Toggle */}
                 <button
-                    className="game-btn"
+                    className="action action--secondary"
                     onClick={() => setShowHints(!showHints)}
                 >
                     💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
@@ -857,7 +857,7 @@ export function MagicGraphGame() {
                 {/* Actions */}
                 <div className="mg-actions">
                     <button
-                        className="game-btn"
+                        className="action action--secondary"
                         onClick={nodeValuesHistory.undo}
                         disabled={!nodeValuesHistory.canUndo}
                         title={`${t('undo')} (Ctrl+Z)`}
@@ -865,17 +865,17 @@ export function MagicGraphGame() {
                         ↩️
                     </button>
                     <button
-                        className="game-btn"
+                        className="action action--secondary"
                         onClick={nodeValuesHistory.redo}
                         disabled={!nodeValuesHistory.canRedo}
                         title={`${t('redo')} (Ctrl+Y)`}
                     >
                         ↪️
                     </button>
-                    <button className="game-btn" onClick={resetPuzzle}>
+                    <button className="action action--secondary" onClick={resetPuzzle}>
                         🔄 {tc('buttons.reset')}
                     </button>
-                    <button className="game-btn game-btn--primary" onClick={nextPuzzle}>
+                    <button className="action action--primary" onClick={nextPuzzle}>
                         {tc('buttons.nextPuzzle')} →
                     </button>
                 </div>
@@ -922,11 +922,11 @@ export function MagicGraphGame() {
 
                                 <div className="game-modal__actions">
                                     {!grandmasterFeedback.isOptimal && (
-                                        <button className="game-btn" onClick={resetPuzzle}>
+                                        <button className="action action--secondary" onClick={resetPuzzle}>
                                             {tc('buttons.tryAgain')}
                                         </button>
                                     )}
-                                    <button className="game-btn game-btn--primary" onClick={nextPuzzle}>
+                                    <button className="action action--primary" onClick={nextPuzzle}>
                                         {tc('buttons.nextPuzzle')} →
                                     </button>
                                 </div>
@@ -949,11 +949,11 @@ export function MagicGraphGame() {
 
                                 <div className="game-modal__actions">
                                     {isDailyMode ? (
-                                        <a href="/math-games/" className="game-btn game-btn--primary">
+                                        <a href="/math-games/" className="action action--primary">
                                             {tc('backToGames')}
                                         </a>
                                     ) : (
-                                        <button className="game-btn game-btn--primary" onClick={nextPuzzle}>
+                                        <button className="action action--primary" onClick={nextPuzzle}>
                                             {tc('buttons.nextPuzzle')} →
                                         </button>
                                     )}
@@ -985,7 +985,7 @@ export function MagicGraphGame() {
                         </div>
 
                         <div className="game-modal__actions">
-                            <button className="game-btn game-btn--primary" onClick={resetPuzzle}>
+                            <button className="action action--primary" onClick={resetPuzzle}>
                                 {tc('buttons.tryAgain')}
                             </button>
                         </div>

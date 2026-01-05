@@ -222,8 +222,8 @@ export function LevelEditor({ onLevelCreated, onCancel }: LevelEditorProps) {
                     )}
                 </div>
                 <div className="sa-editor__quick-actions">
-                    <button className="game-btn game-btn--sm" onClick={fillAll}>{t('editor.fillAll')}</button>
-                    <button className="game-btn game-btn--sm" onClick={clearAll}>{t('editor.clearAll')}</button>
+                    <button className="action action--sm" onClick={fillAll}>{t('editor.fillAll')}</button>
+                    <button className="action action--sm" onClick={clearAll}>{t('editor.clearAll')}</button>
                 </div>
             </div>
 
@@ -265,11 +265,11 @@ export function LevelEditor({ onLevelCreated, onCancel }: LevelEditorProps) {
 
             {/* Action buttons */}
             <div className="sa-editor__actions">
-                <button className="game-btn game-btn--secondary" onClick={onCancel}>
+                <button className="action action--secondary" onClick={onCancel}>
                     {t('editor.cancel')}
                 </button>
                 <button
-                    className="game-btn game-btn--primary"
+                    className="action action--primary"
                     onClick={createLevel}
                     disabled={targetVoxels.size === 0 || selectedPieces.size === 0 || totalPieceCells !== targetVoxels.size}
                 >

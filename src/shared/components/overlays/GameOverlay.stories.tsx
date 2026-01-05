@@ -35,8 +35,8 @@ export const Win: Story = {
     ],
     children: (
       <>
-        <button className="game-btn game-btn--primary">Play Again</button>
-        <button className="game-btn game-btn--secondary">New Game</button>
+        <button className="action action--primary">Play Again</button>
+        <button className="action action--secondary">New Game</button>
       </>
     ),
   },
@@ -63,8 +63,8 @@ export const Lose: Story = {
     ),
     children: (
       <>
-        <button className="game-btn game-btn--primary">Try Again</button>
-        <button className="game-btn game-btn--secondary">New Game</button>
+        <button className="action action--primary">Try Again</button>
+        <button className="action action--secondary">New Game</button>
       </>
     ),
   },
@@ -86,8 +86,8 @@ export const TimeUp: Story = {
     ),
     children: (
       <>
-        <button className="game-btn game-btn--primary">Try Again</button>
-        <button className="game-btn game-btn--secondary">New Game</button>
+        <button className="action action--primary">Try Again</button>
+        <button className="action action--secondary">New Game</button>
       </>
     ),
   },
@@ -99,7 +99,7 @@ export const WinWithoutStats: Story = {
     emoji: '🏆',
     title: 'Level Complete!',
     message: 'You solved the puzzle perfectly!',
-    children: <button className="game-btn game-btn--primary">Continue</button>,
+    children: <button className="action action--primary">Continue</button>,
   },
 }
 
@@ -125,8 +125,8 @@ export const LoseWithLongHint: Story = {
     ),
     children: (
       <>
-        <button className="game-btn game-btn--primary">Try Again</button>
-        <button className="game-btn game-btn--secondary">Different Puzzle</button>
+        <button className="action action--primary">Try Again</button>
+        <button className="action action--secondary">Different Puzzle</button>
       </>
     ),
   },

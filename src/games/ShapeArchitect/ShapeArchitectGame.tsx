@@ -467,7 +467,7 @@ export function ShapeArchitectGame() {
                     {/* Editor Access Button (hidden in daily mode) */}
                     {!isDailyMode && (
                         <button
-                            className="game-btn game-btn--secondary"
+                            className="action action--secondary"
                             onClick={() => setShowEditor(true)}
                         >
                             ✏️ {t('editor.openEditor')}
@@ -499,7 +499,7 @@ export function ShapeArchitectGame() {
                                 <span className="sa-instructions__move-icon">✋</span>
                                 {t('instructions.movePiece', 'Click a target cell to move the selected piece. Press Esc to cancel.')}
                                 <button
-                                    className="game-btn game-btn--sm game-btn--ghost sa-instructions__cancel"
+                                    className="action action--sm action--ghost sa-instructions__cancel"
                                     onClick={clearMoveSelection}
                                     aria-label={t('instructions.cancelMove', 'Cancel move')}
                                 >
@@ -607,7 +607,7 @@ export function ShapeArchitectGame() {
                         {...swipeHandlers}
                     >
                         <button
-                            className="game-btn game-btn--icon"
+                            className="action action--icon"
                             onClick={undoLastPiece}
                             disabled={gameState.placedPieces.length === 0 || showTimeUp || gameState.isSolved}
                             title={`${t('controls.undoTitle')} (Ctrl+Z)`}
@@ -650,7 +650,7 @@ export function ShapeArchitectGame() {
 
                     {/* Hint Toggle */}
                     <button
-                        className="game-btn game-btn--secondary"
+                        className="action action--secondary"
                         onClick={() => setShowHints(!showHints)}
                     >
                         💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
@@ -676,10 +676,10 @@ export function ShapeArchitectGame() {
 
                     {/* Actions */}
                     <div className="game-actions">
-                        <button className="game-btn game-btn--secondary" onClick={resetLevel}>
+                        <button className="action action--secondary" onClick={resetLevel}>
                             🔄 {tc('buttons.reset')}
                         </button>
-                        <button className="game-btn game-btn--primary" onClick={nextLevel}>
+                        <button className="action action--primary" onClick={nextLevel}>
                             {tc('buttons.nextLevel')} →
                         </button>
                     </div>
@@ -722,15 +722,15 @@ export function ShapeArchitectGame() {
                             <div className="game-actions">
                                 {/* In daily mode, show Back to Games; otherwise show game buttons */}
                                 {isDailyMode ? (
-                                    <a href="/math-games/" className="game-btn game-btn--primary">
+                                    <a href="/math-games/" className="action action--primary">
                                         {tc('backToGames')}
                                     </a>
                                 ) : (
                                     <>
-                                        <button className="game-btn game-btn--primary" onClick={nextLevel}>
+                                        <button className="action action--primary" onClick={nextLevel}>
                                             {tc('buttons.nextLevel')} →
                                         </button>
-                                        <button className="game-btn game-btn--secondary" onClick={startRandomLevel}>
+                                        <button className="action action--secondary" onClick={startRandomLevel}>
                                             {tc('buttons.randomLevel')}
                                         </button>
                                     </>
@@ -753,10 +753,10 @@ export function ShapeArchitectGame() {
                             </div>
 
                             <div className="game-actions">
-                                <button className="game-btn game-btn--primary" onClick={resetLevel}>
+                                <button className="action action--primary" onClick={resetLevel}>
                                     {tc('buttons.tryAgain')}
                                 </button>
-                                <button className="game-btn game-btn--secondary" onClick={nextLevel}>
+                                <button className="action action--secondary" onClick={nextLevel}>
                                     {tc('buttons.skipLevel')}
                                 </button>
                             </div>

@@ -71,7 +71,7 @@
     font-size: var(--text-xl);
   }
 
-  .game-grid {
+  .grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--space-md);
   }
@@ -123,15 +123,11 @@
 
 /* Tall Portrait */
 @media (orientation: portrait) and (min-height: 800px) and (max-width: 480px) {
-  .dashboard {
+  .page {
     padding: var(--space-xl);
   }
 
-  .dashboard__header {
-    margin-bottom: var(--space-2xl);
-  }
-
-  .game-grid {
+  .grid {
     gap: var(--space-xl);
   }
 

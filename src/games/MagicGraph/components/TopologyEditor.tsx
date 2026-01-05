@@ -334,7 +334,7 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
 
             {/* Connect button (in connect mode) */}
             {mode === 'connect' && selectedNodeIds.size >= 2 && (
-                <button className="game-btn" onClick={createLineFromSelection}>
+                <button className="action action--secondary" onClick={createLineFromSelection}>
                     {t('editor.createLine')} ({selectedNodeIds.size} {t('editor.nodesSelected')})
                 </button>
             )}
@@ -367,14 +367,14 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
 
             {/* Action buttons */}
             <div className="mg-editor__actions">
-                <button className="game-btn" onClick={clearAll}>
+                <button className="action action--secondary" onClick={clearAll}>
                     {t('editor.clearAll')}
                 </button>
-                <button className="game-btn" onClick={onCancel}>
+                <button className="action action--secondary" onClick={onCancel}>
                     {t('editor.cancel')}
                 </button>
                 <button
-                    className="game-btn game-btn--primary"
+                    className="action action--primary"
                     onClick={generateFromTopology}
                     disabled={nodes.length < 2 || lines.length < 1}
                 >

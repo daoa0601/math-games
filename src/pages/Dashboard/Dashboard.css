@@ -2,17 +2,6 @@
    Dashboard Layout
    ======================================== */
 
-.dashboard {
-  min-height: 100vh;
-  padding: var(--space-lg);
-  background: var(--surface-page);
-}
-
-.dashboard__content {
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
 /* ---- Play Tab Specific ---- */
 
 .play-tab {
@@ -27,7 +16,7 @@
 
 /* ---- Tab Panel Animations ---- */
 
-.dashboard__content > * {
+.page > * {
   animation: tabFadeIn 0.2s var(--ease-out);
 }
 
@@ -43,21 +32,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dashboard__content > * {
+  .page > * {
     animation: none;
-  }
-}
-
-/* ---- Responsive ---- */
-
-@media (max-width: 768px) {
-  .dashboard {
-    padding: var(--space-md);
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard {
-    padding: var(--space-sm);
   }
 }

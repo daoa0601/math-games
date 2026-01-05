@@ -179,6 +179,36 @@ body {
   border-color: var(--text);
 }
 
+.action--sm {
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-xs);
+}
+
+.action--ghost {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+}
+
+.action--ghost:hover {
+  color: var(--text);
+}
+
+.action--icon {
+  padding: var(--space-sm);
+  min-width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action:disabled,
+.action--disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 /* Bottom navigation */
 .nav {
   position: fixed;
