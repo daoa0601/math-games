@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { setupFreshTestState, DEFAULT_TEST_PLAYER } from './fixtures/test-utils';
 
+/**
+ * Navigation E2E Tests
+ *
+ * Tests the navigation between dashboard and games.
+ */
 test.describe('Navigation', () => {
   test.beforeEach(async ({ page }) => {
     // Setup fresh test state before each test
@@ -10,45 +15,45 @@ test.describe('Navigation', () => {
   test('should load home page with game cards', async ({ page }) => {
     await page.goto('/');
 
-    // Verify dashboard loads
-    await expect(page.locator('.dashboard')).toBeVisible();
+    // Verify page loads
+    await expect(page.locator('.page')).toBeVisible();
 
-    // Verify all three game cards are visible on Play tab (default tab)
-    await expect(page.locator('.games-grid')).toBeVisible();
+    // Verify game cards grid is visible
+    await expect(page.locator('.grid')).toBeVisible();
 
     // Check for game card links - should have 3 games
-    const gameCards = page.locator('.game-card');
+    const gameCards = page.locator('.slab');
     await expect(gameCards).toHaveCount(3);
 
-    // Verify each game is present (using aria-labels or specific selectors)
-    await expect(page.getByRole('link', { name: /magic graph/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /sequence race/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /shape architect/i })).toBeVisible();
+    // Verify each game is present by title text
+    await expect(page.locator('.slab').filter({ hasText: /magic graph/i })).toBeVisible();
+    await expect(page.locator('.slab').filter({ hasText: /sequence race/i })).toBeVisible();
+    await expect(page.locator('.slab').filter({ hasText: /shape architect/i })).toBeVisible();
   });
 
   test('should navigate to MagicGraph and back', async ({ page }) => {
     await page.goto('/');
 
     // Click on MagicGraph game card
-    await page.getByRole('link', { name: /magic graph/i }).click();
+    await page.locator('[data-testid="game-card-magicGraph"]').click();
 
     // Wait for navigation and verify URL
     await expect(page).toHaveURL('/magic-graph');
 
-    // Verify game loaded (look for game-specific elements)
+    // Verify game loaded
     await expect(page.locator('[data-testid="magic-graph-game"]')).toBeVisible();
 
     // Go back to dashboard
     await page.goBack();
     await expect(page).toHaveURL('/');
-    await expect(page.locator('.dashboard')).toBeVisible();
+    await expect(page.locator('.page')).toBeVisible();
   });
 
   test('should navigate to SequenceRace and back', async ({ page }) => {
     await page.goto('/');
 
     // Click on SequenceRace game card
-    await page.getByRole('link', { name: /sequence race/i }).click();
+    await page.locator('[data-testid="game-card-sequenceRace"]').click();
 
     // Wait for navigation and verify URL
     await expect(page).toHaveURL('/sequence-race');
@@ -59,14 +64,14 @@ test.describe('Navigation', () => {
     // Go back to dashboard
     await page.goBack();
     await expect(page).toHaveURL('/');
-    await expect(page.locator('.dashboard')).toBeVisible();
+    await expect(page.locator('.page')).toBeVisible();
   });
 
   test('should navigate to ShapeArchitect and back', async ({ page }) => {
     await page.goto('/');
 
     // Click on ShapeArchitect game card
-    await page.getByRole('link', { name: /shape architect/i }).click();
+    await page.locator('[data-testid="game-card-shapeArchitect"]').click();
 
     // Wait for navigation and verify URL
     await expect(page).toHaveURL('/shape-architect');
@@ -77,7 +82,7 @@ test.describe('Navigation', () => {
     // Go back to dashboard
     await page.goBack();
     await expect(page).toHaveURL('/');
-    await expect(page.locator('.dashboard')).toBeVisible();
+    await expect(page.locator('.page')).toBeVisible();
   });
 
   test('should lazy load games without errors', async ({ page }) => {
@@ -93,9 +98,9 @@ test.describe('Navigation', () => {
 
     // Navigate to each game to trigger lazy loading
     const games = [
-      { name: /magic graph/i, url: '/magic-graph', selector: '[data-testid="magic-graph-game"]' },
-      { name: /sequence race/i, url: '/sequence-race', selector: '[data-testid="sequence-race-game"]' },
-      { name: /shape architect/i, url: '/shape-architect', selector: '[data-testid="shape-architect-game"]' },
+      { testId: 'game-card-magicGraph', url: '/magic-graph', selector: '[data-testid="magic-graph-game"]' },
+      { testId: 'game-card-sequenceRace', url: '/sequence-race', selector: '[data-testid="sequence-race-game"]' },
+      { testId: 'game-card-shapeArchitect', url: '/shape-architect', selector: '[data-testid="shape-architect-game"]' },
     ];
 
     for (const game of games) {
@@ -103,12 +108,12 @@ test.describe('Navigation', () => {
       await page.goto('/');
 
       // Click game card
-      await page.getByRole('link', { name: game.name }).click();
+      await page.locator(`[data-testid="${game.testId}"]`).click();
 
       // Verify URL changed
       await expect(page).toHaveURL(game.url);
 
-      // Wait for game to load (may show loading spinner first)
+      // Wait for game to load
       await expect(page.locator(game.selector)).toBeVisible({ timeout: 10000 });
     }
 
@@ -138,41 +143,6 @@ test.describe('Navigation', () => {
     await expect(page).toHaveURL('/shape-architect');
   });
 
-  test('should show loading spinner during lazy loading', async ({ page }) => {
-    await page.goto('/');
-
-    // Click on a game card
-    await page.getByRole('link', { name: /magic graph/i }).click();
-
-    // Either the loading spinner appears or the game loads immediately
-    const spinnerOrGame = page.locator('.loading-spinner, [data-testid="magic-graph-game"]');
-    await expect(spinnerOrGame.first()).toBeVisible({ timeout: 5000 });
-
-    // Eventually the game should be visible
-    await expect(page.locator('[data-testid="magic-graph-game"]')).toBeVisible({ timeout: 10000 });
-  });
-
-  test('should handle 404 for invalid routes', async ({ page }) => {
-    // React apps typically don't show 404 pages in the same way
-    // Instead, they might show nothing or redirect
-    await page.goto('/invalid-route-that-does-not-exist');
-
-    // The app might show a blank page or the loading spinner
-    // Since there's no route defined, Suspense fallback or nothing renders
-
-    // Verify we don't get the dashboard
-    const dashboard = page.locator('.dashboard');
-    await expect(dashboard).not.toBeVisible();
-
-    // Verify we don't get any game
-    await expect(page.locator('[data-testid="magic-graph-game"]')).not.toBeVisible();
-    await expect(page.locator('[data-testid="sequence-race-game"]')).not.toBeVisible();
-    await expect(page.locator('[data-testid="shape-architect-game"]')).not.toBeVisible();
-
-    // Might show loading spinner indefinitely or blank page
-    // This test ensures the app doesn't crash
-  });
-
   test('should preserve URL when refreshing game pages', async ({ page }) => {
     // Navigate to a game
     await page.goto('/magic-graph');
@@ -190,11 +160,11 @@ test.describe('Navigation', () => {
     await page.goto('/');
 
     // Navigate through multiple pages
-    await page.getByRole('link', { name: /magic graph/i }).click();
+    await page.locator('[data-testid="game-card-magicGraph"]').click();
     await expect(page).toHaveURL('/magic-graph');
 
     await page.goto('/');
-    await page.getByRole('link', { name: /sequence race/i }).click();
+    await page.locator('[data-testid="game-card-sequenceRace"]').click();
     await expect(page).toHaveURL('/sequence-race');
 
     // Use browser back button

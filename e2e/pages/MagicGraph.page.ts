@@ -4,95 +4,130 @@ import { Page, Locator } from '@playwright/test';
  * MagicGraph Page Object
  *
  * Represents the MagicGraph puzzle game (/magic-graph) with:
- * - Graph nodes (fixed and empty)
+ * - Graph nodes and lines
  * - Number picker interface
- * - Timer and controls
- * - Difficulty selector
+ * - Timer and difficulty controls
  * - Win state detection
  */
 export class MagicGraphPage {
   readonly page: Page;
 
+  // Game container
+  readonly gameContainer: Locator;
+
   // Game board elements
   readonly puzzleBoard: Locator;
   readonly nodes: Locator;
+  readonly emptyNodes: Locator;
+  readonly fixedNodes: Locator;
   readonly lines: Locator;
 
   // Number picker
   readonly numberPicker: Locator;
-  readonly numberButtons: Locator;
+  readonly numberOptions: Locator;
+  readonly pickerClose: Locator;
+  readonly pickerClear: Locator;
 
   // Game controls
   readonly difficultySelector: Locator;
+  readonly difficultyButtons: Locator;
+  readonly undoButton: Locator;
+  readonly redoButton: Locator;
+  readonly resetButton: Locator;
+  readonly nextPuzzleButton: Locator;
   readonly hintButton: Locator;
-  readonly restartButton: Locator;
   readonly backButton: Locator;
-  readonly soundToggle: Locator;
 
-  // Timer display
-  readonly timer: Locator;
+  // Timer
+  readonly timerContainer: Locator;
+  readonly timerDisplay: Locator;
+  readonly timerTime: Locator;
+  readonly timerPauseBtn: Locator;
+  readonly timedModeBtn: Locator;
+  readonly practiceModeBtn: Locator;
 
   // Game info
-  readonly targetSumDisplay: Locator;
+  readonly gameInfo: Locator;
+
+  // Level selector
+  readonly levelButtons: Locator;
+  readonly randomButton: Locator;
+
+  // Win modal
+  readonly winModal: Locator;
+  readonly winModalTitle: Locator;
+  readonly winModalTime: Locator;
+  readonly winModalNextButton: Locator;
+
+  // Daily challenge
+  readonly dailyBadge: Locator;
+
+  // Number inventory
   readonly numberInventory: Locator;
 
-  // Win bottom sheet
-  readonly winBottomSheet: Locator;
-  readonly winSheetBackdrop: Locator;
-  readonly winSheetTitle: Locator;
-  readonly winSheetTime: Locator;
-  readonly winSheetNextButton: Locator;
-  readonly winSheetInsight: Locator;
-  readonly winSheetPersonalBest: Locator;
-
-  // Tutorial
-  readonly tutorialOverlay: Locator;
-  readonly skipTutorialButton: Locator;
-
-  // Practice mode toggle
-  readonly practiceModeToggle: Locator;
+  // Hints panel
+  readonly hintsPanel: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    // Game board
-    this.puzzleBoard = page.locator('.puzzle-board');
-    this.nodes = page.locator('.puzzle-node');
-    this.lines = page.locator('.puzzle-line');
+    // Game container
+    this.gameContainer = page.locator('[data-testid="magic-graph-game"]');
 
-    // Number picker popup
-    this.numberPicker = page.locator('.number-picker');
-    this.numberButtons = this.numberPicker.locator('button[data-number]');
+    // Game board - uses .mg-board class
+    this.puzzleBoard = page.locator('.mg-board');
+    this.nodes = page.locator('.mg-node');
+    this.emptyNodes = page.locator('.mg-node--empty');
+    this.fixedNodes = page.locator('.mg-node--fixed');
+    this.lines = page.locator('.mg-line');
+
+    // Number picker - uses .mg-picker class
+    this.numberPicker = page.locator('.mg-picker');
+    this.numberOptions = this.numberPicker.locator('.mg-picker__option');
+    this.pickerClose = this.numberPicker.locator('.mg-picker__close');
+    this.pickerClear = this.numberPicker.locator('.mg-picker__clear');
+
+    // Difficulty selector
+    this.difficultySelector = page.locator('.difficulty-selector');
+    this.difficultyButtons = page.locator('.difficulty-btn');
 
     // Game controls
-    this.difficultySelector = page.locator('.difficulty-selector');
-    this.hintButton = page.getByRole('button', { name: /hint|gợi ý/i });
-    this.restartButton = page.getByRole('button', { name: /restart|chơi lại/i });
-    this.backButton = page.getByRole('button', { name: /back|quay lại/i });
-    this.soundToggle = page.getByRole('button', { name: /sound|âm thanh/i });
+    this.undoButton = page.getByRole('button', { name: /↩️|undo/i });
+    this.redoButton = page.getByRole('button', { name: /↪️|redo/i });
+    this.resetButton = page.getByRole('button', { name: /🔄|reset|chơi lại/i });
+    this.nextPuzzleButton = page.getByRole('button', { name: /next puzzle|bài tiếp/i });
+    this.hintButton = page.getByRole('button', { name: /need help|cần giúp|💡/i });
+    this.backButton = page.locator('.action--secondary').filter({ hasText: /back|quay lại/i });
 
-    // Timer
-    this.timer = page.locator('.timer');
+    // Timer - uses timer-container class
+    this.timerContainer = page.locator('.timer-container');
+    this.timerDisplay = page.locator('.timer-display');
+    this.timerTime = page.locator('.timer-display__time');
+    this.timerPauseBtn = page.locator('.timer-pause-btn');
+    this.timedModeBtn = page.locator('.timer-mode-toggle__btn').filter({ hasText: /timed|hẹn giờ/i });
+    this.practiceModeBtn = page.locator('.timer-mode-toggle__btn').filter({ hasText: /practice|luyện tập/i });
 
     // Game info
-    this.targetSumDisplay = page.locator('.target-sum, .puzzle-info').first();
-    this.numberInventory = page.locator('.number-inventory');
+    this.gameInfo = page.locator('.game-info');
 
-    // Win/Lose modal (centered)
-    this.winBottomSheet = page.locator('.game-modal');
-    this.winSheetBackdrop = page.locator('.game-modal__backdrop');
-    this.winSheetTitle = this.winBottomSheet.locator('.game-modal__title');
-    this.winSheetTime = this.winBottomSheet.locator('.game-modal__time');
-    this.winSheetNextButton = this.winBottomSheet.locator('.btn--primary');
-    this.winSheetInsight = this.winBottomSheet.locator('.game-modal__insight');
-    this.winSheetPersonalBest = this.winBottomSheet.locator('.personal-best');
+    // Level selector - uses .mg-level class
+    this.levelButtons = page.locator('.mg-level');
+    this.randomButton = page.getByRole('button', { name: /🎲|random|ngẫu nhiên/i });
 
-    // Tutorial
-    this.tutorialOverlay = page.locator('.tutorial-overlay, .magic-graph-tutorial');
-    this.skipTutorialButton = page.getByRole('button', { name: /skip|bỏ qua/i });
+    // Win modal
+    this.winModal = page.locator('.game-modal');
+    this.winModalTitle = page.locator('.game-modal__title');
+    this.winModalTime = page.locator('.game-modal__time');
+    this.winModalNextButton = this.winModal.locator('.action--primary');
 
-    // Practice mode
-    this.practiceModeToggle = page.getByRole('checkbox', { name: /practice|luyện tập/i });
+    // Daily challenge badge
+    this.dailyBadge = page.locator('.mg-daily');
+
+    // Number inventory - uses .mg-inventory class
+    this.numberInventory = page.locator('.mg-inventory');
+
+    // Hints panel
+    this.hintsPanel = page.locator('.mg-hints');
   }
 
   /**
@@ -101,7 +136,6 @@ export class MagicGraphPage {
   async goto(options?: { daily?: boolean; difficulty?: string }): Promise<void> {
     let url = '/magic-graph';
 
-    // Add query parameters if provided
     const params = new URLSearchParams();
     if (options?.daily) params.append('daily', 'true');
     if (options?.difficulty) params.append('difficulty', options.difficulty);
@@ -111,70 +145,24 @@ export class MagicGraphPage {
     }
 
     await this.page.goto(url);
+    await this.waitForLoad();
+  }
 
-    // Wait for puzzle board to be visible
+  /**
+   * Wait for game to be fully loaded
+   */
+  async waitForLoad(): Promise<void> {
     await this.puzzleBoard.waitFor({ state: 'visible' });
+    await this.nodes.first().waitFor({ state: 'visible' });
+    await this.page.waitForTimeout(200);
   }
 
   /**
-   * Close tutorial if it's showing
-   */
-  async closeTutorial(): Promise<void> {
-    if (await this.tutorialOverlay.isVisible()) {
-      await this.skipTutorialButton.click();
-      await this.tutorialOverlay.waitFor({ state: 'hidden' });
-    }
-  }
-
-  /**
-   * Get all nodes on the board
-   */
-  async getAllNodes(): Promise<
-    Array<{
-      id: string;
-      value: string | null;
-      isFixed: boolean;
-      isEmpty: boolean;
-    }>
-  > {
-    const nodeElements = await this.nodes.all();
-
-    return Promise.all(
-      nodeElements.map(async (node) => {
-        const id = (await node.getAttribute('data-node-id')) || '';
-        const valueText = await node.textContent();
-        const classes = (await node.getAttribute('class')) || '';
-
-        return {
-          id,
-          value: valueText?.trim() || null,
-          isFixed: classes.includes('puzzle-node--fixed'),
-          isEmpty: classes.includes('puzzle-node--empty'),
-        };
-      })
-    );
-  }
-
-  /**
-   * Click on a node to open number picker
-   */
-  async clickNode(nodeId: string): Promise<void> {
-    const node = this.nodes.filter({ has: this.page.locator(`[data-node-id="${nodeId}"]`) }).first();
-    await node.click();
-
-    // Wait for number picker to appear
-    await this.numberPicker.waitFor({ state: 'visible' });
-  }
-
-  /**
-   * Click on an empty node (by index)
+   * Click on an empty node to open the number picker
    */
   async clickEmptyNode(index: number = 0): Promise<void> {
-    const emptyNodes = this.nodes.filter({ hasText: /^$/ });
-    const node = emptyNodes.nth(index);
-    await node.click();
-
-    // Wait for number picker to appear
+    const emptyNode = this.emptyNodes.nth(index);
+    await emptyNode.click();
     await this.numberPicker.waitFor({ state: 'visible' });
   }
 
@@ -182,236 +170,165 @@ export class MagicGraphPage {
    * Select a number from the picker
    */
   async selectNumber(number: number): Promise<void> {
-    const button = this.numberButtons.filter({ hasText: number.toString() }).first();
-    await button.click();
-
-    // Wait for picker to close
+    const option = this.numberOptions.filter({ hasText: new RegExp(`^${number}$`) });
+    await option.click();
     await this.numberPicker.waitFor({ state: 'hidden' });
   }
 
   /**
-   * Place a number on a node (combines click node + select number)
+   * Place a number on an empty node
    */
-  async placeNumber(nodeId: string, number: number): Promise<void> {
-    await this.clickNode(nodeId);
+  async placeNumber(nodeIndex: number, number: number): Promise<void> {
+    await this.clickEmptyNode(nodeIndex);
     await this.selectNumber(number);
   }
 
   /**
-   * Get available numbers from inventory
+   * Close the number picker
    */
-  async getAvailableNumbers(): Promise<number[]> {
-    const inventory = await this.numberInventory.locator('.inventory-number').all();
-    const numbers = await Promise.all(
-      inventory.map(async (el) => {
-        const text = await el.textContent();
-        return parseInt(text?.trim() || '0', 10);
-      })
-    );
-    return numbers.filter(n => !isNaN(n));
+  async closeNumberPicker(): Promise<void> {
+    await this.pickerClose.click();
+    await this.numberPicker.waitFor({ state: 'hidden' });
   }
 
   /**
-   * Get target sum value
+   * Clear a placed number
    */
-  async getTargetSum(): Promise<number> {
-    const text = await this.targetSumDisplay.textContent();
-    const match = text?.match(/\d+/);
-    return match ? parseInt(match[0], 10) : 0;
-  }
-
-  /**
-   * Get current timer value (in seconds)
-   */
-  async getTimerValue(): Promise<number> {
-    const text = await this.timer.textContent();
-    if (!text) return 0;
-
-    // Parse MM:SS format
-    const match = text.match(/(\d+):(\d+)/);
-    if (match) {
-      const minutes = parseInt(match[1], 10);
-      const seconds = parseInt(match[2], 10);
-      return minutes * 60 + seconds;
+  async clearNumber(): Promise<void> {
+    if (await this.pickerClear.isVisible()) {
+      await this.pickerClear.click();
+      await this.numberPicker.waitFor({ state: 'hidden' });
     }
-
-    return 0;
   }
 
   /**
-   * Check if timer is running
+   * Click undo button
    */
-  async isTimerRunning(): Promise<boolean> {
-    // Timer should be visible and have a value
-    if (!(await this.timer.isVisible())) return false;
-
-    const initialValue = await this.getTimerValue();
-    await this.page.waitForTimeout(1100); // Wait slightly more than 1 second
-    const newValue = await this.getTimerValue();
-
-    // Timer is running if value increased (counting up) or decreased (counting down)
-    return newValue !== initialValue;
+  async undo(): Promise<void> {
+    await this.undoButton.click();
   }
 
   /**
-   * Click restart button
+   * Click redo button
    */
-  async restart(): Promise<void> {
-    await this.restartButton.click();
-    // Wait for board to reload
-    await this.page.waitForTimeout(500);
+  async redo(): Promise<void> {
+    await this.redoButton.click();
   }
 
   /**
-   * Click hint button
+   * Reset the puzzle
    */
-  async getHint(): Promise<void> {
+  async reset(): Promise<void> {
+    await this.resetButton.click();
+  }
+
+  /**
+   * Go to next puzzle
+   */
+  async nextPuzzle(): Promise<void> {
+    await this.nextPuzzleButton.click();
+  }
+
+  /**
+   * Toggle hints panel
+   */
+  async toggleHints(): Promise<void> {
     await this.hintButton.click();
-    // Wait for hint to be applied
+  }
+
+  /**
+   * Change difficulty
+   */
+  async changeDifficulty(difficulty: 'easy' | 'medium' | 'hard' | 'master' | 'grandmaster'): Promise<void> {
+    const btn = this.page.locator(`.difficulty-btn--${difficulty}`);
+    await btn.click();
     await this.page.waitForTimeout(300);
   }
 
   /**
-   * Change difficulty level
+   * Switch to practice mode
    */
-  async changeDifficulty(difficulty: 'easy' | 'medium' | 'hard' | 'master' | 'grandmaster'): Promise<void> {
-    await this.difficultySelector.selectOption(difficulty);
-    // Wait for new puzzle to generate
-    await this.page.waitForTimeout(1000);
+  async switchToPracticeMode(): Promise<void> {
+    await this.practiceModeBtn.click();
   }
 
   /**
-   * Check if puzzle is solved (win bottom sheet visible)
+   * Switch to timed mode
+   */
+  async switchToTimedMode(): Promise<void> {
+    await this.timedModeBtn.click();
+  }
+
+  /**
+   * Check if puzzle is solved (win modal visible)
    */
   async isPuzzleSolved(): Promise<boolean> {
-    return this.winBottomSheet.isVisible();
+    return this.winModal.isVisible();
   }
 
   /**
-   * Get win title text
+   * Get timer display text
    */
-  async getWinTitle(): Promise<string | null> {
-    if (!(await this.isPuzzleSolved())) return null;
-    return this.winSheetTitle.textContent();
+  async getTimerText(): Promise<string | null> {
+    return this.timerTime.textContent();
   }
 
   /**
-   * Get win time display
+   * Check if in practice mode
    */
-  async getWinTime(): Promise<string | null> {
-    if (!(await this.isPuzzleSolved())) return null;
-    return this.winSheetTime.textContent();
+  async isInPracticeMode(): Promise<boolean> {
+    const practiceBtn = this.practiceModeBtn;
+    const classes = await practiceBtn.getAttribute('class');
+    return classes?.includes('--active') ?? false;
   }
 
   /**
-   * Click "Next Puzzle" button after winning
+   * Get the number of empty nodes
    */
-  async nextPuzzle(): Promise<void> {
-    await this.winSheetNextButton.click();
-    // Wait for new puzzle
-    await this.page.waitForTimeout(500);
+  async getEmptyNodeCount(): Promise<number> {
+    return this.emptyNodes.count();
   }
 
   /**
-   * Navigate back to dashboard
+   * Get the total number of nodes
    */
-  async goBack(): Promise<void> {
-    await this.backButton.click();
-    await this.page.waitForURL('/');
+  async getTotalNodeCount(): Promise<number> {
+    return this.nodes.count();
   }
 
   /**
-   * Toggle practice mode
+   * Check if undo button is enabled
    */
-  async togglePracticeMode(): Promise<void> {
-    await this.practiceModeToggle.click();
-    // Wait for state to update
-    await this.page.waitForTimeout(200);
+  async isUndoEnabled(): Promise<boolean> {
+    return !(await this.undoButton.isDisabled());
   }
 
   /**
-   * Check if practice mode is enabled
+   * Check if redo button is enabled
    */
-  async isPracticeModeEnabled(): Promise<boolean> {
-    return this.practiceModeToggle.isChecked();
+  async isRedoEnabled(): Promise<boolean> {
+    return !(await this.redoButton.isDisabled());
   }
 
   /**
-   * Get all line statuses (complete, incomplete, impossible)
+   * Pause the timer
    */
-  async getLineStatuses(): Promise<{
-    complete: number;
-    incomplete: number;
-    impossible: number;
-  }> {
-    const lineElements = await this.lines.all();
-
-    let complete = 0;
-    let incomplete = 0;
-    let impossible = 0;
-
-    for (const line of lineElements) {
-      const classes = (await line.getAttribute('class')) || '';
-      if (classes.includes('puzzle-line--complete')) complete++;
-      else if (classes.includes('puzzle-line--impossible')) impossible++;
-      else incomplete++;
-    }
-
-    return { complete, incomplete, impossible };
+  async pauseTimer(): Promise<void> {
+    await this.timerPauseBtn.click();
   }
 
   /**
-   * Check if a node is highlighted (recommended or just placed)
+   * Resume the timer
    */
-  async isNodeHighlighted(nodeId: string): Promise<boolean> {
-    const node = this.nodes.filter({ has: this.page.locator(`[data-node-id="${nodeId}"]`) }).first();
-    const classes = (await node.getAttribute('class')) || '';
-    return classes.includes('puzzle-node--recommended') || classes.includes('puzzle-node--sparkle');
+  async resumeTimer(): Promise<void> {
+    await this.timerPauseBtn.click();
   }
 
   /**
-   * Wait for game to be fully loaded
+   * Check if timer is paused
    */
-  async waitForLoad(): Promise<void> {
-    // Wait for puzzle board
-    await this.puzzleBoard.waitFor({ state: 'visible' });
-
-    // Wait for nodes to render
-    await this.nodes.first().waitFor({ state: 'visible' });
-
-    // Close tutorial if showing
-    await this.closeTutorial();
-
-    // Small delay for animations
-    await this.page.waitForTimeout(200);
-  }
-
-  /**
-   * Solve the puzzle by filling all empty nodes with valid numbers
-   * (Helper method for testing - attempts a simple solution strategy)
-   */
-  async attemptSimpleSolve(): Promise<void> {
-    const availableNumbers = await this.getAvailableNumbers();
-    const nodes = await this.getAllNodes();
-    const emptyNodes = nodes.filter(n => n.isEmpty);
-
-    // Simple strategy: fill empty nodes with available numbers in order
-    for (let i = 0; i < emptyNodes.length && i < availableNumbers.length; i++) {
-      const node = emptyNodes[i];
-      const number = availableNumbers[i];
-
-      try {
-        await this.placeNumber(node.id, number);
-        await this.page.waitForTimeout(200); // Brief pause between placements
-      } catch (error) {
-        // Continue if placement fails
-        console.warn(`Failed to place ${number} on node ${node.id}:`, error);
-      }
-
-      // Check if we won
-      if (await this.isPuzzleSolved()) {
-        break;
-      }
-    }
+  async isTimerPaused(): Promise<boolean> {
+    const classes = await this.timerDisplay.getAttribute('class');
+    return classes?.includes('--paused') ?? false;
   }
 }
