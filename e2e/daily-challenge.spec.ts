@@ -193,10 +193,9 @@ test.describe('Daily Challenge', () => {
     test('should show "all complete" badge when all challenges done', async ({ page }) => {
       const today = new Date().toISOString().split('T')[0];
 
-      // Complete all three challenges
+      // Complete all active challenges (2 games - ShapeArchitect is disabled)
       await completeDailyChallenge(page, 'magic-graph', today);
       await completeDailyChallenge(page, 'sequence-race', today);
-      await completeDailyChallenge(page, 'shape-architect', today);
 
       await dashboard.goto();
       await dashboard.waitForLoad();
@@ -251,7 +250,7 @@ test.describe('Daily Challenge', () => {
       await dashboard.goto();
       await dashboard.waitForLoad();
 
-      // Should have 1 completed, 2 incomplete
+      // Should have 1 completed, 1 incomplete (2 games total - ShapeArchitect disabled)
       const completedDots = page.locator('.daily-challenge-banner__dot--completed');
       const completedCount = await completedDots.count();
 
@@ -280,7 +279,7 @@ test.describe('Daily Challenge', () => {
       const total = await allDots.count();
       const completed = await completedDots.count();
 
-      expect(total).toBe(3);
+      expect(total).toBe(2); // 2 games active (ShapeArchitect disabled)
       expect(completed).toBe(0); // Yesterday's completion doesn't count today
     });
   });

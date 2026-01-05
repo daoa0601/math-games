@@ -408,14 +408,14 @@ export async function waitForShapeArchitectReady(
   page: Page,
   timeout = TEST_TIMEOUTS.gameLoad
 ): Promise<void> {
-  // Wait for grid board
-  await page.locator('.grid-board').waitFor({ state: 'visible', timeout });
+  // Wait for grid board (uses sa-board class)
+  await page.locator('.sa-board').waitFor({ state: 'visible', timeout });
 
-  // Wait for piece inventory
-  await page.locator('.piece-inventory').waitFor({ state: 'visible', timeout: 5000 });
+  // Wait for piece inventory (uses sa-inventory class)
+  await page.locator('.sa-inventory').waitFor({ state: 'visible', timeout: 5000 });
 
-  // Wait for at least one piece to be available
-  await page.locator('.piece-item').first().waitFor({ state: 'visible', timeout: 5000 });
+  // Wait for at least one piece to be available (uses sa-card class)
+  await page.locator('.sa-card').first().waitFor({ state: 'visible', timeout: 5000 });
 
   await waitForNextFrame(page);
 }

@@ -154,19 +154,19 @@ export class ShapeArchitectPage {
     this.rotationDisplay = page.locator('.level-info__item').filter({ hasText: /rotation/i }).locator('.level-info__value');
 
     // Instructions
-    this.instructions = page.locator('.instructions');
+    this.instructions = page.locator('.sa-instructions');
 
     // Placement error
-    this.placementError = page.locator('.placement-error');
+    this.placementError = page.locator('.sa-error');
 
     // View mode toggle
-    this.viewModeToggle = page.locator('.view-mode-toggle');
+    this.viewModeToggle = page.locator('.sa-view-mode');
     this.view2DButton = this.viewModeToggle.locator('button', { hasText: '2D' });
     this.view3DButton = this.viewModeToggle.locator('button', { hasText: '3D' });
 
     // Grid board (2D view)
-    this.gridBoard = page.locator('.grid-board');
-    this.gridCells = this.gridBoard.locator('.grid-cell');
+    this.gridBoard = page.locator('.sa-board');
+    this.gridCells = this.gridBoard.locator('.sa-cell');
 
     // 3D view specific
     this.gridBoard3D = page.locator('.grid-board-3d');
@@ -182,18 +182,18 @@ export class ShapeArchitectPage {
     this.layerSlider = this.layerControls.locator('input[type="range"]');
 
     // Rotation controls
-    this.rotationControls = page.locator('.rotation-controls');
-    this.rotateXButton = this.rotationControls.locator('button[title*="X"]');
-    this.rotateYButton = this.rotationControls.locator('button[title*="Y"]');
-    this.rotateZButton = this.rotationControls.locator('button[title*="Z"]');
-    this.rotationHintTooltip = page.locator('.rotation-hint-tooltip');
+    this.rotationControls = page.locator('.sa-rotation');
+    this.rotateXButton = this.rotationControls.locator('.sa-dial').filter({ hasText: 'X' });
+    this.rotateYButton = this.rotationControls.locator('.sa-dial').filter({ hasText: 'Y' });
+    this.rotateZButton = this.rotationControls.locator('.sa-dial').filter({ hasText: 'Z' });
+    this.rotationHintTooltip = page.locator('.sa-hint--rotation');
 
     // Undo button
     this.undoButton = page.locator('.btn--icon', { hasText: '↩️' });
 
     // Piece inventory
-    this.pieceInventory = page.locator('.piece-inventory');
-    this.pieces = this.pieceInventory.locator('.piece-card');
+    this.pieceInventory = page.locator('.sa-inventory');
+    this.pieces = this.pieceInventory.locator('.sa-card');
 
     // Hints
     this.hintToggle = page.getByRole('button', { name: /hint/i });
@@ -618,7 +618,7 @@ export class ShapeArchitectPage {
    * Click a target cell to open placement modal
    */
   async clickTargetCell() {
-    const targetCells = this.gridBoard.locator('.grid-cell--target');
+    const targetCells = this.gridBoard.locator('.sa-cell--target');
     const count = await targetCells.count();
     if (count > 0) {
       await targetCells.first().click();

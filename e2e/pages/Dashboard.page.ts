@@ -27,11 +27,13 @@ export class DashboardPage {
   readonly playTab: Locator;
   readonly statsTab: Locator;
   readonly achievementsTab: Locator;
+  readonly learnTab: Locator;
 
   // Tab panels
   readonly playTabPanel: Locator;
   readonly statsTabPanel: Locator;
   readonly achievementsTabPanel: Locator;
+  readonly learnTabPanel: Locator;
 
   // Game cards (in Play tab)
   readonly gamesGrid: Locator;
@@ -63,11 +65,13 @@ export class DashboardPage {
     this.playTab = page.locator('[data-testid="tab-play"]');
     this.statsTab = page.locator('[data-testid="tab-stats"]');
     this.achievementsTab = page.locator('[data-testid="tab-achievements"]');
+    this.learnTab = page.locator('[data-testid="tab-learn"]');
 
     // Tab panels
     this.playTabPanel = page.locator('#tabpanel-play');
     this.statsTabPanel = page.locator('#tabpanel-stats');
     this.achievementsTabPanel = page.locator('#tabpanel-achievements');
+    this.learnTabPanel = page.locator('#tabpanel-learn');
 
     // Game cards - using data-testid for reliability
     this.gamesGrid = page.locator('.games-grid');
@@ -109,11 +113,12 @@ export class DashboardPage {
   /**
    * Switch to a specific tab
    */
-  async switchTab(tab: 'play' | 'stats' | 'achievements'): Promise<void> {
+  async switchTab(tab: 'play' | 'stats' | 'achievements' | 'learn'): Promise<void> {
     const tabLocator = {
       play: this.playTab,
       stats: this.statsTab,
       achievements: this.achievementsTab,
+      learn: this.learnTab,
     }[tab];
 
     await tabLocator.click();
@@ -123,6 +128,7 @@ export class DashboardPage {
       play: this.playTabPanel,
       stats: this.statsTabPanel,
       achievements: this.achievementsTabPanel,
+      learn: this.learnTabPanel,
     }[tab];
 
     await panelLocator.waitFor({ state: 'visible' });
