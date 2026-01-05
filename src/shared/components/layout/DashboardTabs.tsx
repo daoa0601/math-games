@@ -71,6 +71,7 @@ export function DashboardTabs({ activeTab, onTabChange, achievementCount }: Dash
           className={`dashboard-tabs__tab ${activeTab === tab.id ? 'dashboard-tabs__tab--active' : ''}`}
           onClick={() => onTabChange(tab.id)}
           onKeyDown={(e) => handleKeyDown(e, index)}
+          data-testid={`tab-${tab.id}`}
         >
           <span className="dashboard-tabs__icon">{tab.icon}</span>
           <span className="dashboard-tabs__label">{t(tab.labelKey)}</span>

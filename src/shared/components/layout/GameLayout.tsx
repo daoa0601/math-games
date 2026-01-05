@@ -21,7 +21,7 @@ export function GameLayout({ title, children, headerRight, gameId }: GameLayoutP
     const [showLearn, setShowLearn] = useState(false);
 
     return (
-        <div className="game-container">
+        <div className="game-container" data-testid={gameId ? `${gameId}-game` : 'game-container'}>
             <SkipLinks />
             <header className="game-header">
                 <h1 className="game-header__title">{title}</h1>

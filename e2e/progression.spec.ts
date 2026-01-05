@@ -39,16 +39,16 @@ test.describe('Progression System', () => {
 
       // Simulate completing a MagicGraph game
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.stats.totalGamesPlayed += 1;
         profile.stats.totalPuzzlesSolved += 1;
         profile.stats.magicGraphSolved += 1;
         profile.lastPlayedDate = new Date().toISOString();
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
 
         // Dispatch storage event to trigger context update
         window.dispatchEvent(new StorageEvent('storage', {
-          key: 'player-profile',
+          key: 'math-games-player',
           newValue: JSON.stringify(profile),
         }));
       });
@@ -67,7 +67,7 @@ test.describe('Progression System', () => {
     test('should track game-specific stats separately', async ({ page }) => {
       // Simulate playing different games
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
 
         // Play MagicGraph twice
         profile.stats.totalGamesPlayed += 2;
@@ -84,7 +84,7 @@ test.describe('Progression System', () => {
         profile.stats.totalPuzzlesSolved += 1;
         profile.stats.shapeArchitectBuilt += 1;
 
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       const profile = await getPlayerProfile(page);
@@ -102,9 +102,9 @@ test.describe('Progression System', () => {
 
       // Set initial best time
       await page.evaluate((time) => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.stats.bestTimes.magicGraphFastest = time;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       }, initialTime);
 
       let profile = await getPlayerProfile(page);
@@ -112,9 +112,9 @@ test.describe('Progression System', () => {
 
       // Update with better time
       await page.evaluate((time) => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.stats.bestTimes.magicGraphFastest = time;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       }, improvedTime);
 
       profile = await getPlayerProfile(page);
@@ -138,11 +138,11 @@ test.describe('Progression System', () => {
 
       // Update stats to meet Learner requirements (5 games, 3 solves)
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.stats.totalGamesPlayed = 5;
         profile.stats.totalPuzzlesSolved = 3;
         profile.rank = 'learner';
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       // Reload to see rank update
@@ -190,11 +190,11 @@ test.describe('Progression System', () => {
     test('should persist rank across page reloads', async ({ page }) => {
       // Set to intermediate rank
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.stats.totalGamesPlayed = 30;
         profile.stats.totalPuzzlesSolved = 20;
         profile.rank = 'intermediate';
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       await page.reload();
@@ -219,11 +219,11 @@ test.describe('Progression System', () => {
 
       // Complete first game
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.stats.totalGamesPlayed = 1;
         profile.stats.totalPuzzlesSolved = 1;
         profile.achievements.push('global_first_steps');
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       profile = await getPlayerProfile(page);
@@ -233,10 +233,10 @@ test.describe('Progression System', () => {
     test('should unlock game-specific achievements', async ({ page }) => {
       // Unlock MagicGraph first solve
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.stats.magicGraphSolved = 1;
         profile.achievements.push('mg_first_solve');
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       let profile = await getPlayerProfile(page);
@@ -244,10 +244,10 @@ test.describe('Progression System', () => {
 
       // Unlock SequenceRace first victory
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.stats.sequenceRaceWins = 1;
         profile.achievements.push('sr_first_victory');
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       profile = await getPlayerProfile(page);
@@ -255,10 +255,10 @@ test.describe('Progression System', () => {
 
       // Unlock ShapeArchitect first build
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.stats.shapeArchitectBuilt = 1;
         profile.achievements.push('sa_first_build');
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       profile = await getPlayerProfile(page);
@@ -268,9 +268,9 @@ test.describe('Progression System', () => {
     test('should display achievements in achievements tab', async ({ page }) => {
       // Add some achievements
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.achievements = ['global_first_steps', 'mg_first_solve', 'sr_first_victory'];
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       await page.reload();
@@ -287,9 +287,9 @@ test.describe('Progression System', () => {
     test('should show achievement count in tab badge', async ({ page }) => {
       // Add 3 achievements out of 10 total
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.achievements = ['global_first_steps', 'mg_first_solve', 'sr_first_victory'];
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       await page.reload();
@@ -306,12 +306,12 @@ test.describe('Progression System', () => {
 
     test('should unlock "All Games" achievement when all games played', async ({ page }) => {
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.stats.magicGraphSolved = 1;
         profile.stats.sequenceRaceWins = 1;
         profile.stats.shapeArchitectBuilt = 1;
         profile.achievements.push('global_all_games');
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       const profile = await getPlayerProfile(page);
@@ -320,9 +320,9 @@ test.describe('Progression System', () => {
 
     test('should not unlock streak achievement without sufficient streak', async ({ page }) => {
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.streak = 5; // Less than 30
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       const profile = await getPlayerProfile(page);
@@ -331,10 +331,10 @@ test.describe('Progression System', () => {
 
     test('should unlock streak achievement at 30 days', async ({ page }) => {
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.streak = 30;
         profile.achievements.push('global_streak_30');
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       const profile = await getPlayerProfile(page);
@@ -347,9 +347,9 @@ test.describe('Progression System', () => {
     test('should not increment stats in practice mode', async ({ page }) => {
       // Enable practice mode
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.preferences.practiceMode = true;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       const initialProfile = await getPlayerProfile(page);
@@ -374,9 +374,9 @@ test.describe('Progression System', () => {
     test('should not unlock achievements in practice mode', async ({ page }) => {
       // Enable practice mode
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.preferences.practiceMode = true;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       const initialProfile = await getPlayerProfile(page);
@@ -391,10 +391,10 @@ test.describe('Progression System', () => {
     test('should resume tracking when practice mode is disabled', async ({ page }) => {
       // Start with practice mode enabled
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.preferences.practiceMode = true;
         profile.stats.totalGamesPlayed = 5;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       let profile = await getPlayerProfile(page);
@@ -403,9 +403,9 @@ test.describe('Progression System', () => {
 
       // Disable practice mode
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.preferences.practiceMode = false;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       profile = await getPlayerProfile(page);
@@ -425,10 +425,10 @@ test.describe('Progression System', () => {
 
     test('should increment streak on consecutive days', async ({ page }) => {
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.streak = 5;
         profile.lastPlayedDate = new Date().toISOString();
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       await page.reload();
@@ -440,9 +440,9 @@ test.describe('Progression System', () => {
 
     test('should display streak in header', async ({ page }) => {
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.streak = 10;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       await page.reload();
@@ -457,9 +457,9 @@ test.describe('Progression System', () => {
     test('should persist streak across sessions', async ({ page }) => {
       // Set streak
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.streak = 15;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       const profile1 = await getPlayerProfile(page);
@@ -480,7 +480,7 @@ test.describe('Progression System', () => {
     test('should persist all profile data across page reloads', async ({ page }) => {
       // Set up comprehensive profile data
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.displayName = 'E2E Test Player';
         profile.stats.totalGamesPlayed = 42;
         profile.stats.totalPuzzlesSolved = 30;
@@ -491,7 +491,7 @@ test.describe('Progression System', () => {
         profile.rank = 'advanced';
         profile.streak = 7;
         profile.achievements = ['global_first_steps', 'mg_first_solve'];
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       // Reload page
@@ -519,9 +519,9 @@ test.describe('Progression System', () => {
       // Perform multiple updates
       for (let i = 1; i <= 5; i++) {
         await page.evaluate((count) => {
-          const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+          const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
           profile.stats.totalGamesPlayed = count;
-          localStorage.setItem('player-profile', JSON.stringify(profile));
+          localStorage.setItem('math-games-player', JSON.stringify(profile));
         }, i);
 
         const profile = await getPlayerProfile(page);
@@ -550,7 +550,7 @@ test.describe('Progression System', () => {
     test('should handle corrupted localStorage gracefully', async ({ page }) => {
       // Set invalid JSON
       await page.evaluate(() => {
-        localStorage.setItem('player-profile', 'invalid-json{{{');
+        localStorage.setItem('math-games-player', 'invalid-json{{{');
       });
 
       // App should handle this and reinitialize
@@ -593,13 +593,13 @@ test.describe('Progression System', () => {
 
       // Update stats
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.stats.totalGamesPlayed = 10;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
 
         // Trigger storage event
         window.dispatchEvent(new StorageEvent('storage', {
-          key: 'player-profile',
+          key: 'math-games-player',
           newValue: JSON.stringify(profile),
         }));
       });

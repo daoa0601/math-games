@@ -40,7 +40,7 @@ export function DailyChallengeBanner({ countdown, className = '' }: DailyChallen
   }, [completions]);
 
   return (
-    <div className={`daily-challenge-banner ${allCompleted ? 'daily-challenge-banner--completed' : ''} ${className}`}>
+    <div className={`daily-challenge-banner ${allCompleted ? 'daily-challenge-banner--completed' : ''} ${className}`} data-testid="daily-challenge-banner">
       <div className="daily-challenge-banner__header">
         <span className="daily-challenge-banner__icon">📅</span>
         <span className="daily-challenge-banner__title">{t('daily.title')}</span>
@@ -57,6 +57,7 @@ export function DailyChallengeBanner({ countdown, className = '' }: DailyChallen
               to={game.path}
               className={`daily-challenge-banner__dot ${isCompleted ? 'daily-challenge-banner__dot--completed' : ''}`}
               title={t(`games.${game.id === 'magic-graph' ? 'magicGraph' : game.id === 'sequence-race' ? 'sequenceRace' : 'shapeArchitect'}.title`)}
+              data-testid={`daily-challenge-${game.id}`}
             >
               <span className="daily-challenge-banner__dot-icon">{game.icon}</span>
             </Link>

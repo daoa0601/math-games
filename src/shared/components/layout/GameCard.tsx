@@ -78,14 +78,14 @@ export const GameCard = memo(function GameCard({
 
   if (disabled) {
     return (
-      <div className="slab slab--disabled">
+      <div className="slab slab--disabled" data-testid={`game-card-${id}`}>
         {content}
       </div>
     );
   }
 
   return (
-    <Link to={to} className="slab">
+    <Link to={to} className="slab" data-testid={`game-card-${id}`}>
       {content}
     </Link>
   );

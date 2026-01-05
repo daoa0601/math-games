@@ -34,20 +34,20 @@ test.describe('Daily Challenge', () => {
       await expect(dashboard.dailyChallengeBanner).toBeVisible();
     });
 
-    test('should show all three game challenges', async ({ page }) => {
-      // Should have 3 challenge dots (one for each game)
+    test('should show all game challenges', async ({ page }) => {
+      // Should have 2 challenge dots (ShapeArchitect is currently disabled)
       const challengeDots = page.locator('.daily-challenge-banner__dot');
       const count = await challengeDots.count();
 
-      expect(count).toBe(3);
+      expect(count).toBe(2);
     });
 
     test('should display challenge icons', async ({ page }) => {
-      // Each challenge should have an icon
+      // Each challenge should have an icon (2 games currently active)
       const icons = page.locator('.daily-challenge-banner__dot-icon');
       const iconCount = await icons.count();
 
-      expect(iconCount).toBe(3);
+      expect(iconCount).toBe(2);
 
       // Verify icons are visible
       for (let i = 0; i < iconCount; i++) {
@@ -93,9 +93,7 @@ test.describe('Daily Challenge', () => {
   test.describe('Starting Challenges', () => {
     test('should navigate to MagicGraph daily challenge', async ({ page }) => {
       // Click on MagicGraph challenge dot
-      const magicGraphDot = page
-        .locator('.daily-challenge-banner__dot')
-        .filter({ hasText: '✨' });
+      const magicGraphDot = page.locator('[data-testid="daily-challenge-magic-graph"]');
 
       await magicGraphDot.click();
 
@@ -107,9 +105,7 @@ test.describe('Daily Challenge', () => {
 
     test('should navigate to SequenceRace daily challenge', async ({ page }) => {
       // Click on SequenceRace challenge dot
-      const sequenceRaceDot = page
-        .locator('.daily-challenge-banner__dot')
-        .filter({ hasText: '🏃' });
+      const sequenceRaceDot = page.locator('[data-testid="daily-challenge-sequence-race"]');
 
       await sequenceRaceDot.click();
 
@@ -119,11 +115,10 @@ test.describe('Daily Challenge', () => {
       expect(page.url()).toContain('daily=true');
     });
 
-    test('should navigate to ShapeArchitect daily challenge', async ({ page }) => {
+    test.skip('should navigate to ShapeArchitect daily challenge', async ({ page }) => {
+      // ShapeArchitect is currently disabled/removed from daily challenges
       // Click on ShapeArchitect challenge dot
-      const shapeArchitectDot = page
-        .locator('.daily-challenge-banner__dot')
-        .filter({ hasText: '🧱' });
+      const shapeArchitectDot = page.locator('[data-testid="daily-challenge-shape-architect"]');
 
       await shapeArchitectDot.click();
 
@@ -135,9 +130,7 @@ test.describe('Daily Challenge', () => {
 
     test('should maintain daily parameter through page reload', async ({ page }) => {
       // Navigate to daily challenge
-      const magicGraphDot = page
-        .locator('.daily-challenge-banner__dot')
-        .filter({ hasText: '✨' });
+      const magicGraphDot = page.locator('[data-testid="daily-challenge-magic-graph"]');
 
       await magicGraphDot.click();
       await page.waitForURL(/\/magic-graph.*daily=true/);
@@ -154,9 +147,7 @@ test.describe('Daily Challenge', () => {
     });
 
     test('should have tooltip on challenge dots', async ({ page }) => {
-      const magicGraphDot = page
-        .locator('.daily-challenge-banner__dot')
-        .filter({ hasText: '✨' });
+      const magicGraphDot = page.locator('[data-testid="daily-challenge-magic-graph"]');
 
       // Should have title attribute for tooltip
       const title = await magicGraphDot.getAttribute('title');
@@ -177,9 +168,7 @@ test.describe('Daily Challenge', () => {
       await dashboard.waitForLoad();
 
       // MagicGraph dot should show as completed
-      const magicGraphDot = page
-        .locator('.daily-challenge-banner__dot--completed')
-        .filter({ hasText: '✨' });
+      const magicGraphDot = page.locator('[data-testid="daily-challenge-magic-graph"].daily-challenge-banner__dot--completed');
 
       await expect(magicGraphDot).toBeVisible();
     });
@@ -247,7 +236,7 @@ test.describe('Daily Challenge', () => {
       const dailyData = await page.evaluate((key) => {
         const data = localStorage.getItem(key);
         return data ? JSON.parse(data) : null;
-      }, STORAGE_KEYS.DAILY_CHALLENGES);
+      }, STORAGE_KEYS.DAILY_CHALLENGE);
 
       expect(dailyData).toBeTruthy();
       expect(dailyData['magic-graph']).toContain(today);
@@ -300,9 +289,9 @@ test.describe('Daily Challenge', () => {
     test('should display current streak in header', async ({ page }) => {
       // Set streak to 5
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.streak = 5;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       await page.reload();
@@ -316,11 +305,11 @@ test.describe('Daily Challenge', () => {
     test('should increment streak on consecutive day completion', async ({ page }) => {
       // Initial streak
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.streak = 3;
         const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         profile.lastPlayedDate = yesterday;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       const initialProfile = await page.evaluate((key) => {
@@ -333,10 +322,10 @@ test.describe('Daily Challenge', () => {
       // Note: Actual streak increment happens in PlayerContext/services
       // This test verifies the data structure
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.streak = 4; // Simulating increment
         profile.lastPlayedDate = new Date().toISOString();
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       const updatedProfile = await page.evaluate((key) => {
@@ -351,9 +340,9 @@ test.describe('Daily Challenge', () => {
 
       // Set initial streak
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.streak = 10;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       // Complete a challenge
@@ -370,9 +359,9 @@ test.describe('Daily Challenge', () => {
     test('should show streak indicator when streak is active', async ({ page }) => {
       // Set a streak
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.streak = 7;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       await page.reload();
@@ -393,11 +382,11 @@ test.describe('Daily Challenge', () => {
     test('should reset streak on missed day', async ({ page }) => {
       // Set streak with last played date 3 days ago
       await page.evaluate(() => {
-        const profile = JSON.parse(localStorage.getItem('player-profile') || '{}');
+        const profile = JSON.parse(localStorage.getItem('math-games-player') || '{}');
         profile.streak = 5;
         const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
         profile.lastPlayedDate = threeDaysAgo;
-        localStorage.setItem('player-profile', JSON.stringify(profile));
+        localStorage.setItem('math-games-player', JSON.stringify(profile));
       });
 
       // In real app, PlayerContext would reset streak on load
@@ -506,7 +495,7 @@ test.describe('Daily Challenge', () => {
           const data = { [gameId]: [date] };
           localStorage.setItem(key, JSON.stringify(data));
         },
-        { key: STORAGE_KEYS.DAILY_CHALLENGES, gameId: 'magic-graph', date: today }
+        { key: STORAGE_KEYS.DAILY_CHALLENGE, gameId: 'magic-graph', date: today }
       );
 
       // Now load dashboard
@@ -541,7 +530,7 @@ test.describe('Daily Challenge', () => {
       // Clear daily challenges
       await page.evaluate((key) => {
         localStorage.removeItem(key);
-      }, STORAGE_KEYS.DAILY_CHALLENGES);
+      }, STORAGE_KEYS.DAILY_CHALLENGE);
 
       await page.reload();
       await dashboard.waitForLoad();
@@ -559,7 +548,7 @@ test.describe('Daily Challenge', () => {
       // Set invalid data
       await page.evaluate((key) => {
         localStorage.setItem(key, 'invalid-json{{{');
-      }, STORAGE_KEYS.DAILY_CHALLENGES);
+      }, STORAGE_KEYS.DAILY_CHALLENGE);
 
       await page.reload();
       await dashboard.waitForLoad();
@@ -583,7 +572,7 @@ test.describe('Daily Challenge', () => {
           };
           localStorage.setItem(key, JSON.stringify(data));
         },
-        { key: STORAGE_KEYS.DAILY_CHALLENGES, today, lastWeek }
+        { key: STORAGE_KEYS.DAILY_CHALLENGE, today, lastWeek }
       );
 
       await page.reload();
@@ -641,9 +630,7 @@ test.describe('Daily Challenge', () => {
 
     test('should activate challenge with Enter key', async ({ page }) => {
       // Find and focus first challenge dot
-      const magicGraphDot = page
-        .locator('.daily-challenge-banner__dot')
-        .filter({ hasText: '✨' });
+      const magicGraphDot = page.locator('[data-testid="daily-challenge-magic-graph"]');
 
       await magicGraphDot.focus();
 

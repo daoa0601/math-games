@@ -58,30 +58,28 @@ export class DashboardPage {
     this.soundToggle = page.locator('.sound-toggle');
     this.languageSwitcher = page.locator('.lang-switcher');
 
-    // Tab navigation (using ARIA roles for reliability)
-    // On mobile (<600px), tabs show icons only: 🎮, 📊, 🏆
-    // On desktop, tabs show full text: Play/Chơi, Stats/Thống kê, Achievements/Thành tựu
+    // Tab navigation (using data-testid for reliability)
     this.tabList = page.locator('[role="tablist"]');
-    this.playTab = page.getByRole('tab', { name: /play|chơi|🎮/i });
-    this.statsTab = page.getByRole('tab', { name: /stats|thống kê|📊/i });
-    this.achievementsTab = page.getByRole('tab', { name: /achievements|thành tựu|🏆/i });
+    this.playTab = page.locator('[data-testid="tab-play"]');
+    this.statsTab = page.locator('[data-testid="tab-stats"]');
+    this.achievementsTab = page.locator('[data-testid="tab-achievements"]');
 
     // Tab panels
     this.playTabPanel = page.locator('#tabpanel-play');
     this.statsTabPanel = page.locator('#tabpanel-stats');
     this.achievementsTabPanel = page.locator('#tabpanel-achievements');
 
-    // Game cards - using class selectors
+    // Game cards - using data-testid for reliability
     this.gamesGrid = page.locator('.games-grid');
     this.gameCards = page.locator('.game-card');
 
-    // Individual game cards by their link destination (using suffix matcher for base path compatibility)
-    this.magicGraphCard = page.locator('a.game-card[href$="/magic-graph"]');
-    this.sequenceRaceCard = page.locator('a.game-card[href$="/sequence-race"]');
-    this.shapeArchitectCard = page.locator('a.game-card[href$="/shape-architect"]');
+    // Individual game cards by data-testid
+    this.magicGraphCard = page.locator('[data-testid="game-card-magicGraph"]');
+    this.sequenceRaceCard = page.locator('[data-testid="game-card-sequenceRace"]');
+    this.shapeArchitectCard = page.locator('[data-testid="game-card-shapeArchitect"]');
 
     // Daily challenge banner
-    this.dailyChallengeBanner = page.locator('.daily-challenge-banner');
+    this.dailyChallengeBanner = page.locator('[data-testid="daily-challenge-banner"]');
   }
 
   /**
