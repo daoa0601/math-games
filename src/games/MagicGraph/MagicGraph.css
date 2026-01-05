@@ -8,8 +8,15 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
-  max-width: 480px;
+  max-width: min(95vw, 480px);
   margin: 0 auto;
+}
+
+/* Desktop: Larger puzzle area */
+@media (min-width: 1024px) {
+  .mg-container {
+    max-width: min(95vw, 600px);
+  }
 }
 
 /* Level Selector */
@@ -93,7 +100,10 @@
   pointer-events: none;
 }
 
-.mg-node--fixed .mg-node__text { fill: var(--muted); }
+.mg-node--fixed .mg-node__text {
+  fill: var(--text);
+  opacity: 0.7;
+}
 .mg-node__pattern { pointer-events: none; }
 
 /* Number Inventory */
@@ -125,10 +135,13 @@
   background: var(--accent);
   color: var(--bg);
   border-color: var(--accent);
+  font-weight: 600;
 }
 
 .mg-chip--used {
-  opacity: 0.3;
+  opacity: 0.5;
+  text-decoration: line-through;
+  color: var(--muted);
   cursor: not-allowed;
 }
 
@@ -179,7 +192,11 @@
   text-align: center;
 }
 
-.mg-picker__option--current { border-color: var(--accent); }
+.mg-picker__option--current {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+}
 
 .mg-picker__clear {
   width: 100%;

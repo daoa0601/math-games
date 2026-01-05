@@ -44,11 +44,37 @@ body {
   padding-bottom: 80px; /* Bottom nav space */
 }
 
-/* Content wrapper - consistent max-width for all sections */
+/* Content wrapper - responsive max-width */
 .content-wrap {
-  max-width: 600px;
+  width: 100%;
+  max-width: var(--content-sm);
   margin: 0 auto;
   padding: 0 var(--space-lg);
+}
+
+/* Tablet: More padding */
+@media (min-width: 768px) {
+  .content-wrap {
+    padding: 0 var(--space-xl);
+  }
+}
+
+/* Desktop: Expand content area */
+@media (min-width: 1024px) {
+  .content-wrap {
+    max-width: var(--content-md);
+  }
+
+  .page {
+    padding-bottom: 0;
+  }
+}
+
+/* Large Desktop: Full expansion */
+@media (min-width: 1280px) {
+  .content-wrap {
+    max-width: var(--content-lg);
+  }
 }
 
 /* Grid layout - Spotify-style list */
@@ -259,6 +285,20 @@ body {
 
 .nav__icon {
   font-size: 20px;
+}
+
+/* Desktop: Centered nav with max-width */
+@media (min-width: 1024px) {
+  .nav {
+    justify-content: center;
+    gap: var(--space-xl);
+  }
+
+  .nav__item {
+    flex-direction: row;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-lg);
+  }
 }
 
 /* Labels (tags) */
