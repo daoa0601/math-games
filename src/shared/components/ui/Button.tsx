@@ -12,6 +12,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   rightIcon?: React.ReactNode;
 }
 
+/**
+ * Button component using Linear Editorial design system.
+ * Uses .action classes for flat, minimal styling.
+ */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -23,15 +27,27 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       className = '',
       disabled,
+      style,
       ...props
     },
     ref
   ) => {
-    const baseClass = 'btn';
-    const variantClass = `btn--${variant}`;
-    const sizeClass = size !== 'medium' ? `btn--${size}` : '';
+    // Map variants to action classes
+    const variantMap: Record<ButtonVariant, string> = {
+      primary: 'action--primary',
+      secondary: 'action--secondary',
+      ghost: 'action--secondary',
+      success: 'action--success',
+      danger: 'action--danger',
+    };
 
-    const classes = [baseClass, variantClass, sizeClass, className]
+    const sizeStyles: Record<ButtonSize, React.CSSProperties> = {
+      small: { fontSize: 'var(--text-xs)', padding: 'var(--space-xs) var(--space-sm)' },
+      medium: {},
+      large: { fontSize: 'var(--text-base)', padding: 'var(--space-md) var(--space-xl)' },
+    };
+
+    const classes = ['action', variantMap[variant], className]
       .filter(Boolean)
       .join(' ');
 
@@ -40,10 +56,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={classes}
         disabled={disabled || isLoading}
+        style={{ ...sizeStyles[size], ...style }}
         {...props}
       >
         {isLoading ? (
-          <span className="btn__spinner" aria-hidden="true">
+          <span className="action__spinner" aria-hidden="true">
             <svg
               width="16"
               height="16"
@@ -65,11 +82,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             </svg>
           </span>
         ) : (
-          leftIcon && <span className="btn__icon btn__icon--left">{leftIcon}</span>
+          leftIcon && <span className="action__icon">{leftIcon}</span>
         )}
-        <span className="btn__text">{children}</span>
+        <span>{children}</span>
         {!isLoading && rightIcon && (
-          <span className="btn__icon btn__icon--right">{rightIcon}</span>
+          <span className="action__icon">{rightIcon}</span>
         )}
       </button>
     );
@@ -78,9 +95,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = 'Button';
 
-// Add the spin animation to the document if not already present
+// Add minimal styles for spinner and icons
 if (typeof document !== 'undefined') {
-  const styleId = 'button-animations';
+  const styleId = 'button-styles';
   if (!document.getElementById(styleId)) {
     const style = document.createElement('style');
     style.id = styleId;
@@ -89,34 +106,19 @@ if (typeof document !== 'undefined') {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
       }
-      .btn__spinner {
+      .action__spinner,
+      .action__icon {
         display: inline-flex;
         align-items: center;
-        justify-content: center;
+        margin-right: var(--space-xs);
       }
-      .btn__icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+      .action--success {
+        background: var(--success);
+        color: var(--bg);
       }
-      .btn__icon--left {
-        margin-right: 0.25rem;
-      }
-      .btn__icon--right {
-        margin-left: 0.25rem;
-      }
-      .btn--danger {
-        background: linear-gradient(180deg, hsl(0, 70%, 62%), hsl(0, 70%, 52%));
-        color: white;
-        box-shadow: 0 4px 0 0 hsl(0, 70%, 40%), 0 6px 12px -2px hsla(0, 70%, 40%, 0.35);
-      }
-      .btn--danger:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 0 0 hsl(0, 70%, 40%), 0 10px 20px -2px hsla(0, 70%, 40%, 0.4);
-      }
-      .btn--danger:active {
-        transform: translateY(2px);
-        box-shadow: 0 2px 0 0 hsl(0, 70%, 40%), 0 4px 8px -2px hsla(0, 70%, 40%, 0.3);
+      .action--danger {
+        background: #ef4444;
+        color: var(--text);
       }
     `;
     document.head.appendChild(style);

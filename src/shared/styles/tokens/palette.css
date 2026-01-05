@@ -1,0 +1,19 @@
+/* palette.css - Linear Editorial color system */
+/* Deep navy palette with sky blue accent */
+
+:root {
+  /* Backgrounds */
+  --bg: #0a0f1a;
+  --surface: #111827;
+
+  /* Borders */
+  --border: #1e3a5f;
+
+  /* Text */
+  --text: #f8fafc;
+  --muted: #64748b;
+
+  /* Feedback */
+  --accent: #60a5fa;
+  --success: #4ade80;
+}

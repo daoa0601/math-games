@@ -31,6 +31,7 @@ import { RaceTrack, StepCards, HistoryLog, SequenceInfoBadge, SequenceRaceTutori
 import { useSequenceRaceState, useAIOpponent, useHintSystem } from './hooks';
 import { applyMove, isHumanTurn } from './logic/engine';
 import { getDailySequenceRaceConfig } from './logic/seededGenerator';
+import '@/shared/styles/game-base.css';
 import './SequenceRace.css';
 
 export function SequenceRaceGame() {
@@ -83,6 +84,9 @@ export function SequenceRaceGame() {
   // Timer
   // ─────────────────────────────────────────────────────────────────
 
+  // Track game over state for timer - needs to be declared before useGameTimer
+  const [isGameOver, setIsGameOver] = useState(false);
+
   const {
     timeLeft,
     showTimeUp,
@@ -95,7 +99,7 @@ export function SequenceRaceGame() {
     pauseTimer,
     resumeTimer,
   } = useGameTimer({
-    isGameOver: false, // Will be set by game state
+    isGameOver,
     practiceMode: profile.preferences.practiceMode,
     onTimeWarning: handleTimeWarning,
   });
@@ -287,11 +291,25 @@ export function SequenceRaceGame() {
   );
 
   // ─────────────────────────────────────────────────────────────────
-  // Win Celebration Effect
+  // Sync game over state for timer
   // ─────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (gameState.gameOver && gameState.winner === 'player') {
+    setIsGameOver(gameState.gameOver);
+  }, [gameState.gameOver]);
+
+  // ─────────────────────────────────────────────────────────────────
+  // Win Celebration Effect (runs once when game ends)
+  // ─────────────────────────────────────────────────────────────────
+
+  // Use ref to capture elapsed time at win moment (avoids re-triggering on timer ticks)
+  const winTimeRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (gameState.gameOver && gameState.winner === 'player' && winTimeRef.current === null) {
+      // Capture the time at win
+      winTimeRef.current = elapsedTime;
+
       handleCompletion({
         gameId: 'sequence-race',
         levelId: isDailyMode ? 'daily' : currentConfig.id,
@@ -310,6 +328,11 @@ export function SequenceRaceGame() {
 
       playSound('win');
       showConfetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    }
+
+    // Reset the ref when game restarts
+    if (!gameState.gameOver) {
+      winTimeRef.current = null;
     }
   }, [
     gameState.gameOver,
@@ -366,7 +389,7 @@ export function SequenceRaceGame() {
         </>
       }
     >
-      <div className="sequence-container">
+      <div className="sr-container">
         {/* Daily Challenge Badge */}
         {isDailyMode && (
           <div className="daily-badge">
@@ -438,7 +461,7 @@ export function SequenceRaceGame() {
                 {game.name}
               </button>
             ))}
-            <button className="btn btn--secondary" onClick={startRandomGame}>
+            <button className="game-btn game-btn--secondary" onClick={startRandomGame}>
               🎲 {tc('buttons.random')}
             </button>
           </div>
@@ -448,20 +471,20 @@ export function SequenceRaceGame() {
         <SequenceInfoBadge sequenceType={currentConfig.sequenceType || 'arithmetic'} />
 
         {/* Game Info Panel */}
-        <div className="game-info-panel">
-          <div className="game-info-panel__item">
-            <span className="game-info-panel__label">{t('target')}</span>
-            <span className="game-info-panel__value game-info-panel__value--glow">
+        <div className="game-info">
+          <div className="game-info__item">
+            <span className="game-info__label">{t('target')}</span>
+            <span className="game-info__value game-info__value--accent">
               {gameState.target}
             </span>
           </div>
-          <div className="game-info-panel__item">
-            <span className="game-info-panel__label">{t('position')}</span>
-            <span className="game-info-panel__value">{gameState.currentPosition}</span>
+          <div className="game-info__item">
+            <span className="game-info__label">{t('position')}</span>
+            <span className="game-info__value">{gameState.currentPosition}</span>
           </div>
-          <div className="game-info-panel__item">
-            <span className="game-info-panel__label">{t('turn')}</span>
-            <span className={`game-info-panel__value game-info-panel__value--${gameState.turn}`}>
+          <div className="game-info__item">
+            <span className="game-info__label">{t('turn')}</span>
+            <span className={`game-info__value game-info__value--${gameState.turn}`}>
               {turnLabel}
             </span>
           </div>
@@ -479,15 +502,15 @@ export function SequenceRaceGame() {
 
         {/* AI First Move Banner */}
         {currentConfig.aiMovesFirst && gameState.history.length === 0 && gameState.turn === 'ai' && (
-          <div className="ai-first-banner">
-            <span className="ai-first-banner__icon">🎯</span>
-            <span className="ai-first-banner__text">{t('aiMovesFirst', 'The opponent moves first this round!')}</span>
+          <div className="sr-ai-first">
+            <span>🎯</span>
+            <span className="sr-ai-first__text">{t('aiMovesFirst', 'The opponent moves first this round!')}</span>
           </div>
         )}
 
         {/* Turn Indicator */}
         {!gameState.gameOver && !showTimeUp && (
-          <div className={`turn-indicator turn-indicator--${gameState.turn}`}>
+          <div className={`sr-turn sr-turn--${gameState.turn}`}>
             {gameMode === 'two-player'
               ? gameState.turn === 'player1'
                 ? t('player1Turn')
@@ -514,7 +537,7 @@ export function SequenceRaceGame() {
         {/* Undo Button */}
         {canUndo && (
           <button
-            className="btn btn--secondary undo-btn"
+            className="game-btn"
             onClick={undoLastMove}
             aria-label={t('undo', 'Undo')}
           >
@@ -523,17 +546,15 @@ export function SequenceRaceGame() {
         )}
 
         {/* Hint Toggle */}
-        <button className="btn btn--secondary hint-toggle" onClick={toggleHints}>
+        <button className="game-btn" onClick={toggleHints}>
           💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
         </button>
 
         {/* Hints Panel */}
         {showHints && (
-          <div className="hints-panel">
+          <div className="sr-hints">
             {teacherHint && (
-              <div
-                className={`hint-card hint-card--teacher ${teacherHint.wasOptimal ? 'hint-card--teacher-good' : 'hint-card--teacher-learn'}`}
-              >
+              <div className="sr-hint">
                 <h4>
                   {teacherHint.wasOptimal
                     ? `✅ ${t('hints.goodMove')}`
@@ -541,14 +562,12 @@ export function SequenceRaceGame() {
                 </h4>
                 <p>{teacherHint.explanation}</p>
                 {!teacherHint.wasOptimal && teacherHint.optimalMove && (
-                  <p className="hint-card__suggestion">
-                    {t('hints.optimalPlay', { move: teacherHint.optimalMove })}
-                  </p>
+                  <p>{t('hints.optimalPlay', { move: teacherHint.optimalMove })}</p>
                 )}
               </div>
             )}
 
-            <div className="hint-card hint-card--concept">
+            <div className="sr-hint">
               <h4>
                 {t('hints.sequence', {
                   name: getSequenceName(currentConfig.sequenceType || 'arithmetic'),
@@ -558,7 +577,7 @@ export function SequenceRaceGame() {
             </div>
 
             {analysis && gameState.turn === 'player' && (
-              <div className={`hint-card ${analysis.canWin ? 'hint-card--concept' : 'hint-card--strategy'}`}>
+              <div className="sr-hint">
                 <h4>{t('hints.positionAnalysis')}</h4>
                 <p>
                   {analysis.canWin
@@ -568,7 +587,7 @@ export function SequenceRaceGame() {
               </div>
             )}
 
-            <div className="hint-card hint-card--strategy">
+            <div className="sr-hint">
               <h4>{t('hints.gameTheoryTip.title')}</h4>
               <p>{t('hints.gameTheoryTip.message')}</p>
             </div>
@@ -579,8 +598,8 @@ export function SequenceRaceGame() {
         <HistoryLog history={gameState.history} />
 
         {/* Actions */}
-        <div className="game-actions">
-          <button className="btn btn--secondary" onClick={restartGame}>
+        <div className="sr-actions">
+          <button className="game-btn" onClick={restartGame}>
             🔄 {tc('buttons.restart')}
           </button>
         </div>
@@ -631,15 +650,15 @@ export function SequenceRaceGame() {
             )}
             {/* In daily mode, show Back to Games; otherwise show game buttons */}
             {isDailyMode ? (
-              <a href="/math-games/" className="btn btn--primary">
+              <a href="/math-games/" className="game-btn game-btn--primary">
                 {tc('backToGames')}
               </a>
             ) : (
               <>
-                <button className="btn btn--primary" onClick={restartGame}>
+                <button className="game-btn game-btn--primary" onClick={restartGame}>
                   {tc('buttons.playAgain')}
                 </button>
-                <button className="btn btn--secondary" onClick={startRandomGame}>
+                <button className="game-btn game-btn--secondary" onClick={startRandomGame}>
                   {tc('buttons.newGame')}
                 </button>
               </>
@@ -667,10 +686,10 @@ export function SequenceRaceGame() {
               </>
             }
           >
-            <button className="btn btn--primary" onClick={restartGame}>
+            <button className="game-btn game-btn--primary" onClick={restartGame}>
               {tc('buttons.tryAgain')}
             </button>
-            <button className="btn btn--secondary" onClick={startRandomGame}>
+            <button className="game-btn game-btn--secondary" onClick={startRandomGame}>
               {tc('buttons.newGame')}
             </button>
           </GameOverlay>

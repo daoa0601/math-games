@@ -9,7 +9,7 @@ export interface GameCardProps {
   id: GameId;
   title: string;
   description: string;
-  icon: string; // Kept for fallback, but we use custom icons
+  icon: string;
   tags: string[];
   to: string;
   disabled?: boolean;
@@ -26,7 +26,13 @@ const iconMap: Record<GameId, React.ComponentType<{ size?: number; className?: s
   shapeArchitect: ShapeArchitectIcon,
 };
 
-// Memoized to prevent re-renders when parent state changes (e.g., achievements gallery toggle)
+// Number glyphs for editorial style
+const GAME_NUMBERS: Record<GameId, string> = {
+  magicGraph: '01',
+  sequenceRace: '02',
+  shapeArchitect: '03',
+};
+
 export const GameCard = memo(function GameCard({
   id,
   title,
@@ -35,70 +41,51 @@ export const GameCard = memo(function GameCard({
   to,
   disabled,
   progress,
-  isNew,
 }: GameCardProps) {
   const IconComponent = iconMap[id];
+  const gameNumber = GAME_NUMBERS[id];
 
   const content = (
     <>
-      {/* Progress indicator in corner */}
+      {/* Icon (left) */}
+      <div className="slab__glyph">
+        {IconComponent ? <IconComponent size={32} /> : '◆'}
+      </div>
+
+      {/* Content (middle) */}
+      <div className="slab__content">
+        <h3 className="slab__title">{title}</h3>
+        <div className="slab__meta">
+          {tags.join(' · ')} {description && `· ${description}`}
+        </div>
+      </div>
+
+      {/* Progress (optional) */}
       {progress && progress.total > 0 && (
-        <div className="game-card__progress">
+        <div className="slab__progress">
           <CompactProgressRing
             completed={progress.completed}
             total={progress.total}
-            size={48}
+            size={36}
           />
         </div>
       )}
 
-      {/* Custom SVG Icon */}
-      <div className="game-card__icon">
-        {IconComponent ? (
-          <IconComponent size={56} />
-        ) : (
-          <span style={{ fontSize: '2.5rem' }}>🎮</span>
-        )}
-      </div>
-
-      <h3 className="game-card__title">
-        {title}
-        {isNew && <span className="tag tag--new" style={{ marginLeft: '0.5rem', fontSize: '0.65rem' }}>NEW</span>}
-      </h3>
-
-      <p className="game-card__description">{description}</p>
-
-      <div className="game-card__tags">
-        {tags.map((tag) => (
-          <span key={tag} className="tag">
-            {tag}
-          </span>
-        ))}
-      </div>
-
-      {disabled && (
-        <div className="game-card__disabled-overlay">
-          <span className="tag" style={{ background: 'hsla(220, 10%, 50%, 0.2)', color: 'var(--text-muted)' }}>
-            Coming Soon
-          </span>
-        </div>
-      )}
+      {/* Number (right) */}
+      <span className="slab__number">{gameNumber}</span>
     </>
   );
 
   if (disabled) {
     return (
-      <div
-        className="game-card game-card--disabled"
-        style={{ opacity: 0.6, cursor: 'not-allowed' }}
-      >
+      <div className="slab slab--disabled">
         {content}
       </div>
     );
   }
 
   return (
-    <Link to={to} className="game-card">
+    <Link to={to} className="slab">
       {content}
     </Link>
   );

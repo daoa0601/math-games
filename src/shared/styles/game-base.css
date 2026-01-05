@@ -1,0 +1,457 @@
+/* ============================================
+   GAME BASE - Unified Shared Game Styles
+   Linear Editorial Design System
+   Target: ~300 lines
+   ============================================ */
+
+/* ----------------------------------------
+   Per-Game Accent Colors
+   ---------------------------------------- */
+[data-game="magic-graph"] { --accent: #a78bfa; }    /* Violet */
+[data-game="sequence-race"] { --accent: #fb923c; }  /* Orange */
+[data-game="shape-architect"] { --accent: #2dd4bf; } /* Teal */
+
+/* ----------------------------------------
+   Info Panel - scores, turns, levels
+   Used by: ALL games
+   ---------------------------------------- */
+.game-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.game-info__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.game-info__label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.game-info__value {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--text);
+}
+
+.game-info__value--player { color: var(--success); }
+.game-info__value--ai { color: #ef4444; }
+.game-info__value--accent { color: var(--accent); }
+
+/* ----------------------------------------
+   Mode Toggle
+   Used by: MagicGraph, SequenceRace, ShapeArchitect
+   ---------------------------------------- */
+.mode-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+}
+
+.mode-toggle__btn {
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+
+.mode-toggle__btn:hover { opacity: 0.8; }
+.mode-toggle__btn--active {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ----------------------------------------
+   Game Modal - end-game overlay
+   Used by: ALL games
+   ---------------------------------------- */
+.game-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 100;
+  animation: fade-in var(--motion-normal) var(--ease-out);
+}
+
+.game-modal__content {
+  max-width: 400px;
+  width: 90%;
+  padding: var(--space-xl);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.game-modal__title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-lg);
+}
+
+.game-modal__title--win { color: var(--success); }
+.game-modal__title--lose { color: #ef4444; }
+
+.game-modal__subtitle {
+  font-size: var(--text-sm);
+  color: var(--muted);
+  margin-bottom: var(--space-md);
+}
+
+.game-modal__stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-xl);
+  margin: var(--space-lg) 0;
+  font-family: var(--font-mono);
+}
+
+.game-modal__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.game-modal__stat-label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.game-modal__stat-value {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--text);
+}
+
+.game-modal__actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  margin-top: var(--space-lg);
+}
+
+/* ----------------------------------------
+   Difficulty / Level Selectors
+   Used by: ALL games
+   ---------------------------------------- */
+.difficulty-selector,
+.level-selector {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.difficulty-btn,
+.level-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+
+.difficulty-btn:hover,
+.level-btn:hover { opacity: 0.8; }
+
+.difficulty-btn--active,
+.level-btn--active {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+
+.difficulty-btn--easy { border-left: 2px solid var(--success); }
+.difficulty-btn--medium { border-left: 2px solid var(--accent); }
+.difficulty-btn--hard { border-left: 2px solid #ef4444; }
+
+/* ----------------------------------------
+   Hints Panel
+   Used by: ALL games
+   ---------------------------------------- */
+.hints-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.hint-card {
+  padding: var(--space-md);
+  border-left: 2px solid var(--accent);
+  background: var(--bg);
+}
+
+.hint-card h4 {
+  margin: 0 0 var(--space-xs) 0;
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  color: var(--text);
+}
+
+.hint-card p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.hint-card--concept { border-left-color: var(--success); }
+.hint-card--strategy { border-left-color: var(--accent); }
+.hint-card--progress { border-left-color: var(--muted); }
+
+/* ----------------------------------------
+   Math Insight - educational panel
+   Used by: SequenceRace, ShapeArchitect
+   ---------------------------------------- */
+.math-insight {
+  max-width: 400px;
+  padding: var(--space-lg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  font-size: var(--text-sm);
+  color: var(--muted);
+  margin: var(--space-md) auto;
+}
+
+.math-insight h4 {
+  font-family: var(--font-display);
+  color: var(--text);
+  margin-bottom: var(--space-sm);
+}
+
+.math-insight p { line-height: 1.5; }
+.math-insight strong { color: var(--text); }
+
+/* ----------------------------------------
+   Failure Hint
+   Used by: SequenceRace
+   ---------------------------------------- */
+.failure-hint {
+  max-width: 450px;
+  text-align: center;
+  padding: var(--space-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
+}
+
+.failure-hint h4 {
+  margin: 0 0 var(--space-sm) 0;
+  font-family: var(--font-display);
+  color: var(--accent);
+}
+
+.failure-hint p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ----------------------------------------
+   Stat Component
+   Used by: Overlays
+   ---------------------------------------- */
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.stat__value {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--text);
+}
+
+.stat__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ----------------------------------------
+   Time-Up Overlay
+   ---------------------------------------- */
+.time-up-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xl);
+  z-index: 100;
+  animation: fade-in var(--motion-normal) var(--ease-out);
+}
+
+.time-up-overlay__title {
+  font-family: var(--font-display);
+  font-size: var(--text-hero);
+  color: #ef4444;
+}
+
+.time-up-overlay__message {
+  font-size: var(--text-lg);
+  color: var(--muted);
+}
+
+/* ----------------------------------------
+   Shared Button States
+   ---------------------------------------- */
+.game-btn {
+  min-height: 44px;
+  padding: var(--space-sm) var(--space-lg);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+
+.game-btn:hover { opacity: 0.8; }
+.game-btn--primary {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.game-btn--secondary {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--border);
+}
+.game-btn--sm {
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-xs);
+}
+.game-btn--disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ----------------------------------------
+   Daily Badge & Game Rules
+   ---------------------------------------- */
+.daily-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.daily-badge__icon { font-size: 1rem; }
+.daily-badge__text { color: var(--accent); }
+.daily-badge__check { color: var(--success); margin-left: var(--space-xs); }
+
+.game-rules {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.game-rules__icon { font-size: 1.25rem; flex-shrink: 0; }
+.game-rules__text { margin: 0; line-height: 1.4; }
+
+/* ----------------------------------------
+   Score Display
+   ---------------------------------------- */
+.score-display {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.score-display__label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.score-display__value {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--text);
+}
+
+/* ----------------------------------------
+   Flash Feedback
+   ---------------------------------------- */
+.flash-success { animation: flash-success var(--motion-normal) var(--ease-out); }
+.flash-warning { animation: flash-warning var(--motion-normal) var(--ease-out); }
+.flash-shake { animation: shake var(--motion-fast) var(--ease-out); }
+
+/* ----------------------------------------
+   Responsive & Accessibility
+   ---------------------------------------- */
+@media (pointer: coarse) {
+  .mode-toggle__btn,
+  .difficulty-btn,
+  .level-btn {
+    min-height: 44px;
+    padding: var(--space-md);
+  }
+  .game-info { padding: var(--space-lg); }
+  .game-btn { min-height: 48px; }
+}
+
+@media (max-width: 600px) {
+  .game-info { justify-content: center; }
+  .difficulty-selector { justify-content: center; }
+  .hints-panel { padding: var(--space-md); }
+  .game-modal__content { padding: var(--space-lg); }
+  .game-modal__title { font-size: var(--text-xl); }
+  .game-modal__actions { flex-direction: column; }
+  .game-modal__stats { flex-direction: column; gap: var(--space-md); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-modal,
+  .time-up-overlay { animation: none; }
+  .flash-success,
+  .flash-warning,
+  .flash-shake { animation: none; }
+}

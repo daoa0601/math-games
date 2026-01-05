@@ -10,6 +10,23 @@
         },
         "tabsLabel": "Điều hướng bảng điều khiển"
     },
+    "nav": {
+        "label": "Điều hướng chính",
+        "home": "Trang chủ",
+        "profile": "Hồ sơ",
+        "learn": "Học",
+        "settings": "Cài đặt"
+    },
+    "settings": {
+        "preferences": "Tùy chọn",
+        "sound": "Âm thanh",
+        "soundDescription": "Bật hoặc tắt âm thanh trò chơi",
+        "language": "Ngôn ngữ",
+        "languageDescription": "Chọn ngôn ngữ ưa thích",
+        "about": "Thông tin",
+        "version": "Phiên bản",
+        "theme": "Giao diện"
+    },
     "backToGames": "Quay lại Trò chơi",
     "player": {
         "streak": "Chuỗi ngày",

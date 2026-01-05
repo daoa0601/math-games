@@ -22,15 +22,15 @@ export function NumberInventory({
     };
 
     return (
-        <div className="number-inventory">
+        <div className="mg-inventory">
             {availableNumbers.map((num) => {
                 const isUsed = usedNumbers.has(num);
                 const isSelected = selectedNumber === num;
 
                 const chipClass = [
-                    'number-chip',
-                    isSelected && 'number-chip--selected',
-                    isUsed && 'number-chip--used',
+                    'mg-chip',
+                    isSelected && 'mg-chip--selected',
+                    isUsed && 'mg-chip--used',
                 ]
                     .filter(Boolean)
                     .join(' ');

@@ -13,8 +13,8 @@ export function ProgressRing({
   progress,
   size = 60,
   strokeWidth = 6,
-  color = 'var(--color-primary)',
-  backgroundColor = 'hsla(220, 25%, 10%, 0.1)',
+  color = 'var(--accent)',
+  backgroundColor = 'var(--border)',
   showPercentage = true,
   label,
   className = '',
@@ -24,13 +24,11 @@ export function ProgressRing({
   const normalizedProgress = Math.min(100, Math.max(0, progress));
   const strokeDashoffset = circumference - (normalizedProgress / 100) * circumference;
 
-  // Determine color based on progress
+  // Determine color based on progress (simplified for Linear Editorial)
   const getProgressColor = () => {
-    if (color !== 'var(--color-primary)') return color;
-    if (normalizedProgress >= 100) return 'var(--color-success)';
-    if (normalizedProgress >= 75) return 'var(--color-secondary)';
-    if (normalizedProgress >= 50) return 'var(--color-warning)';
-    return 'var(--color-primary)';
+    if (color !== 'var(--accent)') return color;
+    if (normalizedProgress >= 100) return 'var(--success)';
+    return 'var(--accent)';
   };
 
   return (
@@ -119,7 +117,7 @@ export function CompactProgressRing({
           fontSize: size < 40 ? '0.625rem' : '0.75rem',
           fontWeight: 700,
           fontFamily: 'var(--font-display)',
-          color: 'var(--text-primary)',
+          color: 'var(--text)',
           whiteSpace: 'nowrap',
         }}
       >

@@ -10,8 +10,8 @@ export function HistoryLog({ history }: HistoryLogProps) {
 
     if (history.length === 0) {
         return (
-            <div className="history-log">
-                <p style={{ color: 'var(--text-muted)', textAlign: 'center', margin: 0 }}>
+            <div className="sr-history">
+                <p style={{ color: 'var(--muted)', textAlign: 'center', margin: 0 }}>
                     {t('gameStart')}
                 </p>
             </div>
@@ -19,9 +19,9 @@ export function HistoryLog({ history }: HistoryLogProps) {
     }
 
     return (
-        <div className="history-log">
+        <div className="sr-history">
             {history.map((entry, index) => (
-                <div key={index} className={`history-entry history-entry--${entry.actor}`}>
+                <div key={index} className={`sr-history__entry sr-history__entry--${entry.actor}`}>
                     <span>{entry.actor === 'player' ? '🧑' : '🤖'}</span>
                     <span>+{entry.step}</span>
                     <span>→</span>

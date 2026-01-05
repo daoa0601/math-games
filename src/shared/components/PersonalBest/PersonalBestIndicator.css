@@ -1,45 +1,30 @@
-/**
- * PersonalBestIndicator Component Styles
- */
-
-/* ============================================================================
-   Base Container
-   ============================================================================ */
+/* PersonalBestIndicator - Linear Editorial */
 
 .personal-best {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
-  background: var(--color-surface-raised);
-  border-radius: var(--radius-md);
-  border-left: 3px solid var(--color-text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--muted);
 }
 
-/* ============================================================================
-   Variants
-   ============================================================================ */
-
+/* Variants */
 .personal-best--new {
-  background: color-mix(in srgb, var(--color-accent) 15%, var(--color-surface));
-  border-left-color: var(--color-accent);
-  animation: pb-celebrate 0.5s ease-out;
+  border-left-color: var(--accent);
+  animation: flash-success var(--motion-normal) var(--ease-out);
 }
 
 .personal-best--tied {
-  background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface));
-  border-left-color: var(--color-success);
+  border-left-color: var(--success);
 }
 
 .personal-best--first {
-  background: color-mix(in srgb, var(--color-magic) 10%, var(--color-surface));
-  border-left-color: var(--color-magic);
+  border-left-color: #a78bfa;
 }
 
-/* ============================================================================
-   Content
-   ============================================================================ */
-
+/* Content */
 .personal-best__icon {
   font-size: var(--text-xl);
   flex-shrink: 0;
@@ -52,65 +37,45 @@
 }
 
 .personal-best__label {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
 }
 
 .personal-best--new .personal-best__label {
-  color: var(--color-accent);
+  color: var(--accent);
 }
 
 .personal-best--tied .personal-best__label {
-  color: var(--color-success);
+  color: var(--success);
 }
 
 .personal-best--first .personal-best__label {
-  color: var(--color-magic);
+  color: #a78bfa;
 }
 
 .personal-best__time {
   font-size: var(--text-lg);
-  font-weight: 700;
-  font-family: var(--font-mono, monospace);
-  color: var(--color-text);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--text);
 }
 
 .personal-best__improvement {
   font-size: var(--text-xs);
-  color: var(--color-success);
+  color: var(--success);
   font-weight: 600;
 }
 
 .personal-best__diff {
   font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  font-family: var(--font-mono, monospace);
+  color: var(--muted);
+  font-family: var(--font-mono);
 }
 
-/* ============================================================================
-   Animation
-   ============================================================================ */
-
-@keyframes pb-celebrate {
-  0% {
-    transform: scale(1);
-  }
-  25% {
-    transform: scale(1.05);
-  }
-  50% {
-    transform: scale(0.98);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* ============================================================================
-   Reduced Motion
-   ============================================================================ */
-
+/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .personal-best--new {
     animation: none;

@@ -213,37 +213,20 @@ This disposes geometries, materials, and textures on unmount.
 Module-level cooldown (2s) prevents audio chaos with multiple toasts.
 
 ### CSS
-- Global design system in `src/index.css`
+- Global design system in `src/index.css` (target: <150 lines)
 - Component-specific CSS colocated
-- BEM naming: `.achievement-toast__icon`
-- CSS variables: `--color-primary`, `--space-md`
+- Flat class names: `.slab`, `.action`, `.label`
+- CSS variables: `--bg`, `--text`, `--border`, `--accent`
+- **NO** gradients, shadows, or border-radius >2px
 
 ### Animations
-Each game has a distinct visual theme with CSS-only animations:
+**Minimal feedback only** - no idle animations, no playful theming.
 
-**MagicGraph** - "Mystical Constellation"
-- Starfield background with twinkling stars
-- Golden glow on fixed nodes (`starGlow`)
-- Shimmer on completed lines (`lineShimmer`)
-- Particle burst on placement (`particleExpand` via `drop-shadow`)
-- Constellation reveal on win (`constellationReveal`)
-
-**SequenceRace** - "Track & Field"
-- CSS stick figures replace emoji runners
-- Running animation: arm swing, leg stride, body lean
-- Victory/defeat poses
-- Multi-particle dust trail
-
-**ShapeArchitect** - "Building Workshop"
-- Wood grain workbench background
-- Blueprint grid on target cells
-- Snap wobble animation (`snapPlaceWobble`)
-- Dust burst with ring effect
-
-**Animation Performance:**
-- All animations use GPU-composited properties: `transform`, `opacity`, `filter`
-- SVG particles created via multi-directional `drop-shadow()` filters
-- Reduced motion: All games respect `@media (prefers-reduced-motion: reduce)`
+- Flash feedback: `flash-success` (green), `flash-warning` (amber)
+- All flashes are one-time, 0.3s, then return to normal
+- **NO** float, wiggle, pulse, or permanent glow effects
+- **NO** translateY hover lifts (use opacity/border-color only)
+- Reduced motion: Respect `@media (prefers-reduced-motion: reduce)`
 
 ---
 
@@ -260,18 +243,29 @@ t('ranks.intermediate');  // "Intermediate" or "Trung cấp"
 
 ## Design System
 
-### Colors
+**Linear Editorial** - Stark, minimal, mobile-first. See `visual-refactor.md` for full spec.
+
+### Colors (7 only)
 ```css
---color-primary: hsl(12, 90%, 62%)    /* Warm Coral */
---color-secondary: hsl(174, 65%, 42%) /* Soft Teal */
---color-accent: hsl(45, 100%, 55%)    /* Sunny Yellow */
---color-magic: hsl(270, 75%, 60%)     /* Magic Purple */
---color-success: hsl(145, 65%, 42%)   /* Leafy Green */
+--bg: #0a0f1a;        /* Deep navy base */
+--surface: #111827;   /* Card backgrounds */
+--border: #1e3a5f;    /* Blue-tinted borders */
+--text: #f8fafc;      /* Warm white */
+--muted: #64748b;     /* Slate gray */
+--accent: #60a5fa;    /* Sky blue feedback */
+--success: #4ade80;   /* Correct answers */
 ```
 
 ### Typography
-- Display: 'Quicksand' (titles, headings)
-- Body: 'Nunito' (text, buttons)
+- Display: `Playfair Display` (headings, serif)
+- UI/Data: `JetBrains Mono` (buttons, labels, numbers)
+
+### Constraints
+- **NO** gradients (flat colors only)
+- **NO** box-shadow (use 1px borders)
+- **NO** border-radius >2px
+- **NO** idle animations
+- **Target**: <150 lines per CSS file
 
 ---
 
@@ -315,39 +309,14 @@ e2e/
 
 ## Theme System
 
-### Dark/Light Mode
-
-The app supports dark and light themes via `ThemeContext`:
-
-```typescript
-import { useTheme } from '@/shared/contexts';
-
-const { theme, toggleTheme } = useTheme();
-// theme: 'light' | 'dark'
-```
-
-### CSS Variables
-
-Theme colors are defined in `src/index.css` with automatic dark mode:
+**Dark mode only** - The Linear Editorial design is dark-first. No light theme.
 
 ```css
 :root {
-  --bg-primary: hsl(0, 0%, 98%);
-  --text-primary: hsl(0, 0%, 10%);
+  --bg: #000;
+  --surface: #0a0a0a;
+  --text: #fff;
 }
-
-[data-theme="dark"] {
-  --bg-primary: hsl(220, 20%, 12%);
-  --text-primary: hsl(0, 0%, 95%);
-}
-```
-
-### Theme Toggle
-
-Use the `ThemeToggle` component in headers:
-
-```typescript
-import { ThemeToggle } from '@/shared/components';
 ```
 
 ---

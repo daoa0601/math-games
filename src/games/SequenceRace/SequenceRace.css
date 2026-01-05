@@ -1,1164 +1,268 @@
-/* ========================================
-   Sequence Sprinter - Component Styles
-   "Track & Field" Theme
-   ======================================== */
-
-.sequence-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-xl);
-    width: 100%;
-    max-width: min(95vw, 1000px);
-}
-
-/* Game Info Panel */
-.game-info-panel {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: var(--space-xl);
-    background: var(--surface-card);
-    padding: var(--space-md) var(--space-xl);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--accent-purple-medium);
-    overflow: hidden;
-}
-
-.game-info-panel__item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.game-info-panel__label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.game-info-panel__value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-accent);
-}
-
-.game-info-panel__value--player {
-    color: var(--color-success);
-}
-
-.game-info-panel__value--ai {
-    color: var(--color-error);
-}
-
-.game-info-panel__value--player1 {
-    color: var(--color-success);
-}
-
-.game-info-panel__value--player2 {
-    color: var(--color-warning, #f59e0b);
-}
-
-/* Mode Toggle */
-.mode-toggle {
-    display: flex;
-    gap: var(--space-sm);
-    padding: var(--space-xs);
-    background: var(--surface-card);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--accent-purple-medium);
-}
-
-.mode-toggle__btn {
-    padding: var(--space-sm) var(--space-md);
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 0.875rem;
-    font-weight: 500;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.mode-toggle__btn:hover {
-    color: var(--text-primary);
-    background: var(--accent-purple-light);
-}
-
-.mode-toggle__btn--active {
-    color: white;
-    background: var(--color-accent);
-}
-
-.mode-toggle__btn--active:hover {
-    background: var(--color-accent-hover, hsl(250, 84%, 44%));
-}
-
-/* ========================================
-   AI First Move Banner
-   ======================================== */
-
-.ai-first-banner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-md);
-    padding: var(--space-md) var(--space-xl);
-    background: linear-gradient(135deg, hsla(15, 85%, 55%, 0.15), hsla(0, 80%, 50%, 0.1));
-    border: 2px solid var(--color-error);
-    border-radius: var(--radius-lg);
-    animation: aiBannerPulse 2s ease-in-out infinite;
-}
-
-.ai-first-banner__icon {
-    font-size: 1.5rem;
-    animation: aiBannerBounce 1s ease-in-out infinite;
-}
-
-.ai-first-banner__text {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-error);
-}
-
-@keyframes aiBannerPulse {
-
-    0%,
-    100% {
-        box-shadow: 0 0 0 0 hsla(0, 80%, 50%, 0.3);
-    }
-
-    50% {
-        box-shadow: 0 0 12px 4px hsla(0, 80%, 50%, 0.2);
-    }
-}
-
-@keyframes aiBannerBounce {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-3px);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .ai-first-banner {
-        animation: none;
-    }
-
-    .ai-first-banner__icon {
-        animation: none;
-    }
-}
-
-/* ========================================
-   Track & Field Race Arena
-   ======================================== */
-
-/* Race Track - Championship Stadium sky background */
-.race-track {
-    width: 100%;
-    background:
-        /* Clouds */
-        radial-gradient(ellipse at 20% 30%, var(--game-race-cloud) 0%, transparent 25%),
-        /* Sky gradient (slightly muted) */
-        linear-gradient(180deg,
-            var(--game-race-sky) 0%,
-            var(--game-race-sky-mid) 60%,
-            var(--game-race-grass) 100%);
-    border-radius: var(--radius-xl);
-    padding: var(--space-xl);
-    border: 3px solid hsl(200, 50%, 60%);
-    box-shadow:
-        0 4px 20px hsla(200, 60%, 40%, 0.2),
-        inset 0 -40px 60px hsla(120, 40%, 60%, 0.15);
-    position: relative;
-    overflow: hidden;
-}
-
-/* Grass edge at bottom */
-.race-track::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 20px;
-    background: linear-gradient(180deg,
-            transparent 0%,
-            hsla(120, 50%, 45%, 0.3) 100%);
-    pointer-events: none;
-}
-
-.track-wrapper {
-    position: relative;
-    height: 140px;
-    /* Increased from 100px to fit two lanes */
-    margin-bottom: var(--space-lg);
-    z-index: 1;
-}
-
-/* Position Display - below track */
-.position-display {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-top: var(--space-xs);
-    padding: var(--space-xs);
-    background: var(--white-15);
-    border-radius: var(--radius-sm);
-    z-index: 0;
-}
-
-.position-display__current {
-    color: var(--color-accent);
-    font-weight: 700;
-}
-
-/* Track line - Championship Stadium running track */
-.track-line {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 24px;
-    background:
-        /* Lane markings */
-        repeating-linear-gradient(90deg,
-            transparent 0px,
-            transparent 30px,
-            var(--game-race-lane) 30px,
-            var(--game-race-lane) 32px),
-        /* Track surface - refined Championship colors */
-        linear-gradient(90deg,
-            var(--game-race-track) 0%,
-            var(--game-race-track-light) 50%,
-            var(--game-race-track) 100%);
-    border-radius: var(--radius-lg);
-    transform: translateY(-50%);
-    box-shadow: inset 0 4px 12px var(--black-20);
-    border: 2px solid var(--game-race-track-border);
-}
-
-.track-markers {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-between;
-    transform: translateY(-50%);
-}
-
-.track-marker {
-    width: 4px;
-    height: 16px;
-    background: var(--color-grey);
-    border-radius: 2px;
-}
-
-.track-marker--major {
-    height: 24px;
-    background: var(--color-primary);
-}
-
-.track-marker-label {
-    position: absolute;
-    bottom: -24px;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    transform: translateX(-50%);
-}
-
-/* ========================================
-   Athletes - Runner Avatars
-   ======================================== */
-
-/* Player Avatar - Athletic runner */
-.player-avatar {
-    position: absolute;
-    top: 50%;
-    width: 52px;
-    height: 52px;
-    background:
-        radial-gradient(circle at 30% 30%, var(--white-30) 0%, transparent 50%),
-        linear-gradient(135deg, hsl(160, 70%, 45%) 0%, var(--color-player1) 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.6rem;
-    transform: translate(-50%, -50%);
-    transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow:
-        0 6px 16px hsla(145, 70%, 35%, 0.5),
-        0 2px 4px var(--black-20),
-        inset 0 -2px 4px hsla(145, 80%, 25%, 0.3),
-        /* Subtle foot shadow on track */
-        0 20px 8px -6px hsla(0, 0%, 0%, 0.15);
-    z-index: 10;
-    border: 3px solid hsl(160, 60%, 55%);
-}
-
-.player-avatar--player {
-    top: 30%;
-    /* Top lane for player */
-}
-
-.player-avatar--ai {
-    top: 70%;
-    /* Bottom lane for AI */
-}
-
-/* Accessibility: Pattern indicator for player - solid double border */
-.player-avatar--player {
-    /* Double solid ring indicates player */
-    outline: 3px solid hsl(160, 70%, 45%);
-    outline-offset: 2px;
-}
-
-/* AI Avatar - Robot/opponent runner */
-.player-avatar--ai {
-    background:
-        radial-gradient(circle at 30% 30%, var(--white-30) 0%, transparent 50%),
-        linear-gradient(135deg, hsl(15, 85%, 55%) 0%, var(--color-ai) 100%);
-    box-shadow:
-        0 6px 16px hsla(0, 80%, 50%, 0.5),
-        0 2px 4px var(--black-20),
-        inset 0 -2px 4px hsla(0, 80%, 30%, 0.3),
-        /* Subtle foot shadow on track */
-        0 20px 8px -6px hsla(0, 0%, 0%, 0.15);
-    z-index: 5;
-    border-color: hsl(15, 70%, 60%);
-    /* Dashed border style to distinguish from player */
-    border-style: dashed;
-}
-
-/* Preview Ghost Marker - Shows where player would land on hover */
-.preview-marker {
-    position: absolute;
-    top: 30%;
-    width: 52px;
-    height: 52px;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: var(--color-success);
-    opacity: 0.25;
-    border: 2px dashed var(--color-success);
-    pointer-events: none;
-    transition: left 0.15s ease-out, opacity 0.15s ease-out;
-    z-index: 8;
-}
-
-/* ========================================
-   CSS Stick Figure Runner
-   ======================================== */
-
-/* Hide emoji when using stick figure */
-.player-avatar--stick-figure {
-    font-size: 0;
-    /* Hide emoji text */
-    position: relative;
-}
-
-/* Stick figure body structure */
-.stick-figure {
-    position: absolute;
-    width: 36px;
-    height: 44px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-/* Head */
-.stick-figure__head {
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    background: currentColor;
-    border-radius: 50%;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    box-shadow: 0 0 4px currentColor;
-}
-
-/* Body/Torso */
-.stick-figure__body {
-    position: absolute;
-    width: 4px;
-    height: 16px;
-    background: currentColor;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 2px;
-}
-
-/* Arms container */
-.stick-figure__arms {
-    position: absolute;
-    top: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 28px;
-    height: 4px;
-}
-
-/* Individual arm */
-.stick-figure__arm {
-    position: absolute;
-    width: 14px;
-    height: 4px;
-    background: currentColor;
-    border-radius: 2px;
-    transform-origin: center;
-    top: 0;
-}
-
-.stick-figure__arm--left {
-    left: 0;
-    transform-origin: right center;
-}
-
-.stick-figure__arm--right {
-    right: 0;
-    transform-origin: left center;
-}
-
-/* Legs container */
-.stick-figure__legs {
-    position: absolute;
-    top: 26px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 24px;
-    height: 18px;
-}
-
-/* Individual leg */
-.stick-figure__leg {
-    position: absolute;
-    width: 4px;
-    height: 16px;
-    background: currentColor;
-    border-radius: 2px;
-    transform-origin: top center;
-    top: 0;
-}
-
-.stick-figure__leg--left {
-    left: 6px;
-}
-
-.stick-figure__leg--right {
-    right: 6px;
-}
-
-/* Player color - bright green/white */
-.player-avatar--player .stick-figure {
-    color: hsl(0, 0%, 100%);
-}
-
-/* AI color - bright coral/white */
-.player-avatar--ai .stick-figure {
-    color: hsl(0, 0%, 100%);
-}
-
-/* ========================================
-   Running Animation
-   ======================================== */
-
-/* Running animations - using sr-* prefixed versions from animations.css */
-
-/* Apply running animation when moving */
-.player-avatar--moving .stick-figure {
-    animation: sr-runLean 0.2s ease-in-out infinite;
-}
-
-.player-avatar--moving .stick-figure__arm--left {
-    animation: sr-armSwingLeft 0.2s ease-in-out infinite;
-}
-
-.player-avatar--moving .stick-figure__arm--right {
-    animation: sr-armSwingRight 0.2s ease-in-out infinite;
-}
-
-.player-avatar--moving .stick-figure__leg--left {
-    animation: sr-legStrideLeft 0.2s ease-in-out infinite;
-}
-
-.player-avatar--moving .stick-figure__leg--right {
-    animation: sr-legStrideRight 0.2s ease-in-out infinite;
-}
-
-/* ========================================
-   Victory & Defeat Poses
-   ======================================== */
-
-/* Victory animations - using sr-* prefixed versions from animations.css */
-
-.player-avatar--winner .stick-figure {
-    animation: sr-victoryBounce 0.4s ease-in-out infinite;
-}
-
-.player-avatar--winner .stick-figure__arm--left {
-    animation: sr-victoryArmsLeft 0.4s ease-in-out infinite;
-}
-
-.player-avatar--winner .stick-figure__arm--right {
-    animation: sr-victoryArmsRight 0.4s ease-in-out infinite;
-}
-
-.player-avatar--winner .stick-figure__leg--left,
-.player-avatar--winner .stick-figure__leg--right {
-    animation: sr-victoryLegs 0.4s ease-in-out infinite alternate;
-}
-
-/* Defeat - Slumped posture */
-.player-avatar--loser .stick-figure {
-    transform: translate(-50%, -45%) rotate(12deg);
-}
-
-.player-avatar--loser .stick-figure__head {
-    transform: translateX(-50%) translateY(3px);
-}
-
-.player-avatar--loser .stick-figure__arm--left {
-    transform: rotate(25deg);
-}
-
-.player-avatar--loser .stick-figure__arm--right {
-    transform: rotate(-25deg);
-}
-
-/* AI Thinking - using sr-thinkSway from animations.css */
-.player-avatar--thinking .stick-figure {
-    animation: sr-thinkSway 1s ease-in-out infinite;
-}
-
-/* Hints Panel Layering */
-.hints-panel {
-    position: relative;
-    z-index: 30;
-    /* Ensure hints are always on top */
-}
-
-/* ========================================
-   Enhanced Dust Trail Effect
-   ======================================== */
-
-/* Primary dust cloud - realistic fade with gradual opacity and scale */
-.player-avatar--moving::before {
-    content: '';
-    position: absolute;
-    right: 85%;
-    top: 45%;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background:
-        radial-gradient(circle, var(--game-race-dust) 0%, transparent 70%);
-    animation: sr-dustParticle1-realistic 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
-    pointer-events: none;
-}
-
-/* Secondary dust particle - staggered fade for depth */
-.player-avatar--moving::after {
-    content: '';
-    position: absolute;
-    right: 75%;
-    top: 60%;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background:
-        radial-gradient(circle, hsla(30, 45%, 70%, 0.5) 0%, transparent 70%);
-    animation: sr-dustParticle2-realistic 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.08s infinite;
-    pointer-events: none;
-}
-
-/* Realistic dust particle animations with gradual opacity and scale reduction */
-@keyframes sr-dustParticle1-realistic {
-    0% {
-        opacity: 0.8;
-        transform: translateX(0) translateY(0) scale(0.5);
-    }
-
-    20% {
-        opacity: 0.7;
-        transform: translateX(-8px) translateY(-2px) scale(0.9);
-    }
-
-    50% {
-        opacity: 0.4;
-        transform: translateX(-16px) translateY(-4px) scale(1.1);
-    }
-
-    80% {
-        opacity: 0.15;
-        transform: translateX(-22px) translateY(-6px) scale(0.8);
-    }
-
-    100% {
-        opacity: 0;
-        transform: translateX(-28px) translateY(-8px) scale(0.4);
-    }
-}
-
-@keyframes sr-dustParticle2-realistic {
-    0% {
-        opacity: 0.6;
-        transform: translateX(0) translateY(0) scale(0.4);
-    }
-
-    25% {
-        opacity: 0.5;
-        transform: translateX(-6px) translateY(2px) scale(0.8);
-    }
-
-    50% {
-        opacity: 0.3;
-        transform: translateX(-12px) translateY(3px) scale(1);
-    }
-
-    75% {
-        opacity: 0.12;
-        transform: translateX(-18px) translateY(4px) scale(0.7);
-    }
-
-    100% {
-        opacity: 0;
-        transform: translateX(-24px) translateY(5px) scale(0.3);
-    }
-}
-
-/* Running animation when moving */
-.player-avatar--moving {
-    animation: sr-runBounce 0.15s ease-in-out infinite alternate;
-}
-
-/* Victory celebration animation */
-.player-avatar--winner {
-    animation: sr-victoryCelebrate 0.6s ease-out forwards;
-}
-
-/* Defeated slump animation */
-.player-avatar--loser {
-    animation: sr-defeatSlump 0.5s ease-out forwards;
-}
-
-/* AI thinking state */
-.player-avatar--thinking {
-    animation: sr-thinkPulse 1s ease-in-out infinite;
-}
-
-/* AI Personality Reactions */
-.ai-reaction {
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 1.2rem;
-    animation: sr-reactionPop 0.5s ease-out forwards;
-    pointer-events: none;
-    z-index: 20;
-}
-
-.ai-reaction--confident {
-    color: hsl(0, 70%, 55%);
-}
-
-.ai-reaction--worried {
-    color: hsl(200, 70%, 55%);
-}
-
-/* reactionPop animation now in animations.css as sr-reactionPop */
-
-/* Target Flag - Finish line */
-.target-flag {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translate(50%, -50%);
-    font-size: 2.2rem;
-    filter: drop-shadow(0 2px 4px var(--black-30));
-    animation: sr-flagWave 2s ease-in-out infinite;
-}
-
-/* Flag when race is finished */
-.target-flag--finished {
-    animation: sr-flagCelebrate 0.5s ease-out forwards;
-    font-size: 2.8rem;
-}
-
-/* flagCelebrate, flagWave animations now in animations.css as sr-* */
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .player-avatar--moving {
-        animation: none;
-    }
-
-    .player-avatar--moving::before,
-    .player-avatar--moving::after {
-        display: none;
-    }
-
-    .player-avatar--winner,
-    .player-avatar--loser {
-        animation: none;
-    }
-
-    .player-avatar--thinking {
-        animation: none;
-    }
-
-    .target-flag {
-        animation: none;
-    }
-
-    .target-flag--finished {
-        animation: none;
-        font-size: 2.8rem;
-    }
-
-    .ai-reaction {
-        animation: none;
-        opacity: 1;
-        transform: translateX(-50%);
-    }
-
-    /* Disable stick figure animations */
-    .player-avatar--moving .stick-figure,
-    .player-avatar--moving .stick-figure__arm--left,
-    .player-avatar--moving .stick-figure__arm--right,
-    .player-avatar--moving .stick-figure__leg--left,
-    .player-avatar--moving .stick-figure__leg--right {
-        animation: none;
-    }
-
-    .player-avatar--winner .stick-figure,
-    .player-avatar--winner .stick-figure__arm--left,
-    .player-avatar--winner .stick-figure__arm--right,
-    .player-avatar--winner .stick-figure__leg--left,
-    .player-avatar--winner .stick-figure__leg--right {
-        animation: none;
-    }
-
-    .player-avatar--thinking .stick-figure {
-        animation: none;
-    }
-
-    .player-avatar--loser .stick-figure {
-        transform: translate(-50%, -50%);
-    }
-}
+/* ============================================
+   SEQUENCE RACE - Game-specific styles
+   Uses: game-base.css (imported globally)
+   ============================================ */
+
+/* Container */
+.sr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+  width: 100%;
+  max-width: min(95vw, 1000px);
+}
+
+/* AI First Banner */
+.sr-ai-first {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-xl);
+  background: var(--bg);
+  border: 2px solid #ef4444;
+}
+
+.sr-ai-first__text {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: #ef4444;
+  text-transform: uppercase;
+}
+
+/* Race Track */
+.sr-track {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: var(--space-xl);
+  position: relative;
+}
+
+.sr-track--urgent { border-color: #ef4444; }
+
+.sr-track__wrapper {
+  position: relative;
+  height: 100px;
+  margin-bottom: var(--space-lg);
+}
+
+.sr-track__line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  transform: translateY(-50%);
+}
+
+/* Track Markers */
+.sr-markers {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  transform: translateY(-50%);
+}
+
+.sr-marker {
+  width: 2px;
+  height: 16px;
+  background: var(--border);
+}
+
+.sr-marker--major {
+  height: 24px;
+  background: var(--accent);
+}
+
+.sr-marker__label {
+  position: absolute;
+  bottom: -24px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--muted);
+  transform: translateX(-50%);
+}
+
+/* Player Avatar */
+.sr-avatar {
+  position: absolute;
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  background: var(--surface);
+  border: 2px solid var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  transform: translate(-50%, -50%);
+  transition: left 0.5s var(--ease-out);
+  z-index: 10;
+}
+
+.sr-avatar--player { top: 30%; border-color: var(--success); }
+.sr-avatar--ai { top: 70%; border-color: #ef4444; border-style: dashed; }
+.sr-avatar--loser { opacity: 0.5; }
+
+/* Preview Ghost */
+.sr-preview {
+  position: absolute;
+  top: 30%;
+  width: 48px;
+  height: 48px;
+  transform: translate(-50%, -50%);
+  background: var(--success);
+  opacity: 0.2;
+  border: 2px dashed var(--success);
+  pointer-events: none;
+  z-index: 8;
+}
+
+/* AI Reaction */
+.sr-reaction {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+}
+
+/* Target Flag */
+.sr-flag {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
+  font-size: 2rem;
+}
+
+/* Position Display */
+.sr-position {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--muted);
+  padding: var(--space-xs);
+  background: var(--bg);
+}
+
+.sr-position strong { color: var(--accent); }
 
 /* Step Cards */
-.step-cards {
-    display: flex;
-    gap: var(--space-md);
-    flex-wrap: wrap;
-    justify-content: center;
+.sr-steps {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.step-card {
-    width: 64px;
-    height: 80px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    font-weight: 700;
-    border-radius: var(--radius-lg);
-    border: 2px solid var(--color-primary);
-    background: var(--surface-card);
-    color: var(--text-primary);
-    cursor: pointer;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    z-index: 5;
-    /* Base z-index */
+.sr-step {
+  width: 64px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
 }
 
-.step-card:hover:not(:disabled) {
-    background: var(--color-primary-dark);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px var(--accent-purple-strong);
-    z-index: 50;
-    /* Bring to front on hover */
+.sr-step:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-style: dashed;
 }
 
-.step-card:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    border-style: dashed;
-}
-
-.step-card__value {
-    font-size: 1.75rem;
-}
-
-.step-card__label {
-    font-size: 0.65rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
+.sr-step__label {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  text-transform: uppercase;
 }
 
 /* History Log */
-.history-log {
-    width: 100%;
-    max-height: 120px;
-    overflow-y: auto;
-    background: var(--surface-card);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
+.sr-history {
+  width: 100%;
+  max-height: 120px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: var(--space-md);
 }
 
-.history-entry {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-xs) 0;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
+.sr-history__entry {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--muted);
 }
 
-.history-entry--player {
-    color: var(--color-success);
+.sr-history__entry--player { color: var(--success); }
+.sr-history__entry--ai { color: #ef4444; }
+
+/* Turn Indicator */
+.sr-turn {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
-.history-entry--ai {
-    color: var(--color-error);
-}
-
-/* Turn Indicator - Inline banner between track and step cards */
-.turn-indicator {
-    display: inline-block;
-    padding: var(--space-xs) var(--space-md);
-    border-radius: var(--radius-full);
-    font-weight: 600;
-    font-size: 0.875rem;
-    animation: pulse 1.5s ease-in-out infinite;
-    text-align: center;
-    white-space: nowrap;
-}
-
-.turn-indicator--player {
-    background: hsla(142, 71%, 45%, 0.2);
-    color: var(--color-success);
-    border: 2px solid var(--color-success);
-}
-
-.turn-indicator--ai {
-    background: hsla(0, 84%, 60%, 0.2);
-    color: var(--color-error);
-    border: 2px solid var(--color-error);
-}
-
-.turn-indicator--player1 {
-    background: hsla(142, 71%, 45%, 0.2);
-    color: var(--color-success);
-    border: 2px solid var(--color-success);
-}
-
-.turn-indicator--player2 {
-    background: hsla(38, 92%, 50%, 0.2);
-    color: var(--color-warning, #f59e0b);
-    border: 2px solid var(--color-warning, #f59e0b);
-}
-
-/* Undo Button */
-.undo-btn {
-    position: absolute;
-    bottom: var(--space-md);
-    left: var(--space-md);
-    opacity: 0.8;
-    font-size: 0.875rem;
-    padding: var(--space-xs) var(--space-sm);
-}
-
-.undo-btn:hover {
-    opacity: 1;
-}
-
-/* Game Over Overlay */
-.game-over-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--overlay-modal);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-xl);
-    z-index: 100;
-    animation: fadeIn 0.3s ease;
-}
-
-.game-over-overlay__title {
-    font-size: 3rem;
-}
-
-.game-over-overlay__title--win {
-    background: linear-gradient(135deg, var(--color-success), var(--color-accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.game-over-overlay__title--lose {
-    color: var(--color-error);
-}
-
-/* Difficulty Selector - use shared styles from game-common.css */
-
-/* Actions */
-.game-actions {
-    display: flex;
-    gap: var(--space-md);
-}
-
-/* Hint Toggle */
-.hint-toggle {
-    font-size: 0.9rem;
-}
-
-/* Hints Panel - use shared styles from hints.css */
-/* Teacher mode hints use sr-teacherFadeIn from animations.css */
-
-/* Math Insight in Game Over */
-.math-insight {
-    max-width: 450px;
-    text-align: center;
-    padding: var(--space-lg);
-    background: var(--accent-purple-light);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--accent-purple-strong);
-}
-
-.math-insight h4 {
-    margin: 0 0 var(--space-sm) 0;
-    color: var(--color-accent);
-}
-
-.math-insight p {
-    margin: 0;
-    color: var(--text-secondary);
-    line-height: 1.6;
-}
-
-.math-insight strong {
-    color: var(--color-primary-light);
-}
-
-/* Level Selector - use shared styles from game-common.css */
-
-/* Timer - use shared styles from game-common.css */
-/* pulse, shake animations in animations.css */
+.sr-turn--player { background: var(--bg); color: var(--success); border: 1px solid var(--success); }
+.sr-turn--ai { background: var(--bg); color: #ef4444; border: 1px solid #ef4444; }
 
 /* Sequence Badge */
-.sequence-badge {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-sm) var(--space-lg);
-    background: linear-gradient(135deg, var(--accent-purple-medium), hsla(45, 100%, 51%, 0.1));
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-primary);
+.sr-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
 }
 
-.sequence-badge__type {
-    font-weight: 700;
-    color: var(--color-accent);
+.sr-badge__type { font-family: var(--font-display); color: var(--accent); }
+.sr-badge__formula { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--muted); }
+
+/* Actions */
+.sr-actions {
+  display: flex;
+  gap: var(--space-md);
 }
-
-.sequence-badge__formula {
-    font-family: monospace;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-
-/* Track urgency - applied directly when time is low */
-.race-track--urgent {
-    border-color: var(--color-error);
-    box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.4);
-    animation: urgentPulse 1s ease infinite;
-}
-
-/* urgentPulse, glow, bounce animations now in animations.css */
-
-/* Glowing values */
-.game-info-panel__value--glow {
-    text-shadow: 0 0 10px var(--color-accent-glow);
-    animation: glow 2s ease infinite;
-}
-
-/* Game Over Enhancement */
-.game-over-overlay__emoji {
-    font-size: 4rem;
-    animation: bounce 0.5s ease infinite;
-}
-
-/* Failure Hint, Time Up Overlay, Stats - use shared styles from game-common.css */
 
 /* ========================================
-   Mobile Touch Optimization
+   RESPONSIVE
    ======================================== */
-
-/* Touch device detection - larger touch targets */
 @media (pointer: coarse) {
-    .step-card {
-        min-width: 72px;
-        min-height: 88px;
-    }
-
-    .mode-toggle__btn {
-        min-height: 44px;
-        padding: var(--space-md) var(--space-lg);
-    }
-
-    .difficulty-btn,
-    .level-btn {
-        min-height: 44px;
-        padding: var(--space-md) var(--space-lg);
-    }
-
-    .btn {
-        min-height: 48px;
-    }
-
-    /* Player avatars larger on touch */
-    .player-avatar {
-        width: 56px;
-        height: 56px;
-        font-size: 1.75rem;
-    }
-
-    /* Disable hover effects on touch - they stick after tap */
-    .step-card:hover:not(:disabled) {
-        transform: none;
-    }
-
-    .mode-toggle__btn:hover {
-        background: transparent;
-    }
-
-    /* Active states for touch feedback */
-    .step-card:active:not(:disabled) {
-        transform: scale(0.95);
-        background: var(--color-primary);
-    }
-
-    .mode-toggle__btn:active {
-        transform: scale(0.95);
-    }
-
-    .difficulty-btn:active,
-    .level-btn:active {
-        transform: scale(0.95);
-    }
+  .sr-step { min-width: 72px; min-height: 88px; }
+  .sr-avatar { width: 52px; height: 52px; }
 }
 
-/* Small screens - responsive layout */
 @media (max-width: 600px) {
-    .sequence-container {
-        gap: var(--space-lg);
-        padding: var(--space-sm);
-    }
-
-    .game-info-panel {
-        flex-wrap: wrap;
-        gap: var(--space-md);
-        padding: var(--space-md);
-    }
-
-    .race-track {
-        padding: var(--space-md);
-    }
-
-    .step-cards {
-        gap: var(--space-sm);
-    }
-
-    .step-card {
-        width: 56px;
-        height: 72px;
-    }
-
-    .step-card__value {
-        font-size: 1.5rem;
-    }
-
-    .difficulty-selector {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .mode-toggle {
-        flex-wrap: wrap;
-    }
-
-    .hints-panel {
-        padding: var(--space-md);
-    }
-
-    .hint-card {
-        padding: var(--space-sm);
-    }
-
-    .game-actions {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .win-overlay__stats {
-        flex-direction: column;
-        gap: var(--space-md);
-    }
-
-    .game-over-overlay__title {
-        font-size: 2rem;
-    }
-
-    .math-insight {
-        padding: var(--space-md);
-    }
-
-    .sequence-badge {
-        padding: var(--space-sm) var(--space-md);
-    }
+  .sr-container { gap: var(--space-lg); padding: var(--space-sm); }
+  .sr-track { padding: var(--space-md); }
+  .sr-steps { gap: var(--space-sm); }
+  .sr-step { width: 56px; height: 72px; font-size: var(--text-lg); }
 }
 
-/* Extra small screens */
-@media (max-width: 360px) {
-    .step-card {
-        width: 48px;
-        height: 64px;
-    }
-
-    .step-card__value {
-        font-size: 1.25rem;
-    }
-
-    .step-card__label {
-        display: none;
-    }
-
-    .player-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 1.25rem;
-    }
+@media (prefers-reduced-motion: reduce) {
+  .sr-avatar { transition: none; }
 }

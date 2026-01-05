@@ -1,18 +1,4 @@
-/**
- * GameOverlay Styles
- *
- * Shared overlay component for game end states.
- * Follows the Playful Premium glassmorphic design system with BEM naming.
- */
-
-/* Spring bounce easing for playful animations */
-:root {
-  --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   BASE OVERLAY (Backdrop)
-   ═══════════════════════════════════════════════════════════════════ */
+/* GameOverlay - Linear Editorial */
 
 .game-overlay {
   position: absolute;
@@ -22,163 +8,85 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-xl);
-  background: hsla(220, 25%, 10%, 0.6);
-  backdrop-filter: blur(8px);
-  border-radius: var(--radius-xl);
+  background: rgba(0, 0, 0, 0.9);
   z-index: 100;
-  animation: overlayBackdropFadeIn 300ms ease-out;
+  animation: fade-in var(--motion-normal) var(--ease-out);
 }
 
-/* Glassmorphic card wrapper for content */
 .game-overlay__card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: hsla(0, 0%, 100%, 0.95);
-  border-radius: 24px;
-  padding: 40px;
-  box-shadow: 0 24px 48px -12px hsla(220, 25%, 10%, 0.25);
-  animation: scaleIn 400ms var(--spring-bounce);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: var(--space-xl);
   max-width: 100%;
+  animation: slide-up var(--motion-normal) var(--ease-out);
 }
 
-@keyframes overlayBackdropFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Legacy animation kept for backwards compatibility */
-@keyframes overlayFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   EMOJI
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Emoji */
 .game-overlay__emoji {
-  font-size: 4rem;
+  font-size: 3rem;
   margin-bottom: var(--space-md);
-  animation: emojiPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
 }
 
-@keyframes emojiPop {
-  from {
-    transform: scale(0);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   TITLE
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Title */
 .game-overlay__title {
   font-family: var(--font-display);
   font-size: var(--text-2xl);
-  font-weight: 700;
   margin: 0 0 var(--space-sm);
   text-align: center;
+  color: var(--text);
 }
 
 .game-overlay__title--win {
-  color: var(--color-success);
-  text-shadow: 0 2px 8px hsla(145, 65%, 42%, 0.25);
+  color: var(--success);
 }
 
 .game-overlay__title--lose {
-  color: var(--color-primary);
-  text-shadow: 0 2px 8px hsla(12, 90%, 62%, 0.2);
+  color: #ef4444;
 }
 
 .game-overlay__title--timeUp {
-  color: var(--color-warning);
-  text-shadow: 0 2px 8px hsla(45, 100%, 55%, 0.3);
+  color: var(--accent);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   MESSAGE
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Message */
 .game-overlay__message {
-  font-size: var(--text-md);
-  color: hsla(220, 25%, 30%, 0.8);
+  font-size: var(--text-base);
+  color: var(--muted);
   text-align: center;
   margin: 0 0 var(--space-md);
   max-width: 300px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   HINT
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Hint */
 .game-overlay__hint {
-  background: hsla(270, 75%, 60%, 0.08);
-  border: 1px solid hsla(270, 75%, 60%, 0.2);
-  border-radius: var(--radius-lg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
   padding: var(--space-md);
   margin-bottom: var(--space-lg);
   max-width: 350px;
   text-align: left;
 }
 
-.game-overlay__hint h4 {
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  color: hsla(270, 75%, 45%, 1);
-  margin: 0 0 var(--space-xs);
+.game-overlay__hint-title {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-xs);
 }
 
-.game-overlay__hint p {
+.game-overlay__hint-text {
   font-size: var(--text-sm);
-  color: hsla(220, 25%, 30%, 0.8);
-  margin: 0 0 var(--space-xs);
+  color: var(--muted);
   line-height: 1.5;
 }
 
-.game-overlay__hint p:last-child {
-  margin-bottom: 0;
-}
-
-.game-overlay__hint code {
-  background: hsla(270, 75%, 60%, 0.12);
-  color: hsla(270, 75%, 35%, 1);
-  padding: 0.125rem 0.375rem;
-  border-radius: var(--radius-sm);
-  font-family: monospace;
-  font-size: var(--text-xs);
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   STATS
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Stats */
 .game-overlay__stats {
   display: flex;
   gap: var(--space-xl);
@@ -189,88 +97,57 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2xs);
+  gap: 2px;
 }
 
 .game-overlay__stat-value {
   font-family: var(--font-display);
   font-size: var(--text-xl);
-  font-weight: 700;
-  color: hsla(220, 25%, 15%, 1);
+  color: var(--text);
 }
 
 .game-overlay__stat-label {
+  font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: hsla(220, 25%, 40%, 0.7);
+  color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   ACTIONS
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Actions */
 .game-overlay__actions {
   display: flex;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 250px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   REDUCED MOTION
-   ═══════════════════════════════════════════════════════════════════ */
+.game-overlay__actions--row {
+  flex-direction: row;
+  justify-content: center;
+  max-width: none;
+}
 
+/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  .game-overlay {
-    animation: none;
-  }
-
+  .game-overlay,
   .game-overlay__card {
     animation: none;
   }
-
-  .game-overlay__emoji {
-    animation: none;
-  }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   MOBILE
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* Mobile */
 @media (max-width: 480px) {
   .game-overlay {
-    padding: var(--space-md);
+    padding: var(--space-lg);
   }
 
   .game-overlay__card {
     padding: var(--space-lg);
-    border-radius: 20px;
-  }
-
-  .game-overlay__emoji {
-    font-size: 3rem;
-  }
-
-  .game-overlay__title {
-    font-size: var(--text-xl);
   }
 
   .game-overlay__stats {
     gap: var(--space-lg);
-  }
-
-  .game-overlay__hint {
-    max-width: 100%;
-  }
-
-  .game-overlay__actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .game-overlay__actions .btn {
-    width: 100%;
   }
 }

@@ -41,41 +41,41 @@ export function SequenceRaceTutorial({ onComplete }: SequenceRaceTutorialProps) 
     <Tutorial totalSteps={TOTAL_STEPS} onComplete={handleComplete} onSkip={handleSkip}>
       <TutorialSpotlight />
 
-      {/* Step 1: Welcome - highlight the game info panel with target */}
-      <TutorialStep step={1} highlightSelector=".game-info-panel">
-        <TutorialTooltip position="bottom" targetSelector=".game-info-panel">
+      {/* Step 1: Welcome - highlight the game info section with target */}
+      <TutorialStep step={1} highlightSelector=".game-info">
+        <TutorialTooltip position="bottom" targetSelector=".game-info">
           <h3>{t('sequenceRace.tutorial.step1Title')}</h3>
           <p>{t('sequenceRace.tutorial.step1')}</p>
         </TutorialTooltip>
       </TutorialStep>
 
       {/* Step 2: The Track - highlight the race track area */}
-      <TutorialStep step={2} highlightSelector=".race-track">
-        <TutorialTooltip position="bottom" targetSelector=".race-track">
+      <TutorialStep step={2} highlightSelector=".sr-track">
+        <TutorialTooltip position="bottom" targetSelector=".sr-track">
           <h3>{t('sequenceRace.tutorial.step2Title')}</h3>
           <p>{t('sequenceRace.tutorial.step2')}</p>
         </TutorialTooltip>
       </TutorialStep>
 
       {/* Step 3: Making Moves - highlight the step cards */}
-      <TutorialStep step={3} highlightSelector=".step-cards">
-        <TutorialTooltip position="top" targetSelector=".step-cards">
+      <TutorialStep step={3} highlightSelector=".sr-steps">
+        <TutorialTooltip position="top" targetSelector=".sr-steps">
           <h3>{t('sequenceRace.tutorial.step3Title')}</h3>
           <p>{t('sequenceRace.tutorial.step3')}</p>
         </TutorialTooltip>
       </TutorialStep>
 
       {/* Step 4: Taking Turns - highlight the turn indicator */}
-      <TutorialStep step={4} highlightSelector=".turn-indicator">
-        <TutorialTooltip position="bottom" targetSelector=".turn-indicator">
+      <TutorialStep step={4} highlightSelector=".sr-turn">
+        <TutorialTooltip position="bottom" targetSelector=".sr-turn">
           <h3>{t('sequenceRace.tutorial.step4Title')}</h3>
           <p>{t('sequenceRace.tutorial.step4')}</p>
         </TutorialTooltip>
       </TutorialStep>
 
       {/* Step 5: Winning - highlight the finish line flag */}
-      <TutorialStep step={5} highlightSelector=".target-flag">
-        <TutorialTooltip position="left" targetSelector=".target-flag">
+      <TutorialStep step={5} highlightSelector=".sr-flag">
+        <TutorialTooltip position="left" targetSelector=".sr-flag">
           <h3>{t('sequenceRace.tutorial.step5Title')}</h3>
           <p>{t('sequenceRace.tutorial.step5')}</p>
         </TutorialTooltip>

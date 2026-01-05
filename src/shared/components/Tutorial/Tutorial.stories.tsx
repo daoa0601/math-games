@@ -26,26 +26,26 @@ const meta: Meta<typeof Tutorial> = {
 export default meta;
 type Story = StoryObj<typeof Tutorial>;
 
-// Sample game UI to demonstrate tutorial
+// Sample game UI to demonstrate tutorial (Linear Editorial style)
 const SampleGameUI = () => (
-  <div style={{ padding: '2rem', minHeight: '100vh' }}>
+  <div style={{ padding: '2rem', minHeight: '100vh', background: 'var(--bg)' }}>
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <h1 id="game-title" style={{ marginBottom: '2rem' }}>Sample Math Game</h1>
+      <h1 id="game-title" style={{ marginBottom: '2rem', color: 'var(--text)' }}>Sample Math Game</h1>
 
       <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
         <div id="score-display" style={{
           padding: '1rem',
-          background: 'var(--color-primary)',
-          borderRadius: '8px',
-          color: 'white'
+          background: 'var(--surface)',
+          border: '1px solid var(--accent)',
+          color: 'var(--text)'
         }}>
           Score: 0
         </div>
         <div id="timer-display" style={{
           padding: '1rem',
-          background: 'var(--color-secondary)',
-          borderRadius: '8px',
-          color: 'white'
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          color: 'var(--text)'
         }}>
           Time: 00:00
         </div>
@@ -63,11 +63,11 @@ const SampleGameUI = () => (
             className="game-cell"
             style={{
               padding: '2rem',
-              background: 'var(--color-bg-secondary)',
-              borderRadius: '8px',
+              background: 'var(--surface)',
               textAlign: 'center',
               fontSize: '1.5rem',
-              border: '2px solid var(--color-border)'
+              border: '1px solid var(--border)',
+              color: 'var(--text)'
             }}
           >
             {num}
@@ -78,22 +78,21 @@ const SampleGameUI = () => (
       <div style={{ display: 'flex', gap: '1rem' }}>
         <button id="hint-button" style={{
           padding: '0.75rem 1.5rem',
-          background: 'var(--color-accent)',
-          border: 'none',
-          borderRadius: '6px',
+          background: 'var(--surface)',
+          border: '1px solid var(--accent)',
           cursor: 'pointer',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          color: 'var(--accent)'
         }}>
           Hint
         </button>
         <button id="reset-button" style={{
           padding: '0.75rem 1.5rem',
-          background: 'var(--color-danger)',
-          border: 'none',
-          borderRadius: '6px',
+          background: 'var(--surface)',
+          border: '1px solid var(--muted)',
           cursor: 'pointer',
           fontWeight: 'bold',
-          color: 'white'
+          color: 'var(--muted)'
         }}>
           Reset
         </button>
@@ -275,7 +274,7 @@ export const ManualStartTutorial: Story = {
         <h2>Tutorial with Manual Start</h2>
         <p>Set autoStart to false to prevent automatic tutorial start.</p>
         <p>You would typically provide a "Start Tutorial" button in your UI.</p>
-        <div id="content" style={{ marginTop: '2rem', padding: '2rem', background: 'var(--color-bg-secondary)', borderRadius: '8px' }}>
+        <div id="content" style={{ marginTop: '2rem', padding: '2rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
           Sample content here
         </div>
       </div>

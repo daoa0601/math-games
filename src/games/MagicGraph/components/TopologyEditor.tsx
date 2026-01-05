@@ -229,30 +229,30 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
     }, []);
 
     return (
-        <div className="topology-editor">
-            <div className="topology-editor__header">
+        <div className="mg-editor">
+            <div className="mg-editor__header">
                 <h3>{t('editor.title')}</h3>
-                <p className="topology-editor__instructions">{t('editor.instructions')}</p>
+                <p className="mg-editor__instructions">{t('editor.instructions')}</p>
             </div>
 
             {/* Mode selector */}
-            <div className="topology-editor__modes">
+            <div className="mg-editor__modes">
                 <button
-                    className={`mode-btn ${mode === 'add' ? 'mode-btn--active' : ''}`}
+                    className={`mg-editor__mode-btn ${mode === 'add' ? 'mg-editor__mode-btn--active' : ''}`}
                     onClick={() => setMode('add')}
                     aria-pressed={mode === 'add'}
                 >
                     ➕ {t('editor.addMode')}
                 </button>
                 <button
-                    className={`mode-btn ${mode === 'connect' ? 'mode-btn--active' : ''}`}
+                    className={`mg-editor__mode-btn ${mode === 'connect' ? 'mg-editor__mode-btn--active' : ''}`}
                     onClick={() => setMode('connect')}
                     aria-pressed={mode === 'connect'}
                 >
                     🔗 {t('editor.connectMode')}
                 </button>
                 <button
-                    className={`mode-btn ${mode === 'delete' ? 'mode-btn--active' : ''}`}
+                    className={`mg-editor__mode-btn ${mode === 'delete' ? 'mg-editor__mode-btn--active' : ''}`}
                     onClick={() => setMode('delete')}
                     aria-pressed={mode === 'delete'}
                 >
@@ -263,7 +263,7 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
             {/* Canvas */}
             <svg
                 ref={svgRef}
-                className="topology-editor__canvas"
+                className="mg-editor__canvas"
                 width={EDITOR_WIDTH}
                 height={EDITOR_HEIGHT}
                 viewBox={`0 0 ${EDITOR_WIDTH} ${EDITOR_HEIGHT}`}
@@ -275,7 +275,7 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
                 {/* Grid for guidance */}
                 <defs>
                     <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--color-border)" strokeWidth="0.5" opacity="0.3" />
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--border)" strokeWidth="0.5" opacity="0.3" />
                     </pattern>
                 </defs>
                 <rect width="100%" height="100%" fill="url(#grid)" />
@@ -285,7 +285,7 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
                     <path
                         key={line.id}
                         d={getLinePath(line)}
-                        className={`editor-line ${mode === 'delete' ? 'editor-line--deletable' : ''}`}
+                        className={`mg-editor-line ${mode === 'delete' ? 'mg-editor-line--deletable' : ''}`}
                         fill="none"
                         onClick={(e) => handleLineClick(line.id, e)}
                     />
@@ -295,7 +295,7 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
                 {selectedNodeIds.size >= 2 && (
                     <path
                         d={getLinePath({ id: 'preview', nodeIds: Array.from(selectedNodeIds) })}
-                        className="editor-line editor-line--preview"
+                        className="mg-editor-line mg-editor-line--preview"
                         fill="none"
                     />
                 )}
@@ -308,7 +308,7 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
                     return (
                         <g
                             key={node.id}
-                            className={`editor-node ${isSelected ? 'editor-node--selected' : ''} ${isDragging ? 'editor-node--dragging' : ''} ${mode === 'delete' ? 'editor-node--deletable' : ''}`}
+                            className={`mg-editor-node ${isSelected ? 'mg-editor-node--selected' : ''} ${isDragging ? 'mg-editor-node--dragging' : ''} ${mode === 'delete' ? 'mg-editor-node--deletable' : ''}`}
                             onClick={(e) => handleNodeClick(node.id, e)}
                             onMouseDown={(e) => handleNodeMouseDown(node.id, e)}
                         >
@@ -316,14 +316,14 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
                                 cx={node.position.x}
                                 cy={node.position.y}
                                 r={NODE_RADIUS}
-                                className="editor-node__circle"
+                                className="mg-editor-node__circle"
                             />
                             <text
                                 x={node.position.x}
                                 y={node.position.y}
                                 textAnchor="middle"
                                 dominantBaseline="central"
-                                className="editor-node__label"
+                                className="mg-editor-node__label"
                             >
                                 {nodes.indexOf(node) + 1}
                             </text>
@@ -334,13 +334,13 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
 
             {/* Connect button (in connect mode) */}
             {mode === 'connect' && selectedNodeIds.size >= 2 && (
-                <button className="editor-action-btn" onClick={createLineFromSelection}>
+                <button className="game-btn" onClick={createLineFromSelection}>
                     {t('editor.createLine')} ({selectedNodeIds.size} {t('editor.nodesSelected')})
                 </button>
             )}
 
             {/* Numbers input */}
-            <div className="topology-editor__numbers">
+            <div className="mg-editor__numbers">
                 <label htmlFor="available-numbers">{t('editor.availableNumbers')}:</label>
                 <input
                     id="available-numbers"
@@ -352,7 +352,7 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
             </div>
 
             {/* Stats */}
-            <div className="topology-editor__stats">
+            <div className="mg-editor__stats">
                 <span>{t('editor.nodes')}: {nodes.length}</span>
                 <span>{t('editor.lines')}: {lines.length}</span>
                 <span>{t('editor.numbers')}: {availableNumbers.length}</span>
@@ -360,21 +360,21 @@ export function TopologyEditor({ onPuzzleCreated, onCancel }: TopologyEditorProp
 
             {/* Error message */}
             {error && (
-                <div className="topology-editor__error" role="alert">
+                <div className="mg-editor__error" role="alert">
                     {error}
                 </div>
             )}
 
             {/* Action buttons */}
-            <div className="topology-editor__actions">
-                <button className="btn btn--secondary" onClick={clearAll}>
+            <div className="mg-editor__actions">
+                <button className="game-btn" onClick={clearAll}>
                     {t('editor.clearAll')}
                 </button>
-                <button className="btn btn--secondary" onClick={onCancel}>
+                <button className="game-btn" onClick={onCancel}>
                     {t('editor.cancel')}
                 </button>
                 <button
-                    className="btn btn--primary"
+                    className="game-btn game-btn--primary"
                     onClick={generateFromTopology}
                     disabled={nodes.length < 2 || lines.length < 1}
                 >

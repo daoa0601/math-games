@@ -104,7 +104,7 @@ export function SequenceRaceLearn({ lang }: SequenceRaceLearnProps) {
             fill="none"
             aria-hidden="true"
           >
-            {/* Number cells */}
+            {/* Number cells - Linear Editorial style */}
             {[1, 2, 3, 4, 5].map((num, i) => {
               const isPlayer = num === 1 || num === 2 || num === 3;
               return (
@@ -114,16 +114,16 @@ export function SequenceRaceLearn({ lang }: SequenceRaceLearnProps) {
                     y="16"
                     width="40"
                     height="48"
-                    rx="8"
-                    fill={isPlayer ? 'var(--color-primary-bg)' : 'var(--surface-elevated)'}
-                    stroke={isPlayer ? 'var(--color-primary)' : 'var(--border-subtle)'}
+                    rx="2"
+                    fill={isPlayer ? '#111827' : '#0a0f1a'}
+                    stroke={isPlayer ? '#fb923c' : '#1e3a5f'}
                     strokeWidth="2"
                   />
                   <text
                     x={i * 48 + 24}
                     y="48"
                     textAnchor="middle"
-                    fill={isPlayer ? 'var(--color-primary)' : 'var(--text-muted)'}
+                    fill={isPlayer ? '#fb923c' : '#64748b'}
                     fontWeight="bold"
                     fontSize="20"
                   >
@@ -138,7 +138,7 @@ export function SequenceRaceLearn({ lang }: SequenceRaceLearnProps) {
               y1="72"
               x2="120"
               y2="72"
-              stroke="var(--color-success)"
+              stroke="#4ade80"
               strokeWidth="3"
               strokeLinecap="round"
             />

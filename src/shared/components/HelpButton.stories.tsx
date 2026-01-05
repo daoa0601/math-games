@@ -43,8 +43,8 @@ export const InHeader: Story = {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '1rem',
-      background: 'var(--color-surface)',
-      borderRadius: '8px'
+      background: 'var(--surface)',
+      border: '1px solid var(--border)'
     }}>
       <h2 style={{ margin: 0 }}>Game Title</h2>
       <div style={{ display: 'flex', gap: '0.5rem' }}>

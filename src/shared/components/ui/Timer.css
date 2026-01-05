@@ -1,466 +1,199 @@
-/* ============================================
-   Timer Component - "Magical Classroom" Style
-   ============================================
-   A friendly, playful timer that feels like a warm
-   classroom companion, not a stressful countdown.
-   ============================================ */
+/* Timer Component - Linear Editorial */
 
-/* Container */
 .timer-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-md);
-    transition: opacity 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 .timer-container--disabled {
-    opacity: 0.6;
-    pointer-events: none;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
-/* ============================================
-   Mode Toggle - Pill-shaped selector
-   ============================================ */
+/* Mode Toggle */
 .timer-mode-toggle {
-    display: flex;
-    gap: 0;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-full);
-    padding: 4px;
-    box-shadow:
-        inset 0 2px 4px hsla(220, 25%, 10%, 0.08),
-        0 1px 2px hsla(220, 25%, 10%, 0.04);
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 2px;
 }
 
 .timer-mode-toggle__btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-xs) var(--space-md);
-    border: none;
-    border-radius: var(--radius-full);
-    background: transparent;
-    color: var(--text-secondary);
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: opacity var(--motion-fast) var(--ease-out);
 }
 
 .timer-mode-toggle__btn:hover:not(:disabled) {
-    color: var(--text-primary);
-}
-
-.timer-mode-toggle__btn:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
+  opacity: 0.8;
 }
 
 .timer-mode-toggle__btn--active {
-    background: var(--color-primary);
-    color: white;
-    box-shadow: 0 2px 8px hsla(12, 90%, 50%, 0.3);
+  background: var(--text);
+  color: var(--bg);
 }
 
-.timer-mode-toggle__btn--active:hover:not(:disabled) {
-    color: white;
-}
-
-/* Practice mode active state - green tint */
 .timer-mode-toggle__btn[aria-checked="true"]:last-child {
-    background: var(--color-success);
-    box-shadow: 0 2px 8px hsla(145, 65%, 35%, 0.3);
+  background: var(--success);
+  color: var(--bg);
 }
 
 .timer-mode-toggle__icon {
-    font-size: 1.1em;
-    line-height: 1;
+  font-size: 1em;
 }
 
-.timer-mode-toggle__label {
-    line-height: 1;
-}
-
-/* Hide label on very small screens */
-@media (max-width: 360px) {
-    .timer-mode-toggle__label {
-        display: none;
-    }
-
-    .timer-mode-toggle__btn {
-        padding: var(--space-xs) var(--space-sm);
-    }
-
-    .timer-mode-toggle__icon {
-        font-size: 1.25em;
-    }
-}
-
-/* ============================================
-   Timer Display - The main clock face
-   ============================================ */
+/* Timer Display */
 .timer-display {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 140px;
-    padding: var(--space-sm) var(--space-lg);
-    background: linear-gradient(
-        135deg,
-        var(--bg-primary) 0%,
-        var(--bg-secondary) 100%
-    );
-    border-radius: var(--radius-xl);
-    border: 3px solid var(--border-light);
-    box-shadow:
-        0 4px 12px hsla(220, 25%, 10%, 0.08),
-        0 2px 4px hsla(220, 25%, 10%, 0.04),
-        inset 0 1px 0 hsla(0, 0%, 100%, 0.5);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: border-color var(--motion-fast) var(--ease-out);
 }
 
-/* Decorative ring around timer */
-.timer-display__ring {
-    position: absolute;
-    inset: -6px;
-    border-radius: calc(var(--radius-xl) + 6px);
-    border: 2px dashed var(--border-light);
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-/* Timer face content */
 .timer-display__face {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    position: relative;
-    z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 .timer-display__icon {
-    font-size: 1.5rem;
-    line-height: 1;
-    animation: timer-icon-bob 3s ease-in-out infinite;
-}
-
-@keyframes timer-icon-bob {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-2px); }
+  font-size: 1.25rem;
 }
 
 .timer-display__time {
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: 0.05em;
-    min-width: 4.5ch;
-    text-align: center;
-    font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: 0.05em;
+  min-width: 4ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .timer-display__paused-badge {
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 2px var(--space-sm);
-    background: var(--color-warning);
-    color: white;
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-radius: var(--radius-sm);
-    box-shadow: 0 2px 4px hsla(38, 95%, 40%, 0.3);
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px var(--space-sm);
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-/* ============================================
-   Timer States
-   ============================================ */
-
-/* Practice mode - calm green */
+/* Timer States */
 .timer-display.timer--practice {
-    border-color: var(--color-success);
-    background: linear-gradient(
-        135deg,
-        hsla(145, 65%, 95%, 1) 0%,
-        hsla(145, 65%, 90%, 1) 100%
-    );
-}
-
-.timer-display.timer--practice .timer-display__ring {
-    border-color: var(--color-success);
-    opacity: 0.3;
+  border-color: var(--success);
 }
 
 .timer-display.timer--practice .timer-display__time {
-    color: hsl(145, 55%, 30%);
+  color: var(--success);
 }
 
-.timer-display.timer--practice .timer-display__icon {
-    animation: timer-icon-zen 4s ease-in-out infinite;
-}
-
-@keyframes timer-icon-zen {
-    0%, 100% { transform: scale(1) rotate(0deg); }
-    25% { transform: scale(1.05) rotate(-2deg); }
-    75% { transform: scale(1.05) rotate(2deg); }
-}
-
-/* Warning state - gentle amber */
 .timer-display.timer--warning {
-    border-color: var(--color-warning);
-    background: linear-gradient(
-        135deg,
-        hsla(38, 95%, 95%, 1) 0%,
-        hsla(38, 95%, 88%, 1) 100%
-    );
-}
-
-.timer-display.timer--warning .timer-display__ring {
-    border-color: var(--color-warning);
-    opacity: 0.4;
-    animation: ring-pulse-warning 2s ease-in-out infinite;
-}
-
-@keyframes ring-pulse-warning {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.02); }
+  border-color: var(--accent);
 }
 
 .timer-display.timer--warning .timer-display__time {
-    color: hsl(38, 75%, 30%);
+  color: var(--accent);
 }
 
-.timer-display.timer--warning .timer-display__icon {
-    animation: timer-icon-hurry 1.5s ease-in-out infinite;
-}
-
-@keyframes timer-icon-hurry {
-    0%, 100% { transform: translateY(0); }
-    25% { transform: translateY(-3px); }
-    75% { transform: translateY(-1px); }
-}
-
-/* Critical state - soft coral breathing */
 .timer-display.timer--critical {
-    border-color: var(--color-primary);
-    background: linear-gradient(
-        135deg,
-        hsla(12, 90%, 96%, 1) 0%,
-        hsla(12, 90%, 90%, 1) 100%
-    );
-    animation: timer-breathe 1.5s ease-in-out infinite;
-}
-
-@keyframes timer-breathe {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow:
-            0 4px 12px hsla(12, 90%, 50%, 0.15),
-            0 2px 4px hsla(12, 90%, 50%, 0.1);
-    }
-    50% {
-        transform: scale(1.02);
-        box-shadow:
-            0 6px 20px hsla(12, 90%, 50%, 0.25),
-            0 4px 8px hsla(12, 90%, 50%, 0.15);
-    }
-}
-
-.timer-display.timer--critical .timer-display__ring {
-    border-color: var(--color-primary);
-    opacity: 0.5;
-    animation: ring-pulse-critical 1s ease-in-out infinite;
-}
-
-@keyframes ring-pulse-critical {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.7; }
+  border-color: #ef4444;
+  animation: flash-warning 0.5s var(--ease-out) infinite;
 }
 
 .timer-display.timer--critical .timer-display__time {
-    color: hsl(12, 80%, 35%);
-    animation: time-pulse 1s ease-in-out infinite;
+  color: #ef4444;
 }
 
-@keyframes time-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
-}
-
-.timer-display.timer--critical .timer-display__icon {
-    animation: timer-icon-urgent 0.5s ease-in-out infinite;
-}
-
-@keyframes timer-icon-urgent {
-    0%, 100% { transform: rotate(-5deg); }
-    50% { transform: rotate(5deg); }
-}
-
-/* Paused state */
 .timer-display--paused {
-    opacity: 0.85;
+  opacity: 0.7;
 }
 
-.timer-display--paused .timer-display__time {
-    animation: none !important;
-}
-
-.timer-display--paused .timer-display__icon {
-    animation: none !important;
-}
-
-/* ============================================
-   Pause/Resume Button
-   ============================================ */
+/* Pause Button */
 .timer-pause-btn {
-    position: absolute;
-    right: -12px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-primary);
-    border: 2px solid var(--border-light);
-    border-radius: var(--radius-full);
-    font-size: 0.875rem;
-    cursor: pointer;
-    box-shadow: 0 2px 6px hsla(220, 25%, 10%, 0.1);
-    transition: all 0.2s ease;
-    z-index: 2;
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: opacity var(--motion-fast) var(--ease-out);
 }
 
 .timer-pause-btn:hover {
-    transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 4px 12px hsla(220, 25%, 10%, 0.15);
-}
-
-.timer-pause-btn:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
+  opacity: 0.8;
 }
 
 .timer-pause-btn--paused {
-    background: var(--color-success);
-    border-color: var(--color-success);
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--bg);
 }
 
-/* ============================================
-   Mode Hint Text
-   ============================================ */
+/* Mode Hint */
 .timer-mode-hint {
-    margin: 0;
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    text-align: center;
-    font-style: italic;
-    max-width: 200px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--muted);
+  text-align: center;
 }
 
-/* ============================================
-   Reduced Motion Support
-   ============================================ */
-@media (prefers-reduced-motion: reduce) {
-    .timer-display__icon,
-    .timer-display.timer--critical,
-    .timer-display.timer--critical .timer-display__time,
-    .timer-display.timer--critical .timer-display__ring,
-    .timer-display.timer--warning .timer-display__ring,
-    .timer-display.timer--practice .timer-display__icon {
-        animation: none !important;
-    }
-
-    .timer-display,
-    .timer-pause-btn,
-    .timer-mode-toggle__btn {
-        transition: none !important;
-    }
-}
-
-/* ============================================
-   Dark Mode Support (if applicable)
-   ============================================ */
-@media (prefers-color-scheme: dark) {
-    .timer-display.timer--practice {
-        background: linear-gradient(
-            135deg,
-            hsla(145, 40%, 20%, 1) 0%,
-            hsla(145, 40%, 15%, 1) 100%
-        );
-    }
-
-    .timer-display.timer--practice .timer-display__time {
-        color: hsl(145, 65%, 70%);
-    }
-
-    .timer-display.timer--warning {
-        background: linear-gradient(
-            135deg,
-            hsla(38, 50%, 20%, 1) 0%,
-            hsla(38, 50%, 15%, 1) 100%
-        );
-    }
-
-    .timer-display.timer--warning .timer-display__time {
-        color: hsl(38, 95%, 70%);
-    }
-
-    .timer-display.timer--critical {
-        background: linear-gradient(
-            135deg,
-            hsla(12, 50%, 20%, 1) 0%,
-            hsla(12, 50%, 15%, 1) 100%
-        );
-    }
-
-    .timer-display.timer--critical .timer-display__time {
-        color: hsl(12, 90%, 75%);
-    }
-}
-
-/* ============================================
-   Responsive Adjustments
-   ============================================ */
+/* Responsive */
 @media (max-width: 480px) {
-    .timer-container {
-        padding: var(--space-sm);
-    }
+  .timer-display {
+    min-width: 100px;
+    padding: var(--space-xs) var(--space-md);
+  }
 
-    .timer-display {
-        min-width: 120px;
-        padding: var(--space-xs) var(--space-md);
-    }
+  .timer-display__time {
+    font-size: var(--text-lg);
+  }
 
-    .timer-display__time {
-        font-size: var(--text-xl);
-    }
+  .timer-mode-toggle__btn {
+    padding: var(--space-xs) var(--space-sm);
+  }
+}
 
-    .timer-display__icon {
-        font-size: 1.25rem;
-    }
+@media (max-width: 360px) {
+  .timer-mode-toggle__label {
+    display: none;
+  }
+}
 
-    .timer-pause-btn {
-        width: 28px;
-        height: 28px;
-        right: -10px;
-        font-size: 0.75rem;
-    }
-
-    .timer-mode-hint {
-        font-size: 0.65rem;
-    }
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .timer-display.timer--critical {
+    animation: none;
+  }
 }

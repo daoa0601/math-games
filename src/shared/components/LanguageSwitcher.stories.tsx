@@ -28,8 +28,8 @@ export const InHeader: Story = {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '1rem',
-      background: 'var(--color-surface)',
-      borderRadius: '8px'
+      background: 'var(--surface)',
+      border: '1px solid var(--border)'
     }}>
       <h2 style={{ margin: 0 }}>Math Games</h2>
       <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -47,8 +47,8 @@ export const InGroup: Story = {
       gap: '1rem',
       alignItems: 'center',
       padding: '1rem',
-      background: 'var(--color-surface)',
-      borderRadius: '8px'
+      background: 'var(--surface)',
+      border: '1px solid var(--border)'
     }}>
       <span>Language:</span>
       <LanguageSwitcher />
@@ -60,8 +60,8 @@ export const InSettingsPanel: Story = {
   render: () => (
     <div style={{
       padding: '1.5rem',
-      background: 'var(--color-surface)',
-      borderRadius: '8px',
+      background: 'var(--surface)',
+      border: '1px solid var(--border)',
       maxWidth: '400px'
     }}>
       <h3 style={{ marginTop: 0 }}>Settings</h3>
@@ -115,7 +115,7 @@ export const MultipleInstances: Story = {
         <p>Instance 3:</p>
         <LanguageSwitcher />
       </div>
-      <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+      <p style={{ fontSize: '0.875rem', color: 'var(--muted)' }}>
         All instances are synchronized through i18next
       </p>
     </div>

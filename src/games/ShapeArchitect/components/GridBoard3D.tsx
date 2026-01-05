@@ -251,7 +251,7 @@ export function GridBoard3D({
     const { enableAntialias, enableShadows, pixelRatio } = useDeviceCapabilities();
 
     return (
-        <div className="grid-board-3d" onPointerLeave={() => onCellHover?.(null)}>
+        <div className="sa-board-3d" onPointerLeave={() => onCellHover?.(null)}>
             <Canvas
                 shadows={enableShadows}
                 frameloop="demand"

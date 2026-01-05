@@ -15,6 +15,7 @@ import { DEFAULT_ROTATION } from './logic/types';
 import { createGameState, removePieceFromGrid } from './logic/engine';
 import { useShapeArchitectState, usePiecePlacement, usePlacedPieceMovement, useKeyboardControls } from './hooks';
 import { getTotalScore } from '../../shared/utils';
+import '@/shared/styles/game-base.css';
 import './ShapeArchitect.css';
 
 // Geometry hint keys for failure state
@@ -417,7 +418,7 @@ export function ShapeArchitectGame() {
                     </>
                 }
             >
-                <div className="shape-container">
+                <div className="sa-container">
                     {/* Daily Challenge Badge */}
                     {isDailyMode && (
                         <div className="daily-badge">
@@ -466,7 +467,7 @@ export function ShapeArchitectGame() {
                     {/* Editor Access Button (hidden in daily mode) */}
                     {!isDailyMode && (
                         <button
-                            className="btn btn--secondary btn--editor"
+                            className="game-btn game-btn--secondary"
                             onClick={() => setShowEditor(true)}
                         >
                             ✏️ {t('editor.openEditor')}
@@ -474,31 +475,31 @@ export function ShapeArchitectGame() {
                     )}
 
                     {/* Level Info */}
-                    <div className="level-info">
-                        <div className="level-info__item">
-                            <span className="level-info__label">{t('level')}</span>
-                            <span className="level-info__value">{gameState.level.name}</span>
+                    <div className="game-info">
+                        <div className="game-info__item">
+                            <span className="game-info__label">{t('level')}</span>
+                            <span className="game-info__value">{gameState.level.name}</span>
                         </div>
-                        <div className="level-info__item">
-                            <span className="level-info__label">{t('piecesLeft')}</span>
-                            <span className="level-info__value level-info__value--glow">{gameState.remainingPieces.length}</span>
+                        <div className="game-info__item">
+                            <span className="game-info__label">{t('piecesLeft')}</span>
+                            <span className="game-info__value">{gameState.remainingPieces.length}</span>
                         </div>
-                        <div className="level-info__item">
-                            <span className="level-info__label">{t('rotation')}</span>
-                            <span className="level-info__value">
+                        <div className="game-info__item">
+                            <span className="game-info__label">{t('rotation')}</span>
+                            <span className="game-info__value">
                                 X:{gameState.rotation.x}° Y:{gameState.rotation.y}° Z:{gameState.rotation.z}°
                             </span>
                         </div>
                     </div>
 
                     {/* Instructions */}
-                    <div className={`instructions ${selectedPlacedPieceId ? 'instructions--move-mode' : ''}`}>
+                    <div className={`sa-instructions ${selectedPlacedPieceId ? 'sa-instructions--move-mode' : ''}`}>
                         {selectedPlacedPieceId ? (
                             <>
-                                <span className="instructions__move-icon">✋</span>
+                                <span className="sa-instructions__move-icon">✋</span>
                                 {t('instructions.movePiece', 'Click a target cell to move the selected piece. Press Esc to cancel.')}
                                 <button
-                                    className="btn btn--sm btn--ghost instructions__cancel"
+                                    className="game-btn game-btn--sm game-btn--ghost sa-instructions__cancel"
                                     onClick={clearMoveSelection}
                                     aria-label={t('instructions.cancelMove', 'Cancel move')}
                                 >
@@ -514,22 +515,22 @@ export function ShapeArchitectGame() {
 
                     {/* Placement Error Feedback */}
                     {placementError && (
-                        <div className="placement-error" role="alert">
+                        <div className="sa-error" role="alert">
                             ⚠️ {placementError}
                         </div>
                     )}
 
                     {/* View Mode Toggle */}
-                    <div className="view-mode-toggle" role="group" aria-label="View mode">
+                    <div className="sa-view-mode" role="group" aria-label="View mode">
                         <button
-                            className={`view-mode-btn ${viewMode === '2d' ? 'view-mode-btn--active' : ''}`}
+                            className={`sa-view-mode__btn ${viewMode === '2d' ? 'sa-view-mode__btn--active' : ''}`}
                             onClick={() => setViewMode('2d')}
                             aria-pressed={viewMode === '2d'}
                         >
                             2D
                         </button>
                         <button
-                            className={`view-mode-btn ${viewMode === '3d' ? 'view-mode-btn--active' : ''}`}
+                            className={`sa-view-mode__btn ${viewMode === '3d' ? 'sa-view-mode__btn--active' : ''}`}
                             onClick={() => setViewMode('3d')}
                             aria-pressed={viewMode === '3d'}
                             disabled={gameState.level.type === '2D'}
@@ -538,13 +539,13 @@ export function ShapeArchitectGame() {
                             3D
                         </button>
                         {gameState.level.type === '3D' && (
-                            <span className="view-mode-toggle__badge">3D Level</span>
+                            <span className="sa-view-mode__badge">3D Level</span>
                         )}
                     </div>
 
                     {/* Grid Board */}
                     {!showEditor && (
-                        <div className={`board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'board-wrapper--urgent' : ''}`}>
+                        <div className={`sa-board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'sa-board-wrapper--urgent' : ''}`}>
                             {viewMode === '2d' ? (
                                 <GridBoard
                                     grid={gameState.grid}
@@ -565,7 +566,7 @@ export function ShapeArchitectGame() {
                                 />
                             ) : (
                                 <>
-                                    <div className="view-3d-controls">
+                                    <div className="sa-3d-controls">
                                         <CameraPresetButtons
                                             activePreset={cameraPreset}
                                             onPresetChange={setCameraPreset}
@@ -601,12 +602,12 @@ export function ShapeArchitectGame() {
 
                     {/* Controls - Swipe area for mobile rotation */}
                     <div
-                        className="shape-controls"
+                        className="sa-controls"
                         ref={swipeRef as React.RefObject<HTMLDivElement>}
                         {...swipeHandlers}
                     >
                         <button
-                            className="btn btn--icon"
+                            className="game-btn game-btn--icon"
                             onClick={undoLastPiece}
                             disabled={gameState.placedPieces.length === 0 || showTimeUp || gameState.isSolved}
                             title={`${t('controls.undoTitle')} (Ctrl+Z)`}
@@ -627,13 +628,13 @@ export function ShapeArchitectGame() {
                             disabled={!selectedPiece || showTimeUp || gameState.isSolved}
                         />
                         {showRotationHint && selectedPiece && (
-                            <div className="rotation-hint-tooltip">
+                            <div className="sa-hint sa-hint--rotation">
                                 <span>💡 {t('hints.rotationTip')}</span>
                             </div>
                         )}
                         {/* Mobile swipe hint */}
                         {selectedPiece && (
-                            <div className="swipe-hint" aria-hidden="true">
+                            <div className="sa-hint sa-hint--swipe" aria-hidden="true">
                                 <span>👆 {t('hints.swipeRotate', '← Swipe to rotate →')}</span>
                             </div>
                         )}
@@ -649,7 +650,7 @@ export function ShapeArchitectGame() {
 
                     {/* Hint Toggle */}
                     <button
-                        className="btn btn--secondary hint-toggle"
+                        className="game-btn game-btn--secondary"
                         onClick={() => setShowHints(!showHints)}
                     >
                         💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
@@ -657,16 +658,16 @@ export function ShapeArchitectGame() {
 
                     {/* Hints Panel */}
                     {showHints && (
-                        <div className="hints-panel">
-                            <div className="hint-card hint-card--concept">
+                        <div className="game-hints">
+                            <div className="game-hints__card">
                                 <h4>🧱 {t('hints.tetrominoTip.title')}</h4>
                                 <p>{t('hints.tetrominoTip.message')}</p>
                             </div>
-                            <div className="hint-card hint-card--strategy">
+                            <div className="game-hints__card">
                                 <h4>🎯 {t('hints.strategy.title')}</h4>
                                 <p>{t('hints.strategy.message')}</p>
                             </div>
-                            <div className="hint-card hint-card--spatial">
+                            <div className="game-hints__card">
                                 <h4>🧠 {t('hints.spatialThinking.title')}</h4>
                                 <p>{t('hints.spatialThinking.message')}</p>
                             </div>
@@ -675,31 +676,31 @@ export function ShapeArchitectGame() {
 
                     {/* Actions */}
                     <div className="game-actions">
-                        <button className="btn btn--secondary" onClick={resetLevel}>
+                        <button className="game-btn game-btn--secondary" onClick={resetLevel}>
                             🔄 {tc('buttons.reset')}
                         </button>
-                        <button className="btn btn--primary" onClick={nextLevel}>
+                        <button className="game-btn game-btn--primary" onClick={nextLevel}>
                             {tc('buttons.nextLevel')} →
                         </button>
                     </div>
 
                     {/* Win Overlay */}
                     {gameState.isSolved && (
-                        <div className="shape-win-overlay">
-                            <div className="win-overlay__emoji">🧱</div>
-                            <h2 className="shape-win-overlay__title">{t('win.title')}</h2>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '1.25rem' }}>
+                        <div className="game-modal">
+                            <div className="game-modal__emoji">🧱</div>
+                            <h2 className="game-modal__title game-modal__title--success">{t('win.title')}</h2>
+                            <p className="game-modal__message">
                                 {t('win.message')}
                             </p>
 
-                            <div className="win-overlay__stats">
-                                <div className="stat">
-                                    <span className="stat__value">{elapsedTime}s</span>
-                                    <span className="stat__label">{tc('stats.time')}</span>
+                            <div className="game-modal__stats">
+                                <div className="game-modal__stat">
+                                    <span className="game-modal__stat-value">{elapsedTime}s</span>
+                                    <span className="game-modal__stat-label">{tc('stats.time')}</span>
                                 </div>
-                                <div className="stat">
-                                    <span className="stat__value">{gameState.level.pieces.length}</span>
-                                    <span className="stat__label">{tc('stats.pieces')}</span>
+                                <div className="game-modal__stat">
+                                    <span className="game-modal__stat-value">{gameState.level.pieces.length}</span>
+                                    <span className="game-modal__stat-label">{tc('stats.pieces')}</span>
                                 </div>
                             </div>
 
@@ -709,7 +710,6 @@ export function ShapeArchitectGame() {
                                     currentTime={rewards.personalBest.currentTime}
                                     previousBest={rewards.personalBest.previousBest}
                                     isNewBest={rewards.personalBest.isNewBest}
-                                    className="win-overlay__pb"
                                 />
                             )}
 
@@ -722,15 +722,15 @@ export function ShapeArchitectGame() {
                             <div className="game-actions">
                                 {/* In daily mode, show Back to Games; otherwise show game buttons */}
                                 {isDailyMode ? (
-                                    <a href="/math-games/" className="btn btn--primary">
+                                    <a href="/math-games/" className="game-btn game-btn--primary">
                                         {tc('backToGames')}
                                     </a>
                                 ) : (
                                     <>
-                                        <button className="btn btn--primary" onClick={nextLevel}>
+                                        <button className="game-btn game-btn--primary" onClick={nextLevel}>
                                             {tc('buttons.nextLevel')} →
                                         </button>
-                                        <button className="btn btn--secondary" onClick={startRandomLevel}>
+                                        <button className="game-btn game-btn--secondary" onClick={startRandomLevel}>
                                             {tc('buttons.randomLevel')}
                                         </button>
                                     </>
@@ -741,22 +741,22 @@ export function ShapeArchitectGame() {
 
                     {/* Time Up Overlay */}
                     {showTimeUp && (
-                        <div className="time-up-overlay">
-                            <h2 className="time-up-overlay__title">⏰ {tc('timer.timeUp')}</h2>
-                            <p className="time-up-overlay__message">
+                        <div className="game-modal">
+                            <h2 className="game-modal__title">⏰ {tc('timer.timeUp')}</h2>
+                            <p className="game-modal__message">
                                 {tc('timer.practiceMessage')}
                             </p>
 
-                            <div className="failure-hint">
+                            <div className="math-insight">
                                 <h4>💡 {t(`hints.failure.${failureHintKey}.title`)}</h4>
                                 <p>{t(`hints.failure.${failureHintKey}.tip`)}</p>
                             </div>
 
                             <div className="game-actions">
-                                <button className="btn btn--primary" onClick={resetLevel}>
+                                <button className="game-btn game-btn--primary" onClick={resetLevel}>
                                     {tc('buttons.tryAgain')}
                                 </button>
-                                <button className="btn btn--secondary" onClick={nextLevel}>
+                                <button className="game-btn game-btn--secondary" onClick={nextLevel}>
                                     {tc('buttons.skipLevel')}
                                 </button>
                             </div>
@@ -815,7 +815,7 @@ export function ShapeArchitectGame() {
 
                 {/* Level Editor Modal */}
                 {showEditor && (
-                    <div className="level-editor-overlay">
+                    <div className="sa-editor-overlay">
                         <LevelEditor
                             onLevelCreated={handleCustomLevel}
                             onCancel={() => setShowEditor(false)}

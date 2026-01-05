@@ -43,9 +43,9 @@ export function SequenceInfoBadge({
 
     // Default 'badge' variant
     return (
-        <div className="sequence-badge">
-            <span className="sequence-badge__type">{name}</span>
-            <span className="sequence-badge__formula">{info.formula}</span>
+        <div className="sr-badge">
+            <span className="sr-badge__type">{name}</span>
+            <span className="sr-badge__formula">{info.formula}</span>
         </div>
     );
 }

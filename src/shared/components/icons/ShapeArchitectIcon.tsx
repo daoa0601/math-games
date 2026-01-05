@@ -4,6 +4,13 @@ interface IconProps {
 }
 
 export function ShapeArchitectIcon({ size = 64, className = '' }: IconProps) {
+  // Linear Editorial: Teal blocks, navy grid, white highlights
+  const bgColor = '#111827';
+  const blockColor = '#2dd4bf';
+  const blockDark = '#14b8a6';
+  const gridColor = '#1e3a5f';
+  const highlightColor = '#f8fafc';
+
   return (
     <svg
       width={size}
@@ -14,125 +21,61 @@ export function ShapeArchitectIcon({ size = 64, className = '' }: IconProps) {
       className={className}
       aria-hidden="true"
     >
-      <defs>
-        <linearGradient id="blockPink" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#f472b6" />
-          <stop offset="100%" stopColor="#db2777" />
-        </linearGradient>
-        <linearGradient id="blockMint" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#34d399" />
-          <stop offset="100%" stopColor="#059669" />
-        </linearGradient>
-        <linearGradient id="blockYellow" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#fbbf24" />
-          <stop offset="100%" stopColor="#f59e0b" />
-        </linearGradient>
-        <linearGradient id="blockBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#60a5fa" />
-          <stop offset="100%" stopColor="#3b82f6" />
-        </linearGradient>
-        <linearGradient id="blockPurple" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="100%" stopColor="#7c3aed" />
-        </linearGradient>
-        <linearGradient id="workshopBg" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#fef3c7" />
-          <stop offset="100%" stopColor="#fde68a" />
-        </linearGradient>
-      </defs>
+      {/* Background */}
+      <rect width="64" height="64" fill={bgColor} />
 
-      {/* Workshop background */}
-      <rect x="2" y="2" width="60" height="60" rx="12" fill="url(#workshopBg)" />
-
-      {/* Blueprint grid pattern */}
-      <g stroke="#93c5fd" strokeWidth="0.5" opacity="0.3">
-        <line x1="2" y1="12" x2="62" y2="12" />
-        <line x1="2" y1="22" x2="62" y2="22" />
-        <line x1="2" y1="32" x2="62" y2="32" />
-        <line x1="2" y1="42" x2="62" y2="42" />
-        <line x1="2" y1="52" x2="62" y2="52" />
-        <line x1="12" y1="2" x2="12" y2="62" />
-        <line x1="22" y1="2" x2="22" y2="62" />
-        <line x1="32" y1="2" x2="32" y2="62" />
-        <line x1="42" y1="2" x2="42" y2="62" />
-        <line x1="52" y1="2" x2="52" y2="62" />
+      {/* Grid pattern */}
+      <g stroke={gridColor} strokeWidth="1">
+        <line x1="0" y1="16" x2="64" y2="16" />
+        <line x1="0" y1="32" x2="64" y2="32" />
+        <line x1="0" y1="48" x2="64" y2="48" />
+        <line x1="16" y1="0" x2="16" y2="64" />
+        <line x1="32" y1="0" x2="32" y2="64" />
+        <line x1="48" y1="0" x2="48" y2="64" />
       </g>
 
-      {/* 3D Block Stack - Isometric view */}
+      {/* Isometric block stack */}
 
-      {/* Bottom row - Pink L-shape */}
+      {/* Bottom row - 2 blocks */}
       <g>
-        {/* Block 1 */}
-        <path d="M16 48 L24 44 L24 36 L16 40 Z" fill="url(#blockPink)" />
-        <path d="M24 44 L32 48 L32 40 L24 36 Z" fill="#f9a8d4" />
-        <path d="M16 48 L24 52 L32 48 L24 44 Z" fill="#fce7f3" />
+        {/* Block 1 - bottom left */}
+        <polygon points="16,48 28,42 28,34 16,40" fill={blockDark} />
+        <polygon points="28,42 40,48 40,40 28,34" fill={blockColor} />
+        <polygon points="16,48 28,54 40,48 28,42" fill={highlightColor} fillOpacity="0.3" />
+        <polygon points="16,48 28,54 40,48 28,42" stroke={blockColor} strokeWidth="1" fill="none" />
 
-        {/* Block 2 */}
-        <path d="M24 48 L32 44 L32 36 L24 40 Z" fill="url(#blockPink)" />
-        <path d="M32 44 L40 48 L40 40 L32 36 Z" fill="#f9a8d4" />
-        <path d="M24 48 L32 52 L40 48 L32 44 Z" fill="#fce7f3" />
+        {/* Block 2 - bottom right */}
+        <polygon points="28,48 40,42 40,34 28,40" fill={blockDark} />
+        <polygon points="40,42 52,48 52,40 40,34" fill={blockColor} />
+        <polygon points="28,48 40,54 52,48 40,42" fill={highlightColor} fillOpacity="0.3" />
+        <polygon points="28,48 40,54 52,48 40,42" stroke={blockColor} strokeWidth="1" fill="none" />
       </g>
 
-      {/* Middle row - Mint blocks */}
+      {/* Middle row - 1 block */}
       <g>
-        {/* Block on top of pink */}
-        <path d="M20 40 L28 36 L28 28 L20 32 Z" fill="url(#blockMint)" />
-        <path d="M28 36 L36 40 L36 32 L28 28 Z" fill="#6ee7b7" />
-        <path d="M20 40 L28 44 L36 40 L28 36 Z" fill="#d1fae5" />
+        <polygon points="22,40 34,34 34,26 22,32" fill={blockDark} />
+        <polygon points="34,34 46,40 46,32 34,26" fill={blockColor} />
+        <polygon points="22,40 34,46 46,40 34,34" fill={highlightColor} fillOpacity="0.3" />
+        <polygon points="22,40 34,46 46,40 34,34" stroke={blockColor} strokeWidth="1" fill="none" />
       </g>
 
-      {/* Yellow block - standalone */}
+      {/* Top row - 1 block */}
       <g>
-        <path d="M38 44 L46 40 L46 32 L38 36 Z" fill="url(#blockYellow)" />
-        <path d="M46 40 L54 44 L54 36 L46 32 Z" fill="#fcd34d" />
-        <path d="M38 44 L46 48 L54 44 L46 40 Z" fill="#fef3c7" />
+        <polygon points="28,32 40,26 40,18 28,24" fill={blockDark} />
+        <polygon points="40,26 52,32 52,24 40,18" fill={blockColor} />
+        <polygon points="28,32 40,38 52,32 40,26" fill={highlightColor} fillOpacity="0.3" />
+        <polygon points="28,32 40,38 52,32 40,26" stroke={blockColor} strokeWidth="1" fill="none" />
       </g>
 
-      {/* Top blocks - Blue */}
-      <g>
-        <path d="M24 32 L32 28 L32 20 L24 24 Z" fill="url(#blockBlue)" />
-        <path d="M32 28 L40 32 L40 24 L32 20 Z" fill="#93c5fd" />
-        <path d="M24 32 L32 36 L40 32 L32 28 Z" fill="#dbeafe" />
-      </g>
-
-      {/* Floating block being placed - Purple with animation */}
-      <g>
-        <animateTransform
-          attributeName="transform"
-          type="translate"
-          values="0 0; 0 -3; 0 0"
-          dur="1.5s"
-          repeatCount="indefinite"
-        />
-        <path d="M40 24 L48 20 L48 12 L40 16 Z" fill="url(#blockPurple)" />
-        <path d="M48 20 L56 24 L56 16 L48 12 Z" fill="#c4b5fd" />
-        <path d="M40 24 L48 28 L56 24 L48 20 Z" fill="#ede9fe" />
-
-        {/* Sparkle effect */}
-        <circle cx="52" cy="10" r="2" fill="#fbbf24">
-          <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite" />
-          <animate attributeName="r" values="2;3;2" dur="1s" repeatCount="indefinite" />
-        </circle>
-      </g>
-
-      {/* Small builder character */}
-      <g>
-        {/* Hard hat */}
-        <ellipse cx="10" cy="24" rx="5" ry="2" fill="#fbbf24" />
-        <rect x="6" y="22" width="8" height="3" rx="1" fill="#f59e0b" />
-
-        {/* Face */}
-        <circle cx="10" cy="28" r="4" fill="#fcd34d" />
-        <circle cx="8.5" cy="27" r="0.8" fill="#1e293b" />
-        <circle cx="11.5" cy="27" r="0.8" fill="#1e293b" />
-        <path d="M8 29.5 Q10 31 12 29.5" stroke="#1e293b" strokeWidth="1" fill="none" />
-
-        {/* Body */}
-        <rect x="7" y="32" width="6" height="8" rx="2" fill="#3b82f6" />
-
-        {/* Arm pointing up */}
-        <line x1="13" y1="34" x2="18" y2="28" stroke="#fcd34d" strokeWidth="2" strokeLinecap="round" />
-      </g>
+      {/* Target outline - where next block goes */}
+      <polygon
+        points="10,40 22,34 22,26 10,32"
+        stroke={highlightColor}
+        strokeWidth="1"
+        strokeDasharray="2 2"
+        fill="none"
+        opacity="0.5"
+      />
     </svg>
   );
 }

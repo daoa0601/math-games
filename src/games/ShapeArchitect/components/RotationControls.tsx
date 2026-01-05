@@ -23,7 +23,7 @@ interface RotationControlsProps {
 
 function RotateXIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" className="rotation-dial__icon">
+        <svg viewBox="0 0 24 24" fill="none" className="sa-dial__icon">
             {/* X-axis rotation - arrow looping around horizontal axis */}
             <ellipse
                 cx="12"
@@ -54,7 +54,7 @@ function RotateXIcon() {
 
 function RotateYIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" className="rotation-dial__icon">
+        <svg viewBox="0 0 24 24" fill="none" className="sa-dial__icon">
             {/* Y-axis rotation - arrow looping around vertical axis */}
             <ellipse
                 cx="12"
@@ -85,7 +85,7 @@ function RotateYIcon() {
 
 function RotateZIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" className="rotation-dial__icon">
+        <svg viewBox="0 0 24 24" fill="none" className="sa-dial__icon">
             {/* Z-axis rotation - classic circular arrow */}
             <circle
                 cx="12"
@@ -171,12 +171,12 @@ export function RotationControls({
 
     return (
         <div
-            className={`rotation-controls ${disabled ? 'rotation-controls--disabled' : ''}`}
+            className={`sa-rotation ${disabled ? 'sa-rotation--disabled' : ''}`}
             role="group"
             aria-label="3D piece rotation controls"
         >
-            <span className="rotation-controls__label">Rotate</span>
-            <div className="rotation-controls__dials">
+            <span className="sa-rotation__label">Rotate</span>
+            <div className="sa-rotation__dials">
                 {axisOrder.map((axis) => {
                     const config = AXIS_CONFIG[axis];
                     const Icon = config.icon;
@@ -186,19 +186,19 @@ export function RotationControls({
                     return (
                         <button
                             key={axis}
-                            className={`rotation-dial ${isActive ? 'rotation-dial--active' : ''}`}
+                            className={`sa-dial ${isActive ? 'sa-dial--active' : ''}`}
                             style={{ '--dial-color': config.color } as React.CSSProperties}
                             onClick={handlers[axis]}
                             disabled={disabled}
                             title={`${config.tooltip} - Current: ${angle}°`}
                             aria-label={`Rotate ${axis.toUpperCase()} axis by 90 degrees. Current: ${angle} degrees`}
                         >
-                            <div className="rotation-dial__face">
+                            <div className="sa-dial__face">
                                 <Icon />
-                                <span className="rotation-dial__axis">{config.label}</span>
+                                <span className="sa-dial__axis">{config.label}</span>
                             </div>
-                            <span className="rotation-dial__angle">{angle}°</span>
-                            <span className="rotation-dial__shortcut">{config.shortcut}</span>
+                            <span className="sa-dial__angle">{angle}°</span>
+                            <span className="sa-dial__shortcut">{config.shortcut}</span>
                         </button>
                     );
                 })}

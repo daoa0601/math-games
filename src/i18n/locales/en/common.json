@@ -10,6 +10,23 @@
         },
         "tabsLabel": "Dashboard navigation"
     },
+    "nav": {
+        "label": "Main navigation",
+        "home": "Home",
+        "profile": "Profile",
+        "learn": "Learn",
+        "settings": "Settings"
+    },
+    "settings": {
+        "preferences": "Preferences",
+        "sound": "Sound",
+        "soundDescription": "Enable or disable game sounds",
+        "language": "Language",
+        "languageDescription": "Choose your preferred language",
+        "about": "About",
+        "version": "Version",
+        "theme": "Theme"
+    },
     "backToGames": "Back to Games",
     "player": {
         "streak": "Day Streak",

@@ -14,19 +14,19 @@ const GAMES: GameCardConfig[] = [
   {
     id: 'magic-graph',
     icon: '✨',
-    color: 'var(--color-magic)',
+    color: '#a78bfa', // Violet accent for MagicGraph
     taglineKey: 'learn.magicGraph.tagline',
   },
   {
     id: 'sequence-race',
     icon: '🏃',
-    color: 'var(--color-primary)',
+    color: '#fb923c', // Orange accent for SequenceRace
     taglineKey: 'learn.sequenceRace.tagline',
   },
   {
     id: 'shape-architect',
     icon: '🏗️',
-    color: 'var(--game-build-primary)',
+    color: '#2dd4bf', // Teal accent for ShapeArchitect
     taglineKey: 'learn.shapeArchitect.tagline',
   },
 ];

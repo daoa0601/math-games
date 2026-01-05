@@ -1,4 +1,4 @@
-/* Error Boundary Styles */
+/* ErrorBoundary - Linear Editorial */
 
 .error-boundary {
   display: flex;
@@ -6,67 +6,65 @@
   justify-content: center;
   min-height: 100vh;
   padding: var(--space-lg);
-  background: var(--bg-body);
+  background: var(--bg);
 }
 
 .error-boundary__content {
   text-align: center;
   max-width: 400px;
   padding: var(--space-xl);
-  background: var(--surface-card);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
 .error-boundary__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   margin-bottom: var(--space-lg);
-  color: var(--color-error);
-  background: hsla(0, 70%, 50%, 0.1);
-  border-radius: 50%;
+  color: #ef4444;
+  font-size: 2rem;
 }
 
 .error-boundary__title {
   margin: 0 0 var(--space-sm);
   font-family: var(--font-display);
   font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--color-text);
+  color: var(--text);
 }
 
 .error-boundary__message {
   margin: 0 0 var(--space-lg);
-  color: var(--color-text-muted);
+  color: var(--muted);
   line-height: 1.6;
 }
 
 .error-boundary__details {
   margin-bottom: var(--space-lg);
   padding: var(--space-md);
-  background: var(--bg-subtle);
-  border-radius: var(--radius-md);
+  background: var(--bg);
+  border: 1px solid var(--border);
   text-align: left;
   font-size: var(--text-sm);
 }
 
 .error-boundary__details summary {
   cursor: pointer;
-  color: var(--color-text-muted);
+  color: var(--muted);
   margin-bottom: var(--space-sm);
 }
 
 .error-boundary__details pre {
   margin: var(--space-sm) 0 0;
   padding: var(--space-sm);
-  background: var(--bg-body);
-  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
   overflow-x: auto;
+  font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--color-error);
+  color: #ef4444;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -83,44 +81,39 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-sm) var(--space-lg);
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  font-weight: 600;
-  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   text-decoration: none;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: opacity var(--motion-fast) var(--ease-out);
 }
 
 .error-boundary__btn--primary {
-  background: var(--color-primary);
-  color: white;
-  border: none;
+  background: var(--text);
+  color: var(--bg);
+  border: 1px solid var(--text);
 }
 
 .error-boundary__btn--primary:hover {
-  background: var(--color-primary-dark);
-  transform: translateY(-2px);
+  opacity: 0.8;
 }
 
 .error-boundary__btn--secondary {
   background: transparent;
-  color: var(--color-text-muted);
-  border: 2px solid var(--border-color);
+  color: var(--muted);
+  border: 1px solid var(--border);
 }
 
 .error-boundary__btn--secondary:hover {
-  border-color: var(--color-text-muted);
-  color: var(--color-text);
+  border-color: var(--muted);
+  color: var(--text);
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .error-boundary__btn {
     transition: none;
-  }
-
-  .error-boundary__btn--primary:hover {
-    transform: none;
   }
 }

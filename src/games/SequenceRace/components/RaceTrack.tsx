@@ -1,4 +1,3 @@
-import { useEffect, useState, useRef } from 'react';
 import type { SequenceState, GameMode } from '../logic/types';
 
 interface RaceTrackProps {
@@ -6,50 +5,17 @@ interface RaceTrackProps {
     gameMode: GameMode;
     isAIThinking?: boolean;
     aiReaction?: 'confident' | 'worried' | 'neutral';
-    /** Preview position to show ghost marker when hovering step cards */
     previewPosition?: number | null;
-    /** Apply urgent styling (red border, pulsing) when time is low */
     isUrgent?: boolean;
 }
 
-// CSS Stick Figure Component
-function StickFigure() {
-    return (
-        <div className="stick-figure">
-            <div className="stick-figure__head" />
-            <div className="stick-figure__body" />
-            <div className="stick-figure__arms">
-                <div className="stick-figure__arm stick-figure__arm--left" />
-                <div className="stick-figure__arm stick-figure__arm--right" />
-            </div>
-            <div className="stick-figure__legs">
-                <div className="stick-figure__leg stick-figure__leg--left" />
-                <div className="stick-figure__leg stick-figure__leg--right" />
-            </div>
-        </div>
-    );
+// Simplified avatar using emoji instead of CSS art
+function AvatarEmoji({ isAI }: { isAI?: boolean }) {
+    return <span aria-hidden="true">{isAI ? '🤖' : '🏃'}</span>;
 }
 
 export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral', previewPosition, isUrgent }: RaceTrackProps) {
     const { target, currentPosition, gameOver, winner } = state;
-    const prevPositionRef = useRef(currentPosition);
-    const [isMoving, setIsMoving] = useState(false);
-
-    // Detect movement and trigger animation
-    useEffect(() => {
-        if (currentPosition !== prevPositionRef.current) {
-            // This setState is intentional for animation triggers (not a cascading render)
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setIsMoving(true);
-            prevPositionRef.current = currentPosition;
-
-            // Clear moving state after animation completes
-            const timer = setTimeout(() => setIsMoving(false), 400);
-            return () => clearTimeout(timer);
-        }
-    }, [currentPosition]);
-
-    // Calculate position percentage
     const positionPercent = (currentPosition / target) * 100;
 
     // Generate markers (every 5 units or at least 5 markers)
@@ -62,21 +28,21 @@ export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral
     }
 
     return (
-        <div className={`race-track${isUrgent ? ' race-track--urgent' : ''}`}>
-            <div className="track-wrapper">
+        <div className={`sr-track${isUrgent ? ' sr-track--urgent' : ''}`}>
+            <div className="sr-track__wrapper">
                 {/* Track Line */}
-                <div className="track-line" />
+                <div className="sr-track__line" />
 
                 {/* Markers */}
-                <div className="track-markers">
+                <div className="sr-markers">
                     {markers.map((marker) => (
                         <div
                             key={marker.value}
-                            className={`track-marker ${marker.isMajor ? 'track-marker--major' : ''}`}
+                            className={`sr-marker ${marker.isMajor ? 'sr-marker--major' : ''}`}
                             style={{ position: 'absolute', left: `${marker.percent}%` }}
                         >
                             {marker.isMajor && (
-                                <span className="track-marker-label">{marker.value}</span>
+                                <span className="sr-marker__label">{marker.value}</span>
                             )}
                         </div>
                     ))}
@@ -84,23 +50,19 @@ export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral
 
                 {/* Player Avatar */}
                 <div
-                    className={`player-avatar player-avatar--player player-avatar--stick-figure ${
-                        isMoving ? 'player-avatar--moving' : ''
-                    } ${
-                        gameOver && winner === 'player' ? 'player-avatar--winner' : ''
-                    } ${
-                        gameOver && winner !== 'player' && winner !== null ? 'player-avatar--loser' : ''
+                    className={`sr-avatar sr-avatar--player ${
+                        gameOver && winner !== 'player' && winner !== null ? 'sr-avatar--loser' : ''
                     }`}
                     style={{ left: `${positionPercent}%` }}
                     aria-label={gameMode === 'two-player' ? 'Shared player position' : 'Your runner'}
                 >
-                    <StickFigure />
+                    <AvatarEmoji />
                 </div>
 
                 {/* Preview Ghost Marker (shows where player would land on hover) */}
                 {previewPosition !== null && previewPosition !== undefined && previewPosition !== currentPosition && previewPosition <= target && (
                     <div
-                        className="preview-marker"
+                        className="sr-preview"
                         style={{ left: `${(previewPosition / target) * 100}%` }}
                         aria-hidden="true"
                     />
@@ -109,20 +71,16 @@ export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral
                 {/* AI Opponent (only in vs-ai mode) */}
                 {gameMode === 'vs-ai' && (
                     <div
-                        className={`player-avatar player-avatar--ai player-avatar--stick-figure ${
-                            isAIThinking ? 'player-avatar--thinking' : ''
-                        } ${
-                            gameOver && winner === 'ai' ? 'player-avatar--winner' : ''
-                        } ${
-                            gameOver && winner === 'player' ? 'player-avatar--loser' : ''
+                        className={`sr-avatar sr-avatar--ai ${
+                            gameOver && winner === 'player' ? 'sr-avatar--loser' : ''
                         }`}
                         style={{ left: `${positionPercent}%` }}
                         aria-label="AI opponent"
                     >
-                        <StickFigure />
+                        <AvatarEmoji isAI />
                         {/* AI Reaction Bubble */}
                         {!gameOver && (
-                            <span className={`ai-reaction ai-reaction--${aiReaction}`}>
+                            <span className="sr-reaction">
                                 {aiReaction === 'confident' && '😏'}
                                 {aiReaction === 'worried' && '😰'}
                                 {aiReaction === 'neutral' && (isAIThinking ? '🤔' : '')}
@@ -132,12 +90,12 @@ export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral
                 )}
 
                 {/* Target Flag */}
-                <div className={`target-flag ${gameOver ? 'target-flag--finished' : ''}`}>🏁</div>
+                <div className="sr-flag">🏁</div>
             </div>
 
             {/* Position Display */}
-            <div className="position-display">
-                Position: <strong className="position-display__current">{currentPosition}</strong> / {target}
+            <div className="sr-position">
+                Position: <strong>{currentPosition}</strong> / {target}
             </div>
         </div>
     );

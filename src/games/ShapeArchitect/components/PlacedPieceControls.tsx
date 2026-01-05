@@ -53,7 +53,7 @@ export function PlacedPieceControls({
                     {!is2DMode && (
                         <>
                             <button
-                                className="btn btn--sm btn--icon placed-piece-controls__btn"
+                                className="game-btn game-btn--sm game-btn--icon placed-piece-controls__btn"
                                 onClick={() => onRotateAxis('x')}
                                 disabled={disabled}
                                 title={`X: ${rotation.x}°`}
@@ -62,7 +62,7 @@ export function PlacedPieceControls({
                                 ↻X
                             </button>
                             <button
-                                className="btn btn--sm btn--icon placed-piece-controls__btn"
+                                className="game-btn game-btn--sm game-btn--icon placed-piece-controls__btn"
                                 onClick={() => onRotateAxis('y')}
                                 disabled={disabled}
                                 title={`Y: ${rotation.y}°`}
@@ -73,7 +73,7 @@ export function PlacedPieceControls({
                         </>
                     )}
                     <button
-                        className="btn btn--sm btn--icon placed-piece-controls__btn"
+                        className="game-btn game-btn--sm game-btn--icon placed-piece-controls__btn"
                         onClick={() => onRotateAxis('z')}
                         disabled={disabled}
                         title={`Z: ${rotation.z}°`}
@@ -86,7 +86,7 @@ export function PlacedPieceControls({
 
             <div className="placed-piece-controls__actions">
                 <button
-                    className="btn btn--secondary placed-piece-controls__cancel"
+                    className="game-btn game-btn--secondary placed-piece-controls__cancel"
                     onClick={onCancel}
                     disabled={disabled}
                 >
