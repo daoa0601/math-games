@@ -47,6 +47,13 @@ test.describe('Accessibility', () => {
       activeTab = await page.locator('[role="tab"][aria-selected="true"]');
       await expect(activeTab).toContainText(/achievements|thành tích/i);
 
+      // Press Right Arrow to move to Learn tab
+      await page.keyboard.press('ArrowRight');
+      await page.waitForTimeout(100);
+
+      activeTab = await page.locator('[role="tab"][aria-selected="true"]');
+      await expect(activeTab).toContainText(/learn|học/i);
+
       // Press Right Arrow to wrap back to Play tab
       await page.keyboard.press('ArrowRight');
       await page.waitForTimeout(100);
@@ -59,19 +66,26 @@ test.describe('Accessibility', () => {
       // Focus on Play tab
       await dashboard.playTab.focus();
 
-      // Press Left Arrow to wrap to Achievements tab
+      // Press Left Arrow to wrap to Learn tab (last tab)
       await page.keyboard.press('ArrowLeft');
       await page.waitForTimeout(100);
 
-      const activeTab = await page.locator('[role="tab"][aria-selected="true"]');
+      let activeTab = await page.locator('[role="tab"][aria-selected="true"]');
+      await expect(activeTab).toContainText(/learn|học/i);
+
+      // Press Left Arrow to move to Achievements tab
+      await page.keyboard.press('ArrowLeft');
+      await page.waitForTimeout(100);
+
+      activeTab = await page.locator('[role="tab"][aria-selected="true"]');
       await expect(activeTab).toContainText(/achievements|thành tích/i);
 
       // Press Left Arrow to move to Stats tab
       await page.keyboard.press('ArrowLeft');
       await page.waitForTimeout(100);
 
-      const statsTab = await page.locator('[role="tab"][aria-selected="true"]');
-      await expect(statsTab).toContainText(/stats|thống kê/i);
+      activeTab = await page.locator('[role="tab"][aria-selected="true"]');
+      await expect(activeTab).toContainText(/stats|thống kê/i);
     });
 
     test('should navigate tabs using Home and End keys', async ({ page }) => {
@@ -86,12 +100,12 @@ test.describe('Accessibility', () => {
       let activeTab = await page.locator('[role="tab"][aria-selected="true"]');
       await expect(activeTab).toContainText(/play|chơi/i);
 
-      // Press End to go to last tab
+      // Press End to go to last tab (Learn)
       await page.keyboard.press('End');
       await page.waitForTimeout(100);
 
       activeTab = await page.locator('[role="tab"][aria-selected="true"]');
-      await expect(activeTab).toContainText(/achievements|thành tích/i);
+      await expect(activeTab).toContainText(/learn|học/i);
     });
 
     test('should navigate game cards using Tab key', async ({ page }) => {

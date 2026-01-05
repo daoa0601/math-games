@@ -511,7 +511,7 @@ test.describe('Progression System', () => {
 
     test('should handle profile schema version correctly', async ({ page }) => {
       const profile = await getPlayerProfile(page);
-      expect(profile!.version).toBe(1);
+      expect(profile!.version).toBe(2); // Version 2 is current (matches STORAGE_VERSION in player.ts)
       expect(profile!.createdAt).toBeDefined();
     });
 
