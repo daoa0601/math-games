@@ -418,167 +418,74 @@ export function ShapeArchitectGame() {
                     </>
                 }
             >
-                <div className="sa-container">
-                    {/* Daily Challenge Badge */}
-                    {isDailyMode && (
-                        <div className="daily-badge">
-                            <span className="daily-badge__icon">📅</span>
-                            <span className="daily-badge__text">{tc('daily.dailyChallenge')}</span>
-                            {dailyCompleted && <span className="daily-badge__check">✓</span>}
-                        </div>
-                    )}
-
-                    {/* Timer with Practice/Timed Mode Toggle */}
-                    <Timer
-                        timeLeft={timeLeft}
-                        formattedTime={formattedTime}
-                        timerClass={timerClass}
-                        isPracticeMode={isPracticeMode}
-                        isPaused={isPaused}
-                        onModeChange={handlePracticeModeChange}
-                        onPause={pauseTimer}
-                        onResume={resumeTimer}
-                        disabled={gameState.isSolved}
-                    />
-
-                    {/* Difficulty Selector (hidden in daily mode) */}
-                    {!isDailyMode && (
-                        <DifficultySelector
-                            options={['easy', 'medium', 'hard']}
-                            value={difficulty}
-                            onChange={handleDifficultyChange}
-                        />
-                    )}
-
-                    {/* Game Rules */}
-                    <div className="game-rules">
-                        <span className="game-rules__icon">📜</span>
-                        <p className="game-rules__text">{t('rules')}</p>
-                    </div>
-
-                    {/* Score Display */}
-                    {totalScore > 0 && (
-                        <div className="score-display">
-                            <span className="score-display__label">{tc('stats.score')}:</span>
-                            <span className="score-display__value">{totalScore}</span>
-                        </div>
-                    )}
-
-                    {/* Editor Access Button (hidden in daily mode) */}
-                    {!isDailyMode && (
-                        <button
-                            className="action action--secondary"
-                            onClick={() => setShowEditor(true)}
-                        >
-                            ✏️ {t('editor.openEditor')}
-                        </button>
-                    )}
-
-                    {/* Level Info */}
-                    <div className="game-info">
-                        <div className="game-info__item">
-                            <span className="game-info__label">{t('level')}</span>
-                            <span className="game-info__value">{gameState.level.name}</span>
-                        </div>
-                        <div className="game-info__item">
-                            <span className="game-info__label">{t('piecesLeft')}</span>
-                            <span className="game-info__value">{gameState.remainingPieces.length}</span>
-                        </div>
-                        <div className="game-info__item">
-                            <span className="game-info__label">{t('rotation')}</span>
-                            <span className="game-info__value">
-                                X:{gameState.rotation.x}° Y:{gameState.rotation.y}° Z:{gameState.rotation.z}°
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Instructions */}
-                    <div className={`sa-instructions ${selectedPlacedPieceId ? 'sa-instructions--move-mode' : ''}`}>
-                        {selectedPlacedPieceId ? (
-                            <>
-                                <span className="sa-instructions__move-icon">✋</span>
-                                {t('instructions.movePiece', 'Click a target cell to move the selected piece. Press Esc to cancel.')}
-                                <button
-                                    className="action action--sm action--ghost sa-instructions__cancel"
-                                    onClick={clearMoveSelection}
-                                    aria-label={t('instructions.cancelMove', 'Cancel move')}
-                                >
-                                    ✕
-                                </button>
-                            </>
-                        ) : selectedPiece ? (
-                            t('instructions.placePiece', { piece: selectedPiece.name })
-                        ) : (
-                            t('instructions.selectPiece')
+                <div className="sa-container sa-layout">
+                    {/* === MAIN AREA: Board and inventory === */}
+                    <div className="sa-main">
+                        {/* Daily Challenge Badge */}
+                        {isDailyMode && (
+                            <div className="daily-badge">
+                                <span className="daily-badge__icon">📅</span>
+                                <span className="daily-badge__text">{tc('daily.dailyChallenge')}</span>
+                                {dailyCompleted && <span className="daily-badge__check">✓</span>}
+                            </div>
                         )}
-                    </div>
 
-                    {/* Placement Error Feedback */}
-                    {placementError && (
-                        <div className="sa-error" role="alert">
-                            ⚠️ {placementError}
-                        </div>
-                    )}
-
-                    {/* View Mode Toggle */}
-                    <div className="sa-view-mode" role="group" aria-label="View mode">
-                        <button
-                            className={`sa-view-mode__btn ${viewMode === '2d' ? 'sa-view-mode__btn--active' : ''}`}
-                            onClick={() => setViewMode('2d')}
-                            aria-pressed={viewMode === '2d'}
-                        >
-                            2D
-                        </button>
-                        <button
-                            className={`sa-view-mode__btn ${viewMode === '3d' ? 'sa-view-mode__btn--active' : ''}`}
-                            onClick={() => setViewMode('3d')}
-                            aria-pressed={viewMode === '3d'}
-                            disabled={gameState.level.type === '2D'}
-                            title={gameState.level.type === '2D' ? t('viewMode.2dOnlyLevel', 'This level is 2D only') : undefined}
-                        >
-                            3D
-                        </button>
-                        {gameState.level.type === '3D' && (
-                            <span className="sa-view-mode__badge">3D Level</span>
-                        )}
-                    </div>
-
-                    {/* Grid Board */}
-                    {!showEditor && (
-                        <div className={`sa-board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'sa-board-wrapper--urgent' : ''}`}>
-                            {viewMode === '2d' ? (
-                                <GridBoard
-                                    grid={gameState.grid}
-                                    gridSize={gameState.level.gridSize}
-                                    selectedPiece={selectedPlacedPieceId ? null : selectedPiece}
-                                    rotation={selectedPlacedPieceId ? moveRotation : gameState.rotation}
-                                    placedPieces={gameState.placedPieces}
-                                    levelPieces={gameState.level.pieces}
-                                    onCellClick={handleCellClick}
-                                    hoverPosition={effectivePreviewPosition}
-                                    onCellHover={selectedPlacedPieceId ? setMovePreviewPosition : setHoverPosition}
-                                    justPlacedPositions={justMovedPositions.size > 0 ? justMovedPositions : justPlacedPositions}
-                                    isPreviewLocked={previewLocked}
-                                    selectedPlacedPieceId={selectedPlacedPieceId}
-                                    onPlacedPieceClick={selectPlacedPiece}
-                                    isMovePreviewValid={isMovePreviewValid}
-                                    moveRotation={moveRotation}
-                                />
-                            ) : (
+                        {/* Instructions */}
+                        <div className={`sa-instructions ${selectedPlacedPieceId ? 'sa-instructions--move-mode' : ''}`}>
+                            {selectedPlacedPieceId ? (
                                 <>
-                                    <div className="sa-3d-controls">
-                                        <CameraPresetButtons
-                                            activePreset={cameraPreset}
-                                            onPresetChange={setCameraPreset}
-                                        />
-                                        <LayerControls
-                                            depth={gameState.level.gridSize[2]}
-                                            maxVisibleLayer={maxVisibleLayer}
-                                            onChange={setMaxVisibleLayer}
-                                            disabled={gameState.isSolved || showTimeUp}
-                                        />
-                                    </div>
-                                    <GridBoard3D
+                                    <span className="sa-instructions__move-icon">✋</span>
+                                    {t('instructions.movePiece', 'Click a target cell to move the selected piece. Press Esc to cancel.')}
+                                    <button
+                                        className="action action--sm action--ghost sa-instructions__cancel"
+                                        onClick={clearMoveSelection}
+                                        aria-label={t('instructions.cancelMove', 'Cancel move')}
+                                    >
+                                        ✕
+                                    </button>
+                                </>
+                            ) : selectedPiece ? (
+                                t('instructions.placePiece', { piece: selectedPiece.name })
+                            ) : (
+                                t('instructions.selectPiece')
+                            )}
+                        </div>
+
+                        {/* Placement Error Feedback */}
+                        {placementError && (
+                            <div className="sa-error" role="alert">
+                                ⚠️ {placementError}
+                            </div>
+                        )}
+
+                        {/* View Mode Toggle */}
+                        <div className="sa-view-mode" role="group" aria-label="View mode">
+                            <button
+                                className={`sa-view-mode__btn ${viewMode === '2d' ? 'sa-view-mode__btn--active' : ''}`}
+                                onClick={() => setViewMode('2d')}
+                                aria-pressed={viewMode === '2d'}
+                            >
+                                2D
+                            </button>
+                            <button
+                                className={`sa-view-mode__btn ${viewMode === '3d' ? 'sa-view-mode__btn--active' : ''}`}
+                                onClick={() => setViewMode('3d')}
+                                aria-pressed={viewMode === '3d'}
+                                disabled={gameState.level.type === '2D'}
+                                title={gameState.level.type === '2D' ? t('viewMode.2dOnlyLevel', 'This level is 2D only') : undefined}
+                            >
+                                3D
+                            </button>
+                            {gameState.level.type === '3D' && (
+                                <span className="sa-view-mode__badge">3D Level</span>
+                            )}
+                        </div>
+
+                        {/* Grid Board */}
+                        {!showEditor && (
+                            <div className={`sa-board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'sa-board-wrapper--urgent' : ''}`}>
+                                {viewMode === '2d' ? (
+                                    <GridBoard
                                         grid={gameState.grid}
                                         gridSize={gameState.level.gridSize}
                                         selectedPiece={selectedPlacedPieceId ? null : selectedPiece}
@@ -588,35 +495,141 @@ export function ShapeArchitectGame() {
                                         onCellClick={handleCellClick}
                                         hoverPosition={effectivePreviewPosition}
                                         onCellHover={selectedPlacedPieceId ? setMovePreviewPosition : setHoverPosition}
-                                        cameraPreset={cameraPreset}
-                                        maxVisibleLayer={maxVisibleLayer}
-                                        isPreviewLocked={previewLocked}
                                         justPlacedPositions={justMovedPositions.size > 0 ? justMovedPositions : justPlacedPositions}
+                                        isPreviewLocked={previewLocked}
                                         selectedPlacedPieceId={selectedPlacedPieceId}
                                         onPlacedPieceClick={selectPlacedPiece}
+                                        isMovePreviewValid={isMovePreviewValid}
+                                        moveRotation={moveRotation}
                                     />
-                                </>
-                            )}
-                        </div>
-                    )}
+                                ) : (
+                                    <>
+                                        <div className="sa-3d-controls">
+                                            <CameraPresetButtons
+                                                activePreset={cameraPreset}
+                                                onPresetChange={setCameraPreset}
+                                            />
+                                            <LayerControls
+                                                depth={gameState.level.gridSize[2]}
+                                                maxVisibleLayer={maxVisibleLayer}
+                                                onChange={setMaxVisibleLayer}
+                                                disabled={gameState.isSolved || showTimeUp}
+                                            />
+                                        </div>
+                                        <GridBoard3D
+                                            grid={gameState.grid}
+                                            gridSize={gameState.level.gridSize}
+                                            selectedPiece={selectedPlacedPieceId ? null : selectedPiece}
+                                            rotation={selectedPlacedPieceId ? moveRotation : gameState.rotation}
+                                            placedPieces={gameState.placedPieces}
+                                            levelPieces={gameState.level.pieces}
+                                            onCellClick={handleCellClick}
+                                            hoverPosition={effectivePreviewPosition}
+                                            onCellHover={selectedPlacedPieceId ? setMovePreviewPosition : setHoverPosition}
+                                            cameraPreset={cameraPreset}
+                                            maxVisibleLayer={maxVisibleLayer}
+                                            isPreviewLocked={previewLocked}
+                                            justPlacedPositions={justMovedPositions.size > 0 ? justMovedPositions : justPlacedPositions}
+                                            selectedPlacedPieceId={selectedPlacedPieceId}
+                                            onPlacedPieceClick={selectPlacedPiece}
+                                        />
+                                    </>
+                                )}
+                            </div>
+                        )}
 
-                    {/* Controls - Swipe area for mobile rotation */}
-                    <div
-                        className="sa-controls"
-                        ref={swipeRef as React.RefObject<HTMLDivElement>}
-                        {...swipeHandlers}
-                    >
-                        <button
-                            className="action action--icon"
-                            onClick={undoLastPiece}
-                            disabled={gameState.placedPieces.length === 0 || showTimeUp || gameState.isSolved}
-                            title={`${t('controls.undoTitle')} (Ctrl+Z)`}
+                        {/* Piece Inventory */}
+                        <PieceInventory
+                            pieces={gameState.remainingPieces}
+                            selectedPieceId={gameState.selectedPieceId}
+                            onSelectPiece={handleSelectPiece}
+                            rotation={gameState.rotation}
+                        />
+                    </div>
+
+                    {/* === SIDEBAR: Controls and info === */}
+                    <div className="sa-sidebar">
+                        {/* Timer with Practice/Timed Mode Toggle */}
+                        <Timer
+                            timeLeft={timeLeft}
+                            formattedTime={formattedTime}
+                            timerClass={timerClass}
+                            isPracticeMode={isPracticeMode}
+                            isPaused={isPaused}
+                            onModeChange={handlePracticeModeChange}
+                            onPause={pauseTimer}
+                            onResume={resumeTimer}
+                            disabled={gameState.isSolved}
+                        />
+
+                        {/* Difficulty Selector (hidden in daily mode) */}
+                        {!isDailyMode && (
+                            <DifficultySelector
+                                options={['easy', 'medium', 'hard']}
+                                value={difficulty}
+                                onChange={handleDifficultyChange}
+                            />
+                        )}
+
+                        {/* Game Rules */}
+                        <div className="game-rules">
+                            <span className="game-rules__icon">📜</span>
+                            <p className="game-rules__text">{t('rules')}</p>
+                        </div>
+
+                        {/* Score Display */}
+                        {totalScore > 0 && (
+                            <div className="score-display">
+                                <span className="score-display__label">{tc('stats.score')}:</span>
+                                <span className="score-display__value">{totalScore}</span>
+                            </div>
+                        )}
+
+                        {/* Editor Access Button (hidden in daily mode) */}
+                        {!isDailyMode && (
+                            <button
+                                className="action action--secondary"
+                                onClick={() => setShowEditor(true)}
+                            >
+                                ✏️ {t('editor.openEditor')}
+                            </button>
+                        )}
+
+                        {/* Level Info */}
+                        <div className="game-info">
+                            <div className="game-info__item">
+                                <span className="game-info__label">{t('level')}</span>
+                                <span className="game-info__value">{gameState.level.name}</span>
+                            </div>
+                            <div className="game-info__item">
+                                <span className="game-info__label">{t('piecesLeft')}</span>
+                                <span className="game-info__value">{gameState.remainingPieces.length}</span>
+                            </div>
+                            <div className="game-info__item">
+                                <span className="game-info__label">{t('rotation')}</span>
+                                <span className="game-info__value">
+                                    X:{gameState.rotation.x}° Y:{gameState.rotation.y}° Z:{gameState.rotation.z}°
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Controls - Swipe area for mobile rotation */}
+                        <div
+                            className="sa-controls"
+                            ref={swipeRef as React.RefObject<HTMLDivElement>}
+                            {...swipeHandlers}
                         >
-                            ↩️
-                        </button>
-                        <RotationControls
-                            rotation={selectedPlacedPieceId ? moveRotation : gameState.rotation}
-                            onRotateX={() => selectedPlacedPieceId ? rotateMoveAxis('x') : handleRotateAxis('x')}
+                            <button
+                                className="action action--icon"
+                                onClick={undoLastPiece}
+                                disabled={gameState.placedPieces.length === 0 || showTimeUp || gameState.isSolved}
+                                title={`${t('controls.undoTitle')} (Ctrl+Z)`}
+                            >
+                                ↩️
+                            </button>
+                            <RotationControls
+                                rotation={selectedPlacedPieceId ? moveRotation : gameState.rotation}
+                                onRotateX={() => selectedPlacedPieceId ? rotateMoveAxis('x') : handleRotateAxis('x')}
                             onRotateY={() => selectedPlacedPieceId ? rotateMoveAxis('y') : handleRotateAxis('y')}
                             onRotateZ={() => selectedPlacedPieceId ? rotateMoveAxis('z') : handleRotateAxis('z')}
                             disabled={(!selectedPiece && !selectedPlacedPieceId) || showTimeUp || gameState.isSolved}
@@ -638,51 +651,45 @@ export function ShapeArchitectGame() {
                                 <span>👆 {t('hints.swipeRotate', '← Swipe to rotate →')}</span>
                             </div>
                         )}
-                    </div>
-
-                    {/* Piece Inventory */}
-                    <PieceInventory
-                        pieces={gameState.remainingPieces}
-                        selectedPieceId={gameState.selectedPieceId}
-                        onSelectPiece={handleSelectPiece}
-                        rotation={gameState.rotation}
-                    />
-
-                    {/* Hint Toggle */}
-                    <button
-                        className="action action--secondary"
-                        onClick={() => setShowHints(!showHints)}
-                    >
-                        💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
-                    </button>
-
-                    {/* Hints Panel */}
-                    {showHints && (
-                        <div className="game-hints">
-                            <div className="game-hints__card">
-                                <h4>🧱 {t('hints.tetrominoTip.title')}</h4>
-                                <p>{t('hints.tetrominoTip.message')}</p>
-                            </div>
-                            <div className="game-hints__card">
-                                <h4>🎯 {t('hints.strategy.title')}</h4>
-                                <p>{t('hints.strategy.message')}</p>
-                            </div>
-                            <div className="game-hints__card">
-                                <h4>🧠 {t('hints.spatialThinking.title')}</h4>
-                                <p>{t('hints.spatialThinking.message')}</p>
-                            </div>
                         </div>
-                    )}
 
-                    {/* Actions */}
-                    <div className="game-actions">
-                        <button className="action action--secondary" onClick={resetLevel}>
-                            🔄 {tc('buttons.reset')}
+                        {/* Hint Toggle */}
+                        <button
+                            className="action action--secondary"
+                            onClick={() => setShowHints(!showHints)}
+                        >
+                            💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
                         </button>
-                        <button className="action action--primary" onClick={nextLevel}>
-                            {tc('buttons.nextLevel')} →
-                        </button>
+
+                        {/* Hints Panel */}
+                        {showHints && (
+                            <div className="game-hints">
+                                <div className="game-hints__card">
+                                    <h4>🧱 {t('hints.tetrominoTip.title')}</h4>
+                                    <p>{t('hints.tetrominoTip.message')}</p>
+                                </div>
+                                <div className="game-hints__card">
+                                    <h4>🎯 {t('hints.strategy.title')}</h4>
+                                    <p>{t('hints.strategy.message')}</p>
+                                </div>
+                                <div className="game-hints__card">
+                                    <h4>🧠 {t('hints.spatialThinking.title')}</h4>
+                                    <p>{t('hints.spatialThinking.message')}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="game-actions">
+                            <button className="action action--secondary" onClick={resetLevel}>
+                                🔄 {tc('buttons.reset')}
+                            </button>
+                            <button className="action action--primary" onClick={nextLevel}>
+                                {tc('buttons.nextLevel')} →
+                            </button>
+                        </div>
                     </div>
+                    {/* === END SIDEBAR === */}
 
                     {/* Win Overlay */}
                     {gameState.isSolved && (

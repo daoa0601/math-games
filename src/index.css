@@ -59,13 +59,14 @@ body {
   }
 }
 
-/* Desktop: Expand content area */
+/* Desktop: Expand content area + sidebar offset */
 @media (min-width: 1024px) {
   .content-wrap {
     max-width: var(--content-md);
   }
 
   .page {
+    padding-left: 72px;
     padding-bottom: 0;
   }
 }
@@ -287,17 +288,37 @@ body {
   font-size: 20px;
 }
 
-/* Desktop: Centered nav with max-width */
+/* Desktop: Left sidebar navigation */
 @media (min-width: 1024px) {
   .nav {
-    justify-content: center;
-    gap: var(--space-xl);
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 72px;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: var(--space-xl);
+    gap: var(--space-md);
+    border-top: none;
+    border-right: 1px solid var(--border);
   }
 
   .nav__item {
-    flex-direction: row;
-    gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-lg);
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    width: 100%;
+    font-size: var(--text-xs);
+  }
+
+  .nav__icon {
+    font-size: 24px;
+  }
+
+  .game-container {
+    margin-left: 72px;
   }
 }
 

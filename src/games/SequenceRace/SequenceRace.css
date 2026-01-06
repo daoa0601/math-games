@@ -266,3 +266,40 @@
 @media (prefers-reduced-motion: reduce) {
   .sr-avatar { transition: none; }
 }
+
+/* ========================================
+   DESKTOP LAYOUT (1024px+)
+   ======================================== */
+@media (min-width: 1024px) {
+  .sr-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--space-xl);
+    align-items: start;
+    max-width: 1200px;
+  }
+
+  .sr-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    align-items: stretch;
+  }
+
+  .sr-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    position: sticky;
+    top: var(--space-lg);
+  }
+
+  .sr-container {
+    max-width: none;
+  }
+
+  /* Track takes full width of main area */
+  .sr-track {
+    width: 100%;
+  }
+}

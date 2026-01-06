@@ -533,71 +533,126 @@ export function MagicGraphGame() {
                 </>
             }
         >
-            <div className="mg-container">
-                {/* Daily Challenge Badge */}
-                {isDailyMode && (
-                    <div className="mg-daily">
-                        <span>📅</span>
-                        <span>{tc('daily.dailyChallenge')}</span>
-                        {dailyCompleted && <span className="mg-daily__check">✓</span>}
+            <div className="mg-container mg-layout">
+                {/* === MAIN AREA: Board and inventory === */}
+                <div className="mg-main">
+                    {/* Daily Challenge Badge */}
+                    {isDailyMode && (
+                        <div className="mg-daily">
+                            <span>📅</span>
+                            <span>{tc('daily.dailyChallenge')}</span>
+                            {dailyCompleted && <span className="mg-daily__check">✓</span>}
+                        </div>
+                    )}
+
+                    {/* Generation Loading */}
+                    {isGenerating && (
+                        <div className="mg-loading">
+                            <div className="mg-loading__spinner">🔮</div>
+                            <p>{tc('generatingPuzzle')}</p>
+                        </div>
+                    )}
+
+                    {/* Game Board or Editor */}
+                    {showEditor ? (
+                        <TopologyEditor
+                            onPuzzleCreated={handleCustomPuzzle}
+                            onCancel={() => setShowEditor(false)}
+                        />
+                    ) : (
+                        <div
+                            ref={puzzleBoardRef}
+                            className={`mg-board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'mg-board-wrapper--urgent' : ''}`}
+                        >
+                            <PuzzleBoard
+                                nodes={puzzle.nodes}
+                                lines={puzzle.lines}
+                                nodeValues={nodeValues}
+                                targetSum={puzzle.targetSum}
+                                selectedNodeId={pickerState?.nodeId ?? null}
+                                onNodeClick={handleNodeClick}
+                                impossibleLineIds={impossibleLineIds}
+                                recommendedNodeId={starterHint?.nodeId ?? null}
+                                justPlacedNodeId={justPlacedNodeId}
+                                isCompleted={showWin}
+                            />
+                        </div>
+                    )}
+
+                    {/* Number Picker Popup */}
+                    {pickerState && (
+                        <NumberPicker
+                            availableNumbers={puzzle.availableNumbers}
+                            usedNumbers={usedNumbers}
+                            position={pickerState.position}
+                            onSelect={handlePickerSelect}
+                            onClose={handlePickerClose}
+                            onClear={nodeValues.get(pickerState.nodeId) !== null ? handlePickerClear : undefined}
+                            currentValue={nodeValues.get(pickerState.nodeId)}
+                        />
+                    )}
+
+                    {/* Number Inventory (display-only reference) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                        <span className="game-info__label">{tc('availableNumbers')}</span>
+                        <NumberInventory
+                            availableNumbers={puzzle.availableNumbers}
+                            usedNumbers={usedNumbers}
+                            selectedNumber={null}
+                            onSelectNumber={() => { }}
+                        />
                     </div>
-                )}
-
-                {/* Timer with Practice/Timed Mode Toggle */}
-                <Timer
-                    timeLeft={timeLeft}
-                    formattedTime={formattedTime}
-                    timerClass={timerClass}
-                    isPracticeMode={isPracticeMode}
-                    isPaused={isPaused}
-                    onModeChange={handlePracticeModeChange}
-                    onPause={pauseTimer}
-                    onResume={resumeTimer}
-                    disabled={showWin}
-                />
-
-                {/* Difficulty Selector (hidden in daily mode) */}
-                {!isDailyMode && (
-                    <DifficultySelector
-                        options={['easy', 'medium', 'hard', 'master', 'grandmaster']}
-                        value={difficulty}
-                        onChange={handleDifficultyChange}
-                    />
-                )}
-
-                {/* Game Rules */}
-                <div className="mg-rules">
-                    <span>📜</span> {t('rules')}
                 </div>
 
-                {/* Game Actions (hidden in daily mode) */}
-                {!isDailyMode && (
-                    <div className="mg-levels">
-                        <button
-                            className="action action--secondary"
-                            onClick={handleRandomPuzzle}
-                            disabled={isGenerating || isWorkerBusy}
-                        >
-                            {isGenerating || isWorkerBusy ? `⏳ ${tc('generating')}` : `🎲 ${tc('buttons.newPuzzle')}`}
-                        </button>
-                        <button
-                            className="action action--secondary"
-                            onClick={() => setShowEditor(true)}
-                        >
-                            ✏️ {t('editor.openEditor')}
-                        </button>
-                    </div>
-                )}
+                {/* === SIDEBAR: Controls and info === */}
+                <div className="mg-sidebar">
+                    {/* Timer with Practice/Timed Mode Toggle */}
+                    <Timer
+                        timeLeft={timeLeft}
+                        formattedTime={formattedTime}
+                        timerClass={timerClass}
+                        isPracticeMode={isPracticeMode}
+                        isPaused={isPaused}
+                        onModeChange={handlePracticeModeChange}
+                        onPause={pauseTimer}
+                        onResume={resumeTimer}
+                        disabled={showWin}
+                    />
 
-                {/* Generation Loading */}
-                {isGenerating && (
-                    <div className="mg-loading">
-                        <div className="mg-loading__spinner">🔮</div>
-                        <p>{tc('generatingPuzzle')}</p>
-                    </div>
-                )}
+                    {/* Difficulty Selector (hidden in daily mode) */}
+                    {!isDailyMode && (
+                        <DifficultySelector
+                            options={['easy', 'medium', 'hard', 'master', 'grandmaster']}
+                            value={difficulty}
+                            onChange={handleDifficultyChange}
+                        />
+                    )}
 
-                {/* Puzzle Info */}
+                    {/* Game Rules */}
+                    <div className="mg-rules">
+                        <span>📜</span> {t('rules')}
+                    </div>
+
+                    {/* Game Actions (hidden in daily mode) */}
+                    {!isDailyMode && (
+                        <div className="mg-levels">
+                            <button
+                                className="action action--secondary"
+                                onClick={handleRandomPuzzle}
+                                disabled={isGenerating || isWorkerBusy}
+                            >
+                                {isGenerating || isWorkerBusy ? `⏳ ${tc('generating')}` : `🎲 ${tc('buttons.newPuzzle')}`}
+                            </button>
+                            <button
+                                className="action action--secondary"
+                                onClick={() => setShowEditor(true)}
+                            >
+                                ✏️ {t('editor.openEditor')}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Puzzle Info */}
                 <div className="game-info">
                     {difficulty === 'grandmaster' ? (
                         <>
@@ -669,57 +724,7 @@ export function MagicGraphGame() {
                     </div>
                 </div>
 
-                {/* Game Board or Editor */}
-                {showEditor ? (
-                    <TopologyEditor
-                        onPuzzleCreated={handleCustomPuzzle}
-                        onCancel={() => setShowEditor(false)}
-                    />
-                ) : (
-                    <div
-                        ref={puzzleBoardRef}
-                        className={`mg-board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'mg-board-wrapper--urgent' : ''}`}
-                    >
-                        <PuzzleBoard
-                            nodes={puzzle.nodes}
-                            lines={puzzle.lines}
-                            nodeValues={nodeValues}
-                            targetSum={puzzle.targetSum}
-                            selectedNodeId={pickerState?.nodeId ?? null}
-                            onNodeClick={handleNodeClick}
-                            impossibleLineIds={impossibleLineIds}
-                            recommendedNodeId={starterHint?.nodeId ?? null}
-                            justPlacedNodeId={justPlacedNodeId}
-                            isCompleted={showWin}
-                        />
-                    </div>
-                )}
-
-                {/* Number Picker Popup */}
-                {pickerState && (
-                    <NumberPicker
-                        availableNumbers={puzzle.availableNumbers}
-                        usedNumbers={usedNumbers}
-                        position={pickerState.position}
-                        onSelect={handlePickerSelect}
-                        onClose={handlePickerClose}
-                        onClear={nodeValues.get(pickerState.nodeId) !== null ? handlePickerClear : undefined}
-                        currentValue={nodeValues.get(pickerState.nodeId)}
-                    />
-                )}
-
-                {/* Number Inventory (display-only reference) */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-sm)' }}>
-                    <span className="game-info__label">{tc('availableNumbers')}</span>
-                    <NumberInventory
-                        availableNumbers={puzzle.availableNumbers}
-                        usedNumbers={usedNumbers}
-                        selectedNumber={null}
-                        onSelectNumber={() => { }}
-                    />
-                </div>
-
-                {/* Unsolvable Button (appears after 45 seconds for seeded puzzles) */}
+                    {/* Unsolvable Button (appears after 45 seconds for seeded puzzles) */}
                 {showUnsolvableButton && !showWin && !showTimeUp && (
                     <div className="mg-unsolvable">
                         <button
@@ -818,6 +823,8 @@ export function MagicGraphGame() {
                         {tc('buttons.nextPuzzle')} →
                     </button>
                 </div>
+                </div>
+                {/* === END SIDEBAR === */}
             </div>
 
             {/* Win Modal - Centered */}

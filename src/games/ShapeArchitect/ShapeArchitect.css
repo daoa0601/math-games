@@ -492,3 +492,52 @@
 @media (prefers-reduced-motion: reduce) {
   .sa-ghost__cell, .sa-cell--target, .sa-cell--just-placed { animation: none; }
 }
+
+/* ========================================
+   DESKTOP LAYOUT (1024px+)
+   ======================================== */
+@media (min-width: 1024px) {
+  .sa-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: var(--space-xl);
+    align-items: start;
+    max-width: 1200px;
+  }
+
+  .sa-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    align-items: center;
+  }
+
+  .sa-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    position: sticky;
+    top: var(--space-lg);
+  }
+
+  .sa-container {
+    max-width: none;
+  }
+
+  /* Board takes full width of main area */
+  .sa-board-3d {
+    width: 100%;
+    max-width: 700px;
+  }
+
+  /* Inventory spans full width in main area */
+  .sa-inventory {
+    width: 100%;
+  }
+
+  /* 3D controls inline on desktop */
+  .sa-3d-controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}

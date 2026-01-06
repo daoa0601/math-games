@@ -416,3 +416,32 @@
   .flash-warning,
   .flash-shake { animation: none; }
 }
+
+/* ----------------------------------------
+   Desktop Layout Utilities (1024px+)
+   ---------------------------------------- */
+@media (min-width: 1024px) {
+  /* Two-column game layout: main area + sidebar */
+  .game-layout-desktop {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--space-xl);
+    align-items: start;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .game-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .game-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    position: sticky;
+    top: var(--space-lg);
+  }
+}

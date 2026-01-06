@@ -376,3 +376,40 @@
   .mg-picker,
   .mg-loading__spinner { animation: none; }
 }
+
+/* ========================================
+   DESKTOP LAYOUT (1024px+)
+   ======================================== */
+@media (min-width: 1024px) {
+  .mg-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--space-xl);
+    align-items: start;
+    max-width: 1100px;
+  }
+
+  .mg-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    align-items: center;
+  }
+
+  .mg-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    position: sticky;
+    top: var(--space-lg);
+  }
+
+  .mg-container {
+    max-width: none;
+  }
+
+  /* Board takes full width of main area */
+  .mg-board-wrapper {
+    width: 100%;
+  }
+}

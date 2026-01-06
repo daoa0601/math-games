@@ -351,207 +351,214 @@ export function SequenceRaceGame() {
         </>
       }
     >
-      <div className="sr-container">
-        {/* Daily Challenge Badge */}
-        {isDailyMode && (
-          <div className="daily-badge">
-            <span className="daily-badge__icon">📅</span>
-            <span className="daily-badge__text">{tc('daily.dailyChallenge')}</span>
-            {dailyCompleted && <span className="daily-badge__check">✓</span>}
-          </div>
-        )}
+      <div className="sr-container sr-layout">
+        {/* === MAIN AREA: Track and gameplay === */}
+        <div className="sr-main">
+          {/* Daily Challenge Badge */}
+          {isDailyMode && (
+            <div className="daily-badge">
+              <span className="daily-badge__icon">📅</span>
+              <span className="daily-badge__text">{tc('daily.dailyChallenge')}</span>
+              {dailyCompleted && <span className="daily-badge__check">✓</span>}
+            </div>
+          )}
 
-        {/* Timer */}
-        <Timer
-          timeLeft={timeLeft}
-          formattedTime={formattedTime}
-          timerClass={timerClass}
-          isPracticeMode={isPracticeMode}
-          isPaused={isPaused}
-          onModeChange={handlePracticeModeChange}
-          onPause={pauseTimer}
-          onResume={resumeTimer}
-          disabled={gameState.gameOver}
-        />
+          {/* Sequence Info */}
+          <SequenceInfoBadge sequenceType={currentConfig.sequenceType || 'arithmetic'} />
 
-        {/* Mode Toggle (hidden in daily mode) */}
-        {!isDailyMode && (
-          <div className="mode-toggle">
-            <button
-              className={`mode-toggle__btn ${gameMode === 'vs-ai' ? 'mode-toggle__btn--active' : ''}`}
-              onClick={() => handleModeChange('vs-ai')}
-            >
-              🤖 {t('mode.vsAI')}
-            </button>
-            <button
-              className={`mode-toggle__btn ${gameMode === 'two-player' ? 'mode-toggle__btn--active' : ''}`}
-              onClick={() => handleModeChange('two-player')}
-            >
-              👥 {t('mode.twoPlayer')}
-            </button>
-          </div>
-        )}
-
-        {/* Difficulty Selector (hidden in daily mode) */}
-        {!isDailyMode && gameMode === 'vs-ai' && (
-          <DifficultySelector
-            options={['easy', 'medium', 'hard']}
-            value={difficulty}
-            onChange={handleDifficultyChange}
+          {/* Race Track */}
+          <RaceTrack
+            state={gameState}
+            gameMode={gameMode}
+            isAIThinking={isAIThinking}
+            aiReaction={aiReaction}
+            previewPosition={previewPosition}
+            isUrgent={!isPracticeMode && timeLeft <= 10}
           />
-        )}
 
-        {/* Game Rules */}
-        <div className="game-rules">
-          <span className="game-rules__icon">📜</span>
-          <p className="game-rules__text">{t('rules')}</p>
+          {/* AI First Move Banner */}
+          {currentConfig.aiMovesFirst && gameState.history.length === 0 && gameState.turn === 'ai' && (
+            <div className="sr-ai-first">
+              <span>🎯</span>
+              <span className="sr-ai-first__text">{t('aiMovesFirst', 'The opponent moves first this round!')}</span>
+            </div>
+          )}
+
+          {/* Turn Indicator */}
+          {!gameState.gameOver && !showTimeUp && (
+            <div className={`sr-turn sr-turn--${gameState.turn}`}>
+              {gameMode === 'two-player'
+                ? gameState.turn === 'player1'
+                  ? t('player1Turn')
+                  : t('player2Turn')
+                : gameState.turn === 'player'
+                  ? t('yourTurn')
+                  : isAIThinking
+                    ? t('aiThinking')
+                    : t('aiTurn')}
+            </div>
+          )}
+
+          {/* Step Cards */}
+          <StepCards
+            availableSteps={currentConfig.stepPool}
+            validMoves={isHumanTurn(gameState) ? validMoves : []}
+            disabled={!isHumanTurn(gameState) || gameState.gameOver || isAIThinking || showTimeUp}
+            onSelectStep={handlePlayerMove}
+            currentPosition={gameState.currentPosition}
+            targetNumber={currentConfig.target}
+            onPreviewPosition={setPreviewPosition}
+          />
+
+          {/* History Log */}
+          <HistoryLog history={gameState.history} />
         </div>
 
-        {/* Game Actions (hidden in daily mode) */}
-        {!isDailyMode && (
-          <div className="level-selector">
-            <button className="action action--secondary" onClick={startRandomGame}>
-              🎲 {tc('buttons.newGame')}
+        {/* === SIDEBAR: Controls and info === */}
+        <div className="sr-sidebar">
+          {/* Timer */}
+          <Timer
+            timeLeft={timeLeft}
+            formattedTime={formattedTime}
+            timerClass={timerClass}
+            isPracticeMode={isPracticeMode}
+            isPaused={isPaused}
+            onModeChange={handlePracticeModeChange}
+            onPause={pauseTimer}
+            onResume={resumeTimer}
+            disabled={gameState.gameOver}
+          />
+
+          {/* Mode Toggle (hidden in daily mode) */}
+          {!isDailyMode && (
+            <div className="mode-toggle">
+              <button
+                className={`mode-toggle__btn ${gameMode === 'vs-ai' ? 'mode-toggle__btn--active' : ''}`}
+                onClick={() => handleModeChange('vs-ai')}
+              >
+                🤖 {t('mode.vsAI')}
+              </button>
+              <button
+                className={`mode-toggle__btn ${gameMode === 'two-player' ? 'mode-toggle__btn--active' : ''}`}
+                onClick={() => handleModeChange('two-player')}
+              >
+                👥 {t('mode.twoPlayer')}
+              </button>
+            </div>
+          )}
+
+          {/* Difficulty Selector (hidden in daily mode) */}
+          {!isDailyMode && gameMode === 'vs-ai' && (
+            <DifficultySelector
+              options={['easy', 'medium', 'hard']}
+              value={difficulty}
+              onChange={handleDifficultyChange}
+            />
+          )}
+
+          {/* Game Rules */}
+          <div className="game-rules">
+            <span className="game-rules__icon">📜</span>
+            <p className="game-rules__text">{t('rules')}</p>
+          </div>
+
+          {/* Game Actions (hidden in daily mode) */}
+          {!isDailyMode && (
+            <div className="level-selector">
+              <button className="action action--secondary" onClick={startRandomGame}>
+                🎲 {tc('buttons.newGame')}
+              </button>
+            </div>
+          )}
+
+          {/* Game Info Panel */}
+          <div className="game-info">
+            <div className="game-info__item">
+              <span className="game-info__label">{t('target')}</span>
+              <span className="game-info__value game-info__value--accent">
+                {gameState.target}
+              </span>
+            </div>
+            <div className="game-info__item">
+              <span className="game-info__label">{t('position')}</span>
+              <span className="game-info__value">{gameState.currentPosition}</span>
+            </div>
+            <div className="game-info__item">
+              <span className="game-info__label">{t('turn')}</span>
+              <span className={`game-info__value game-info__value--${gameState.turn}`}>
+                {turnLabel}
+              </span>
+            </div>
+          </div>
+
+          {/* Undo Button */}
+          {canUndo && (
+            <button
+              className="action action--secondary"
+              onClick={undoLastMove}
+              aria-label={t('undo', 'Undo')}
+            >
+              ↩️ {t('undo', 'Undo')}
             </button>
-          </div>
-        )}
+          )}
 
-        {/* Sequence Info */}
-        <SequenceInfoBadge sequenceType={currentConfig.sequenceType || 'arithmetic'} />
-
-        {/* Game Info Panel */}
-        <div className="game-info">
-          <div className="game-info__item">
-            <span className="game-info__label">{t('target')}</span>
-            <span className="game-info__value game-info__value--accent">
-              {gameState.target}
-            </span>
-          </div>
-          <div className="game-info__item">
-            <span className="game-info__label">{t('position')}</span>
-            <span className="game-info__value">{gameState.currentPosition}</span>
-          </div>
-          <div className="game-info__item">
-            <span className="game-info__label">{t('turn')}</span>
-            <span className={`game-info__value game-info__value--${gameState.turn}`}>
-              {turnLabel}
-            </span>
-          </div>
-        </div>
-
-        {/* Race Track */}
-        <RaceTrack
-          state={gameState}
-          gameMode={gameMode}
-          isAIThinking={isAIThinking}
-          aiReaction={aiReaction}
-          previewPosition={previewPosition}
-          isUrgent={!isPracticeMode && timeLeft <= 10}
-        />
-
-        {/* AI First Move Banner */}
-        {currentConfig.aiMovesFirst && gameState.history.length === 0 && gameState.turn === 'ai' && (
-          <div className="sr-ai-first">
-            <span>🎯</span>
-            <span className="sr-ai-first__text">{t('aiMovesFirst', 'The opponent moves first this round!')}</span>
-          </div>
-        )}
-
-        {/* Turn Indicator */}
-        {!gameState.gameOver && !showTimeUp && (
-          <div className={`sr-turn sr-turn--${gameState.turn}`}>
-            {gameMode === 'two-player'
-              ? gameState.turn === 'player1'
-                ? t('player1Turn')
-                : t('player2Turn')
-              : gameState.turn === 'player'
-                ? t('yourTurn')
-                : isAIThinking
-                  ? t('aiThinking')
-                  : t('aiTurn')}
-          </div>
-        )}
-
-        {/* Step Cards */}
-        <StepCards
-          availableSteps={currentConfig.stepPool}
-          validMoves={isHumanTurn(gameState) ? validMoves : []}
-          disabled={!isHumanTurn(gameState) || gameState.gameOver || isAIThinking || showTimeUp}
-          onSelectStep={handlePlayerMove}
-          currentPosition={gameState.currentPosition}
-          targetNumber={currentConfig.target}
-          onPreviewPosition={setPreviewPosition}
-        />
-
-        {/* Undo Button */}
-        {canUndo && (
-          <button
-            className="action action--secondary"
-            onClick={undoLastMove}
-            aria-label={t('undo', 'Undo')}
-          >
-            ↩️ {t('undo', 'Undo')}
+          {/* Hint Toggle */}
+          <button className="action action--secondary" onClick={toggleHints}>
+            💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
           </button>
-        )}
 
-        {/* Hint Toggle */}
-        <button className="action action--secondary" onClick={toggleHints}>
-          💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
-        </button>
+          {/* Hints Panel */}
+          {showHints && (
+            <div className="sr-hints">
+              {teacherHint && (
+                <div className="sr-hint">
+                  <h4>
+                    {teacherHint.wasOptimal
+                      ? `✅ ${t('hints.goodMove')}`
+                      : `📚 ${t('hints.learningMoment')}`}
+                  </h4>
+                  <p>{teacherHint.explanation}</p>
+                  {!teacherHint.wasOptimal && teacherHint.optimalMove && (
+                    <p>{t('hints.optimalPlay', { move: teacherHint.optimalMove })}</p>
+                  )}
+                </div>
+              )}
 
-        {/* Hints Panel */}
-        {showHints && (
-          <div className="sr-hints">
-            {teacherHint && (
               <div className="sr-hint">
                 <h4>
-                  {teacherHint.wasOptimal
-                    ? `✅ ${t('hints.goodMove')}`
-                    : `📚 ${t('hints.learningMoment')}`}
+                  {t('hints.sequence', {
+                    name: getSequenceName(currentConfig.sequenceType || 'arithmetic'),
+                  })}
                 </h4>
-                <p>{teacherHint.explanation}</p>
-                {!teacherHint.wasOptimal && teacherHint.optimalMove && (
-                  <p>{t('hints.optimalPlay', { move: teacherHint.optimalMove })}</p>
-                )}
+                <p>{getSequenceDescription(currentConfig.sequenceType || 'arithmetic')}</p>
               </div>
-            )}
 
-            <div className="sr-hint">
-              <h4>
-                {t('hints.sequence', {
-                  name: getSequenceName(currentConfig.sequenceType || 'arithmetic'),
-                })}
-              </h4>
-              <p>{getSequenceDescription(currentConfig.sequenceType || 'arithmetic')}</p>
-            </div>
+              {analysis && gameState.turn === 'player' && (
+                <div className="sr-hint">
+                  <h4>{t('hints.positionAnalysis')}</h4>
+                  <p>
+                    {analysis.canWin
+                      ? `✨ ${t('hints.winningStrategy')}`
+                      : `⚠️ ${t('hints.aiAdvantage')}`}
+                  </p>
+                </div>
+              )}
 
-            {analysis && gameState.turn === 'player' && (
               <div className="sr-hint">
-                <h4>{t('hints.positionAnalysis')}</h4>
-                <p>
-                  {analysis.canWin
-                    ? `✨ ${t('hints.winningStrategy')}`
-                    : `⚠️ ${t('hints.aiAdvantage')}`}
-                </p>
+                <h4>{t('hints.gameTheoryTip.title')}</h4>
+                <p>{t('hints.gameTheoryTip.message')}</p>
               </div>
-            )}
-
-            <div className="sr-hint">
-              <h4>{t('hints.gameTheoryTip.title')}</h4>
-              <p>{t('hints.gameTheoryTip.message')}</p>
             </div>
+          )}
+
+          {/* Actions */}
+          <div className="sr-actions">
+            <button className="action action--secondary" onClick={restartGame}>
+              🔄 {tc('buttons.restart')}
+            </button>
           </div>
-        )}
-
-        {/* History Log */}
-        <HistoryLog history={gameState.history} />
-
-        {/* Actions */}
-        <div className="sr-actions">
-          <button className="action action--secondary" onClick={restartGame}>
-            🔄 {tc('buttons.restart')}
-          </button>
         </div>
+        {/* === END SIDEBAR === */}
 
         {/* Game Over Overlay */}
         {gameState.gameOver && (
