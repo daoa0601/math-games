@@ -8,6 +8,7 @@ import type { Piece, Position3D, Rotation3D, CellState } from '../logic/types';
 import { canPlacePiece, getPieceWorldPositions } from '../logic/engine';
 import { RotationControls } from './RotationControls';
 import { useSharedBoxGeometry } from '../hooks';
+import { Canvas3DErrorBoundary } from './Canvas3DErrorBoundary';
 import './PlacementModal.css';
 
 const SWIPE_THRESHOLD = 100; // px to dismiss
@@ -51,6 +52,11 @@ function PiecePreview3D({
 }) {
     const sharedGeometry = useSharedBoxGeometry();
     const worldPositions = getPieceWorldPositions(piece, position, rotation);
+
+    // Guard against empty positions array to prevent division by zero
+    if (worldPositions.length === 0) {
+        return null;
+    }
 
     // Calculate center offset for the preview
     const centerX = worldPositions.reduce((sum, p) => sum + p.x, 0) / worldPositions.length;
@@ -98,6 +104,11 @@ function PiecePreview2D({
 }) {
     // Get world positions at origin to see the rotated shape
     const worldPositions = getPieceWorldPositions(piece, { x: 0, y: 0, z: 0 }, rotation);
+
+    // Guard against empty positions array
+    if (worldPositions.length === 0) {
+        return null;
+    }
 
     // Calculate bounds
     const minX = Math.min(...worldPositions.map(p => p.x));
@@ -307,16 +318,26 @@ export function PlacementModal({
                     <div className="placement-modal__preview">
                         {viewMode === '3d' ? (
                             <div className="placement-modal__3d-container">
-                                <Canvas>
-                                    <Suspense fallback={null}>
-                                        <PiecePreview3D
+                                <Canvas3DErrorBoundary
+                                    fallback={
+                                        <PiecePreview2D
                                             piece={piece}
-                                            position={position}
                                             rotation={rotation}
                                             isValid={isValid}
                                         />
-                                    </Suspense>
-                                </Canvas>
+                                    }
+                                >
+                                    <Canvas>
+                                        <Suspense fallback={null}>
+                                            <PiecePreview3D
+                                                piece={piece}
+                                                position={position}
+                                                rotation={rotation}
+                                                isValid={isValid}
+                                            />
+                                        </Suspense>
+                                    </Canvas>
+                                </Canvas3DErrorBoundary>
                             </div>
                         ) : (
                             <PiecePreview2D
