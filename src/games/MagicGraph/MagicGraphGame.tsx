@@ -21,9 +21,6 @@ interface PickerState {
     position: { x: number; y: number };
 }
 
-// Difficulty to hint count mapping
-const DIFFICULTY_HINTS: Record<Difficulty, number> = { easy: 2, medium: 1, hard: 0, master: 0, grandmaster: 0 };
-
 export function MagicGraphGame() {
     const { t } = useTranslation('magicGraph');
     const { t: tc } = useTranslation('common');

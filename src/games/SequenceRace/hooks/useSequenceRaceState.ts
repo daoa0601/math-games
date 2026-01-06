@@ -17,6 +17,8 @@ import { generateRandomConfig, SEQUENCE_INFO } from '../logic/presets';
 export interface UseSequenceRaceStateOptions {
   /** Callback when timer needs reset */
   onResetTimer?: () => void;
+  /** Initial config for daily mode */
+  initialConfig?: GameConfig;
 }
 
 export interface UseSequenceRaceStateReturn {
@@ -50,7 +52,7 @@ export interface UseSequenceRaceStateReturn {
 export function useSequenceRaceState(
   options: UseSequenceRaceStateOptions = {}
 ): UseSequenceRaceStateReturn {
-  const { onResetTimer } = options;
+  const { onResetTimer, initialConfig } = options;
 
   // ─────────────────────────────────────────────────────────────────
   // Core state
@@ -58,10 +60,12 @@ export function useSequenceRaceState(
 
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
   const [gameMode, setGameMode] = useState<GameMode>('vs-ai');
-  // Start with a random game instead of a fixed preset
-  const [currentConfig, setCurrentConfig] = useState<GameConfig>(() => generateRandomConfig('easy'));
+  // Start with initial config if provided (daily mode), otherwise random
+  const [currentConfig, setCurrentConfig] = useState<GameConfig>(() =>
+    initialConfig ?? generateRandomConfig('easy')
+  );
   const [gameState, setGameState] = useState<SequenceState>(() =>
-    createGameState({ ...generateRandomConfig('easy'), mode: 'vs-ai' })
+    createGameState({ ...(initialConfig ?? generateRandomConfig('easy')), mode: 'vs-ai' })
   );
 
   // ─────────────────────────────────────────────────────────────────

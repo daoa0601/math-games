@@ -123,7 +123,10 @@ export function SequenceRaceGame() {
     handleDifficultyChange,
     handleModeChange: handleModeChangeBase,
     undoLastMove,
-  } = useSequenceRaceState({ onResetTimer: resetTimer });
+  } = useSequenceRaceState({
+    onResetTimer: resetTimer,
+    initialConfig: isDailyMode ? dailyConfigRef.current ?? undefined : undefined,
+  });
 
   // ─────────────────────────────────────────────────────────────────
   // Hint System (extracted hook)
@@ -219,17 +222,6 @@ export function SequenceRaceGame() {
       announce(tc('announcements.aiWins'), 'assertive');
     }
   }, [gameState.winner, gameState.target, gameState.history.length, announce, tc]);
-
-  // ─────────────────────────────────────────────────────────────────
-  // Daily Mode Initialization
-  // ─────────────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    if (isDailyMode && dailyConfigRef.current) {
-      startGame(dailyConfigRef.current);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
 
   // ─────────────────────────────────────────────────────────────────
   // Practice Mode
