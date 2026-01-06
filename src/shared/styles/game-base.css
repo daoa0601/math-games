@@ -146,6 +146,13 @@
   margin-top: var(--space-lg);
 }
 
+.game-modal__insight {
+  margin-top: var(--space-lg);
+  font-size: var(--text-sm);
+  color: var(--muted);
+  text-align: center;
+}
+
 /* ----------------------------------------
    Difficulty / Level Selectors
    Used by: ALL games
