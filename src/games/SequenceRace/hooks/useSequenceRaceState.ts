@@ -8,7 +8,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { SequenceState, GameConfig, GameMode } from '../logic/types';
 import { createGameState, getValidMoves, analyzePosition } from '../logic/engine';
-import { presetGames, generateRandomConfig, SEQUENCE_INFO } from '../logic/presets';
+import { generateRandomConfig, SEQUENCE_INFO } from '../logic/presets';
 
 // ═══════════════════════════════════════════════════════════════════
 // TYPES
@@ -27,7 +27,6 @@ export interface UseSequenceRaceStateReturn {
   gameState: SequenceState;
 
   // Derived state
-  filteredGames: GameConfig[];
   validMoves: number[];
   analysis: ReturnType<typeof analyzePosition> | null;
   sequenceInfo: (typeof SEQUENCE_INFO)[keyof typeof SEQUENCE_INFO];
@@ -37,7 +36,6 @@ export interface UseSequenceRaceStateReturn {
 
   // Actions
   setGameState: React.Dispatch<React.SetStateAction<SequenceState>>;
-  startGame: (config: GameConfig) => void;
   startRandomGame: () => void;
   restartGame: () => void;
   handleDifficultyChange: (newDifficulty: 'easy' | 'medium' | 'hard') => void;
@@ -60,9 +58,10 @@ export function useSequenceRaceState(
 
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
   const [gameMode, setGameMode] = useState<GameMode>('vs-ai');
-  const [currentConfig, setCurrentConfig] = useState<GameConfig>(presetGames[0]);
+  // Start with a random game instead of a fixed preset
+  const [currentConfig, setCurrentConfig] = useState<GameConfig>(() => generateRandomConfig('easy'));
   const [gameState, setGameState] = useState<SequenceState>(() =>
-    createGameState({ ...presetGames[0], mode: 'vs-ai' })
+    createGameState({ ...generateRandomConfig('easy'), mode: 'vs-ai' })
   );
 
   // ─────────────────────────────────────────────────────────────────
@@ -133,11 +132,6 @@ export function useSequenceRaceState(
   // Derived state (memoized)
   // ─────────────────────────────────────────────────────────────────
 
-  const filteredGames = useMemo(
-    () => presetGames.filter((g) => g.difficulty === difficulty),
-    [difficulty]
-  );
-
   const validMoves = useMemo(() => getValidMoves(gameState), [gameState]);
 
   const analysis = useMemo(() => {
@@ -154,20 +148,13 @@ export function useSequenceRaceState(
   // Actions
   // ─────────────────────────────────────────────────────────────────
 
-  const startGame = useCallback(
-    (config: GameConfig) => {
-      const configWithMode = { ...config, mode: gameMode };
-      setCurrentConfig(configWithMode);
-      setGameState(createGameState(configWithMode));
-      onResetTimer?.();
-    },
-    [gameMode, onResetTimer]
-  );
-
   const startRandomGame = useCallback(() => {
     const config = generateRandomConfig(difficulty);
-    startGame(config);
-  }, [difficulty, startGame]);
+    const configWithMode = { ...config, mode: gameMode };
+    setCurrentConfig(configWithMode);
+    setGameState(createGameState(configWithMode));
+    onResetTimer?.();
+  }, [difficulty, gameMode, onResetTimer]);
 
   const restartGame = useCallback(() => {
     setGameState(createGameState(currentConfig));
@@ -177,13 +164,12 @@ export function useSequenceRaceState(
   const handleDifficultyChange = useCallback(
     (newDifficulty: 'easy' | 'medium' | 'hard') => {
       setDifficulty(newDifficulty);
-      const newGames = presetGames.filter((g) => g.difficulty === newDifficulty);
-      if (newGames.length > 0) {
-        const configWithMode = { ...newGames[0], mode: gameMode };
-        setCurrentConfig(configWithMode);
-        setGameState(createGameState(configWithMode));
-        onResetTimer?.();
-      }
+      // Generate a random game for the new difficulty
+      const randomConfig = generateRandomConfig(newDifficulty);
+      const configWithMode = { ...randomConfig, mode: gameMode };
+      setCurrentConfig(configWithMode);
+      setGameState(createGameState(configWithMode));
+      onResetTimer?.();
     },
     [gameMode, onResetTimer]
   );
@@ -207,7 +193,6 @@ export function useSequenceRaceState(
     gameState,
 
     // Derived
-    filteredGames,
     validMoves,
     analysis,
     sequenceInfo,
@@ -217,7 +202,6 @@ export function useSequenceRaceState(
 
     // Actions
     setGameState,
-    startGame,
     startRandomGame,
     restartGame,
     handleDifficultyChange,

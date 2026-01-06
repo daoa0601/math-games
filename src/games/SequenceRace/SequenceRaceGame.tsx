@@ -22,7 +22,7 @@ import {
   PersonalBestIndicator,
   HelpButton,
 } from '@/shared/components';
-import { useGameTimer, useGameRewards, useSwipeNavigation, useAnnounce } from '@/shared/hooks';
+import { useGameTimer, useGameRewards, useAnnounce } from '@/shared/hooks';
 import { usePlayer } from '@/shared/contexts';
 import { playSound, showConfetti } from '@/shared/utils';
 import { isDailyCompleted, completeDailyChallenge } from '@/shared/services/daily';
@@ -113,13 +113,11 @@ export function SequenceRaceGame() {
     gameMode,
     currentConfig,
     gameState,
-    filteredGames,
     validMoves,
     analysis,
     sequenceInfo,
     canUndo,
     setGameState,
-    startGame,
     startRandomGame,
     restartGame,
     handleDifficultyChange,
@@ -243,34 +241,6 @@ export function SequenceRaceGame() {
     },
     [updatePreferences]
   );
-
-  // ─────────────────────────────────────────────────────────────────
-  // Level Navigation (with swipe support)
-  // ─────────────────────────────────────────────────────────────────
-
-  const currentGameIndex = useMemo(
-    () => filteredGames.findIndex((g) => g.id === currentConfig.id),
-    [filteredGames, currentConfig.id]
-  );
-
-  const nextGame = useCallback(() => {
-    if (filteredGames.length === 0) return;
-    const nextIndex = (currentGameIndex + 1) % filteredGames.length;
-    startGame({ ...filteredGames[nextIndex], difficulty });
-  }, [currentGameIndex, filteredGames, startGame, difficulty]);
-
-  const previousGame = useCallback(() => {
-    if (filteredGames.length === 0) return;
-    const prevIndex = (currentGameIndex - 1 + filteredGames.length) % filteredGames.length;
-    startGame({ ...filteredGames[prevIndex], difficulty });
-  }, [currentGameIndex, filteredGames, startGame, difficulty]);
-
-  // Swipe navigation for level selector (mobile)
-  const { ref: levelSwipeRef, handlers: levelSwipeHandlers } = useSwipeNavigation({
-    onNext: nextGame,
-    onPrevious: previousGame,
-    enabled: !isDailyMode && !gameState.gameOver && !showTimeUp,
-  });
 
   // ─────────────────────────────────────────────────────────────────
   // Player Move Handler
@@ -445,24 +415,11 @@ export function SequenceRaceGame() {
           <p className="game-rules__text">{t('rules')}</p>
         </div>
 
-        {/* Level Selector (hidden in daily mode) - Swipeable on mobile */}
+        {/* Game Actions (hidden in daily mode) */}
         {!isDailyMode && (
-          <div
-            className="level-selector"
-            ref={levelSwipeRef as React.RefObject<HTMLDivElement>}
-            {...levelSwipeHandlers}
-          >
-            {filteredGames.map((game) => (
-              <button
-                key={game.id}
-                className={`level-btn ${currentConfig.id === game.id ? 'level-btn--active' : ''}`}
-                onClick={() => startGame({ ...game, difficulty })}
-              >
-                {game.name}
-              </button>
-            ))}
+          <div className="level-selector">
             <button className="action action--secondary" onClick={startRandomGame}>
-              🎲 {tc('buttons.random')}
+              🎲 {tc('buttons.newGame')}
             </button>
           </div>
         )}

@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton } from '@/shared/components';
-import { useGameTimer, useGameRewards, useSwipeNavigation, useAnnounce, useFocusTrap } from '@/shared/hooks';
+import { useGameTimer, useGameRewards, useAnnounce, useFocusTrap } from '@/shared/hooks';
 import { usePlayer } from '@/shared/contexts';
 import { playSound, showConfetti } from '@/shared/utils';
 import { isDailyCompleted, completeDailyChallenge } from '@/shared/services/daily';
@@ -10,7 +10,7 @@ import { shouldShowTutorial } from '@/shared/services/tutorialProgress';
 import { PuzzleBoard, NumberInventory, NumberPicker, TopologyEditor, MagicGraphTutorial } from './components';
 import type { PuzzleConfig, Difficulty, OptimizationGoal } from './logic/types';
 import { generatePuzzle, isPuzzleSolved, getLineStatus, findImpossibleLines, findBestStartingNode, deriveAlgebraicHints, findOptimalSums, checkOptimalSolution, calculateSumSearchRange } from './logic/solver';
-import { puzzleTemplates, getHints, getProgressHint, createRandomBasePuzzle } from './logic/puzzles';
+import { getHints, getProgressHint, createRandomBasePuzzle } from './logic/puzzles';
 import { getDailyMagicGraphPuzzle } from './logic/seededGenerator';
 import { useHistory, useWorkerSolver } from './hooks';
 import '@/shared/styles/game-base.css';
@@ -34,7 +34,6 @@ export function MagicGraphGame() {
     const [dailyCompleted, setDailyCompleted] = useState(() => isDailyMode && isDailyCompleted('magic-graph'));
 
     const [difficulty, setDifficulty] = useState<Difficulty>(isDailyMode ? 'medium' : 'easy');
-    const [currentTemplateIndex, setCurrentTemplateIndex] = useState(0);
 
     // Player and rewards
     const { profile, updatePreferences } = usePlayer();
@@ -61,7 +60,9 @@ export function MagicGraphGame() {
         if (isDailyMode) {
             return getDailyMagicGraphPuzzle();
         }
-        return generatePuzzle(puzzleTemplates[0], DIFFICULTY_HINTS.easy);
+        // Start with a random puzzle based on initial difficulty
+        const { basePuzzle, hintsToShow } = createRandomBasePuzzle('easy');
+        return generatePuzzle(basePuzzle, hintsToShow);
     });
 
     // Use worker solver for non-blocking puzzle generation
@@ -249,12 +250,6 @@ export function MagicGraphGame() {
         optimalSum: number;
         message: string;
     } | null>(null);
-
-    // Filter puzzles by difficulty (master and grandmaster use hard puzzles)
-    const filteredTemplates = useMemo(() => {
-        const targetDifficulty = (difficulty === 'master' || difficulty === 'grandmaster') ? 'hard' : difficulty;
-        return puzzleTemplates.filter(t => t.difficulty === targetDifficulty);
-    }, [difficulty]);
 
     // Calculate optimal sums for grandmaster mode
     const computedOptimalResult = useMemo(() => {
@@ -446,28 +441,6 @@ export function MagicGraphGame() {
         setPickerState(null);
     }, []);
 
-    // Load new puzzle
-    const loadTemplate = useCallback((index: number, templates: typeof puzzleTemplates) => {
-        const template = templates[index];
-        if (!template) return;
-
-        setCurrentTemplateIndex(index);
-        const newPuzzle = generatePuzzle(template, DIFFICULTY_HINTS[difficulty]);
-        setPuzzle(newPuzzle);
-
-        const map = new Map<string, number | null>();
-        newPuzzle.nodes.forEach((n) => map.set(n.id, n.value));
-        nodeValuesHistory.reset(map);
-        setPickerState(null);
-        setShowWin(false);
-        setShowHints(false);
-        setTargetRevealed(false); // Reset for master mode
-        setGrandmasterFeedback(null); // Reset grandmaster feedback
-        setShowUnsolvableButton(false); // Reset unsolvable button
-        setUnsolvableFeedback(null); // Reset unsolvable feedback
-        resetTimer();
-    }, [difficulty, resetTimer, nodeValuesHistory]);
-
     // Generate random puzzle using Web Worker for non-blocking generation
     const handleRandomPuzzle = useCallback(async () => {
         setIsGenerating(true);
@@ -499,28 +472,24 @@ export function MagicGraphGame() {
         setIsGenerating(false);
     }, [difficulty, resetTimer, nodeValuesHistory, workerGeneratePuzzle]);
 
-    // Change difficulty
+    // Change difficulty - generates a random puzzle for the new difficulty
     const handleDifficultyChange = useCallback((newDifficulty: Difficulty) => {
         setDifficulty(newDifficulty);
         // Master and grandmaster modes use hard puzzles
         const targetDifficulty = (newDifficulty === 'master' || newDifficulty === 'grandmaster') ? 'hard' : newDifficulty;
-        const newTemplates = puzzleTemplates.filter(t => t.difficulty === targetDifficulty);
-        if (newTemplates.length > 0) {
-            const template = newTemplates[0];
-            const newPuzzle = generatePuzzle(template, DIFFICULTY_HINTS[newDifficulty]);
+        const { basePuzzle, hintsToShow } = createRandomBasePuzzle(targetDifficulty);
+        const newPuzzle = generatePuzzle(basePuzzle, hintsToShow);
 
-            setPuzzle(newPuzzle);
-            setCurrentTemplateIndex(0);
+        setPuzzle(newPuzzle);
 
-            const map = new Map<string, number | null>();
-            newPuzzle.nodes.forEach((n) => map.set(n.id, n.value));
-            nodeValuesHistory.reset(map);
-            setTargetRevealed(false); // Reset for master mode
-            setGrandmasterFeedback(null); // Reset grandmaster feedback
-            setShowUnsolvableButton(false); // Reset unsolvable button
-            setUnsolvableFeedback(null); // Reset unsolvable feedback
-            resetTimer();
-        }
+        const map = new Map<string, number | null>();
+        newPuzzle.nodes.forEach((n) => map.set(n.id, n.value));
+        nodeValuesHistory.reset(map);
+        setTargetRevealed(false); // Reset for master mode
+        setGrandmasterFeedback(null); // Reset grandmaster feedback
+        setShowUnsolvableButton(false); // Reset unsolvable button
+        setUnsolvableFeedback(null); // Reset unsolvable feedback
+        resetTimer();
     }, [resetTimer, nodeValuesHistory]);
 
     // Reset current puzzle
@@ -536,24 +505,10 @@ export function MagicGraphGame() {
         resetTimer();
     }, [puzzle, resetTimer, nodeValuesHistory]);
 
-    // Next puzzle
+    // Next puzzle - generates a new random puzzle
     const nextPuzzle = useCallback(() => {
-        const nextIndex = (currentTemplateIndex + 1) % filteredTemplates.length;
-        loadTemplate(nextIndex, filteredTemplates);
-    }, [currentTemplateIndex, filteredTemplates, loadTemplate]);
-
-    // Previous puzzle
-    const previousPuzzle = useCallback(() => {
-        const prevIndex = (currentTemplateIndex - 1 + filteredTemplates.length) % filteredTemplates.length;
-        loadTemplate(prevIndex, filteredTemplates);
-    }, [currentTemplateIndex, filteredTemplates, loadTemplate]);
-
-    // Swipe navigation for level selector (mobile)
-    const { ref: levelSwipeRef, handlers: levelSwipeHandlers } = useSwipeNavigation({
-        onNext: nextPuzzle,
-        onPrevious: previousPuzzle,
-        enabled: !isDailyMode && !showWin && !showTimeUp,
-    });
+        handleRandomPuzzle();
+    }, [handleRandomPuzzle]);
 
     // Handle custom puzzle from TopologyEditor
     const handleCustomPuzzle = useCallback((customPuzzle: PuzzleConfig) => {
@@ -618,28 +573,15 @@ export function MagicGraphGame() {
                     <span>📜</span> {t('rules')}
                 </div>
 
-                {/* Level Selector (hidden in daily mode) - Swipeable on mobile */}
+                {/* Game Actions (hidden in daily mode) */}
                 {!isDailyMode && (
-                    <div
-                        className="mg-levels"
-                        ref={levelSwipeRef as React.RefObject<HTMLDivElement>}
-                        {...levelSwipeHandlers}
-                    >
-                        {filteredTemplates.map((template, index) => (
-                            <button
-                                key={template.name}
-                                className={`mg-level ${index === currentTemplateIndex ? 'mg-level--active' : ''}`}
-                                onClick={() => loadTemplate(index, filteredTemplates)}
-                            >
-                                {template.name}
-                            </button>
-                        ))}
+                    <div className="mg-levels">
                         <button
                             className="action action--secondary"
                             onClick={handleRandomPuzzle}
                             disabled={isGenerating || isWorkerBusy}
                         >
-                            {isGenerating || isWorkerBusy ? `⏳ ${tc('generating')}` : `🎲 ${tc('buttons.random')}`}
+                            {isGenerating || isWorkerBusy ? `⏳ ${tc('generating')}` : `🎲 ${tc('buttons.newPuzzle')}`}
                         </button>
                         <button
                             className="action action--secondary"
