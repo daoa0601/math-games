@@ -10,6 +10,7 @@ import { GridFloor } from './GridFloor';
 import { useThreeCleanup } from '../hooks';
 import { CAMERA_PRESETS, type CameraPreset } from './CameraPresetButtons';
 import { useDeviceCapabilities } from '@/shared/hooks';
+import { Canvas3DErrorBoundary } from './Canvas3DErrorBoundary';
 
 interface GridBoard3DProps {
     grid: CellState[][][];
@@ -252,24 +253,26 @@ export function GridBoard3D({
 
     return (
         <div className="sa-board-3d" onPointerLeave={() => onCellHover?.(null)}>
-            <Canvas
-                shadows={enableShadows}
-                frameloop="demand"
-                gl={{
-                    antialias: enableAntialias,
-                    powerPreference: 'high-performance',
-                }}
-                dpr={[1, pixelRatio]}
-            >
-                <Suspense fallback={null}>
-                    <Scene3DContent
-                        voxels={voxels}
-                        centerOffset={centerOffset}
-                        gridSize={[width, height, depth]}
-                        cameraPreset={cameraPreset}
-                    />
-                </Suspense>
-            </Canvas>
+            <Canvas3DErrorBoundary>
+                <Canvas
+                    shadows={enableShadows}
+                    frameloop="demand"
+                    gl={{
+                        antialias: enableAntialias,
+                        powerPreference: 'high-performance',
+                    }}
+                    dpr={[1, pixelRatio]}
+                >
+                    <Suspense fallback={null}>
+                        <Scene3DContent
+                            voxels={voxels}
+                            centerOffset={centerOffset}
+                            gridSize={[width, height, depth]}
+                            cameraPreset={cameraPreset}
+                        />
+                    </Suspense>
+                </Canvas>
+            </Canvas3DErrorBoundary>
         </div>
     );
 }

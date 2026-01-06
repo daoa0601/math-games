@@ -16,3 +16,4 @@ export type { VoxelData } from './InstancedVoxels';
 export { PlacedPieceControls } from './PlacedPieceControls';
 export { PlacementModal } from './PlacementModal';
 export type { PlacementModalProps } from './PlacementModal';
+export { Canvas3DErrorBoundary } from './Canvas3DErrorBoundary';
