@@ -32,7 +32,6 @@ const GAME_CONFIGS: GameConfig[] = [
     path: '/shape-architect',
     tags: ['3D', 'spatial'],
     levelCount: 10,
-    disabled: true,
   },
 ];
 

@@ -167,6 +167,7 @@ export async function completeTutorial(page: Page, gameId: string): Promise<void
 
 /**
  * Mark daily challenge as completed for a game
+ * Uses the correct DailyChallengeState schema matching the app
  */
 export async function completeDailyChallenge(
   page: Page,
@@ -175,15 +176,89 @@ export async function completeDailyChallenge(
 ): Promise<void> {
   await page.evaluate(
     ({ key, gameId, date }) => {
+      // Type definitions matching DailyChallengeStateSchema
+      interface GameStreak {
+        currentStreak: number;
+        longestStreak: number;
+        lastCompletedDate: string | null;
+      }
+
+      interface DailyChallengeCompletion {
+        date: string;
+        gameId: string;
+        completed: boolean;
+        timeSeconds: number | null;
+        completedAt: string | null;
+      }
+
+      interface DailyChallengeState {
+        completions: DailyChallengeCompletion[];
+        streaks: {
+          'magic-graph': GameStreak;
+          'sequence-race': GameStreak;
+          'shape-architect': GameStreak;
+        };
+        version: number;
+      }
+
       const data = localStorage.getItem(key);
-      const challenges = data ? JSON.parse(data) : {};
-      if (!challenges[gameId]) {
-        challenges[gameId] = [];
+
+      // Default state matching DailyChallengeStateSchema
+      const defaultStreak: GameStreak = {
+        currentStreak: 0,
+        longestStreak: 0,
+        lastCompletedDate: null,
+      };
+
+      const defaultState: DailyChallengeState = {
+        completions: [],
+        streaks: {
+          'magic-graph': { ...defaultStreak },
+          'sequence-race': { ...defaultStreak },
+          'shape-architect': { ...defaultStreak },
+        },
+        version: 1,
+      };
+
+      // Parse existing state or use default
+      let state: DailyChallengeState = defaultState;
+      if (data) {
+        try {
+          const parsed = JSON.parse(data);
+          // Check if it's the new schema format
+          if (parsed.completions && parsed.streaks && parsed.version) {
+            state = parsed as DailyChallengeState;
+          }
+        } catch {
+          // Use default if parsing fails
+        }
       }
-      if (!challenges[gameId].includes(date)) {
-        challenges[gameId].push(date);
+
+      // Check if already completed for this date
+      const existingIndex = state.completions.findIndex(
+        (c) => c.date === date && c.gameId === gameId
+      );
+
+      if (existingIndex < 0) {
+        // Add new completion
+        state.completions.push({
+          date,
+          gameId,
+          completed: true,
+          timeSeconds: 30, // Default time for test
+          completedAt: new Date().toISOString(),
+        });
+
+        // Update streak for this game
+        const streak = state.streaks[gameId as keyof typeof state.streaks];
+        if (streak) {
+          streak.currentStreak = streak.currentStreak + 1;
+          streak.longestStreak = Math.max(streak.longestStreak, streak.currentStreak);
+          streak.lastCompletedDate = date;
+        }
       }
-      localStorage.setItem(key, JSON.stringify(challenges));
+
+      localStorage.setItem(key, JSON.stringify(state));
     },
     { key: STORAGE_KEYS.DAILY_CHALLENGE, gameId, date }
   );

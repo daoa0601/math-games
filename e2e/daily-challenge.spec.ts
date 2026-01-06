@@ -35,19 +35,19 @@ test.describe('Daily Challenge', () => {
     });
 
     test('should show all game challenges', async ({ page }) => {
-      // Should have 2 challenge dots (ShapeArchitect is currently disabled)
+      // Should have 3 challenge dots (all games active)
       const challengeDots = page.locator('.daily-challenge-banner__dot');
       const count = await challengeDots.count();
 
-      expect(count).toBe(2);
+      expect(count).toBe(3);
     });
 
     test('should display challenge icons', async ({ page }) => {
-      // Each challenge should have an icon (2 games currently active)
+      // Each challenge should have an icon (3 games currently active)
       const icons = page.locator('.daily-challenge-banner__dot-icon');
       const iconCount = await icons.count();
 
-      expect(iconCount).toBe(2);
+      expect(iconCount).toBe(3);
 
       // Verify icons are visible
       for (let i = 0; i < iconCount; i++) {
@@ -115,8 +115,7 @@ test.describe('Daily Challenge', () => {
       expect(page.url()).toContain('daily=true');
     });
 
-    test.skip('should navigate to ShapeArchitect daily challenge', async ({ page }) => {
-      // ShapeArchitect is currently disabled/removed from daily challenges
+    test('should navigate to ShapeArchitect daily challenge', async ({ page }) => {
       // Click on ShapeArchitect challenge dot
       const shapeArchitectDot = page.locator('[data-testid="daily-challenge-shape-architect"]');
 
@@ -193,9 +192,10 @@ test.describe('Daily Challenge', () => {
     test('should show "all complete" badge when all challenges done', async ({ page }) => {
       const today = new Date().toISOString().split('T')[0];
 
-      // Complete all active challenges (2 games - ShapeArchitect is disabled)
+      // Complete all active challenges (3 games)
       await completeDailyChallenge(page, 'magic-graph', today);
       await completeDailyChallenge(page, 'sequence-race', today);
+      await completeDailyChallenge(page, 'shape-architect', today);
 
       await dashboard.goto();
       await dashboard.waitForLoad();
@@ -231,14 +231,18 @@ test.describe('Daily Challenge', () => {
 
       await completeDailyChallenge(page, 'magic-graph', today);
 
-      // Check localStorage
+      // Check localStorage - uses new schema with completions array
       const dailyData = await page.evaluate((key) => {
         const data = localStorage.getItem(key);
         return data ? JSON.parse(data) : null;
       }, STORAGE_KEYS.DAILY_CHALLENGE);
 
       expect(dailyData).toBeTruthy();
-      expect(dailyData['magic-graph']).toContain(today);
+      expect(dailyData.completions).toBeDefined();
+      const magicGraphCompletion = dailyData.completions.find(
+        (c: { gameId: string; date: string }) => c.gameId === 'magic-graph' && c.date === today
+      );
+      expect(magicGraphCompletion).toBeTruthy();
     });
 
     test('should handle partial completion correctly', async ({ page }) => {
@@ -250,7 +254,7 @@ test.describe('Daily Challenge', () => {
       await dashboard.goto();
       await dashboard.waitForLoad();
 
-      // Should have 1 completed, 1 incomplete (2 games total - ShapeArchitect disabled)
+      // Should have 1 completed, 2 incomplete (3 games total)
       const completedDots = page.locator('.daily-challenge-banner__dot--completed');
       const completedCount = await completedDots.count();
 
@@ -279,7 +283,7 @@ test.describe('Daily Challenge', () => {
       const total = await allDots.count();
       const completed = await completedDots.count();
 
-      expect(total).toBe(2); // 2 games active (ShapeArchitect disabled)
+      expect(total).toBe(3); // 3 games active
       expect(completed).toBe(0); // Yesterday's completion doesn't count today
     });
   });
@@ -477,6 +481,7 @@ test.describe('Daily Challenge', () => {
 
       await completeDailyChallenge(page, 'magic-graph', today);
       await completeDailyChallenge(page, 'sequence-race', today);
+      await completeDailyChallenge(page, 'shape-architect', today);
 
       // Reload page multiple times
       for (let i = 0; i < 3; i++) {
@@ -487,7 +492,7 @@ test.describe('Daily Challenge', () => {
           .locator('.daily-challenge-banner__dot--completed')
           .count();
 
-        expect(completedCount).toBe(2);
+        expect(completedCount).toBe(3);
       }
     });
 
@@ -528,12 +533,22 @@ test.describe('Daily Challenge', () => {
         .toISOString()
         .split('T')[0];
 
-      // Add completions for today and last week
+      // Add completions using the correct schema format
       await page.evaluate(
         ({ key, today, lastWeek }) => {
+          const defaultStreak = { currentStreak: 0, longestStreak: 0, lastCompletedDate: null };
           const data = {
-            'magic-graph': [today, lastWeek],
-            'sequence-race': [lastWeek],
+            completions: [
+              { date: today, gameId: 'magic-graph', completed: true, timeSeconds: 30, completedAt: new Date().toISOString() },
+              { date: lastWeek, gameId: 'magic-graph', completed: true, timeSeconds: 30, completedAt: new Date().toISOString() },
+              { date: lastWeek, gameId: 'sequence-race', completed: true, timeSeconds: 30, completedAt: new Date().toISOString() },
+            ],
+            streaks: {
+              'magic-graph': { ...defaultStreak },
+              'sequence-race': { ...defaultStreak },
+              'shape-architect': { ...defaultStreak },
+            },
+            version: 1,
           };
           localStorage.setItem(key, JSON.stringify(data));
         },
