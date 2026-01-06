@@ -434,8 +434,9 @@
     grid-template-columns: 1fr 320px;
     gap: var(--space-xl);
     align-items: start;
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    flex: 1;
   }
 
   .game-main {
