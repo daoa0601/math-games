@@ -158,6 +158,7 @@
     "buttons": {
         "reset": "Reset",
         "nextPuzzle": "Next Puzzle",
+        "newPuzzle": "New Puzzle",
         "nextLevel": "Next Level",
         "random": "Random",
         "needHelp": "Need Help?",

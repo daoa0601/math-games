@@ -158,6 +158,7 @@
     "buttons": {
         "reset": "Đặt lại",
         "nextPuzzle": "Câu đố tiếp",
+        "newPuzzle": "Câu đố mới",
         "nextLevel": "Màn tiếp",
         "random": "Ngẫu nhiên",
         "needHelp": "Cần trợ giúp?",

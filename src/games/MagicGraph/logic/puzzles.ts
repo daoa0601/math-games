@@ -288,7 +288,8 @@ export function generateRandomPuzzle(difficulty: 'easy' | 'medium' | 'hard'): Pu
 
 function getRandomShapes(difficulty: 'easy' | 'medium' | 'hard') {
     if (difficulty === 'easy') {
-        return [linePuzzle, crossPuzzle, ...easyLetters.slice(0, 3)];
+        // Exclude linePuzzle (3-node) as it's too trivial
+        return [crossPuzzle, ...easyLetters.slice(0, 4)];
     } else if (difficulty === 'medium') {
         return [crossPuzzle, magicTrianglePuzzle, diamondPuzzle, ...mediumLetters.slice(0, 3)];
     } else {
