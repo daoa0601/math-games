@@ -165,8 +165,9 @@ export function PlacementModal({
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Swipe-to-dismiss state for mobile bottom sheet
+    // Reset swipe offset when modal opens by using key derived from isOpen transitions
     const [swipeOffset, setSwipeOffset] = useState(0);
-    const touchStartRef = useRef<number | null>(null);
+    const [touchStart, setTouchStart] = useState<number | null>(null);
 
     // Check if placement is valid
     const isValid = piece && position
@@ -175,32 +176,26 @@ export function PlacementModal({
 
     // Use ref to track isValid without triggering callback recreation
     const isValidRef = useRef(isValid);
-    isValidRef.current = isValid;
-
-    // Reset swipe offset when modal opens
     useEffect(() => {
-        if (isOpen) {
-            setSwipeOffset(0);
-            touchStartRef.current = null;
-        }
-    }, [isOpen]);
+        isValidRef.current = isValid;
+    }, [isValid]);
 
     // Touch handlers for swipe-to-dismiss
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
-        touchStartRef.current = e.touches[0].clientY;
+        setTouchStart(e.touches[0].clientY);
     }, []);
 
     const handleTouchMove = useCallback((e: React.TouchEvent) => {
-        if (touchStartRef.current === null) return;
+        if (touchStart === null) return;
 
         const currentY = e.touches[0].clientY;
-        const delta = currentY - touchStartRef.current;
+        const delta = currentY - touchStart;
 
         // Only allow swiping down (positive delta)
         if (delta > 0) {
             setSwipeOffset(delta);
         }
-    }, []);
+    }, [touchStart]);
 
     const handleTouchEnd = useCallback(() => {
         if (swipeOffset > SWIPE_THRESHOLD) {
@@ -209,7 +204,7 @@ export function PlacementModal({
         }
         // Reset
         setSwipeOffset(0);
-        touchStartRef.current = null;
+        setTouchStart(null);
     }, [swipeOffset, onCancel]);
 
     // Focus trap for accessibility

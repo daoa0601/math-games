@@ -2,12 +2,14 @@ import { useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useFocusTrap } from '@/shared/hooks/accessibility';
+import type { StorageGameId } from '@/shared/types/game';
 import { MagicGraphLearn } from './content/MagicGraphLearn';
 import { SequenceRaceLearn } from './content/SequenceRaceLearn';
 import { ShapeArchitectLearn } from './content/ShapeArchitectLearn';
 import './LearnModal.css';
 
-export type GameId = 'magic-graph' | 'sequence-race' | 'shape-architect';
+// Re-export for backwards compatibility with existing imports
+export type GameId = StorageGameId;
 
 export interface LearnModalProps {
   gameId: GameId | null;

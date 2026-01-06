@@ -1,11 +1,11 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton } from '../../shared/components';
-import { useGameTimer, useGameRewards, useSwipeNavigation, useAnnounce, useFocusTrap } from '../../shared/hooks';
-import { usePlayer } from '../../shared/contexts';
-import { playSound, showConfetti } from '../../shared/utils';
-import { isDailyCompleted, completeDailyChallenge } from '../../shared/services/daily';
+import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton } from '@/shared/components';
+import { useGameTimer, useGameRewards, useSwipeNavigation, useAnnounce, useFocusTrap } from '@/shared/hooks';
+import { usePlayer } from '@/shared/contexts';
+import { playSound, showConfetti } from '@/shared/utils';
+import { isDailyCompleted, completeDailyChallenge } from '@/shared/services/daily';
 import { shouldShowTutorial } from '@/shared/services/tutorialProgress';
 import { PuzzleBoard, NumberInventory, NumberPicker, TopologyEditor, MagicGraphTutorial } from './components';
 import type { PuzzleConfig, Difficulty, OptimizationGoal } from './logic/types';
