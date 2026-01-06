@@ -471,8 +471,6 @@ export function ShapeArchitectGame() {
                                 className={`sa-view-mode__btn ${viewMode === '3d' ? 'sa-view-mode__btn--active' : ''}`}
                                 onClick={() => setViewMode('3d')}
                                 aria-pressed={viewMode === '3d'}
-                                disabled={gameState.level.type === '2D'}
-                                title={gameState.level.type === '2D' ? t('viewMode.2dOnlyLevel', 'This level is 2D only') : undefined}
                             >
                                 3D
                             </button>

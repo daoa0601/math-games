@@ -268,14 +268,56 @@ function getAllZRotations(): Rotation3D[] {
 }
 
 /**
+ * Check if a position is adjacent to any occupied cell in the grid.
+ * Adjacent means sharing a face (not diagonal).
+ */
+function isAdjacentToOccupied(
+  grid: CellState[][][],
+  positions: Position3D[],
+  gridSize: [number, number, number]
+): boolean {
+  const directions = [
+    { x: 1, y: 0, z: 0 },
+    { x: -1, y: 0, z: 0 },
+    { x: 0, y: 1, z: 0 },
+    { x: 0, y: -1, z: 0 },
+    { x: 0, y: 0, z: 1 },
+    { x: 0, y: 0, z: -1 },
+  ];
+
+  for (const pos of positions) {
+    for (const dir of directions) {
+      const nx = pos.x + dir.x;
+      const ny = pos.y + dir.y;
+      const nz = pos.z + dir.z;
+
+      // Check bounds
+      if (nx >= 0 && nx < gridSize[0] &&
+          ny >= 0 && ny < gridSize[1] &&
+          nz >= 0 && nz < gridSize[2]) {
+        // Check if neighbor is occupied (value = 2)
+        if (grid[nx][ny][nz] === 2) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
  * Find all valid positions where a piece can be placed on a placement grid.
  * The placement grid tracks where pieces have been placed (for collision detection).
+ *
+ * @param requireAdjacent - If true, only return positions adjacent to already-placed pieces
  */
 function findValidPositions(
   placementGrid: CellState[][][],
   piece: Piece,
   rotation: Rotation3D,
-  gridSize: [number, number, number]
+  gridSize: [number, number, number],
+  requireAdjacent: boolean = false
 ): Position3D[] {
   const validPositions: Position3D[] = [];
 
@@ -302,6 +344,11 @@ function findValidPositions(
           canPlace = false;
           break;
         }
+      }
+
+      // If requiring adjacency, check if any piece cell is adjacent to occupied cells
+      if (canPlace && requireAdjacent) {
+        canPlace = isAdjacentToOccupied(placementGrid, worldPositions, gridSize);
       }
 
       if (canPlace) {
@@ -439,19 +486,28 @@ export function generateGuaranteedSolvable(
   const placementGrid = createGrid(gridSize);
   const rotations = getAllZRotations();
 
+  let isFirstPiece = true;
   for (const piece of pieces) {
     // Try random rotations until we find a valid placement
     const shuffledRotations = rng.shuffle([...rotations]);
     let placed = false;
 
     for (const rotation of shuffledRotations) {
-      const validPositions = findValidPositions(placementGrid, piece, rotation, gridSize);
+      // After first piece, require adjacency to create unified shape
+      const validPositions = findValidPositions(
+        placementGrid,
+        piece,
+        rotation,
+        gridSize,
+        !isFirstPiece // requireAdjacent = true after first piece
+      );
 
       if (validPositions.length > 0) {
         // Pick a random valid position
         const position = rng.pick(validPositions);
         placePieceOnGrid(placementGrid, piece, position, rotation);
         placed = true;
+        isFirstPiece = false;
         break;
       }
     }
