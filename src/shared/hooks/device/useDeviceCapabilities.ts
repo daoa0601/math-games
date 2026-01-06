@@ -7,7 +7,7 @@
  * - GPU capabilities estimation
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 export interface DeviceCapabilities {
   /** True if device has touch capabilities (mobile/tablet) */
@@ -67,15 +67,14 @@ function detectLowEnd(): boolean {
  * Hook to detect device capabilities for adaptive rendering
  */
 export function useDeviceCapabilities(): DeviceCapabilities {
-  // Use state to handle SSR - initial render assumes desktop
-  const [isMobile, setIsMobile] = useState(false);
-  const [isLowEnd, setIsLowEnd] = useState(false);
-
-  // Detect on mount (client-side only)
-  useEffect(() => {
-    setIsMobile(detectMobile());
-    setIsLowEnd(detectLowEnd());
-  }, []);
+  // Use lazy initialization to detect on first render (client-side only)
+  // This avoids cascading renders from useEffect + setState
+  const [isMobile] = useState(() =>
+    typeof navigator !== 'undefined' ? detectMobile() : false
+  );
+  const [isLowEnd] = useState(() =>
+    typeof navigator !== 'undefined' ? detectLowEnd() : false
+  );
 
   // Compute derived values based on device detection
   const capabilities = useMemo((): DeviceCapabilities => {

@@ -37,8 +37,7 @@ import { getTodaySeed } from '../utils/seededRandom';
 const STORAGE_VERSION = 1;
 const MAX_HISTORY_DAYS = 30; // Keep 30 days of completion history
 
-const GAME_IDS: StorageGameId[] = ['magic-graph', 'sequence-race'];
-// 'shape-architect' removed until fixed
+const GAME_IDS: StorageGameId[] = ['magic-graph', 'sequence-race', 'shape-architect'];
 
 // ============================================================================
 // Default State
