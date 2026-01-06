@@ -4,38 +4,29 @@ import { Page, Locator } from '@playwright/test';
  * Dashboard Page Object
  *
  * Represents the main dashboard page (/) with:
- * - Tab navigation (Play, Stats, Achievements)
- * - Game cards grid
- * - Header with settings controls
- * - Player profile display
+ * - Bottom navigation (Home, Profile, Learn, Settings)
+ * - Game cards grid on Home tab
+ * - Compact header with rank and streak
  */
 export class DashboardPage {
   readonly page: Page;
 
   // Header elements
   readonly header: Locator;
-  readonly rankBadge: Locator;
+  readonly rankIcon: Locator;
   readonly playerName: Locator;
-  readonly playerRank: Locator;
+  readonly rankName: Locator;
   readonly streakIndicator: Locator;
   readonly streakCount: Locator;
-  readonly soundToggle: Locator;
-  readonly languageSwitcher: Locator;
 
-  // Tab navigation
-  readonly tabList: Locator;
-  readonly playTab: Locator;
-  readonly statsTab: Locator;
-  readonly achievementsTab: Locator;
+  // Bottom navigation tabs
+  readonly nav: Locator;
+  readonly homeTab: Locator;
+  readonly profileTab: Locator;
   readonly learnTab: Locator;
+  readonly settingsTab: Locator;
 
-  // Tab panels
-  readonly playTabPanel: Locator;
-  readonly statsTabPanel: Locator;
-  readonly achievementsTabPanel: Locator;
-  readonly learnTabPanel: Locator;
-
-  // Game cards (in Play tab)
+  // Game cards (on Home tab)
   readonly gamesGrid: Locator;
   readonly gameCards: Locator;
   readonly magicGraphCard: Locator;
@@ -50,32 +41,22 @@ export class DashboardPage {
 
     // Header elements
     this.header = page.locator('.compact-header');
-    this.rankBadge = page.locator('.compact-header__rank-badge');
+    this.rankIcon = page.locator('.compact-header__rank-icon');
     this.playerName = page.locator('.compact-header__name');
-    this.playerRank = page.locator('.compact-header__rank');
+    this.rankName = page.locator('.compact-header__rank-name');
     this.streakIndicator = page.locator('.compact-header__streak');
     this.streakCount = page.locator('.compact-header__streak-count');
 
-    // Controls - use class selectors for reliability
-    this.soundToggle = page.locator('.sound-toggle');
-    this.languageSwitcher = page.locator('.lang-switcher');
+    // Bottom navigation - uses .nav class with role="tablist"
+    this.nav = page.locator('.nav[role="tablist"]');
+    this.homeTab = page.locator('.nav__item').filter({ hasText: /home|trang chủ/i }).first();
+    this.profileTab = page.locator('.nav__item').filter({ hasText: /profile|hồ sơ/i }).first();
+    this.learnTab = page.locator('.nav__item').filter({ hasText: /learn|học/i }).first();
+    this.settingsTab = page.locator('.nav__item').filter({ hasText: /settings|cài đặt/i }).first();
 
-    // Tab navigation (using data-testid for reliability)
-    this.tabList = page.locator('[role="tablist"]');
-    this.playTab = page.locator('[data-testid="tab-play"]');
-    this.statsTab = page.locator('[data-testid="tab-stats"]');
-    this.achievementsTab = page.locator('[data-testid="tab-achievements"]');
-    this.learnTab = page.locator('[data-testid="tab-learn"]');
-
-    // Tab panels
-    this.playTabPanel = page.locator('#tabpanel-play');
-    this.statsTabPanel = page.locator('#tabpanel-stats');
-    this.achievementsTabPanel = page.locator('#tabpanel-achievements');
-    this.learnTabPanel = page.locator('#tabpanel-learn');
-
-    // Game cards - using data-testid for reliability
-    this.gamesGrid = page.locator('.games-grid');
-    this.gameCards = page.locator('.game-card');
+    // Game cards - uses .slab class
+    this.gamesGrid = page.locator('.grid');
+    this.gameCards = page.locator('.slab');
 
     // Individual game cards by data-testid
     this.magicGraphCard = page.locator('[data-testid="game-card-magicGraph"]');
@@ -97,14 +78,14 @@ export class DashboardPage {
    * Wait for dashboard to be fully loaded
    */
   async waitForLoad(): Promise<void> {
-    // Wait for dashboard container
-    await this.page.waitForSelector('.dashboard', { state: 'visible' });
+    // Wait for page container
+    await this.page.waitForSelector('.page', { state: 'visible' });
 
     // Wait for header to load
     await this.header.waitFor({ state: 'visible' });
 
-    // Wait for tabs to be visible
-    await this.playTab.waitFor({ state: 'visible' });
+    // Wait for nav to be visible
+    await this.nav.waitFor({ state: 'visible' });
 
     // Small delay for animations
     await this.page.waitForTimeout(200);
@@ -113,25 +94,15 @@ export class DashboardPage {
   /**
    * Switch to a specific tab
    */
-  async switchTab(tab: 'play' | 'stats' | 'achievements' | 'learn'): Promise<void> {
+  async switchTab(tab: 'home' | 'profile' | 'learn' | 'settings'): Promise<void> {
     const tabLocator = {
-      play: this.playTab,
-      stats: this.statsTab,
-      achievements: this.achievementsTab,
+      home: this.homeTab,
+      profile: this.profileTab,
       learn: this.learnTab,
+      settings: this.settingsTab,
     }[tab];
 
     await tabLocator.click();
-
-    // Wait for tab panel to be visible
-    const panelLocator = {
-      play: this.playTabPanel,
-      stats: this.statsTabPanel,
-      achievements: this.achievementsTabPanel,
-      learn: this.learnTabPanel,
-    }[tab];
-
-    await panelLocator.waitFor({ state: 'visible' });
     await this.page.waitForTimeout(300); // Animation delay
   }
 
@@ -139,7 +110,7 @@ export class DashboardPage {
    * Get the currently active tab
    */
   async getActiveTab(): Promise<string | null> {
-    const activeTab = this.page.locator('[role="tab"][aria-selected="true"]');
+    const activeTab = this.page.locator('.nav__item--active');
     return activeTab.textContent();
   }
 
@@ -181,7 +152,7 @@ export class DashboardPage {
     streak: number;
   }> {
     const name = await this.playerName.textContent();
-    const rank = await this.playerRank.textContent();
+    const rank = await this.rankName.textContent();
 
     // Get streak count (0 if not visible)
     let streak = 0;
@@ -194,52 +165,10 @@ export class DashboardPage {
   }
 
   /**
-   * Toggle sound on/off
-   */
-  async toggleSound(): Promise<void> {
-    await this.soundToggle.click();
-  }
-
-  /**
-   * Check if sound is enabled
-   */
-  async isSoundEnabled(): Promise<boolean> {
-    const ariaPressed = await this.soundToggle.getAttribute('aria-pressed');
-    return ariaPressed === 'true';
-  }
-
-  /**
-   * Switch language
-   */
-  async switchLanguage(): Promise<void> {
-    await this.languageSwitcher.click();
-  }
-
-  /**
-   * Get current language
-   */
-  async getCurrentLanguage(): Promise<'en' | 'vi'> {
-    const text = await this.languageSwitcher.textContent();
-    // If button shows "VI" it means current is English, showing option to switch to Vietnamese
-    return text?.includes('VI') ? 'en' : 'vi';
-  }
-
-  /**
    * Check if daily challenge banner is visible
    */
   async isDailyChallengeBannerVisible(): Promise<boolean> {
     return this.dailyChallengeBanner.isVisible();
-  }
-
-  /**
-   * Get achievement count from achievements tab badge
-   */
-  async getAchievementCount(): Promise<{ unlocked: number; total: number }> {
-    const badgeText = await this.page.locator('.dashboard-tabs__badge').textContent();
-    if (!badgeText) return { unlocked: 0, total: 0 };
-
-    const [unlocked, total] = badgeText.split('/').map(s => parseInt(s.trim(), 10));
-    return { unlocked: unlocked || 0, total: total || 0 };
   }
 
   /**
@@ -248,7 +177,7 @@ export class DashboardPage {
   async getAllGameCards(): Promise<string[]> {
     const cards = await this.gameCards.all();
     const titles = await Promise.all(
-      cards.map(card => card.locator('.game-card__title').textContent())
+      cards.map(card => card.locator('.slab__title').textContent())
     );
     return titles.filter((title): title is string => title !== null);
   }
@@ -257,6 +186,6 @@ export class DashboardPage {
    * Get game card by title text
    */
   getGameCardByTitle(title: string): Locator {
-    return this.page.locator('.game-card').filter({ hasText: title });
+    return this.page.locator('.slab').filter({ hasText: title });
   }
 }

@@ -367,14 +367,14 @@ export async function waitForMagicGraphReady(
   page: Page,
   timeout = TEST_TIMEOUTS.gameLoad
 ): Promise<void> {
-  // Wait for main puzzle board
-  await page.locator('.puzzle-board').waitFor({ state: 'visible', timeout });
+  // Wait for main puzzle board (.mg-board)
+  await page.locator('.mg-board').waitFor({ state: 'visible', timeout });
 
   // Wait for at least one puzzle node to be rendered
-  await page.locator('.puzzle-node').first().waitFor({ state: 'visible', timeout: 5000 });
+  await page.locator('.mg-node').first().waitFor({ state: 'visible', timeout: 5000 });
 
   // Wait for number inventory to be populated
-  await page.locator('.number-inventory').waitFor({ state: 'visible', timeout: 5000 });
+  await page.locator('.mg-inventory').waitFor({ state: 'visible', timeout: 5000 });
 
   // Small delay for React state to settle
   await waitForNextFrame(page);
@@ -422,20 +422,20 @@ export async function waitForShapeArchitectReady(
 
 /**
  * Wait for Dashboard to be fully ready
- * Checks for tabs and game cards
+ * Checks for page container and game cards
  */
 export async function waitForDashboardReady(
   page: Page,
   timeout = TEST_TIMEOUTS.gameLoad
 ): Promise<void> {
-  // Wait for dashboard container
-  await page.locator('.dashboard').waitFor({ state: 'visible', timeout });
+  // Wait for page container (.page)
+  await page.locator('.page').waitFor({ state: 'visible', timeout });
 
-  // Wait for tab list
-  await page.locator('[role="tablist"]').waitFor({ state: 'visible', timeout: 5000 });
+  // Wait for nav tabs to be visible
+  await page.locator('.nav[role="tablist"]').waitFor({ state: 'visible', timeout: 5000 });
 
-  // Wait for at least one game card
-  await page.locator('.game-card').first().waitFor({ state: 'visible', timeout: 5000 });
+  // Wait for at least one game card (.slab)
+  await page.locator('.slab').first().waitFor({ state: 'visible', timeout: 5000 });
 
   await waitForNextFrame(page);
 }

@@ -441,43 +441,9 @@ test.describe('Daily Challenge', () => {
   });
 
   test.describe('Banner Visibility', () => {
-    test('should show banner on Play tab', async ({ page }) => {
-      await dashboard.playTab.click();
-      await page.waitForTimeout(200);
-
+    test('should show banner on home tab', async ({ page }) => {
+      // Banner should be visible on home tab (default)
       await expect(dashboard.dailyChallengeBanner).toBeVisible();
-    });
-
-    test('should hide banner on Stats tab', async ({ page }) => {
-      await dashboard.statsTab.click();
-      await page.waitForTimeout(200);
-
-      // Banner should not be visible on stats tab
-      const banner = page.locator('.daily-challenge-banner');
-
-      // May or may not be in DOM, but shouldn't be visible
-      const isVisible = await banner.isVisible().catch(() => false);
-
-      // On stats tab, banner should be hidden
-      if (isVisible) {
-        // If visible, it might be a design choice to show it everywhere
-        // This is acceptable
-        expect(isVisible).toBe(true);
-      } else {
-        expect(isVisible).toBe(false);
-      }
-    });
-
-    test('should show banner on Achievements tab', async ({ page }) => {
-      await dashboard.achievementsTab.click();
-      await page.waitForTimeout(200);
-
-      // Similar to stats tab, verify visibility
-      const banner = page.locator('.daily-challenge-banner');
-      const isVisible = await banner.isVisible().catch(() => false);
-
-      // Design choice - may be visible or not
-      expect(typeof isVisible).toBe('boolean');
     });
   });
 
