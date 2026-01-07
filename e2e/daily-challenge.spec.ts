@@ -445,7 +445,7 @@ test.describe('Daily Challenge', () => {
   });
 
   test.describe('Banner Visibility', () => {
-    test('should show banner on home tab', async ({ page }) => {
+    test('should show banner on home tab', async () => {
       // Banner should be visible on home tab (default)
       await expect(dashboard.dailyChallengeBanner).toBeVisible();
     });
