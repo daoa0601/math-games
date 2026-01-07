@@ -169,7 +169,7 @@ test.describe('Progression System', () => {
       expect(profile!.stats.totalPuzzlesSolved).toBe(20);
     });
 
-    test.skip('should show rank progress in stats tab', async ({ page }) => {
+    test.skip('should show rank progress in stats tab', async () => {
       // Skip: stats tab no longer exists in current navigation structure
       // The dashboard now uses BottomNav with home/profile/learn/settings
     });

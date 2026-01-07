@@ -163,8 +163,6 @@ test.describe('MagicGraph Game', () => {
 
   test.describe('Difficulty Changes', () => {
     test('should change difficulty level', async ({ page }) => {
-      const mgPage = new MagicGraphPage(page);
-
       // Get initial active difficulty
       const easyBtn = page.locator('.difficulty-btn--easy');
       const mediumBtn = page.locator('.difficulty-btn--medium');

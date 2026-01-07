@@ -45,7 +45,9 @@ export function SequenceRaceGame() {
 
   const isDailyMode = searchParams.get('daily') === 'true';
   const [dailyCompleted, setDailyCompleted] = useState(() => isDailyMode && isDailyCompleted('sequence-race'));
-  const dailyConfigRef = useRef(isDailyMode ? getDailySequenceRaceConfig() : null);
+
+  // Memoize daily config to avoid regeneration - safe to use during render
+  const dailyConfig = useMemo(() => isDailyMode ? getDailySequenceRaceConfig() : null, [isDailyMode]);
 
   // Tutorial state
   const [showTutorial, setShowTutorial] = useState(() =>
@@ -81,32 +83,11 @@ export function SequenceRaceGame() {
   }, [announce, t]);
 
   // ─────────────────────────────────────────────────────────────────
-  // Timer
+  // Game State (extracted hook) - defined first to provide isGameOver
   // ─────────────────────────────────────────────────────────────────
 
-  // Track game over state for timer - needs to be declared before useGameTimer
-  const [isGameOver, setIsGameOver] = useState(false);
-
-  const {
-    timeLeft,
-    showTimeUp,
-    timerClass,
-    formattedTime,
-    elapsedTime,
-    isPracticeMode,
-    isPaused,
-    resetTimer,
-    pauseTimer,
-    resumeTimer,
-  } = useGameTimer({
-    isGameOver,
-    practiceMode: profile.preferences.practiceMode,
-    onTimeWarning: handleTimeWarning,
-  });
-
-  // ─────────────────────────────────────────────────────────────────
-  // Game State (extracted hook)
-  // ─────────────────────────────────────────────────────────────────
+  // Use ref for resetTimer to break circular dependency with useGameTimer
+  const resetTimerRef = useRef<() => void>(() => {});
 
   const {
     difficulty,
@@ -124,9 +105,35 @@ export function SequenceRaceGame() {
     handleModeChange: handleModeChangeBase,
     undoLastMove,
   } = useSequenceRaceState({
-    onResetTimer: resetTimer,
-    initialConfig: isDailyMode ? dailyConfigRef.current ?? undefined : undefined,
+    onResetTimer: () => resetTimerRef.current(),
+    initialConfig: dailyConfig ?? undefined,
   });
+
+  // ─────────────────────────────────────────────────────────────────
+  // Timer - now uses gameState.gameOver directly
+  // ─────────────────────────────────────────────────────────────────
+
+  const {
+    timeLeft,
+    showTimeUp,
+    timerClass,
+    formattedTime,
+    elapsedTime,
+    isPracticeMode,
+    isPaused,
+    resetTimer,
+    pauseTimer,
+    resumeTimer,
+  } = useGameTimer({
+    isGameOver: gameState.gameOver,
+    practiceMode: profile.preferences.practiceMode,
+    onTimeWarning: handleTimeWarning,
+  });
+
+  // Update ref after useGameTimer is called (in effect to avoid render-phase mutation)
+  useEffect(() => {
+    resetTimerRef.current = resetTimer;
+  }, [resetTimer]);
 
   // ─────────────────────────────────────────────────────────────────
   // Hint System (extracted hook)
@@ -253,14 +260,6 @@ export function SequenceRaceGame() {
   );
 
   // ─────────────────────────────────────────────────────────────────
-  // Sync game over state for timer
-  // ─────────────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    setIsGameOver(gameState.gameOver);
-  }, [gameState.gameOver]);
-
-  // ─────────────────────────────────────────────────────────────────
   // Win Celebration Effect (runs once when game ends)
   // ─────────────────────────────────────────────────────────────────
 
@@ -282,10 +281,10 @@ export function SequenceRaceGame() {
         isOptimalSolution: analysis?.canWin ?? false,
       });
 
-      // Track daily challenge completion
+      // Track daily challenge completion - setState needed for UI update
       if (isDailyMode && !dailyCompleted) {
         completeDailyChallenge('sequence-race', elapsedTime);
-        setDailyCompleted(true);
+        setDailyCompleted(true); // eslint-disable-line react-hooks/set-state-in-effect -- UI update on game win
       }
 
       playSound('win');
@@ -307,6 +306,7 @@ export function SequenceRaceGame() {
     handleCompletion,
     isDailyMode,
     dailyCompleted,
+    setDailyCompleted,
   ]);
 
   // ─────────────────────────────────────────────────────────────────
