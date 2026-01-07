@@ -7,7 +7,11 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher, SoundToggle } from '@/shared/components';
 import './SettingsTab.css';
 
-export function SettingsTab() {
+interface SettingsTabProps {
+  onFeedbackClick?: () => void;
+}
+
+export function SettingsTab({ onFeedbackClick }: SettingsTabProps) {
   const { t } = useTranslation();
 
   return (
@@ -29,6 +33,18 @@ export function SettingsTab() {
             <span className="settings-row__description">{t('settings.languageDescription')}</span>
           </div>
           <LanguageSwitcher />
+        </div>
+      </section>
+
+      <section className="settings-section">
+        <h2 className="settings-section__title">{t('settings.support')}</h2>
+
+        <div className="settings-row settings-row--clickable" onClick={onFeedbackClick}>
+          <div className="settings-row__label">
+            <span className="settings-row__name">{t('feedback.title')}</span>
+            <span className="settings-row__description">{t('feedback.description')}</span>
+          </div>
+          <span className="settings-row__arrow" aria-hidden="true">→</span>
         </div>
       </section>
 

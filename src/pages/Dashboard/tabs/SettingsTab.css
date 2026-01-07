@@ -28,6 +28,21 @@
   border-bottom: 1px solid var(--border);
 }
 
+.settings-row--clickable {
+  cursor: pointer;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+
+.settings-row--clickable:hover {
+  opacity: 0.7;
+}
+
+.settings-row__arrow {
+  font-family: var(--font-mono);
+  color: var(--muted);
+  font-size: var(--text-lg);
+}
+
 .settings-row__label {
   display: flex;
   flex-direction: column;

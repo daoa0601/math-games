@@ -15,7 +15,10 @@
         "home": "Home",
         "profile": "Profile",
         "learn": "Learn",
-        "settings": "Settings"
+        "settings": "Settings",
+        "feedback": "Feedback",
+        "more": "More",
+        "moreMenu": "More options"
     },
     "settings": {
         "preferences": "Preferences",
@@ -23,9 +26,26 @@
         "soundDescription": "Enable or disable game sounds",
         "language": "Language",
         "languageDescription": "Choose your preferred language",
+        "support": "Support",
         "about": "About",
         "version": "Version",
         "theme": "Theme"
+    },
+    "feedback": {
+        "title": "Send Feedback",
+        "description": "Share your thoughts, report bugs, or suggest improvements",
+        "typeLabel": "Feedback Type",
+        "messageLabel": "Your Message",
+        "placeholder": "Tell us what you think...",
+        "submit": "Send Feedback",
+        "thankYou": "Thank you for your feedback!",
+        "types": {
+            "general": "General Feedback",
+            "magic-graph": "Magic Graph",
+            "sequence-race": "Sequence Race",
+            "shape-architect": "Shape Architect",
+            "bug": "Bug Report"
+        }
     },
     "backToGames": "Back to Games",
     "player": {

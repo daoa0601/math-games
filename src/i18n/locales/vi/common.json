@@ -15,7 +15,10 @@
         "home": "Trang chủ",
         "profile": "Hồ sơ",
         "learn": "Học",
-        "settings": "Cài đặt"
+        "settings": "Cài đặt",
+        "feedback": "Góp ý",
+        "more": "Thêm",
+        "moreMenu": "Tùy chọn khác"
     },
     "settings": {
         "preferences": "Tùy chọn",
@@ -23,9 +26,26 @@
         "soundDescription": "Bật hoặc tắt âm thanh trò chơi",
         "language": "Ngôn ngữ",
         "languageDescription": "Chọn ngôn ngữ ưa thích",
+        "support": "Hỗ trợ",
         "about": "Thông tin",
         "version": "Phiên bản",
         "theme": "Giao diện"
+    },
+    "feedback": {
+        "title": "Gửi góp ý",
+        "description": "Chia sẻ ý kiến, báo lỗi hoặc đề xuất cải tiến",
+        "typeLabel": "Loại góp ý",
+        "messageLabel": "Nội dung",
+        "placeholder": "Hãy cho chúng tôi biết ý kiến của bạn...",
+        "submit": "Gửi góp ý",
+        "thankYou": "Cảm ơn bạn đã góp ý!",
+        "types": {
+            "general": "Góp ý chung",
+            "magic-graph": "Đồ Thị Ma Thuật",
+            "sequence-race": "Đua Dãy Số",
+            "shape-architect": "Kiến Trúc Sư",
+            "bug": "Báo lỗi"
+        }
     },
     "backToGames": "Quay lại Trò chơi",
     "player": {
