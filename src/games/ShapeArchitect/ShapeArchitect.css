@@ -10,7 +10,9 @@
   align-items: center;
   gap: var(--space-lg);
   width: 100%;
-  max-width: min(95vw, 1200px);
+  max-width: 100%;
+  flex: 1;
+  justify-content: center;
 }
 
 /* ========================================
@@ -502,7 +504,9 @@
     grid-template-columns: 1fr 360px;
     gap: var(--space-xl);
     align-items: start;
-    max-width: 1200px;
+    width: 100%;
+    max-width: 100%;
+    flex: 1;
   }
 
   .sa-main {
@@ -527,7 +531,7 @@
   /* Board takes full width of main area */
   .sa-board-3d {
     width: 100%;
-    max-width: 700px;
+    max-width: none;
   }
 
   /* Inventory spans full width in main area */
