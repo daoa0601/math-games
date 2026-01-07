@@ -26,8 +26,9 @@ test.describe('Navigation', () => {
     await expect(gameCards).toHaveCount(3);
 
     // Verify each game is present by title text
+    // Note: "Sequence Race" was renamed to "Sequence Sprinter"
     await expect(page.locator('.slab').filter({ hasText: /magic graph/i })).toBeVisible();
-    await expect(page.locator('.slab').filter({ hasText: /sequence race/i })).toBeVisible();
+    await expect(page.locator('.slab').filter({ hasText: /sequence sprinter|sequence race/i })).toBeVisible();
     await expect(page.locator('.slab').filter({ hasText: /shape architect/i })).toBeVisible();
   });
 

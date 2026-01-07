@@ -3,43 +3,21 @@
  * Manages player data persistence, streak tracking, and profile operations
  */
 
-import { calculateRank, type PlayerRank } from './rank';
+import { calculateRank } from './rank';
 import { PLAYER_KEY, LANGUAGE_KEY, SOUND_ENABLED_KEY } from '../constants';
+import { getTodayDate, daysBetween } from '../utils/dateUtils';
+import type {
+  PlayerProfile,
+  PlayerStats,
+  PlayerPreferences,
+  PlayerRank,
+} from '../schemas/playerProfile.schema';
+
+// Re-export for backwards compatibility
+export type { PlayerProfile, PlayerStats, PlayerPreferences };
+export { getTodayDate }; // Re-export from dateUtils for backward compat
 
 const STORAGE_VERSION = 2; // Increment when data structure changes
-
-export interface PlayerPreferences {
-  soundEnabled: boolean;
-  practiceMode: boolean;
-  language: 'en' | 'vi';
-}
-
-export interface PlayerStats {
-  totalGamesPlayed: number;
-  totalPuzzlesSolved: number; // MagicGraph + ShapeArchitect
-  totalWins: number; // SequenceRace only
-  magicGraphSolved: number;
-  sequenceRaceWins: number;
-  shapeArchitectBuilt: number;
-  bestTimes: {
-    magicGraphFastest: number | null;
-    sequenceRaceFastest: number | null;
-    shapeArchitectFastest: number | null;
-  };
-}
-
-export interface PlayerProfile {
-  id: string;
-  displayName: string;
-  stats: PlayerStats;
-  rank: PlayerRank;
-  streak: number;
-  lastPlayedDate: string | null;
-  achievements: string[];
-  preferences: PlayerPreferences;
-  createdAt: string;
-  version: number;
-}
 
 /**
  * Generate a unique player ID
@@ -48,22 +26,7 @@ function generatePlayerId(): string {
   return `player_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
-/**
- * Get today's date in YYYY-MM-DD format
- */
-export function getTodayDate(): string {
-  return new Date().toISOString().split('T')[0];
-}
-
-/**
- * Calculate days between two date strings (YYYY-MM-DD format)
- */
-function daysBetween(date1: string, date2: string): number {
-  const d1 = new Date(date1);
-  const d2 = new Date(date2);
-  const diffTime = Math.abs(d2.getTime() - d1.getTime());
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-}
+// getTodayDate and daysBetween imported from '@/shared/utils/dateUtils'
 
 /**
  * Create default player stats

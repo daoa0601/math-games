@@ -3,17 +3,10 @@
  * Defines player ranks based on games played and puzzles solved
  */
 
-import type { PlayerStats } from './player';
+import type { PlayerStats, PlayerRank } from '../schemas/playerProfile.schema';
 
-export type PlayerRank =
-  | 'beginner'
-  | 'learner'
-  | 'apprentice'
-  | 'intermediate'
-  | 'advanced'
-  | 'expert'
-  | 'master'
-  | 'grandmaster';
+// Re-export PlayerRank for backwards compatibility
+export type { PlayerRank };
 
 export interface RankThreshold {
   rank: PlayerRank;

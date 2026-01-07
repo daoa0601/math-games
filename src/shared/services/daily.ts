@@ -28,6 +28,7 @@ import {
   type GameStreak,
 } from '../utils/schemas';
 import { DAILY_CHALLENGE_KEY } from '../constants';
+import { daysBetween } from '../utils/dateUtils';
 import { getTodaySeed } from '../utils/seededRandom';
 
 // ============================================================================
@@ -289,9 +290,9 @@ function updateGameStreak(
     return { streak: currentStreak, increased: false };
   }
 
-  const daysBetween = getDaysBetween(lastCompletedDate, completionDate);
+  const daysDiff = daysBetween(lastCompletedDate, completionDate);
 
-  if (daysBetween === 1) {
+  if (daysDiff === 1) {
     // Consecutive day - increase streak
     const newCurrentStreak = currentStreak.currentStreak + 1;
     const newStreak: GameStreak = {
@@ -311,15 +312,7 @@ function updateGameStreak(
   return { streak: newStreak, increased: false };
 }
 
-/**
- * Calculate days between two dates (YYYY-MM-DD format)
- */
-function getDaysBetween(date1: string, date2: string): number {
-  const d1 = new Date(date1 + 'T00:00:00');
-  const d2 = new Date(date2 + 'T00:00:00');
-  const diffTime = Math.abs(d2.getTime() - d1.getTime());
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-}
+// daysBetween imported from '@/shared/utils/dateUtils'
 
 /**
  * Remove completions older than MAX_HISTORY_DAYS
