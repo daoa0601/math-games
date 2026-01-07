@@ -48,9 +48,10 @@ export {
 
 // Seeded Generator
 export {
-    generateSeededLevel,
     getDailyShapeArchitectLevel,
     previewDailyLevel,
+    generateCohesivePuzzle,
+    generateGuaranteedSolvableWithRetry,
 } from './seededGenerator';
 
 // Solver

@@ -564,20 +564,6 @@ export function generateGuaranteedSolvableWithRetry(
 }
 
 // ============================================================================
-// Legacy Function (kept for backwards compatibility)
-// ============================================================================
-
-/**
- * @deprecated Use generateCohesivePuzzle instead
- */
-export function generateGuaranteedSolvable(
-  rng: SeededRandom,
-  difficulty: 'easy' | 'medium' | 'hard' = 'medium'
-): LevelConfig | null {
-  return generateCohesivePuzzle(rng, difficulty);
-}
-
-// ============================================================================
 // Fallback Preset Selection
 // ============================================================================
 

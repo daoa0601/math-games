@@ -4,7 +4,6 @@ import {
   previewDailyLevel,
   GENERATOR_CONSTANTS,
   generateValidatedLevelForTesting,
-  generateGuaranteedSolvable,
   generateGuaranteedSolvableWithRetry,
   generateCohesivePuzzle,
 } from '../seededGenerator';
@@ -290,88 +289,6 @@ describe('Solvability Stress Test', () => {
 
     expect(unsolvable.length).toBe(0);
   }, 180000);
-});
-
-// ========================================
-// Cohesive Shape Generator Tests
-// ========================================
-
-describe('generateGuaranteedSolvable (legacy)', () => {
-  it('generates levels that are solvable when successful', () => {
-    const seeds = ['test-1', 'test-2', 'test-3'];
-
-    for (const seed of seeds) {
-      const rng = createSeededRandom(seed);
-      const level = generateGuaranteedSolvable(rng, 'easy');
-
-      if (level) {
-        const result = solvePuzzle(level, 5000);
-        expect(result.solvable).toBe(true);
-      }
-    }
-  }, 30000);
-
-  it('generates correct piece counts by difficulty', () => {
-    const expectedRanges = {
-      easy: [3, 4],
-      medium: [5, 6],
-      hard: [7, 8],
-    };
-
-    for (const difficulty of ['easy', 'medium', 'hard'] as const) {
-      const rng = createSeededRandom(`count-${difficulty}`);
-      const level = generateGuaranteedSolvable(rng, difficulty);
-
-      if (level) {
-        const [min, max] = expectedRanges[difficulty];
-        expect(level.pieces.length).toBeGreaterThanOrEqual(min);
-        expect(level.pieces.length).toBeLessThanOrEqual(max);
-      }
-    }
-  });
-
-  it('all pieces are connected (at least 2 cells each)', () => {
-    const rng = createSeededRandom('connected-test');
-    const level = generateGuaranteedSolvable(rng, 'medium');
-
-    if (level) {
-      for (const piece of level.pieces) {
-        expect(piece.layout.length).toBeGreaterThanOrEqual(2);
-      }
-    }
-  });
-
-  it('target voxels match total piece volume', () => {
-    const rng = createSeededRandom('volume-test');
-    const level = generateGuaranteedSolvable(rng, 'medium');
-
-    if (level) {
-      const pieceVolume = level.pieces.reduce((sum, p) => sum + p.layout.length, 0);
-      const targetVolume = level.targetVoxels.length;
-
-      expect(targetVolume).toBe(pieceVolume);
-    }
-  });
-
-  it('generates reproducible levels with same seed', () => {
-    const seed = 'reproducible-guaranteed';
-
-    const rng1 = createSeededRandom(seed);
-    const rng2 = createSeededRandom(seed);
-
-    const level1 = generateGuaranteedSolvable(rng1, 'medium');
-    const level2 = generateGuaranteedSolvable(rng2, 'medium');
-
-    // Both should produce same result (either both null or both valid with same values)
-    if (level1 && level2) {
-      expect(level1.pieces.length).toBe(level2.pieces.length);
-      expect(level1.targetVoxels.length).toBe(level2.targetVoxels.length);
-      expect(level1.gridSize).toEqual(level2.gridSize);
-    } else {
-      // Both should be null if one is null (same seed = same result)
-      expect(level1).toEqual(level2);
-    }
-  });
 });
 
 describe('generateGuaranteedSolvableWithRetry', () => {
