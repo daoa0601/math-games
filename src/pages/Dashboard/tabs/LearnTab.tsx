@@ -37,6 +37,10 @@ const GAMES: GameCardConfig[] = [
  * Dashboard tab that displays game cards for learning about
  * the mathematical concepts behind each game.
  */
+// Convert kebab-case to camelCase for translation keys
+const toCamelCase = (s: string) =>
+  s.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+
 export function LearnTab() {
   const { t } = useTranslation();
   const [selectedGame, setSelectedGame] = useState<GameId | null>(null);
@@ -57,13 +61,13 @@ export function LearnTab() {
             className="learn-card"
             onClick={() => setSelectedGame(game.id)}
             style={{ '--card-accent': game.color } as React.CSSProperties}
-            aria-label={`${t(`games.${game.id.replace('-', '')}.title`)} - ${t(game.taglineKey)}`}
+            aria-label={`${t(`games.${toCamelCase(game.id)}.title`)} - ${t(game.taglineKey)}`}
           >
             <span className="learn-card__icon" aria-hidden="true">
               {game.icon}
             </span>
             <span className="learn-card__title">
-              {t(`games.${game.id.replace('-', '')}.title`)}
+              {t(`games.${toCamelCase(game.id)}.title`)}
             </span>
             <span className="learn-card__tagline">{t(game.taglineKey)}</span>
           </button>

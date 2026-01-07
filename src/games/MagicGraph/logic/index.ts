@@ -8,6 +8,7 @@ export type {
     LineStatus,
     LineWithStatus,
     Difficulty,
+    OptimizationGoal,
 } from './types';
 
 // Re-export functions

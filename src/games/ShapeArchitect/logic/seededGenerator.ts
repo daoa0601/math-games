@@ -1,8 +1,15 @@
 /**
  * Seeded Level Generator for ShapeArchitect
  *
- * Generates reproducible levels for daily challenges using seeded RNG.
- * Same seed always produces the same level configuration.
+ * Generates puzzles by starting with cohesive base shapes (squares, rectangles,
+ * L-shapes, T-shapes, etc.) and breaking them into multiple pieces.
+ * Difficulty is determined by the number of pieces.
+ *
+ * Algorithm:
+ * 1. Select a base shape template based on difficulty
+ * 2. Use region-growing to split the shape into N connected pieces
+ * 3. Convert pieces to game format
+ * 4. Validate and return
  *
  * @example
  * import { getDailyShapeArchitectLevel } from './seededGenerator';
@@ -11,198 +18,25 @@
  * // Always returns the same level for Jan 1, 2025
  */
 
-import type { LevelConfig, Piece, Position3D, Rotation3D, CellState } from './types';
+import type { LevelConfig, Piece, Position3D } from './types';
 import type { SeededRandom } from '@/shared/utils';
 import { createSeededRandom } from '@/shared/utils';
-import { solvePuzzle } from './solver';
 import { presetLevels } from './presets';
-import { getPieceWorldPositions, createGrid } from './engine';
 
 // ============================================================================
-// Piece Factories (inline to avoid circular deps with presets)
+// Types
 // ============================================================================
 
-type PieceFactory = (id: string, color: string) => Piece;
+interface BaseShape {
+  name: string;
+  cells: Position3D[];
+  minPieces: number;
+  maxPieces: number;
+}
 
-const TETRIS_FACTORIES: Record<string, PieceFactory> = {
-  I: (id, color) => ({
-    id,
-    name: 'I-Block',
-    color,
-    layout: [
-      { x: 0, y: 0, z: 0 },
-      { x: 1, y: 0, z: 0 },
-      { x: 2, y: 0, z: 0 },
-      { x: 3, y: 0, z: 0 },
-    ],
-  }),
-  O: (id, color) => ({
-    id,
-    name: 'O-Block',
-    color,
-    layout: [
-      { x: 0, y: 0, z: 0 },
-      { x: 1, y: 0, z: 0 },
-      { x: 0, y: 1, z: 0 },
-      { x: 1, y: 1, z: 0 },
-    ],
-  }),
-  T: (id, color) => ({
-    id,
-    name: 'T-Block',
-    color,
-    layout: [
-      { x: 0, y: 0, z: 0 },
-      { x: 1, y: 0, z: 0 },
-      { x: 2, y: 0, z: 0 },
-      { x: 1, y: 1, z: 0 },
-    ],
-  }),
-  S: (id, color) => ({
-    id,
-    name: 'S-Block',
-    color,
-    layout: [
-      { x: 1, y: 0, z: 0 },
-      { x: 2, y: 0, z: 0 },
-      { x: 0, y: 1, z: 0 },
-      { x: 1, y: 1, z: 0 },
-    ],
-  }),
-  Z: (id, color) => ({
-    id,
-    name: 'Z-Block',
-    color,
-    layout: [
-      { x: 0, y: 0, z: 0 },
-      { x: 1, y: 0, z: 0 },
-      { x: 1, y: 1, z: 0 },
-      { x: 2, y: 1, z: 0 },
-    ],
-  }),
-  J: (id, color) => ({
-    id,
-    name: 'J-Block',
-    color,
-    layout: [
-      { x: 0, y: 0, z: 0 },
-      { x: 0, y: 1, z: 0 },
-      { x: 1, y: 1, z: 0 },
-      { x: 2, y: 1, z: 0 },
-    ],
-  }),
-  L: (id, color) => ({
-    id,
-    name: 'L-Block',
-    color,
-    layout: [
-      { x: 2, y: 0, z: 0 },
-      { x: 0, y: 1, z: 0 },
-      { x: 1, y: 1, z: 0 },
-      { x: 2, y: 1, z: 0 },
-    ],
-  }),
-};
-
-// Pentomino factories (5 cells each) for harder levels
-const PENTOMINO_FACTORIES: Record<string, PieceFactory> = {
-  F: (id, color) => ({
-    id,
-    name: 'F-Pento',
-    color,
-    layout: [
-      { x: 1, y: 0, z: 0 },
-      { x: 2, y: 0, z: 0 },
-      { x: 0, y: 1, z: 0 },
-      { x: 1, y: 1, z: 0 },
-      { x: 1, y: 2, z: 0 },
-    ],
-  }),
-  P: (id, color) => ({
-    id,
-    name: 'P-Pento',
-    color,
-    layout: [
-      { x: 0, y: 0, z: 0 },
-      { x: 1, y: 0, z: 0 },
-      { x: 0, y: 1, z: 0 },
-      { x: 1, y: 1, z: 0 },
-      { x: 0, y: 2, z: 0 },
-    ],
-  }),
-  U: (id, color) => ({
-    id,
-    name: 'U-Pento',
-    color,
-    layout: [
-      { x: 0, y: 0, z: 0 },
-      { x: 2, y: 0, z: 0 },
-      { x: 0, y: 1, z: 0 },
-      { x: 1, y: 1, z: 0 },
-      { x: 2, y: 1, z: 0 },
-    ],
-  }),
-  W: (id, color) => ({
-    id,
-    name: 'W-Pento',
-    color,
-    layout: [
-      { x: 0, y: 0, z: 0 },
-      { x: 0, y: 1, z: 0 },
-      { x: 1, y: 1, z: 0 },
-      { x: 1, y: 2, z: 0 },
-      { x: 2, y: 2, z: 0 },
-    ],
-  }),
-  L: (id, color) => ({
-    id,
-    name: 'L-Pento',
-    color,
-    layout: [
-      { x: 0, y: 0, z: 0 },
-      { x: 0, y: 1, z: 0 },
-      { x: 0, y: 2, z: 0 },
-      { x: 0, y: 3, z: 0 },
-      { x: 1, y: 3, z: 0 },
-    ],
-  }),
-  N: (id, color) => ({
-    id,
-    name: 'N-Pento',
-    color,
-    layout: [
-      { x: 0, y: 0, z: 0 },
-      { x: 0, y: 1, z: 0 },
-      { x: 1, y: 1, z: 0 },
-      { x: 1, y: 2, z: 0 },
-      { x: 1, y: 3, z: 0 },
-    ],
-  }),
-  T: (id, color) => ({
-    id,
-    name: 'T-Pento',
-    color,
-    layout: [
-      { x: 0, y: 0, z: 0 },
-      { x: 1, y: 0, z: 0 },
-      { x: 2, y: 0, z: 0 },
-      { x: 1, y: 1, z: 0 },
-      { x: 1, y: 2, z: 0 },
-    ],
-  }),
-  Y: (id, color) => ({
-    id,
-    name: 'Y-Pento',
-    color,
-    layout: [
-      { x: 1, y: 0, z: 0 },
-      { x: 0, y: 1, z: 0 },
-      { x: 1, y: 1, z: 0 },
-      { x: 1, y: 2, z: 0 },
-      { x: 1, y: 3, z: 0 },
-    ],
-  }),
-};
+// ============================================================================
+// Constants
+// ============================================================================
 
 const PIECE_COLORS = [
   '#00BCD4', // Cyan
@@ -213,326 +47,496 @@ const PIECE_COLORS = [
   '#2196F3', // Blue
   '#FF9800', // Orange
   '#E91E63', // Pink
+  '#26A69A', // Teal
+  '#795548', // Brown
 ];
-
-// ============================================================================
-// Constants
-// ============================================================================
 
 /**
  * Piece count ranges by difficulty.
- * More pieces = more complex puzzle.
+ * More pieces = harder puzzle.
  */
 const PIECE_COUNT_RANGE: Record<'easy' | 'medium' | 'hard', [number, number]> = {
-  easy: [4, 5],
+  easy: [3, 4],
   medium: [5, 6],
-  hard: [6, 7],
+  hard: [7, 8],
 };
-
-/**
- * Validation timeout in milliseconds.
- * Fast enough for real-time generation while still being thorough.
- */
-const VALIDATION_TIMEOUT_MS = 2000;
 
 /**
  * Maximum retry attempts before falling back to preset.
  */
 const MAX_RETRY_ATTEMPTS = 10;
 
-/**
- * Piece mix ratios by difficulty.
- * Higher difficulties include more pentominoes (harder shapes).
- */
-const DIFFICULTY_PIECE_MIX: Record<'easy' | 'medium' | 'hard', { tetris: number; pento: number }> = {
-  easy: { tetris: 1.0, pento: 0.0 },    // 100% tetrominoes
-  medium: { tetris: 0.6, pento: 0.4 },  // 60% tetris, 40% pento
-  hard: { tetris: 0.3, pento: 0.7 },    // 30% tetris, 70% pento
-};
-
 // ============================================================================
-// Guaranteed Solvable Generator (Reverse Generation)
+// Base Shape Templates
 // ============================================================================
 
 /**
- * Generate all 4 rotations of a rotation state.
- * Used to try different orientations when placing pieces.
+ * Generate a rectangle shape.
  */
-function getAllZRotations(): Rotation3D[] {
-  return [
-    { x: 0, y: 0, z: 0 },
-    { x: 0, y: 0, z: 90 },
-    { x: 0, y: 0, z: 180 },
-    { x: 0, y: 0, z: 270 },
-  ];
+function createRectangle(width: number, height: number): Position3D[] {
+  const cells: Position3D[] = [];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      cells.push({ x, y, z: 0 });
+    }
+  }
+  return cells;
 }
 
 /**
- * Check if a position is adjacent to any occupied cell in the grid.
- * Adjacent means sharing a face (not diagonal).
+ * Generate an L-shape.
+ * Two rectangles joined at a corner.
  */
-function isAdjacentToOccupied(
-  grid: CellState[][][],
-  positions: Position3D[],
-  gridSize: [number, number, number]
-): boolean {
+function createLShape(armLength: number, armWidth: number): Position3D[] {
+  const cells: Position3D[] = [];
+  // Vertical arm
+  for (let y = 0; y < armLength; y++) {
+    for (let x = 0; x < armWidth; x++) {
+      cells.push({ x, y, z: 0 });
+    }
+  }
+  // Horizontal arm (extending right from bottom)
+  for (let x = armWidth; x < armLength; x++) {
+    for (let y = 0; y < armWidth; y++) {
+      cells.push({ x, y, z: 0 });
+    }
+  }
+  return cells;
+}
+
+/**
+ * Generate a T-shape.
+ */
+function createTShape(stemLength: number, topWidth: number, thickness: number): Position3D[] {
+  const cells: Position3D[] = [];
+  // Top bar
+  const topStart = Math.floor((topWidth - thickness) / 2);
+  for (let x = 0; x < topWidth; x++) {
+    for (let y = stemLength; y < stemLength + thickness; y++) {
+      cells.push({ x, y, z: 0 });
+    }
+  }
+  // Stem
+  for (let y = 0; y < stemLength; y++) {
+    for (let x = topStart; x < topStart + thickness; x++) {
+      cells.push({ x, y, z: 0 });
+    }
+  }
+  return cells;
+}
+
+/**
+ * Generate a plus/cross shape.
+ */
+function createPlusShape(armLength: number, thickness: number): Position3D[] {
+  const cells: Position3D[] = [];
+  const totalSize = armLength * 2 + thickness;
+
+  for (let y = 0; y < totalSize; y++) {
+    for (let x = 0; x < totalSize; x++) {
+      // Check if in horizontal arm or vertical arm
+      const inHorizontal = y >= armLength && y < armLength + thickness;
+      const inVertical = x >= armLength && x < armLength + thickness;
+      if (inHorizontal || inVertical) {
+        cells.push({ x, y, z: 0 });
+      }
+    }
+  }
+  return cells;
+}
+
+/**
+ * Generate a U-shape.
+ */
+function createUShape(width: number, height: number, thickness: number): Position3D[] {
+  const cells: Position3D[] = [];
+  // Left arm
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < thickness; x++) {
+      cells.push({ x, y, z: 0 });
+    }
+  }
+  // Right arm
+  for (let y = 0; y < height; y++) {
+    for (let x = width - thickness; x < width; x++) {
+      cells.push({ x, y, z: 0 });
+    }
+  }
+  // Bottom connecting bar
+  for (let x = thickness; x < width - thickness; x++) {
+    for (let y = 0; y < thickness; y++) {
+      cells.push({ x, y, z: 0 });
+    }
+  }
+  return cells;
+}
+
+/**
+ * Generate an H-shape.
+ */
+function createHShape(width: number, height: number, thickness: number): Position3D[] {
+  const cells: Position3D[] = [];
+  const midY = Math.floor((height - thickness) / 2);
+
+  // Left arm (full height)
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < thickness; x++) {
+      cells.push({ x, y, z: 0 });
+    }
+  }
+  // Right arm (full height)
+  for (let y = 0; y < height; y++) {
+    for (let x = width - thickness; x < width; x++) {
+      cells.push({ x, y, z: 0 });
+    }
+  }
+  // Middle connecting bar
+  for (let x = thickness; x < width - thickness; x++) {
+    for (let y = midY; y < midY + thickness; y++) {
+      cells.push({ x, y, z: 0 });
+    }
+  }
+  return cells;
+}
+
+/**
+ * Get base shapes appropriate for the given piece count.
+ * Larger shapes support more pieces.
+ */
+function getBaseShapes(pieceCount: number): BaseShape[] {
+  const shapes: BaseShape[] = [];
+
+  // Small shapes for 3-4 pieces
+  if (pieceCount <= 4) {
+    shapes.push({ name: '4x4 Square', cells: createRectangle(4, 4), minPieces: 3, maxPieces: 4 });
+    shapes.push({ name: '6x3 Rectangle', cells: createRectangle(6, 3), minPieces: 3, maxPieces: 4 });
+    shapes.push({ name: '8x2 Strip', cells: createRectangle(8, 2), minPieces: 3, maxPieces: 4 });
+    shapes.push({ name: 'Small L', cells: createLShape(4, 2), minPieces: 3, maxPieces: 4 });
+  }
+
+  // Medium shapes for 5-6 pieces
+  if (pieceCount >= 4 && pieceCount <= 6) {
+    shapes.push({ name: '5x5 Square', cells: createRectangle(5, 5), minPieces: 4, maxPieces: 6 });
+    shapes.push({ name: '6x4 Rectangle', cells: createRectangle(6, 4), minPieces: 4, maxPieces: 6 });
+    shapes.push({ name: '8x3 Rectangle', cells: createRectangle(8, 3), minPieces: 4, maxPieces: 6 });
+    shapes.push({ name: 'Medium L', cells: createLShape(5, 2), minPieces: 4, maxPieces: 6 });
+    shapes.push({ name: 'T-Shape', cells: createTShape(3, 5, 2), minPieces: 4, maxPieces: 6 });
+    shapes.push({ name: 'Plus Shape', cells: createPlusShape(2, 2), minPieces: 4, maxPieces: 6 });
+  }
+
+  // Large shapes for 7-8 pieces
+  if (pieceCount >= 6) {
+    shapes.push({ name: '6x6 Square', cells: createRectangle(6, 6), minPieces: 6, maxPieces: 9 });
+    shapes.push({ name: '8x4 Rectangle', cells: createRectangle(8, 4), minPieces: 6, maxPieces: 8 });
+    shapes.push({ name: '10x3 Rectangle', cells: createRectangle(10, 3), minPieces: 6, maxPieces: 8 });
+    shapes.push({ name: 'Large L', cells: createLShape(6, 2), minPieces: 5, maxPieces: 8 });
+    shapes.push({ name: 'Large T', cells: createTShape(4, 6, 2), minPieces: 5, maxPieces: 8 });
+    shapes.push({ name: 'Large Plus', cells: createPlusShape(3, 2), minPieces: 5, maxPieces: 8 });
+    shapes.push({ name: 'U-Shape', cells: createUShape(6, 4, 2), minPieces: 5, maxPieces: 8 });
+    shapes.push({ name: 'H-Shape', cells: createHShape(6, 5, 2), minPieces: 5, maxPieces: 8 });
+  }
+
+  // Filter to shapes that support the requested piece count
+  return shapes.filter(s => pieceCount >= s.minPieces && pieceCount <= s.maxPieces);
+}
+
+// ============================================================================
+// Shape Dissection Algorithm
+// ============================================================================
+
+/**
+ * Get adjacent cells (4-connected neighbors).
+ */
+function getNeighbors(pos: Position3D, cellSet: Set<string>): Position3D[] {
   const directions = [
     { x: 1, y: 0, z: 0 },
     { x: -1, y: 0, z: 0 },
     { x: 0, y: 1, z: 0 },
     { x: 0, y: -1, z: 0 },
-    { x: 0, y: 0, z: 1 },
-    { x: 0, y: 0, z: -1 },
   ];
 
-  for (const pos of positions) {
-    for (const dir of directions) {
-      const nx = pos.x + dir.x;
-      const ny = pos.y + dir.y;
-      const nz = pos.z + dir.z;
+  const neighbors: Position3D[] = [];
+  for (const dir of directions) {
+    const key = `${pos.x + dir.x},${pos.y + dir.y},${pos.z + dir.z}`;
+    if (cellSet.has(key)) {
+      neighbors.push({ x: pos.x + dir.x, y: pos.y + dir.y, z: pos.z + dir.z });
+    }
+  }
+  return neighbors;
+}
 
-      // Check bounds
-      if (nx >= 0 && nx < gridSize[0] &&
-          ny >= 0 && ny < gridSize[1] &&
-          nz >= 0 && nz < gridSize[2]) {
-        // Check if neighbor is occupied (value = 2)
-        if (grid[nx][ny][nz] === 2) {
-          return true;
-        }
+/**
+ * Check if a set of cells forms a connected region.
+ */
+function isConnected(cells: Position3D[]): boolean {
+  if (cells.length <= 1) return true;
+
+  const cellSet = new Set(cells.map(c => `${c.x},${c.y},${c.z}`));
+  const visited = new Set<string>();
+  const queue: Position3D[] = [cells[0]];
+  visited.add(`${cells[0].x},${cells[0].y},${cells[0].z}`);
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const neighbors = getNeighbors(current, cellSet);
+
+    for (const neighbor of neighbors) {
+      const key = `${neighbor.x},${neighbor.y},${neighbor.z}`;
+      if (!visited.has(key)) {
+        visited.add(key);
+        queue.push(neighbor);
       }
     }
   }
 
-  return false;
+  return visited.size === cells.length;
 }
 
 /**
- * Find all valid positions where a piece can be placed on a placement grid.
- * The placement grid tracks where pieces have been placed (for collision detection).
- *
- * @param requireAdjacent - If true, only return positions adjacent to already-placed pieces
+ * Position key helper.
  */
-function findValidPositions(
-  placementGrid: CellState[][][],
-  piece: Piece,
-  rotation: Rotation3D,
-  gridSize: [number, number, number],
-  requireAdjacent: boolean = false
-): Position3D[] {
-  const validPositions: Position3D[] = [];
-
-  // Only check z=0 for 2D puzzles
-  for (let x = 0; x < gridSize[0]; x++) {
-    for (let y = 0; y < gridSize[1]; y++) {
-      const pos: Position3D = { x, y, z: 0 };
-
-      // Check if we can place here using the placement grid
-      // We need custom logic since canPlacePiece expects target cells
-      const worldPositions = getPieceWorldPositions(piece, pos, rotation);
-
-      let canPlace = true;
-      for (const wp of worldPositions) {
-        // Check bounds
-        if (wp.x < 0 || wp.x >= gridSize[0] ||
-            wp.y < 0 || wp.y >= gridSize[1] ||
-            wp.z < 0 || wp.z >= gridSize[2]) {
-          canPlace = false;
-          break;
-        }
-        // Check collision with already-placed pieces (value > 1 means occupied)
-        if (placementGrid[wp.x][wp.y][wp.z] > 1) {
-          canPlace = false;
-          break;
-        }
-      }
-
-      // If requiring adjacency, check if any piece cell is adjacent to occupied cells
-      if (canPlace && requireAdjacent) {
-        canPlace = isAdjacentToOccupied(placementGrid, worldPositions, gridSize);
-      }
-
-      if (canPlace) {
-        validPositions.push(pos);
-      }
-    }
-  }
-
-  return validPositions;
+function posKey(pos: Position3D): string {
+  return `${pos.x},${pos.y},${pos.z}`;
 }
 
 /**
- * Place a piece on the placement grid.
- * Marks cells as occupied (value = 2) to track where pieces are placed.
+ * Parse position key back to Position3D.
  */
-function placePieceOnGrid(
-  grid: CellState[][][],
-  piece: Piece,
-  position: Position3D,
-  rotation: Rotation3D
-): void {
-  const worldPositions = getPieceWorldPositions(piece, position, rotation);
-  for (const pos of worldPositions) {
-    grid[pos.x][pos.y][pos.z] = 2; // Mark as placed
-  }
+function parseKey(key: string): Position3D {
+  const [x, y, z] = key.split(',').map(Number);
+  return { x, y, z };
 }
 
 /**
- * Extract all occupied positions from a placement grid.
- * Returns positions where value = 2 (piece was placed).
- */
-function extractOccupiedCells(grid: CellState[][][]): Position3D[] {
-  const occupied: Position3D[] = [];
-  for (let x = 0; x < grid.length; x++) {
-    for (let y = 0; y < grid[x].length; y++) {
-      for (let z = 0; z < grid[x][y].length; z++) {
-        if (grid[x][y][z] === 2) {
-          occupied.push({ x, y, z });
-        }
-      }
-    }
-  }
-  return occupied;
-}
-
-/**
- * Calculate the minimum bounding box for a set of positions.
- * Returns grid size with 1-cell padding on each side.
- */
-function calculateBoundingBox(positions: Position3D[]): [number, number, number] {
-  if (positions.length === 0) {
-    return [4, 4, 1];
-  }
-
-  const maxX = Math.max(...positions.map(p => p.x));
-  const maxY = Math.max(...positions.map(p => p.y));
-  const maxZ = Math.max(...positions.map(p => p.z));
-
-  // Add padding for the grid size
-  return [maxX + 2, maxY + 2, Math.max(1, maxZ + 1)];
-}
-
-/**
- * Select random pieces based on difficulty.
- * Easy = only tetrominoes, Medium = mixed, Hard = mostly pentominoes.
- */
-function selectRandomPieces(
-  rng: SeededRandom,
-  pieceCount: number,
-  difficulty: 'easy' | 'medium' | 'hard'
-): Piece[] {
-  const mix = DIFFICULTY_PIECE_MIX[difficulty];
-  const pieces: Piece[] = [];
-
-  const tetrisKeys = Object.keys(TETRIS_FACTORIES);
-  const pentoKeys = Object.keys(PENTOMINO_FACTORIES);
-
-  // Shuffle both pools
-  const shuffledTetris = rng.shuffle(tetrisKeys);
-  const shuffledPento = rng.shuffle(pentoKeys);
-
-  let tetrisIndex = 0;
-  let pentoIndex = 0;
-
-  for (let i = 0; i < pieceCount; i++) {
-    const color = PIECE_COLORS[i % PIECE_COLORS.length];
-
-    // Decide whether to pick tetromino or pentomino
-    const usePento = rng.next() < mix.pento;
-
-    if (usePento && pentoIndex < shuffledPento.length) {
-      const key = shuffledPento[pentoIndex % shuffledPento.length];
-      pieces.push(PENTOMINO_FACTORIES[key](`p${i}`, color));
-      pentoIndex++;
-    } else {
-      const key = shuffledTetris[tetrisIndex % shuffledTetris.length];
-      pieces.push(TETRIS_FACTORIES[key](`p${i}`, color));
-      tetrisIndex++;
-    }
-  }
-
-  return pieces;
-}
-
-/**
- * Generate a guaranteed-solvable level using reverse generation.
+ * Split a shape into N connected pieces using region-growing.
  *
  * Algorithm:
- * 1. Select N random pieces based on difficulty
- * 2. Create a large empty grid
- * 3. Place each piece in a valid random position with random rotation
- * 4. Extract occupied cells as the target shape
- * 5. Return level with shuffled pieces (so solution isn't obvious)
+ * 1. Select N random seed points spread across the shape
+ * 2. Grow regions from each seed by claiming neighboring cells
+ * 3. Continue until all cells are assigned
+ * 4. Validate that each region is connected
  *
- * Since we actually placed the pieces, we know they fit - guaranteed solvable!
+ * @returns Array of cell arrays (one per piece), or null if dissection fails
  */
-export function generateGuaranteedSolvable(
+function dissectShape(
+  cells: Position3D[],
+  numPieces: number,
+  rng: SeededRandom
+): Position3D[][] | null {
+  if (cells.length < numPieces) return null;
+
+  const cellSet = new Set(cells.map(c => posKey(c)));
+  const assigned = new Map<string, number>(); // cell -> region index
+  const regions: Set<string>[] = Array.from({ length: numPieces }, () => new Set());
+  const frontiers: Set<string>[] = Array.from({ length: numPieces }, () => new Set());
+
+  // Select seed points spread across the shape
+  const shuffledCells = rng.shuffle([...cells]);
+
+  for (let i = 0; i < numPieces && i < shuffledCells.length; i++) {
+    // Pick the i-th cell from shuffled list as seed
+    const seed = shuffledCells[i];
+    const key = posKey(seed);
+    regions[i].add(key);
+    assigned.set(key, i);
+
+    // Add neighbors to frontier
+    const neighbors = getNeighbors(seed, cellSet);
+    for (const n of neighbors) {
+      const nKey = posKey(n);
+      if (!assigned.has(nKey)) {
+        frontiers[i].add(nKey);
+      }
+    }
+  }
+
+  // Region growing: each region claims cells from its frontier
+  let maxIterations = cells.length * 2;
+  while (assigned.size < cells.length && maxIterations-- > 0) {
+    // Find regions that still have frontier cells
+    const activeRegions = regions
+      .map((_, i) => i)
+      .filter(i => frontiers[i].size > 0);
+
+    if (activeRegions.length === 0) break;
+
+    // Each active region claims one cell from its frontier
+    const shuffledActive = rng.shuffle(activeRegions);
+
+    for (const regionIdx of shuffledActive) {
+      if (frontiers[regionIdx].size === 0) continue;
+
+      // Convert frontier to array and pick one randomly
+      const frontierArray = Array.from(frontiers[regionIdx]);
+      const candidateKey = rng.pick(frontierArray);
+      frontiers[regionIdx].delete(candidateKey);
+
+      // Skip if already assigned (another region claimed it)
+      if (assigned.has(candidateKey)) continue;
+
+      // Check if assigning this cell would leave other regions unable to grow
+      // (Simple heuristic: ensure remaining unassigned cells stay connected)
+      const candidate = parseKey(candidateKey);
+
+      // Assign the cell
+      regions[regionIdx].add(candidateKey);
+      assigned.set(candidateKey, regionIdx);
+
+      // Add new neighbors to frontier
+      const neighbors = getNeighbors(candidate, cellSet);
+      for (const n of neighbors) {
+        const nKey = posKey(n);
+        if (!assigned.has(nKey)) {
+          frontiers[regionIdx].add(nKey);
+        }
+      }
+    }
+  }
+
+  // Check if all cells were assigned
+  if (assigned.size !== cells.length) {
+    // Assign remaining cells to nearest regions
+    for (const cell of cells) {
+      const key = posKey(cell);
+      if (!assigned.has(key)) {
+        // Find adjacent assigned cell and join its region
+        const neighbors = getNeighbors(cell, cellSet);
+        for (const n of neighbors) {
+          const nKey = posKey(n);
+          if (assigned.has(nKey)) {
+            const regionIdx = assigned.get(nKey)!;
+            regions[regionIdx].add(key);
+            assigned.set(key, regionIdx);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // Convert regions to arrays and validate connectivity
+  const result: Position3D[][] = [];
+  for (const region of regions) {
+    const regionCells = Array.from(region).map(k => parseKey(k));
+    if (regionCells.length === 0) return null; // Empty region = failure
+    if (!isConnected(regionCells)) return null; // Disconnected = failure
+    result.push(regionCells);
+  }
+
+  // Ensure minimum piece size (at least 2 cells per piece)
+  // This allows for more flexible dissection while keeping pieces meaningful
+  const minSize = 2;
+  if (result.some(r => r.length < minSize)) {
+    return null;
+  }
+
+  return result;
+}
+
+// ============================================================================
+// Piece Conversion
+// ============================================================================
+
+/**
+ * Normalize a piece's layout to start at origin (0,0,0).
+ */
+function normalizeLayout(cells: Position3D[]): Position3D[] {
+  if (cells.length === 0) return cells;
+
+  const minX = Math.min(...cells.map(c => c.x));
+  const minY = Math.min(...cells.map(c => c.y));
+  const minZ = Math.min(...cells.map(c => c.z));
+
+  return cells.map(c => ({
+    x: c.x - minX,
+    y: c.y - minY,
+    z: c.z - minZ,
+  }));
+}
+
+/**
+ * Convert dissected regions to Piece objects.
+ */
+function convertToPieces(regions: Position3D[][], rng: SeededRandom): Piece[] {
+  const shuffledColors = rng.shuffle([...PIECE_COLORS]);
+
+  return regions.map((region, i) => ({
+    id: `piece_${i}`,
+    name: `Piece ${i + 1}`,
+    color: shuffledColors[i % shuffledColors.length],
+    layout: normalizeLayout(region),
+  }));
+}
+
+// ============================================================================
+// Level Generation
+// ============================================================================
+
+/**
+ * Calculate the bounding box of a shape and add padding.
+ */
+function calculateGridSize(cells: Position3D[]): [number, number, number] {
+  if (cells.length === 0) return [4, 4, 1];
+
+  const maxX = Math.max(...cells.map(c => c.x));
+  const maxY = Math.max(...cells.map(c => c.y));
+  const maxZ = Math.max(...cells.map(c => c.z));
+
+  // Add 2 cells padding on each side
+  return [maxX + 3, maxY + 3, Math.max(1, maxZ + 1)];
+}
+
+/**
+ * Offset cells to center them in the grid (with padding).
+ */
+function centerShape(cells: Position3D[]): Position3D[] {
+  // Add 1 cell offset to create border around the shape
+  return cells.map(c => ({
+    x: c.x + 1,
+    y: c.y + 1,
+    z: c.z,
+  }));
+}
+
+/**
+ * Generate a puzzle by selecting a cohesive shape and breaking it into pieces.
+ *
+ * @returns LevelConfig or null if generation fails
+ */
+export function generateCohesivePuzzle(
   rng: SeededRandom,
-  difficulty: 'easy' | 'medium' | 'hard' = 'medium'
+  difficulty: 'easy' | 'medium' | 'hard'
 ): LevelConfig | null {
-  // 1. Determine piece count
+  // 1. Determine piece count based on difficulty
   const [minPieces, maxPieces] = PIECE_COUNT_RANGE[difficulty];
   const pieceCount = rng.nextInt(minPieces, maxPieces);
 
-  // 2. Select random pieces
-  const pieces = selectRandomPieces(rng, pieceCount, difficulty);
+  // 2. Select a base shape appropriate for this piece count
+  const availableShapes = getBaseShapes(pieceCount);
+  if (availableShapes.length === 0) return null;
 
-  // 3. Calculate grid size based on total cells
-  const totalCells = pieces.reduce((sum, p) => sum + p.layout.length, 0);
-  // Make grid larger to give room for interesting shapes
-  const baseSize = Math.ceil(Math.sqrt(totalCells * 2.5));
-  const gridSize: [number, number, number] = [baseSize + 4, baseSize + 4, 1];
+  const baseShape = rng.pick(availableShapes);
 
-  // 4. Create placement grid and place pieces
-  const placementGrid = createGrid(gridSize);
-  const rotations = getAllZRotations();
+  // 3. Dissect the shape into pieces
+  const regions = dissectShape(baseShape.cells, pieceCount, rng);
+  if (!regions) return null;
 
-  let isFirstPiece = true;
-  for (const piece of pieces) {
-    // Try random rotations until we find a valid placement
-    const shuffledRotations = rng.shuffle([...rotations]);
-    let placed = false;
+  // 4. Convert regions to pieces
+  const pieces = convertToPieces(regions, rng);
 
-    for (const rotation of shuffledRotations) {
-      // After first piece, require adjacency to create unified shape
-      const validPositions = findValidPositions(
-        placementGrid,
-        piece,
-        rotation,
-        gridSize,
-        !isFirstPiece // requireAdjacent = true after first piece
-      );
+  // Shuffle pieces so solution order isn't obvious
+  const shuffledPieces = rng.shuffle(pieces);
 
-      if (validPositions.length > 0) {
-        // Pick a random valid position
-        const position = rng.pick(validPositions);
-        placePieceOnGrid(placementGrid, piece, position, rotation);
-        placed = true;
-        isFirstPiece = false;
-        break;
-      }
-    }
-
-    if (!placed) {
-      // Failed to place this piece - return null to trigger retry
-      return null;
-    }
-  }
-
-  // 5. Extract target voxels from placed pieces
-  const targetVoxels = extractOccupiedCells(placementGrid);
-
-  // 6. Calculate tight bounding box
-  const finalGridSize = calculateBoundingBox(targetVoxels);
-
-  // 7. Shuffle pieces so solution order isn't obvious
-  const shuffledPieces = rng.shuffle([...pieces]);
+  // 5. Calculate grid size and center the shape
+  const centeredCells = centerShape(baseShape.cells);
+  const gridSize = calculateGridSize(centeredCells);
 
   return {
-    id: `guaranteed_${rng.seed}`,
-    name: `Puzzle ${pieceCount} Pieces`,
+    id: `cohesive_${rng.seed}`,
+    name: `${baseShape.name} (${pieceCount} pieces)`,
     type: '2D',
-    gridSize: finalGridSize,
-    targetVoxels,
+    gridSize,
+    targetVoxels: centeredCells,
     pieces: shuffledPieces,
     difficulty,
   };
@@ -547,7 +551,7 @@ export function generateGuaranteedSolvableWithRetry(
   difficulty: 'easy' | 'medium' | 'hard'
 ): LevelConfig {
   for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
-    const result = generateGuaranteedSolvable(rng, difficulty);
+    const result = generateCohesivePuzzle(rng, difficulty);
     if (result) {
       return result;
     }
@@ -565,17 +569,12 @@ export function generateGuaranteedSolvableWithRetry(
 
 /**
  * Get a fallback preset level matching the specified difficulty.
- * Uses seeded selection to ensure consistent fallback for the same seed.
- *
- * @param rng - Seeded random number generator for consistent selection
- * @param difficulty - Target difficulty level
- * @returns A preset level matching the difficulty
  */
 function getFallbackPreset(
   rng: SeededRandom,
   difficulty: 'easy' | 'medium' | 'hard'
 ): LevelConfig {
-  // Filter presets by difficulty (only 2D presets for now since generator is 2D)
+  // Filter presets by difficulty (only 2D presets)
   const matchingPresets = presetLevels.filter(
     (level) => level.difficulty === difficulty && level.type === '2D'
   );
@@ -589,119 +588,11 @@ function getFallbackPreset(
   // Use seeded selection for reproducibility
   const selected = rng.pick(candidates);
 
-  // Return a copy with modified ID to indicate it's a fallback
   return {
     ...selected,
     id: `daily_fallback_${rng.seed}`,
     name: `Daily Challenge (${selected.name})`,
   };
-}
-
-// ============================================================================
-// Seeded Generator Functions
-// ============================================================================
-
-/**
- * Generate a level using seeded randomness.
- * Produces the same level for the same seed.
- *
- * @param rng - Seeded random number generator
- * @param difficulty - Level difficulty (daily challenges use 'medium')
- * @returns Complete level configuration
- */
-export function generateSeededLevel(
-  rng: SeededRandom,
-  difficulty: 'easy' | 'medium' | 'hard' = 'medium'
-): LevelConfig {
-  // 1. Determine piece count using seeded RNG
-  const [minPieces, maxPieces] = PIECE_COUNT_RANGE[difficulty];
-  const pieceCount = rng.nextInt(minPieces, maxPieces);
-
-  // 2. Get all tetromino factories and shuffle with seeded RNG
-  const factoryKeys = Object.keys(TETRIS_FACTORIES);
-  const shuffledKeys = rng.shuffle(factoryKeys);
-
-  // 3. Create pieces with seeded selection
-  const pieces: Piece[] = [];
-  for (let i = 0; i < pieceCount; i++) {
-    const key = shuffledKeys[i % shuffledKeys.length];
-    const factory = TETRIS_FACTORIES[key];
-    const color = PIECE_COLORS[i % PIECE_COLORS.length];
-    pieces.push(factory(`p${i}`, color));
-  }
-
-  // 4. Calculate target area dimensions
-  const totalCells = pieces.reduce((sum, p) => sum + p.layout.length, 0);
-  const width = Math.ceil(Math.sqrt(totalCells * 1.3));
-  const height = Math.ceil(totalCells / width);
-
-  // 5. Create rectangular target voxels
-  const targetVoxels: Position3D[] = [];
-  let cellsAdded = 0;
-  for (let y = 1; y <= height && cellsAdded < totalCells; y++) {
-    for (let x = 1; x <= width && cellsAdded < totalCells; x++) {
-      targetVoxels.push({ x, y, z: 0 });
-      cellsAdded++;
-    }
-  }
-
-  return {
-    id: `daily_${rng.seed}`,
-    name: `Daily ${pieceCount} Pieces`,
-    type: '2D',
-    gridSize: [width + 3, height + 3, 1] as [number, number, number],
-    targetVoxels,
-    pieces,
-    difficulty,
-  };
-}
-
-// ============================================================================
-// Level Validation
-// ============================================================================
-
-/**
- * Generate a validated level with retry logic.
- * Attempts to generate a solvable level, retrying with modified seeds if needed.
- *
- * @param baseSeed - Base seed string for generation
- * @param difficulty - Target difficulty level
- * @returns A validated level config (either generated or fallback preset)
- */
-function generateValidatedLevel(
-  baseSeed: string,
-  difficulty: 'easy' | 'medium' | 'hard'
-): LevelConfig {
-  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
-    // Create seed with attempt suffix for retries
-    const seed = attempt === 0 ? baseSeed : `${baseSeed}-retry${attempt}`;
-    const rng = createSeededRandom(seed);
-
-    const level = generateSeededLevel(rng, difficulty);
-
-    // Validate the generated level
-    const result = solvePuzzle(level, VALIDATION_TIMEOUT_MS);
-
-    if (result.solvable) {
-      // Definitely solvable, return it
-      return level;
-    }
-
-    if (result.timedOut) {
-      // Solver timed out - for complex puzzles, we can't be certain
-      // Continue trying to find a definitively solvable level
-      // But if we exhaust retries, this is better than nothing
-      continue;
-    }
-
-    // result.solvable === false && !result.timedOut means definitively unsolvable
-    // Continue to next attempt
-  }
-
-  // All retries exhausted, fall back to a preset level
-  // Presets are pre-validated, so they're guaranteed solvable
-  const fallbackRng = createSeededRandom(baseSeed);
-  return getFallbackPreset(fallbackRng, difficulty);
 }
 
 // ============================================================================
@@ -711,7 +602,7 @@ function generateValidatedLevel(
 /**
  * Get today's daily challenge level for ShapeArchitect.
  * Always returns the same level for the same date.
- * Validates that the generated level is solvable, with retry and fallback logic.
+ * Uses cohesive shape generation for interesting puzzles.
  *
  * @param date - Date string in YYYY-MM-DD format (defaults to today)
  * @returns Level config for daily challenge (guaranteed solvable)
@@ -719,9 +610,10 @@ function generateValidatedLevel(
 export function getDailyShapeArchitectLevel(date?: string): LevelConfig {
   const dateStr = date ?? new Date().toISOString().split('T')[0];
   const baseSeed = `${dateStr}-shape-architect`;
+  const rng = createSeededRandom(baseSeed);
 
   // Daily challenges are always medium difficulty
-  return generateValidatedLevel(baseSeed, 'medium');
+  return generateGuaranteedSolvableWithRetry(rng, 'medium');
 }
 
 /**
@@ -745,28 +637,17 @@ export function previewDailyLevel(daysFromNow: number = 0): LevelConfig {
  * Exported constants for testing purposes.
  */
 export const GENERATOR_CONSTANTS = {
-  VALIDATION_TIMEOUT_MS,
   MAX_RETRY_ATTEMPTS,
+  PIECE_COUNT_RANGE,
 } as const;
 
 /**
  * Generate a validated level directly (for testing).
- * Exposes the internal generateValidatedLevel function.
  */
-export { generateValidatedLevel as generateValidatedLevelForTesting };
-
-// ============================================================================
-// 3D Support Status
-// ============================================================================
-
-/**
- * NOTE: The current seeded generator only produces 2D levels (z=0).
- *
- * To support 3D daily challenges, the generator would need to be extended to:
- * 1. Use 3D polycube pieces (from presets.ts POLYCUBE_3D)
- * 2. Generate 3D target voxels with z > 0
- * 3. Set level type to '3D' for proper solver rotation handling
- *
- * For now, 3D puzzles are only available through preset levels.
- * The fallback mechanism will use 2D presets for daily challenges.
- */
+export function generateValidatedLevelForTesting(
+  baseSeed: string,
+  difficulty: 'easy' | 'medium' | 'hard'
+): LevelConfig {
+  const rng = createSeededRandom(baseSeed);
+  return generateGuaranteedSolvableWithRetry(rng, difficulty);
+}

@@ -3,11 +3,11 @@
 // Now with mathematical sequences!
 // ========================================
 
-import type { GameConfig } from './types';
+import type { GameConfig, SequenceType } from './types';
 import { validateAllPresets, type FairnessResult } from './engine';
 
-// Sequence types for educational value
-export type SequenceType = 'arithmetic' | 'geometric' | 'fibonacci' | 'prime' | 'square' | 'triangular' | 'powers3';
+// Re-export SequenceType for consumers who import from presets
+export type { SequenceType } from './types';
 
 export interface SequenceInfo {
     type: SequenceType;
