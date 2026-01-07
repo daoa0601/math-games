@@ -6,13 +6,13 @@ import { presetLevels } from '../../logic/presets';
 describe('useShapeArchitectState', () => {
     it('initializes with random level of selected difficulty', () => {
         const { result } = renderHook(() => useShapeArchitectState());
-        // Guaranteed-solvable levels have IDs starting with 'guaranteed_'
-        expect(result.current.gameState.level.id).toMatch(/^guaranteed_/);
+        // Cohesive shape levels have IDs starting with 'cohesive_'
+        expect(result.current.gameState.level.id).toMatch(/^cohesive_/);
         expect(result.current.gameState.level.difficulty).toBe('easy');
         expect(result.current.gameState.isSolved).toBe(false);
         // Easy difficulty should have 3-4 pieces
         expect(result.current.gameState.level.pieces.length).toBeGreaterThanOrEqual(3);
-        expect(result.current.gameState.level.pieces.length).toBeLessThanOrEqual(5);
+        expect(result.current.gameState.level.pieces.length).toBeLessThanOrEqual(4);
     });
 
     it('auto-selects first piece on level load', () => {
@@ -56,13 +56,13 @@ describe('useShapeArchitectState', () => {
         });
 
         expect(result.current.difficulty).toBe('medium');
-        // Guaranteed-solvable level ID should start with 'guaranteed_'
-        expect(result.current.gameState.level.id).toMatch(/^guaranteed_/);
+        // Cohesive shape level ID should start with 'cohesive_'
+        expect(result.current.gameState.level.id).toMatch(/^cohesive_/);
         // Level ID should have changed
         expect(result.current.gameState.level.id).not.toBe(initialLevelId);
         // Medium difficulty should have 5-6 pieces
         expect(result.current.gameState.level.pieces.length).toBeGreaterThanOrEqual(5);
-        expect(result.current.gameState.level.pieces.length).toBeLessThanOrEqual(7);
+        expect(result.current.gameState.level.pieces.length).toBeLessThanOrEqual(6);
     });
 
     it('auto-switches viewMode to 3d for 3D levels', () => {

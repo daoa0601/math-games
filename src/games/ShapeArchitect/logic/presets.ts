@@ -1061,19 +1061,19 @@ export const presetLevels: LevelConfig[] = [
 // ========================================
 
 /**
- * Generate a random guaranteed-solvable level.
+ * Generate a random guaranteed-solvable level using cohesive shapes.
  *
- * Uses reverse generation algorithm:
- * 1. Select random pieces based on difficulty
- * 2. Place them on a grid in valid positions
- * 3. Extract occupied cells as the target shape
+ * Algorithm:
+ * 1. Select a cohesive base shape (square, rectangle, L, T, plus, etc.)
+ * 2. Use region-growing to split the shape into N connected pieces
+ * 3. Return the puzzle with pieces that exactly reconstruct the shape
  *
- * Since we place pieces first, the puzzle is always solvable!
+ * Since we split an actual shape into pieces, the puzzle is always solvable!
  *
- * Difficulty affects both piece count and piece types:
- * - Easy: 3-4 tetrominoes only
- * - Medium: 5-6 pieces, mix of tetrominoes and pentominoes
- * - Hard: 6-7 pieces, mostly pentominoes
+ * Difficulty determines piece count:
+ * - Easy: 3-4 pieces
+ * - Medium: 5-6 pieces
+ * - Hard: 7-8 pieces
  */
 export function generateRandomLevel(difficulty: 'easy' | 'medium' | 'hard'): LevelConfig {
     // Create unique seed from timestamp + random for variety
