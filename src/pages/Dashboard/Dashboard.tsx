@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { usePlayer } from '@/shared/contexts';
+import { usePlayer, useAuthAPI } from '@/shared/contexts';
 import { BottomNav, type NavTabId } from '@/shared/components/layout';
 import { SkipLinks } from '@/shared/components';
 import { CompactHeader } from './CompactHeader';
@@ -8,6 +8,7 @@ import './Dashboard.css';
 
 export function Dashboard() {
   const { profile, currentRankInfo, checkStreak } = usePlayer();
+  const { logout } = useAuthAPI();
   const [activeTab, setActiveTab] = useState<NavTabId>('home');
 
   // Check streak on mount
@@ -23,6 +24,7 @@ export function Dashboard() {
           profile={profile}
           rankInfo={currentRankInfo}
           streak={profile.streak}
+          onLogout={logout}
         />
         <main id="dashboard-main" tabIndex={-1}>
           {activeTab === 'home' && <PlayTab />}

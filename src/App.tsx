@@ -1,8 +1,10 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Dashboard } from './pages';
-import { PlayerProvider } from './shared/contexts';
+import { Login } from './pages/Login';
+import { PlayerProvider, AuthProvider, useAuthState } from './shared/contexts';
 import { ErrorBoundary } from './shared/components';
+import type { PlayerProfile } from './shared/services/player';
 import './index.css';
 
 // Lazy load game components for code splitting
@@ -43,20 +45,49 @@ function LoadingSpinner() {
   );
 }
 
-function App() {
+// Protected routes - only accessible when logged in
+function ProtectedRoutes() {
+  const { isLoggedIn, isLoading } = useAuthState();
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!isLoggedIn) {
+    return <Login />;
+  }
+
   return (
-    <PlayerProvider>
-      <BrowserRouter basename={import.meta.env.BASE_URL}>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/magic-graph" element={<ErrorBoundary><MagicGraphGame /></ErrorBoundary>} />
-            <Route path="/sequence-race" element={<ErrorBoundary><SequenceRaceGame /></ErrorBoundary>} />
-            <Route path="/shape-architect" element={<ErrorBoundary><ShapeArchitectGame /></ErrorBoundary>} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </PlayerProvider>
+    <Suspense fallback={<LoadingSpinner />}>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/magic-graph" element={<ErrorBoundary><MagicGraphGame /></ErrorBoundary>} />
+        <Route path="/sequence-race" element={<ErrorBoundary><SequenceRaceGame /></ErrorBoundary>} />
+        <Route path="/shape-architect" element={<ErrorBoundary><ShapeArchitectGame /></ErrorBoundary>} />
+      </Routes>
+    </Suspense>
+  );
+}
+
+function App() {
+  const [serverProfile, setServerProfile] = useState<PlayerProfile | null>(null);
+
+  const handleLogin = useCallback((profile: PlayerProfile) => {
+    setServerProfile(profile);
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    setServerProfile(null);
+  }, []);
+
+  return (
+    <AuthProvider onLogin={handleLogin} onLogout={handleLogout}>
+      <PlayerProvider initialProfile={serverProfile}>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
+          <ProtectedRoutes />
+        </BrowserRouter>
+      </PlayerProvider>
+    </AuthProvider>
   );
 }
 
