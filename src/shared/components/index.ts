@@ -17,6 +17,10 @@ export * from './Tutorial';
 export { LearnModal } from './LearnModal';
 export type { GameId } from './LearnModal';
 
+// Feedback Modal
+export { FeedbackModal } from './FeedbackModal';
+export type { FeedbackModalProps } from './FeedbackModal';
+
 // Overlays
 export { GameOverlay } from './overlays';
 export type { GameOverlayProps } from './overlays';
