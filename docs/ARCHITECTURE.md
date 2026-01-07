@@ -43,7 +43,8 @@ math-gymnasium/
 │   │       └── tabs/
 │   │           ├── PlayTab.tsx
 │   │           ├── StatsTab.tsx
-│   │           └── AchievementsTab.tsx
+│   │           ├── AchievementsTab.tsx
+│   │           └── LearnTab.tsx
 │   │
 │   ├── shared/
 │   │   ├── components/         # Reusable UI
@@ -292,9 +293,9 @@ Respects `prefers-reduced-motion` media query.
 
 ## Theme System
 
-### Dark/Light Mode Architecture
+### Dark-First Design
 
-The app supports system and manual theme switching:
+The app uses a **Linear Editorial** design optimized for dark mode. While `ThemeContext` provides light/dark switching capability, the design system prioritizes the dark palette.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -320,19 +321,16 @@ The app supports system and manual theme switching:
 
 ### CSS Custom Properties
 
-Theme colors are defined in `src/index.css`:
+Theme colors are defined in `src/index.css` with the dark palette as default:
 
 ```css
 :root {
-  --bg-primary: hsl(0, 0%, 98%);
-  --bg-secondary: hsl(0, 0%, 95%);
-  --text-primary: hsl(0, 0%, 10%);
-}
-
-[data-theme="dark"] {
-  --bg-primary: hsl(220, 20%, 12%);
-  --bg-secondary: hsl(220, 18%, 16%);
-  --text-primary: hsl(0, 0%, 95%);
+  --bg: #0a0f1a;        /* Deep navy base */
+  --surface: #111827;   /* Card backgrounds */
+  --border: #1e3a5f;    /* Blue-tinted borders */
+  --text: #f8fafc;      /* Warm white */
+  --muted: #64748b;     /* Slate gray */
+  --accent: #60a5fa;    /* Sky blue feedback */
 }
 ```
 
@@ -341,9 +339,10 @@ Theme colors are defined in `src/index.css`:
 Components use CSS variables for automatic theming:
 
 ```css
-.game-card {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+.slab {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 ```
 

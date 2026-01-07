@@ -6,7 +6,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '@/shared/contexts/usePlayerHooks';
-import { ACHIEVEMENTS, type AchievementCategory } from '@/shared/services/achievements';
+import { ACHIEVEMENTS, type AchievementCategory } from '@/shared/services';
 import './AchievementsTab.css';
 
 const CATEGORY_ICONS: Record<AchievementCategory, string> = {

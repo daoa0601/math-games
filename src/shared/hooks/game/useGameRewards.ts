@@ -9,7 +9,7 @@
 
 import { useCallback, useState } from 'react';
 import { usePlayer } from '@/shared/contexts';
-import type { Achievement, AchievementContext, GameId } from '@/shared/services/achievements';
+import type { Achievement, AchievementContext, GameId } from '@/shared/services';
 import type { PlayerRank } from '@/shared/services/rank';
 import {
   completeLevelWithPB,

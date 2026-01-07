@@ -8,28 +8,25 @@ import { SequenceRaceLearn } from './content/SequenceRaceLearn';
 import { ShapeArchitectLearn } from './content/ShapeArchitectLearn';
 import './LearnModal.css';
 
-// Re-export for backwards compatibility with existing imports
-export type GameId = StorageGameId;
-
 export interface LearnModalProps {
-  gameId: GameId | null;
+  gameId: StorageGameId | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const GAME_TITLES: Record<GameId, string> = {
+const GAME_TITLES: Record<StorageGameId, string> = {
   'magic-graph': 'games.magicGraph.title',
   'sequence-race': 'games.sequenceRace.title',
   'shape-architect': 'games.shapeArchitect.title',
 };
 
-const GAME_ICONS: Record<GameId, string> = {
+const GAME_ICONS: Record<StorageGameId, string> = {
   'magic-graph': '✨',
   'sequence-race': '🏃',
   'shape-architect': '🏗️',
 };
 
-function LearnContent({ gameId, lang }: { gameId: GameId; lang: string }) {
+function LearnContent({ gameId, lang }: { gameId: StorageGameId; lang: string }) {
   switch (gameId) {
     case 'magic-graph':
       return <MagicGraphLearn lang={lang} />;

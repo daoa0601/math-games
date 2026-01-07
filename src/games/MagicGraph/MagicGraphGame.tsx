@@ -1,12 +1,9 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
 import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton } from '@/shared/components';
-import { useGameTimer, useGameRewards, useAnnounce, useFocusTrap } from '@/shared/hooks';
-import { usePlayer } from '@/shared/contexts';
+import { useGameTimer, useGameRewards, useGameInit, useAnnounce, useFocusTrap } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
-import { isDailyCompleted, completeDailyChallenge } from '@/shared/services/daily';
-import { shouldShowTutorial } from '@/shared/services/tutorialProgress';
+import { completeDailyChallenge } from '@/shared/services/daily';
 import { PuzzleBoard, NumberInventory, NumberPicker, TopologyEditor, MagicGraphTutorial } from './components';
 import type { PuzzleConfig, Difficulty, OptimizationGoal } from './logic/types';
 import { generatePuzzle, isPuzzleSolved, getLineStatus, findImpossibleLines, findBestStartingNode, deriveAlgebraicHints, findOptimalSums, checkOptimalSolution, calculateSumSearchRange } from './logic/solver';
@@ -24,16 +21,22 @@ interface PickerState {
 export function MagicGraphGame() {
     const { t } = useTranslation('magicGraph');
     const { t: tc } = useTranslation('common');
-    const [searchParams] = useSearchParams();
 
-    // Daily mode detection
-    const isDailyMode = searchParams.get('daily') === 'true';
-    const [dailyCompleted, setDailyCompleted] = useState(() => isDailyMode && isDailyCompleted('magic-graph'));
+    // Game initialization (daily mode, tutorial, practice mode)
+    const {
+        isDailyMode,
+        dailyCompleted,
+        setDailyCompleted,
+        showTutorial,
+        setShowTutorial,
+        practiceMode,
+        handlePracticeModeChange,
+        handleTimeWarning,
+    } = useGameInit({ gameId: 'magic-graph' });
 
     const [difficulty, setDifficulty] = useState<Difficulty>(isDailyMode ? 'medium' : 'easy');
 
-    // Player and rewards
-    const { profile, updatePreferences } = usePlayer();
+    // Rewards system
     const {
         handleCompletion,
         rewards,
@@ -42,14 +45,6 @@ export function MagicGraphGame() {
         toastQueue,
         dismissToast,
     } = useGameRewards();
-
-    // Practice mode from player preferences
-    const [practiceMode, setPracticeMode] = useState(profile.preferences.practiceMode);
-
-    // Tutorial state
-    const [showTutorial, setShowTutorial] = useState(() =>
-        shouldShowTutorial('magic-graph')
-    );
 
     // Generate initial puzzle once and derive both states from it
     const [puzzle, setPuzzle] = useState<PuzzleConfig>(() => {
@@ -98,15 +93,6 @@ export function MagicGraphGame() {
 
     // Screen reader announcements for accessibility
     const { announce } = useAnnounce();
-
-    // Time warning callback for screen reader announcements
-    const handleTimeWarning = useCallback((secondsRemaining: number) => {
-        if (secondsRemaining === 30) {
-            announce(t('timer.warning30', '30 seconds remaining'), 'polite');
-        } else if (secondsRemaining === 10) {
-            announce(t('timer.warning10', '10 seconds remaining! Hurry!'), 'assertive');
-        }
-    }, [announce, t]);
 
     // Timer hook with practice mode support
     const {
@@ -229,12 +215,6 @@ export function MagicGraphGame() {
             setTimeout(() => setUnsolvableFeedback(null), 3000);
         }
     }, [puzzle, pauseTimer, handleCompletion, isDailyMode, difficulty, elapsedTime, practiceMode, dailyCompleted, t]);
-
-    // Handle practice mode toggle
-    const handlePracticeModeChange = useCallback((newPracticeMode: boolean) => {
-        setPracticeMode(newPracticeMode);
-        updatePreferences({ practiceMode: newPracticeMode });
-    }, [updatePreferences]);
 
     // Master mode: hidden target sum state
     const [targetRevealed, setTargetRevealed] = useState(false);

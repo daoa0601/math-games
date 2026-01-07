@@ -3,11 +3,9 @@
  * Defines 10 core achievements across all games
  */
 
-import type { StorageGameId, AchievementCategory as ImportedCategory } from '../types';
+import type { StorageGameId, AchievementCategory } from '../types';
 
-// Re-export for backwards compatibility
-export type GameId = StorageGameId;
-export type AchievementCategory = ImportedCategory;
+// Use StorageGameId directly - GameId alias is deprecated in ../types/game.ts
 export type AchievementRarity = 'common' | 'rare' | 'epic' | 'legendary';
 
 export interface Achievement {
@@ -23,7 +21,7 @@ export interface Achievement {
  * Context passed to achievement condition checkers
  */
 export interface AchievementContext {
-  gameId: GameId;
+  gameId: StorageGameId;
   difficulty?: string;
   streak?: number;
   // Game-specific

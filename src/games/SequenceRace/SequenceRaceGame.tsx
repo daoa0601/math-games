@@ -10,7 +10,6 @@
 
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
 import {
   GameLayout,
   DifficultySelector,
@@ -22,11 +21,9 @@ import {
   PersonalBestIndicator,
   HelpButton,
 } from '@/shared/components';
-import { useGameTimer, useGameRewards, useAnnounce } from '@/shared/hooks';
-import { usePlayer } from '@/shared/contexts';
+import { useGameTimer, useGameRewards, useGameInit, useAnnounce } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
-import { isDailyCompleted, completeDailyChallenge } from '@/shared/services/daily';
-import { shouldShowTutorial } from '@/shared/services/tutorialProgress';
+import { completeDailyChallenge } from '@/shared/services/daily';
 import { RaceTrack, StepCards, HistoryLog, SequenceInfoBadge, SequenceRaceTutorial } from './components';
 import { useSequenceRaceState, useAIOpponent, useHintSystem } from './hooks';
 import { applyMove, isHumanTurn } from './logic/engine';
@@ -37,26 +34,32 @@ import './SequenceRace.css';
 export function SequenceRaceGame() {
   const { t } = useTranslation('sequenceRace');
   const { t: tc } = useTranslation('common');
-  const [searchParams] = useSearchParams();
 
   // ─────────────────────────────────────────────────────────────────
-  // Daily Mode Detection
+  // Game Initialization (consolidated hook)
   // ─────────────────────────────────────────────────────────────────
 
-  const isDailyMode = searchParams.get('daily') === 'true';
-  const [dailyCompleted, setDailyCompleted] = useState(() => isDailyMode && isDailyCompleted('sequence-race'));
+  const {
+    isDailyMode,
+    dailyCompleted,
+    setDailyCompleted,
+    showTutorial,
+    setShowTutorial,
+    practiceMode,
+    handlePracticeModeChange,
+    handleTimeWarning,
+  } = useGameInit({ gameId: 'sequence-race' });
+
+  // Daily config for seeded puzzle generation
   const dailyConfigRef = useRef(isDailyMode ? getDailySequenceRaceConfig() : null);
 
-  // Tutorial state
-  const [showTutorial, setShowTutorial] = useState(() =>
-    shouldShowTutorial('sequence-race')
-  );
+  // Screen reader announcements for game events
+  const { announce } = useAnnounce();
 
   // ─────────────────────────────────────────────────────────────────
-  // Player and Rewards
+  // Rewards
   // ─────────────────────────────────────────────────────────────────
 
-  const { profile, updatePreferences } = usePlayer();
   const {
     handleCompletion,
     rewards,
@@ -65,20 +68,6 @@ export function SequenceRaceGame() {
     toastQueue,
     dismissToast,
   } = useGameRewards();
-
-  // ─────────────────────────────────────────────────────────────────
-  // Screen Reader Announcements
-  // ─────────────────────────────────────────────────────────────────
-
-  const { announce } = useAnnounce();
-
-  const handleTimeWarning = useCallback((secondsRemaining: number) => {
-    if (secondsRemaining === 30) {
-      announce(t('timer.warning30', '30 seconds remaining'), 'polite');
-    } else if (secondsRemaining === 10) {
-      announce(t('timer.warning10', '10 seconds remaining! Hurry!'), 'assertive');
-    }
-  }, [announce, t]);
 
   // ─────────────────────────────────────────────────────────────────
   // Timer
@@ -100,7 +89,7 @@ export function SequenceRaceGame() {
     resumeTimer,
   } = useGameTimer({
     isGameOver,
-    practiceMode: profile.preferences.practiceMode,
+    practiceMode,
     onTimeWarning: handleTimeWarning,
   });
 
@@ -222,17 +211,6 @@ export function SequenceRaceGame() {
       announce(tc('announcements.aiWins'), 'assertive');
     }
   }, [gameState.winner, gameState.target, gameState.history.length, announce, tc]);
-
-  // ─────────────────────────────────────────────────────────────────
-  // Practice Mode
-  // ─────────────────────────────────────────────────────────────────
-
-  const handlePracticeModeChange = useCallback(
-    (newPracticeMode: boolean) => {
-      updatePreferences({ practiceMode: newPracticeMode });
-    },
-    [updatePreferences]
-  );
 
   // ─────────────────────────────────────────────────────────────────
   // Player Move Handler
