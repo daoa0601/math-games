@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { usePlayer, useAuthAPI, useAuthState } from '@/shared/contexts';
 import { BottomNav, type NavTabId } from '@/shared/components/layout';
 import { SkipLinks, FeedbackModal, AuthModal, AccountLinkBanner, type AuthMode } from '@/shared/components';
+import { useFirebaseAuthAPI, useFirebaseAuthState } from '@/firebase/useFirebaseAuthHooks';
 import { CompactHeader } from './CompactHeader';
 import { PlayTab, ProfileTab, LearnTab, SettingsTab } from './tabs';
 import './Dashboard.css';
@@ -10,6 +11,8 @@ export function Dashboard() {
   const { profile, currentRankInfo, checkStreak } = usePlayer();
   const { logout } = useAuthAPI();
   const { isGuest, isFirebaseUser, isAnonymous } = useAuthState();
+  const firebaseAPI = useFirebaseAuthAPI();
+  const firebaseState = useFirebaseAuthState();
   const [activeTab, setActiveTab] = useState<NavTabId>('home');
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -42,12 +45,67 @@ export function Dashboard() {
     setIsAuthModalOpen(false);
   }, []);
 
-  // Placeholder handler - will be connected to Firebase auth when configured
+  // Google sign-in handler using Firebase
   const handleGoogleSignIn = useCallback(async () => {
-    console.log('[Dashboard] Google sign-in requested');
-    // When Firebase is configured, this will use useFirebaseAuthAPI
-    return false;
-  }, []);
+    if (!firebaseState.isFirebaseAvailable) {
+      console.warn('[Dashboard] Firebase not available for Google sign-in');
+      return false;
+    }
+
+    // If user is anonymous, link to Google account to preserve progress
+    if (firebaseState.isAnonymous) {
+      const success = await firebaseAPI.linkToGoogle();
+      if (success) {
+        setIsAuthModalOpen(false);
+      }
+      return success;
+    }
+
+    // Otherwise do a regular sign-in
+    const success = await firebaseAPI.signInWithGoogle();
+    if (success) {
+      setIsAuthModalOpen(false);
+    }
+    return success;
+  }, [firebaseState.isFirebaseAvailable, firebaseState.isAnonymous, firebaseAPI]);
+
+  // Email sign-in handler using Firebase
+  const handleEmailSignIn = useCallback(async (email: string, password: string) => {
+    if (!firebaseState.isFirebaseAvailable) {
+      console.warn('[Dashboard] Firebase not available for email sign-in');
+      return false;
+    }
+
+    const success = await firebaseAPI.signInWithEmail(email, password);
+    if (success) {
+      setIsAuthModalOpen(false);
+    }
+    return success;
+  }, [firebaseState.isFirebaseAvailable, firebaseAPI]);
+
+  // Email sign-up handler using Firebase
+  const handleEmailSignUp = useCallback(async (email: string, password: string) => {
+    if (!firebaseState.isFirebaseAvailable) {
+      console.warn('[Dashboard] Firebase not available for email sign-up');
+      return false;
+    }
+
+    // If user is anonymous, link to email account to preserve progress
+    if (firebaseState.isAnonymous) {
+      const success = await firebaseAPI.linkToEmail(email, password);
+      if (success) {
+        setIsAuthModalOpen(false);
+      }
+      return success;
+    }
+
+    // Otherwise create new account
+    const success = await firebaseAPI.createAccount(email, password);
+    if (success) {
+      setIsAuthModalOpen(false);
+    }
+    return success;
+  }, [firebaseState.isFirebaseAvailable, firebaseState.isAnonymous, firebaseAPI]);
 
   return (
     <div className="page">
@@ -86,6 +144,10 @@ export function Dashboard() {
         mode={authMode}
         onClose={handleAuthModalClose}
         onGoogleSignIn={handleGoogleSignIn}
+        onEmailSignIn={firebaseState.isFirebaseAvailable ? handleEmailSignIn : undefined}
+        onEmailSignUp={firebaseState.isFirebaseAvailable ? handleEmailSignUp : undefined}
+        isLoading={firebaseState.isLoading}
+        error={firebaseState.error}
       />
     </div>
   );

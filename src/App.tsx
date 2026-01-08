@@ -1,9 +1,11 @@
-import { lazy, Suspense, useState, useCallback } from 'react';
+import { lazy, Suspense, useState, useCallback, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import type { User } from 'firebase/auth';
 import { Dashboard } from './pages';
 import { Login } from './pages/Login';
 import { PlayerProvider, AuthProvider, useAuthState } from './shared/contexts';
 import { ErrorBoundary } from './shared/components';
+import { FirebaseAuthProvider, initSyncManager, destroySyncManager } from './firebase';
 import type { PlayerProfile } from './shared/services/player';
 import './index.css';
 
@@ -71,6 +73,7 @@ function ProtectedRoutes() {
 
 function App() {
   const [serverProfile, setServerProfile] = useState<PlayerProfile | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
 
   const handleLogin = useCallback((profile: PlayerProfile) => {
     setServerProfile(profile);
@@ -80,14 +83,33 @@ function App() {
     setServerProfile(null);
   }, []);
 
+  const handleFirebaseUserChange = useCallback((user: User | null) => {
+    setFirebaseUser(user);
+  }, []);
+
+  // Initialize sync manager when Firebase user is authenticated
+  useEffect(() => {
+    if (firebaseUser) {
+      initSyncManager().catch(console.error);
+    }
+
+    return () => {
+      if (firebaseUser) {
+        destroySyncManager();
+      }
+    };
+  }, [firebaseUser]);
+
   return (
-    <AuthProvider onLogin={handleLogin} onLogout={handleLogout}>
-      <PlayerProvider initialProfile={serverProfile}>
-        <BrowserRouter basename={import.meta.env.BASE_URL}>
-          <ProtectedRoutes />
-        </BrowserRouter>
-      </PlayerProvider>
-    </AuthProvider>
+    <FirebaseAuthProvider onUserChange={handleFirebaseUserChange}>
+      <AuthProvider onLogin={handleLogin} onLogout={handleLogout}>
+        <PlayerProvider initialProfile={serverProfile}>
+          <BrowserRouter basename={import.meta.env.BASE_URL}>
+            <ProtectedRoutes />
+          </BrowserRouter>
+        </PlayerProvider>
+      </AuthProvider>
+    </FirebaseAuthProvider>
   );
 }
 
