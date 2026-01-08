@@ -1,13 +1,10 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
 import { DndContext, pointerWithin } from '@dnd-kit/core';
 import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, PersonalBestIndicator, HelpButton } from '@/shared/components';
-import { useGameTimer, useGameRewards, useSwipe, useAnnounce } from '@/shared/hooks';
-import { usePlayer } from '@/shared/contexts';
+import { useGameTimer, useGameRewards, useSwipe, useAnnounce, useGameInit } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
-import { isDailyCompleted, completeDailyChallenge } from '@/shared/services/daily';
-import { shouldShowTutorial } from '@/shared/services/tutorialProgress';
+import { completeDailyChallenge } from '@/shared/services/daily';
 import { GridBoard, GridBoard3D, PieceInventory, LevelEditor, CameraPresetButtons, RotationControls, LayerControls, ShapeArchitectTutorial, PreviewLockButton, PlacedPieceControls, PlacementModal } from './components';
 import type { CameraPreset } from './components/CameraPresetButtons';
 import type { Position3D, LevelConfig } from './logic/types';
@@ -29,11 +26,21 @@ const GEOMETRY_HINT_KEYS = [
 export function ShapeArchitectGame() {
     const { t } = useTranslation('shapeArchitect');
     const { t: tc } = useTranslation('common');
-    const [searchParams] = useSearchParams();
 
-    // Daily mode detection
-    const isDailyMode = searchParams.get('daily') === 'true';
-    const [dailyCompleted, setDailyCompleted] = useState(() => isDailyMode && isDailyCompleted('shape-architect'));
+    // ─────────────────────────────────────────────────────────────────
+    // Game Initialization (consolidated hook)
+    // ─────────────────────────────────────────────────────────────────
+
+    const {
+        isDailyMode,
+        dailyCompleted,
+        setDailyCompleted,
+        showTutorial,
+        setShowTutorial,
+        practiceMode,
+        handlePracticeModeChange,
+        handleTimeWarning,
+    } = useGameInit({ gameId: 'shape-architect' });
 
     // Use the extracted state hook
     const {
@@ -72,18 +79,12 @@ export function ShapeArchitectGame() {
         return !localStorage.getItem('shape-architect-rotated');
     });
 
-    // Tutorial state
-    const [showTutorial, setShowTutorial] = useState(() =>
-        shouldShowTutorial('shape-architect')
-    );
-
     // Get total score (re-computed when progressVersion changes)
     // progressVersion is intentionally used as a trigger to force re-computation after level completion
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const totalScore = useMemo(() => getTotalScore('shape-architect'), [progressVersion]);
 
-    // Player and rewards
-    const { profile: playerProfile, updatePreferences } = usePlayer();
+    // Rewards
     const {
         handleCompletion,
         rewards,
@@ -93,19 +94,8 @@ export function ShapeArchitectGame() {
         dismissToast,
     } = useGameRewards();
 
-    // Practice mode from player preferences
-    const [practiceMode, setPracticeMode] = useState(playerProfile.preferences.practiceMode);
-
-    // Screen reader announcements for accessibility
+    // Screen reader announcements for game events
     const { announce } = useAnnounce();
-
-    const handleTimeWarning = useCallback((secondsRemaining: number) => {
-        if (secondsRemaining === 30) {
-            announce(t('timer.warning30', '30 seconds remaining'), 'polite');
-        } else if (secondsRemaining === 10) {
-            announce(t('timer.warning10', '10 seconds remaining! Hurry!'), 'assertive');
-        }
-    }, [announce, t]);
 
     // Timer hook with practice mode support
     const {
@@ -152,12 +142,6 @@ export function ShapeArchitectGame() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [gameState.level.id]); // Only trigger on level change
-
-    // Handle practice mode toggle
-    const handlePracticeModeChange = useCallback((newPracticeMode: boolean) => {
-        setPracticeMode(newPracticeMode);
-        updatePreferences({ practiceMode: newPracticeMode });
-    }, [updatePreferences]);
 
     // Use placement hook for unified click/drag handling
     const {

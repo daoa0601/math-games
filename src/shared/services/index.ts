@@ -41,10 +41,8 @@ export {
 // Achievement System
 export {
   type Achievement,
-  type AchievementCategory,
   type AchievementRarity,
   type AchievementContext,
-  type GameId,
   ACHIEVEMENTS,
   getAchievementById,
   getAchievementsByCategory,
@@ -53,6 +51,9 @@ export {
   getAchievementStats,
   getRarityColor,
 } from './achievements';
+
+// Re-export types from canonical source for backwards compatibility
+export type { StorageGameId as GameId, AchievementCategory } from '../types';
 
 // Daily Challenge System
 export {

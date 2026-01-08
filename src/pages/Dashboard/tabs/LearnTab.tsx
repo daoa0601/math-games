@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LearnModal, type GameId } from '@/shared/components/LearnModal';
+import type { StorageGameId } from '@/shared/types';
+import { LearnModal } from '@/shared/components/LearnModal';
 import './LearnTab.css';
 
 interface GameCardConfig {
-  id: GameId;
+  id: StorageGameId;
   icon: string;
   color: string;
   taglineKey: string;
@@ -43,7 +44,7 @@ const toCamelCase = (s: string) =>
 
 export function LearnTab() {
   const { t } = useTranslation();
-  const [selectedGame, setSelectedGame] = useState<GameId | null>(null);
+  const [selectedGame, setSelectedGame] = useState<StorageGameId | null>(null);
 
   return (
     <div

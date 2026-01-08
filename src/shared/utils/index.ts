@@ -16,7 +16,8 @@ export {
     getGameAverageTime,
 } from './storage';
 
-export type { GameId, LevelProgress, GameProgress, PersonalBestResult } from './storage';
+export type { LevelProgress, GameProgress, PersonalBestResult } from './storage';
+// GameId is deprecated - use StorageGameId from '../types' instead
 
 export {
     playSound,

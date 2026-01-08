@@ -1,6 +1,29 @@
-// ========================================
-// useWorkerSolver - Hook for Web Worker Solver
-// ========================================
+/**
+ * useWorkerSolver Hook
+ *
+ * Offloads CPU-intensive puzzle solving to a Web Worker, preventing UI blocking.
+ * Uses a request-response pattern with unique IDs to track pending promises.
+ *
+ * Key behavior:
+ * - Worker initialized on mount, terminated on unmount
+ * - Multiple requests can be pending simultaneously
+ * - `cancel()` terminates worker and recreates it, rejecting all pending
+ * - Serializes/deserializes Map solutions for worker communication
+ *
+ * @example
+ * ```tsx
+ * const { generatePuzzle, solve, isWorking, error, cancel } = useWorkerSolver();
+ *
+ * // Generate a puzzle (async)
+ * const puzzle = await generatePuzzle(basePuzzle, difficulty);
+ *
+ * // Solve current placement (async)
+ * const solutions = await solve(nodes, lines, numbers, targetSum);
+ *
+ * // Show loading state
+ * {isWorking && <Spinner />}
+ * ```
+ */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { PuzzleConfig, GraphNode, Line } from '../logic/types';
@@ -8,6 +31,10 @@ import type { WorkerRequest, WorkerResponse } from '../logic/solver.worker';
 
 // Import worker using Vite's worker syntax
 import SolverWorker from '../logic/solver.worker?worker';
+
+// ═══════════════════════════════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════════════════════════════
 
 interface UseWorkerSolverReturn {
     /** Generate a puzzle asynchronously */
@@ -31,14 +58,14 @@ interface UseWorkerSolverReturn {
     /** Any error from the last operation */
     error: string | null;
 
-    /** Cancel any pending operations */
+    /** Cancel any pending operations (terminates and recreates worker) */
     cancel: () => void;
 }
 
-/**
- * Hook for offloading solver operations to a Web Worker.
- * Prevents UI blocking during puzzle generation and solving.
- */
+// ═══════════════════════════════════════════════════════════════════
+// HOOK
+// ═══════════════════════════════════════════════════════════════════
+
 export function useWorkerSolver(): UseWorkerSolverReturn {
     const [isWorking, setIsWorking] = useState(false);
     const [error, setError] = useState<string | null>(null);

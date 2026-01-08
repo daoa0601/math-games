@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import type { StorageGameId } from '@/shared/types';
 import {
     getProgress,
     saveProgress,
@@ -9,12 +10,11 @@ import {
     getTotalScore,
     resetProgress,
     getGlobalStats,
-    type GameId,
     type GameProgress,
 } from '../storage';
 
 describe('Storage Service', () => {
-    const testGameId: GameId = 'magic-graph';
+    const testGameId: StorageGameId = 'magic-graph';
 
     beforeEach(() => {
         // localStorage is cleared in setup.ts before each test
