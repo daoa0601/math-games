@@ -183,7 +183,7 @@ export function PlayerProvider({ children, initialProfile }: PlayerProviderProps
     // The server expects increments, not absolute values
     const increments: Record<string, number> = {};
     if (updates.totalGamesPlayed !== undefined) {
-      increments.totalGamesPlayed = updates.totalGamesPlayed - (profileRef.current.stats.totalGamesPlayed - updates.totalGamesPlayed);
+      increments.totalGamesPlayed = 1;
     }
     if (updates.totalPuzzlesSolved !== undefined) {
       increments.totalPuzzlesSolved = 1;

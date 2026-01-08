@@ -222,7 +222,7 @@ export function ShapeArchitectGame() {
             // Trigger re-render of progress-dependent UI
             setProgressVersion((v) => v + 1);
         }
-    }, [gameState.isSolved, gameState.level.id, filteredLevels, elapsedTime, difficulty, practiceMode, handleCompletion, isDailyMode, dailyCompleted]);
+    }, [gameState.isSolved, gameState.level.id, filteredLevels, elapsedTime, difficulty, practiceMode, handleCompletion, isDailyMode, dailyCompleted, setDailyCompleted]);
 
     // Wrap handleRotateAxis to dismiss hint and play sound
     const handleRotateWithHint = useCallback((axis: 'x' | 'y' | 'z') => {

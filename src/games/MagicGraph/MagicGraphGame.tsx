@@ -214,7 +214,7 @@ export function MagicGraphGame() {
             // Clear feedback after 3 seconds
             setTimeout(() => setUnsolvableFeedback(null), 3000);
         }
-    }, [puzzle, pauseTimer, handleCompletion, isDailyMode, difficulty, elapsedTime, practiceMode, dailyCompleted, t]);
+    }, [puzzle, pauseTimer, handleCompletion, isDailyMode, difficulty, elapsedTime, practiceMode, dailyCompleted, setDailyCompleted, t]);
 
     // Master mode: hidden target sum state
     const [targetRevealed, setTargetRevealed] = useState(false);
@@ -401,7 +401,7 @@ export function MagicGraphGame() {
             });
             setTimeout(() => setShowWin(true), 300);
         }
-    }, [pickerState, nodeValues, puzzle, nodeValuesHistory, difficulty, computedOptimalResult, optimizationGoal, pauseTimer, elapsedTime, practiceMode, handleCompletion, isDailyMode, dailyCompleted]);
+    }, [pickerState, nodeValues, puzzle, nodeValuesHistory, difficulty, computedOptimalResult, optimizationGoal, pauseTimer, elapsedTime, practiceMode, handleCompletion, isDailyMode, dailyCompleted, setDailyCompleted]);
 
     // Handle clearing a node value
     const handlePickerClear = useCallback(() => {

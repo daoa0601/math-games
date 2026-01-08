@@ -50,8 +50,11 @@ const {
     handleTimeWarning,
   } = useGameInit({ gameId: 'sequence-race' });
 
-  // Daily config for seeded puzzle generation
-  const dailyConfigRef = useRef(isDailyMode ? getDailySequenceRaceConfig() : null);
+  // Daily config for seeded puzzle generation (computed once per mode)
+  const dailyConfig = useMemo(
+    () => isDailyMode ? getDailySequenceRaceConfig() : undefined,
+    [isDailyMode]
+  );
 
   // Screen reader announcements for game events
   const { announce } = useAnnounce();
@@ -114,12 +117,14 @@ const {
     undoLastMove,
   } = useSequenceRaceState({
     onResetTimer: resetTimer,
-    initialConfig: dailyConfigRef.current ?? undefined,
+    initialConfig: dailyConfig,
   });
 
   // Sync isGameOver state with gameState.gameOver
+  // This pattern is required because useGameTimer expects a boolean prop,
+  // while gameState comes from a separate hook (useSequenceRaceState)
   useEffect(() => {
-    setIsGameOver(gameState.gameOver);
+    setIsGameOver(gameState.gameOver); // eslint-disable-line react-hooks/set-state-in-effect
   }, [gameState.gameOver]);
 
   // ─────────────────────────────────────────────────────────────────
@@ -260,7 +265,7 @@ const {
       // Track daily challenge completion - setState needed for UI update
       if (isDailyMode && !dailyCompleted) {
         completeDailyChallenge('sequence-race', elapsedTime);
-        setDailyCompleted(true); // eslint-disable-line react-hooks/set-state-in-effect -- UI update on game win
+        setDailyCompleted(true);
       }
 
       playSound('win');
