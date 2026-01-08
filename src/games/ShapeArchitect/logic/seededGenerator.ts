@@ -20,7 +20,7 @@
 
 import type { LevelConfig, Piece, Position3D } from './types';
 import type { SeededRandom } from '@/shared/utils';
-import { createSeededRandom } from '@/shared/utils';
+import { createSeededRandom, createDailyRandom } from '@/shared/utils';
 import { presetLevels } from './presets';
 
 // ============================================================================
@@ -609,8 +609,8 @@ function getFallbackPreset(
  */
 export function getDailyShapeArchitectLevel(date?: string): LevelConfig {
   const dateStr = date ?? new Date().toISOString().split('T')[0];
-  const baseSeed = `${dateStr}-shape-architect`;
-  const rng = createSeededRandom(baseSeed);
+  // Use createDailyRandom for consistency with other games
+  const rng = createDailyRandom(dateStr, 'shape-architect');
 
   // Daily challenges are always medium difficulty
   return generateGuaranteedSolvableWithRetry(rng, 'medium');
