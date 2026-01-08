@@ -148,21 +148,6 @@ export function PuzzleBoard({
                 An interactive graph puzzle where you place numbers on nodes so that each line sums to the target.
             </desc>
 
-            {/* SVG Pattern definitions for accessibility */}
-            <defs>
-                {/* Fixed node pattern - radial dots (star-like) */}
-                <pattern id="pattern-fixed" width="8" height="8" patternUnits="userSpaceOnUse">
-                    <circle cx="4" cy="4" r="1.5" fill="hsla(45, 100%, 70%, 0.6)" />
-                </pattern>
-                {/* Filled (player-placed) node pattern - diagonal lines */}
-                <pattern id="pattern-filled" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                    <line x1="0" y1="0" x2="0" y2="6" stroke="hsla(270, 70%, 80%, 0.4)" strokeWidth="1.5" />
-                </pattern>
-                {/* Empty node pattern - subtle grid */}
-                <pattern id="pattern-empty" width="6" height="6" patternUnits="userSpaceOnUse">
-                    <path d="M 6 0 L 0 0 0 6" fill="none" stroke="hsla(200, 60%, 60%, 0.3)" strokeWidth="0.5" />
-                </pattern>
-            </defs>
 
             {/* Render lines first (behind nodes) */}
             {lineStatuses.map((line) => (
@@ -208,13 +193,6 @@ export function PuzzleBoard({
                     onNodeClick({ nodeId: node.id, screenPosition });
                 };
 
-                // Determine which pattern to use for accessibility
-                const patternId = isFixed
-                    ? 'pattern-fixed'
-                    : isEmpty
-                        ? 'pattern-empty'
-                        : 'pattern-filled';
-
                 return (
                     <g
                         key={node.id}
@@ -232,16 +210,6 @@ export function PuzzleBoard({
                             cx={pos.x}
                             cy={pos.y}
                             r={NODE_RADIUS}
-                        />
-                        {/* Pattern overlay for accessibility - distinguishes node types beyond color */}
-                        <circle
-                            className="mg-node__pattern"
-                            cx={pos.x}
-                            cy={pos.y}
-                            r={NODE_RADIUS - 2}
-                            fill={`url(#${patternId})`}
-                            pointerEvents="none"
-                            aria-hidden="true"
                         />
                         {!isEmpty && (
                             <text

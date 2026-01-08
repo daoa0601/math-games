@@ -505,7 +505,8 @@
     gap: var(--space-xl);
     align-items: start;
     width: 100%;
-    max-width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
     flex: 1;
   }
 
