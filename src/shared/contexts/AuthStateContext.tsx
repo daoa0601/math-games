@@ -9,6 +9,7 @@ import { createContext, useContext } from 'react';
 
 export interface AuthState {
   isLoggedIn: boolean;
+  isGuest: boolean;
   playerId: string | null;
   isLoading: boolean;
   error: string | null;

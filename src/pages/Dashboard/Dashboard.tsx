@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { usePlayer, useAuthAPI } from '@/shared/contexts';
+import { usePlayer, useAuthAPI, useAuthState } from '@/shared/contexts';
 import { BottomNav, type NavTabId } from '@/shared/components/layout';
 import { SkipLinks, FeedbackModal } from '@/shared/components';
 import { CompactHeader } from './CompactHeader';
@@ -9,6 +9,7 @@ import './Dashboard.css';
 export function Dashboard() {
   const { profile, currentRankInfo, checkStreak } = usePlayer();
   const { logout } = useAuthAPI();
+  const { isGuest } = useAuthState();
   const [activeTab, setActiveTab] = useState<NavTabId>('home');
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
@@ -33,6 +34,7 @@ export function Dashboard() {
           profile={profile}
           rankInfo={currentRankInfo}
           streak={profile.streak}
+          isGuest={isGuest}
           onLogout={logout}
         />
         <main id="dashboard-main" tabIndex={-1}>
