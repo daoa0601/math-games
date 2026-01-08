@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GameCard } from '@/shared/components/layout/GameCard';
 import { DailyChallengeBanner } from '@/shared/components/DailyChallenge/DailyChallengeBanner';
@@ -52,11 +52,12 @@ function getTimeUntilMidnight(): string {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-export function PlayTab() {
-  const { t } = useTranslation();
+/**
+ * Isolated countdown component - prevents re-rendering the entire PlayTab every second
+ */
+const DailyChallengeBannerWithCountdown = memo(function DailyChallengeBannerWithCountdown() {
   const [countdown, setCountdown] = useState(getTimeUntilMidnight());
 
-  // Update countdown every second
   useEffect(() => {
     const interval = setInterval(() => {
       setCountdown(getTimeUntilMidnight());
@@ -65,7 +66,16 @@ export function PlayTab() {
     return () => clearInterval(interval);
   }, []);
 
-  // Get progress for each game
+  return <DailyChallengeBanner countdown={countdown} />;
+});
+
+/**
+ * Memoized games grid - only re-renders when progress actually changes
+ */
+const GamesGrid = memo(function GamesGrid() {
+  const { t } = useTranslation();
+
+  // Get progress for each game - computed once on mount
   const gamesWithProgress = useMemo(() => {
     return GAME_CONFIGS.map((config) => {
       const storageId = toStorageId[config.id];
@@ -83,26 +93,32 @@ export function PlayTab() {
   }, []);
 
   return (
-    <div role="tabpanel" id="panel-home">
-      {/* Games Grid */}
-      <div className="grid">
-        {gamesWithProgress.map((game) => (
-          <GameCard
-            key={game.id}
-            id={game.id}
-            title={t(`games.${game.id}.title`)}
-            description={t(`games.${game.id}.description`)}
-            icon=""
-            tags={game.tags}
-            to={game.path}
-            progress={game.progress}
-            disabled={game.disabled}
-          />
-        ))}
-      </div>
+    <div className="grid">
+      {gamesWithProgress.map((game) => (
+        <GameCard
+          key={game.id}
+          id={game.id}
+          title={t(`games.${game.id}.title`)}
+          description={t(`games.${game.id}.description`)}
+          icon=""
+          tags={game.tags}
+          to={game.path}
+          progress={game.progress}
+          disabled={game.disabled}
+        />
+      ))}
+    </div>
+  );
+});
 
-      {/* Daily Challenge Banner */}
-      <DailyChallengeBanner countdown={countdown} />
+export function PlayTab() {
+  return (
+    <div role="tabpanel" id="panel-home">
+      {/* Games Grid - memoized to prevent re-renders from countdown */}
+      <GamesGrid />
+
+      {/* Daily Challenge Banner - isolated countdown updates */}
+      <DailyChallengeBannerWithCountdown />
     </div>
   );
 }

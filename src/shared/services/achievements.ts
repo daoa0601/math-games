@@ -142,11 +142,14 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
 ];
 
+// Pre-built Map for O(1) achievement lookups by ID
+const ACHIEVEMENT_MAP = new Map(ACHIEVEMENTS.map((a) => [a.id, a]));
+
 /**
- * Get achievement by ID
+ * Get achievement by ID - O(1) lookup using Map
  */
 export function getAchievementById(id: string): Achievement | undefined {
-  return ACHIEVEMENTS.find((a) => a.id === id);
+  return ACHIEVEMENT_MAP.get(id);
 }
 
 /**
@@ -172,10 +175,12 @@ export function checkAchievements(
   unlockedAchievements: string[]
 ): string[] {
   const newlyUnlocked: string[] = [];
+  // Convert to Set for O(1) lookups instead of O(n) array.includes()
+  const unlockedSet = new Set(unlockedAchievements);
 
-  // Helper to check if achievement should be unlocked
+  // Helper to check if achievement should be unlocked - O(1) lookup
   const shouldUnlock = (id: string, condition: boolean): void => {
-    if (condition && !unlockedAchievements.includes(id)) {
+    if (condition && !unlockedSet.has(id)) {
       newlyUnlocked.push(id);
     }
   };
@@ -253,6 +258,9 @@ export function getAchievementStats(unlockedAchievements: string[]): {
   unlocked: number;
   byRarity: Record<AchievementRarity, { total: number; unlocked: number }>;
 } {
+  // Convert to Set for O(1) lookups instead of O(n) array.includes()
+  const unlockedSet = new Set(unlockedAchievements);
+
   const byRarity: Record<AchievementRarity, { total: number; unlocked: number }> = {
     common: { total: 0, unlocked: 0 },
     rare: { total: 0, unlocked: 0 },
@@ -262,7 +270,7 @@ export function getAchievementStats(unlockedAchievements: string[]): {
 
   ACHIEVEMENTS.forEach((achievement) => {
     byRarity[achievement.rarity].total++;
-    if (unlockedAchievements.includes(achievement.id)) {
+    if (unlockedSet.has(achievement.id)) {
       byRarity[achievement.rarity].unlocked++;
     }
   });

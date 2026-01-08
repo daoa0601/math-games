@@ -7,6 +7,28 @@ import { type StorageGameId, STORAGE_GAME_IDS } from '../types';
 
 // Use StorageGameId directly - GameId alias is deprecated in ../types/game.ts
 
+// ============================================================================
+// Progress Cache - reduces redundant localStorage reads within a render cycle
+// ============================================================================
+const progressCache = new Map<StorageGameId, { data: GameProgress; timestamp: number }>();
+const CACHE_TTL_MS = 100; // Short TTL to prevent stale data across user interactions
+
+function getCachedProgress(gameId: StorageGameId): GameProgress | null {
+  const cached = progressCache.get(gameId);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+  return null;
+}
+
+function setCachedProgress(gameId: StorageGameId, data: GameProgress): void {
+  progressCache.set(gameId, { data, timestamp: Date.now() });
+}
+
+function invalidateCache(gameId: StorageGameId): void {
+  progressCache.delete(gameId);
+}
+
 export interface LevelProgress {
     levelId: string;
     completed: boolean;
@@ -51,29 +73,42 @@ function getDefaultProgress(gameId: StorageGameId): GameProgress {
 }
 
 /**
- * Load game progress from localStorage
+ * Load game progress from localStorage (with short-lived cache)
  */
 export function getProgress(gameId: StorageGameId): GameProgress {
+    // Check cache first to avoid redundant localStorage reads
+    const cached = getCachedProgress(gameId);
+    if (cached) {
+        return cached;
+    }
+
     try {
         const key = getStorageKey(gameId);
         const stored = localStorage.getItem(key);
 
         if (!stored) {
-            return getDefaultProgress(gameId);
+            const defaultProgress = getDefaultProgress(gameId);
+            setCachedProgress(gameId, defaultProgress);
+            return defaultProgress;
         }
 
         const parsed: StoredGameProgress = JSON.parse(stored);
 
-        return {
+        const progress: GameProgress = {
             gameId: parsed.gameId,
             unlockedLevels: parsed.unlockedLevels,
             completedLevels: new Map(parsed.completedLevels),
             totalScore: parsed.totalScore,
             lastPlayed: parsed.lastPlayed,
         };
+
+        setCachedProgress(gameId, progress);
+        return progress;
     } catch (error) {
         console.error(`Failed to load progress for ${gameId}:`, error);
-        return getDefaultProgress(gameId);
+        const defaultProgress = getDefaultProgress(gameId);
+        setCachedProgress(gameId, defaultProgress);
+        return defaultProgress;
     }
 }
 
@@ -93,6 +128,8 @@ export function saveProgress(progress: GameProgress): void {
         };
 
         localStorage.setItem(key, JSON.stringify(toStore));
+        // Invalidate cache after save so next read gets fresh data
+        invalidateCache(progress.gameId);
     } catch (error) {
         console.error(`Failed to save progress for ${progress.gameId}:`, error);
     }
@@ -180,6 +217,8 @@ export function resetProgress(gameId: StorageGameId): void {
     try {
         const key = getStorageKey(gameId);
         localStorage.removeItem(key);
+        // Invalidate cache after reset
+        invalidateCache(gameId);
     } catch (error) {
         console.error(`Failed to reset progress for ${gameId}:`, error);
     }
