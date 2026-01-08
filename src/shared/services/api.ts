@@ -7,8 +7,9 @@ import type { PlayerProfile, PlayerStats, PlayerPreferences } from './player';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-// Local storage key for the current player ID
+// Local storage keys
 const PLAYER_ID_KEY = 'math-games-player-id';
+const GUEST_MODE_KEY = 'math-games-guest-mode';
 
 /**
  * Get the current player ID from localStorage
@@ -36,6 +37,13 @@ export function clearCurrentPlayerId(): void {
  */
 export function isLoggedIn(): boolean {
   return getCurrentPlayerId() !== null;
+}
+
+/**
+ * Check if playing as guest (local storage only, no server sync)
+ */
+export function isGuestMode(): boolean {
+  return localStorage.getItem(GUEST_MODE_KEY) === 'true';
 }
 
 // ============ API HELPER ============
@@ -110,6 +118,10 @@ export async function fetchPlayerProfile(): Promise<ApiResponse<PlayerProfile>> 
  * Update player display name
  */
 export async function updateDisplayNameApi(displayName: string): Promise<ApiResponse<{ success: boolean; displayName: string }>> {
+  // Skip server sync for guest mode
+  if (isGuestMode()) {
+    return { data: { success: true, displayName }, error: null };
+  }
   const playerId = getCurrentPlayerId();
   if (!playerId) {
     return { data: null, error: 'Not logged in' };
@@ -127,6 +139,10 @@ export async function updateDisplayNameApi(displayName: string): Promise<ApiResp
 export async function updatePreferencesApi(
   preferences: Partial<PlayerPreferences>
 ): Promise<ApiResponse<{ success: boolean }>> {
+  // Skip server sync for guest mode
+  if (isGuestMode()) {
+    return { data: { success: true }, error: null };
+  }
   const playerId = getCurrentPlayerId();
   if (!playerId) {
     return { data: null, error: 'Not logged in' };
@@ -160,6 +176,10 @@ export async function updateStatsApi(updates: {
   shapeArchitectBuilt?: number;
   bestTime?: Partial<PlayerStats['bestTimes']>;
 }): Promise<ApiResponse<StatsUpdateResult>> {
+  // Skip server sync for guest mode
+  if (isGuestMode()) {
+    return { data: null, error: null };
+  }
   const playerId = getCurrentPlayerId();
   if (!playerId) {
     return { data: null, error: 'Not logged in' };
@@ -179,6 +199,10 @@ export async function updateStatsApi(updates: {
 export async function unlockAchievementApi(
   achievementId: string
 ): Promise<ApiResponse<{ success: boolean; alreadyUnlocked: boolean }>> {
+  // Skip server sync for guest mode
+  if (isGuestMode()) {
+    return { data: { success: true, alreadyUnlocked: false }, error: null };
+  }
   const playerId = getCurrentPlayerId();
   if (!playerId) {
     return { data: null, error: 'Not logged in' };
@@ -204,6 +228,10 @@ export interface PlaySessionResult {
  * Record a play session and update streak
  */
 export async function recordPlaySessionApi(): Promise<ApiResponse<PlaySessionResult>> {
+  // Skip server sync for guest mode
+  if (isGuestMode()) {
+    return { data: null, error: null };
+  }
   const playerId = getCurrentPlayerId();
   if (!playerId) {
     return { data: null, error: 'Not logged in' };
@@ -229,6 +257,10 @@ export interface LevelProgress {
 export async function fetchGameProgress(
   gameId: string
 ): Promise<ApiResponse<LevelProgress[]>> {
+  // Skip server fetch for guest mode - use local storage
+  if (isGuestMode()) {
+    return { data: [], error: null };
+  }
   const playerId = getCurrentPlayerId();
   if (!playerId) {
     return { data: null, error: 'Not logged in' };
@@ -245,6 +277,10 @@ export async function saveLevelCompletion(
   levelId: string,
   timeSeconds: number
 ): Promise<ApiResponse<{ success: boolean; isPersonalBest: boolean; bestTime: number }>> {
+  // Skip server sync for guest mode
+  if (isGuestMode()) {
+    return { data: { success: true, isPersonalBest: false, bestTime: timeSeconds }, error: null };
+  }
   const playerId = getCurrentPlayerId();
   if (!playerId) {
     return { data: null, error: 'Not logged in' };
@@ -279,6 +315,10 @@ export interface DailyChallengeStatus {
 export async function fetchDailyChallengeStatus(
   date: string
 ): Promise<ApiResponse<DailyChallengeStatus>> {
+  // Skip server fetch for guest mode - use local storage
+  if (isGuestMode()) {
+    return { data: { challenges: [], streaks: [] }, error: null };
+  }
   const playerId = getCurrentPlayerId();
   if (!playerId) {
     return { data: null, error: 'Not logged in' };
@@ -294,6 +334,10 @@ export async function completeDailyChallengeApi(
   gameId: string,
   timeSeconds: number
 ): Promise<ApiResponse<{ success: boolean; currentStreak: number; longestStreak: number }>> {
+  // Skip server sync for guest mode
+  if (isGuestMode()) {
+    return { data: { success: true, currentStreak: 0, longestStreak: 0 }, error: null };
+  }
   const playerId = getCurrentPlayerId();
   if (!playerId) {
     return { data: null, error: 'Not logged in' };

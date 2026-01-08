@@ -34,6 +34,11 @@ export const LANGUAGE_KEY = `${STORAGE_PREFIX}-lang`;
 export const SOUND_ENABLED_KEY = `${STORAGE_PREFIX}-sound-enabled`;
 
 /**
+ * Guest mode flag (true if playing as guest)
+ */
+export const GUEST_MODE_KEY = `${STORAGE_PREFIX}-guest-mode`;
+
+/**
  * High contrast mode preference
  */
 export const HIGH_CONTRAST_KEY = `${STORAGE_PREFIX}-high-contrast`;

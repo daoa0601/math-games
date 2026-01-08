@@ -17,6 +17,8 @@ import {
   type LoginResult,
 } from '../services/api';
 import type { PlayerProfile } from '../services/player';
+import { createDefaultProfile, savePlayerProfile } from '../services/player';
+import { GUEST_MODE_KEY } from '../constants';
 import { AuthStateContext, type AuthState } from './AuthStateContext';
 import { AuthAPIContext, type AuthAPI } from './AuthAPIContext';
 
@@ -35,8 +37,10 @@ interface AuthProviderProps {
 export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps) {
   const [state, setState] = useState<AuthState>(() => {
     const playerId = getCurrentPlayerId();
+    const isGuest = localStorage.getItem(GUEST_MODE_KEY) === 'true';
     return {
-      isLoggedIn: playerId !== null,
+      isLoggedIn: playerId !== null || isGuest,
+      isGuest,
       playerId,
       isLoading: false,
       error: null,
@@ -46,6 +50,10 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
   // Verify login on mount (check if server has the profile)
   useEffect(() => {
     const verifyLogin = async () => {
+      // Skip server verification for guests - they use local storage only
+      if (state.isGuest) {
+        return;
+      }
       if (state.playerId) {
         setState(s => ({ ...s, isLoading: true }));
         const result = await fetchPlayerProfile();
@@ -54,6 +62,7 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
           apiLogout();
           setState({
             isLoggedIn: false,
+            isGuest: false,
             playerId: null,
             isLoading: false,
             error: null,
@@ -82,8 +91,11 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
     }
 
     if (result.data) {
+      // Clear guest mode when logging in with a real account
+      localStorage.removeItem(GUEST_MODE_KEY);
       setState({
         isLoggedIn: true,
+        isGuest: false,
         playerId: playerId.trim().toLowerCase(),
         isLoading: false,
         error: null,
@@ -99,10 +111,35 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
     return null;
   }, [onLogin]);
 
+  const loginAsGuest = useCallback(() => {
+    // Create a local guest profile
+    const guestProfile = createDefaultProfile();
+    guestProfile.displayName = '';  // Will show "Guest" in UI
+    savePlayerProfile(guestProfile);
+
+    // Mark as guest in localStorage
+    localStorage.setItem(GUEST_MODE_KEY, 'true');
+
+    setState({
+      isLoggedIn: true,
+      isGuest: true,
+      playerId: null,
+      isLoading: false,
+      error: null,
+    });
+
+    if (onLogin) {
+      onLogin(guestProfile, true);
+    }
+  }, [onLogin]);
+
   const logout = useCallback(() => {
     apiLogout();
+    // Clear guest mode flag
+    localStorage.removeItem(GUEST_MODE_KEY);
     setState({
       isLoggedIn: false,
+      isGuest: false,
       playerId: null,
       isLoading: false,
       error: null,
@@ -116,7 +153,7 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
     setState(s => ({ ...s, error: null }));
   }, []);
 
-  const api: AuthAPI = { login, logout, clearError };
+  const api: AuthAPI = { login, loginAsGuest, logout, clearError };
 
   return (
     <AuthStateContext.Provider value={state}>

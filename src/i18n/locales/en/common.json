@@ -335,5 +335,22 @@
             "step6Title": "3D Mode",
             "step6": "Switch to 3D view for complex puzzles. Use camera buttons to change angle."
         }
+    },
+    "login": {
+        "title": "Math Games",
+        "subtitle": "Enter your player ID to continue",
+        "playerIdLabel": "Player ID",
+        "playerIdPlaceholder": "e.g., player123",
+        "hint": "New ID? An account will be created automatically.",
+        "loading": "Loading...",
+        "submit": "Continue",
+        "or": "or",
+        "guest": "Play as Guest",
+        "guestLabel": "Guest",
+        "guestHint": "Progress saved locally",
+        "signIn": "Sign In",
+        "logout": "Logout",
+        "whatIsThis": "What is a Player ID?",
+        "explanation": "Your Player ID is a unique identifier that tracks your progress. Use the same ID on any device to sync your stats and achievements."
     }
 }

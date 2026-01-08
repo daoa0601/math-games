@@ -10,7 +10,7 @@ import './Login.css';
 
 export function Login() {
   const { t } = useTranslation();
-  const { login, isLoading, error, clearError } = useAuth();
+  const { login, loginAsGuest, isLoading, error, clearError } = useAuth();
   const [playerId, setPlayerId] = useState('');
 
   const handleSubmit = async (e: FormEvent) => {
@@ -66,6 +66,19 @@ export function Login() {
             {isLoading
               ? t('login.loading', 'Loading...')
               : t('login.submit', 'Continue')}
+          </button>
+
+          <div className="login-divider">
+            <span>{t('login.or', 'or')}</span>
+          </div>
+
+          <button
+            type="button"
+            className="login-button login-button--guest"
+            onClick={loginAsGuest}
+            disabled={isLoading}
+          >
+            {t('login.guest', 'Play as Guest')}
           </button>
         </form>
 
