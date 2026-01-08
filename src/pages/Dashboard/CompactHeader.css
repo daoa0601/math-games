@@ -64,3 +64,21 @@
   letter-spacing: 0.1em;
   color: var(--muted);
 }
+
+.compact-header__logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.compact-header__logout:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}

@@ -30,3 +30,11 @@ export {
 // Direct context exports (for testing or advanced use cases)
 export { PlayerStateContext } from './PlayerStateContext';
 export { PlayerAPIContext } from './PlayerAPIContext';
+
+// Auth context (for centralized player authentication)
+export { AuthProvider } from './AuthContext';
+export { AuthStateContext, useAuthState, type AuthState } from './AuthStateContext';
+export { AuthAPIContext, useAuthAPI, type AuthAPI } from './AuthAPIContext';
+
+// Combined auth hook for convenience
+export { useAuth } from './useAuthCombined';
