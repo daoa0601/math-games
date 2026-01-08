@@ -280,6 +280,8 @@ body {
   border-bottom: 1px solid var(--border);
   margin-bottom: var(--space-sm);
   flex-shrink: 0;
+  position: relative;
+  z-index: 10;
 }
 
 .game-header__title {
@@ -293,6 +295,34 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  flex-shrink: 0;
+  /* Prevent actions from overflowing into game area on mobile */
+  overflow: visible;
+}
+
+/* On mobile, wrap header to prevent overlap with game content */
+@media (max-width: 480px) {
+  .game-header {
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .game-header__title {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .game-header__actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  /* Prevent game content from centering vertically on mobile
+     which can cause SVG elements to overlap with the header */
+  .game-content {
+    justify-content: flex-start;
+    padding-top: var(--space-md);
+  }
 }
 
 .game-content {
@@ -303,6 +333,8 @@ body {
   justify-content: center;
   overflow: auto;
   min-height: 0;
+  position: relative;
+  z-index: 1;
 }
 
 /* Loading spinner */

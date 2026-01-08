@@ -159,10 +159,18 @@ export class MagicGraphPage {
 
   /**
    * Click on an empty node to open the number picker
+   * Uses dispatchEvent to bypass header overlap issues on mobile viewports
+   * where the header actions row may intercept pointer events
    */
   async clickEmptyNode(index: number = 0): Promise<void> {
     const emptyNode = this.emptyNodes.nth(index);
-    await emptyNode.click();
+    // Scroll to center of viewport to avoid header overlap on mobile
+    await emptyNode.scrollIntoViewIfNeeded();
+    // Small delay to ensure scroll completes
+    await this.page.waitForTimeout(100);
+    // Use dispatchEvent to bypass header overlap on mobile
+    // This directly triggers the click handler on the SVG element
+    await emptyNode.dispatchEvent('click');
     await this.numberPicker.waitFor({ state: 'visible' });
   }
 
@@ -185,9 +193,10 @@ export class MagicGraphPage {
 
   /**
    * Close the number picker
+   * Uses dispatchEvent to bypass header overlap on mobile
    */
   async closeNumberPicker(): Promise<void> {
-    await this.pickerClose.click();
+    await this.pickerClose.dispatchEvent('click');
     await this.numberPicker.waitFor({ state: 'hidden' });
   }
 

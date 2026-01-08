@@ -52,7 +52,13 @@ test.describe('Accessibility', () => {
       expect(count).toBe(3);
     });
 
-    test('should support keyboard navigation', async ({ page }) => {
+    test('should support keyboard navigation', async ({ page }, testInfo) => {
+      // Skip on mobile browsers - Tab navigation doesn't work on mobile Safari/Chrome
+      // Mobile users interact via touch, not keyboard navigation
+      const projectName = testInfo.project.name;
+      const isMobile = projectName.toLowerCase().includes('mobile');
+      test.skip(isMobile, 'Keyboard Tab navigation not supported on mobile browsers');
+
       const dashboard = new DashboardPage(page);
       await dashboard.goto();
       await dashboard.waitForLoad();

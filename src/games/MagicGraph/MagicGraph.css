@@ -366,6 +366,31 @@
   .mg-picker__option { min-height: 44px; }
 }
 
+/* Mobile: Prevent vertical centering that causes header overlap
+   Header is ~50px title + ~50px actions row = ~100px on mobile.
+   SVG nodes start at PADDING=40px from SVG top.
+   Need extra clearance to avoid header intercept. */
+@media (max-width: 480px) {
+  .mg-container {
+    justify-content: flex-start;
+  }
+
+  /* Add margin above board to clear header actions row */
+  .mg-board-wrapper {
+    margin-top: 32px;
+  }
+
+  /* Ensure daily badge doesn't overlap */
+  .mg-daily {
+    margin-top: var(--space-md);
+  }
+
+  /* Position picker BELOW node on mobile to avoid header overlap */
+  .mg-picker {
+    transform: translate(-50%, 8px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mg-node--just-placed,
   .mg-picker,

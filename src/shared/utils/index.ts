@@ -90,3 +90,11 @@ export {
 } from './colorPatterns';
 
 export type { PatternClass } from './colorPatterns';
+
+// Date utilities
+export {
+    getTodayDate,
+    daysBetween,
+    isConsecutiveDay,
+    isSameDay,
+} from './dateUtils';

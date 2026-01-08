@@ -9,7 +9,7 @@ export function StatsTab() {
   const { stats } = profile;
 
   return (
-    <div className="stats-tab" role="tabpanel" id="tabpanel-stats" aria-labelledby="tab-stats">
+    <div className="stats-tab" role="tabpanel" id="panel-stats" aria-labelledby="tab-stats">
       {/* Overall Stats */}
       <section className="stats-tab__section">
         <h2 className="stats-tab__heading">{t('stats.overall')}</h2>

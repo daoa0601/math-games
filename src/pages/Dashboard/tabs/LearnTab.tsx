@@ -48,7 +48,7 @@ export function LearnTab() {
   return (
     <div
       role="tabpanel"
-      id="tabpanel-learn"
+      id="panel-learn"
       aria-labelledby="tab-learn"
       className="learn-tab"
     >
