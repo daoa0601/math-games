@@ -42,6 +42,7 @@ import {
   recordPlaySessionApi,
   unlockAchievementApi,
 } from '../services/api';
+import { syncToFirestore, syncAchievement as syncAchievementToFirebase } from '../../firebase/sync';
 
 // Import split contexts (hooks are exported from usePlayerHooks.ts)
 import { PlayerStateContext, type PlayerState } from './PlayerStateContext';
@@ -206,6 +207,9 @@ export function PlayerProvider({ children, initialProfile }: PlayerProviderProps
       bestTime: updates.bestTimes,
     }).catch(console.error);
 
+    // Sync to Firebase (debounced)
+    syncToFirestore(updated);
+
     return { rankedUp, previousRank, newRank };
   }, []);
 
@@ -235,6 +239,8 @@ export function PlayerProvider({ children, initialProfile }: PlayerProviderProps
           newAchievements.push(achievement);
           // Sync to server (fire and forget)
           unlockAchievementApi(id).catch(console.error);
+          // Sync to Firebase (debounced)
+          syncAchievementToFirebase(id);
         }
       }
     });
