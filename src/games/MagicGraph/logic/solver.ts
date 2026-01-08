@@ -652,7 +652,6 @@ export function deriveAlgebraicHints(
     // Find relationships between lines (shared nodes)
     // Use Sets for O(1) lookups instead of O(n) includes
     for (let i = 0; i < lines.length; i++) {
-        const lineISet = new Set(lines[i].nodeIds);
         for (let j = i + 1; j < lines.length; j++) {
             const lineJSet = new Set(lines[j].nodeIds);
             const shared = lines[i].nodeIds.filter(id => lineJSet.has(id));
