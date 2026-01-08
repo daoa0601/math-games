@@ -10,11 +10,8 @@ import {
   type ReactNode,
 } from 'react';
 import {
-  getCurrentPlayerId,
   loginPlayer,
   logout as apiLogout,
-  fetchPlayerProfile,
-  checkApiAvailability,
   type LoginResult,
 } from '../services/api';
 import type { PlayerProfile } from '../services/player';
@@ -36,89 +33,42 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps) {
+  // TEMPORARY: Login disabled - everyone is treated as guest
   const [state, setState] = useState<AuthState>(() => {
-    const playerId = getCurrentPlayerId();
-    const isGuest = localStorage.getItem(GUEST_MODE_KEY) === 'true';
     return {
-      isLoggedIn: playerId !== null || isGuest,
-      isGuest,
-      playerId,
-      isLoading: true, // Start with loading while we check API
+      isLoggedIn: true,
+      isGuest: true,
+      playerId: null,
+      isLoading: true,
       error: null,
       isOffline: false,
     };
   });
 
-  // Check API availability and verify login on mount
+  // Auto-login as guest on mount (login disabled)
   useEffect(() => {
-    const initializeAuth = async () => {
-      // Skip server verification for guests - they use local storage only
-      if (state.isGuest) {
-        setState(s => ({ ...s, isLoading: false }));
-        return;
-      }
+    // Create a local guest profile if needed
+    const existingProfile = getPlayerProfile();
+    const guestProfile = existingProfile.id ? existingProfile : createDefaultProfile();
+    if (!existingProfile.id) {
+      savePlayerProfile(guestProfile);
+    }
 
-      // First check if the API server is available
-      const apiAvailable = await checkApiAvailability();
+    // Mark as guest in localStorage
+    localStorage.setItem(GUEST_MODE_KEY, 'true');
 
-      if (!apiAvailable) {
-        // API is unavailable - enable offline mode with localStorage data
-        const localProfile = getPlayerProfile();
-        setState({
-          isLoggedIn: true,
-          isGuest: false,
-          playerId: localProfile.id,
-          isLoading: false,
-          error: null,
-          isOffline: true,
-        });
-        if (onLogin) {
-          onLogin(localProfile, false);
-        }
-        return;
-      }
+    setState({
+      isLoggedIn: true,
+      isGuest: true,
+      playerId: null,
+      isLoading: false,
+      error: null,
+      isOffline: false,
+    });
 
-      // API is available - verify login with server
-      const playerId = getCurrentPlayerId();
-      if (playerId) {
-        const result = await fetchPlayerProfile();
-        if (result.error) {
-          // Player ID in localStorage but not on server - clear it
-          apiLogout();
-          setState({
-            isLoggedIn: false,
-            isGuest: false,
-            playerId: null,
-            isLoading: false,
-            error: null,
-            isOffline: false,
-          });
-        } else {
-          setState({
-            isLoggedIn: true,
-            isGuest: false,
-            playerId,
-            isLoading: false,
-            error: null,
-            isOffline: false,
-          });
-          if (result.data && onLogin) {
-            onLogin(result.data, false);
-          }
-        }
-      } else {
-        // No player ID - need to login
-        setState({
-          isLoggedIn: false,
-          isGuest: false,
-          playerId: null,
-          isLoading: false,
-          error: null,
-          isOffline: false,
-        });
-      }
-    };
-    initializeAuth();
+    if (onLogin) {
+      onLogin(guestProfile, !existingProfile.id);
+    }
     // Only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
