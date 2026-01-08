@@ -43,6 +43,8 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
       isLoading: true,
       error: null,
       isOffline: false,
+      isFirebaseUser: false,
+      isAnonymous: false,
     };
   });
 
@@ -65,6 +67,8 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
       isLoading: false,
       error: null,
       isOffline: false,
+      isFirebaseUser: false,
+      isAnonymous: false,
     });
 
     if (onLogin) {
@@ -94,6 +98,8 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
         isLoading: false,
         error: null,
         isOffline: false,
+        isFirebaseUser: false,
+        isAnonymous: false,
       });
 
       if (onLogin) {
@@ -122,6 +128,8 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
       isLoading: false,
       error: null,
       isOffline: false,
+      isFirebaseUser: false,
+      isAnonymous: false,
     });
 
     if (onLogin) {
@@ -140,6 +148,8 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
       isLoading: false,
       error: null,
       isOffline: false,
+      isFirebaseUser: false,
+      isAnonymous: false,
     });
     if (onLogout) {
       onLogout();

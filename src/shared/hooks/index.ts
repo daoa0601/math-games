@@ -10,6 +10,9 @@ export * from './gestures';
 // Device capability hooks
 export * from './device';
 
+// Firebase hooks
+export * from './firebase';
+
 // Cross-cutting hooks (remain at root)
 export { useTutorial } from './useTutorial';
 export type { UseTutorialOptions, UseTutorialReturn } from './useTutorial';

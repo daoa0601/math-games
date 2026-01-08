@@ -114,3 +114,23 @@ export function isFirebaseInitialized(): boolean {
 
 // Re-export config utilities
 export { isFirebaseEnabled, getFirebaseConfig } from './config';
+
+// Re-export auth context (provider and types)
+export {
+  FirebaseAuthProvider,
+  type FirebaseAuthState,
+  type FirebaseAuthAPI,
+} from './FirebaseAuthContext';
+
+// Re-export auth hooks (from separate file for Fast Refresh)
+export {
+  useFirebaseAuth,
+  useFirebaseAuthState,
+  useFirebaseAuthAPI,
+} from './useFirebaseAuthHooks';
+
+// Re-export services
+export * from './services';
+
+// Re-export sync
+export * from './sync';
