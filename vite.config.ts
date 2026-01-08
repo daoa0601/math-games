@@ -49,6 +49,8 @@ export default defineConfig(({ command }) => ({
           'i18n-vendor': ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
           // three.js - large, only used by ShapeArchitect (minified by plugin)
           'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
+          // Firebase - loaded on-demand when Firebase is configured
+          'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
           // REMOVED: dnd-vendor - now bundles with ShapeArchitect chunk
         },
       },

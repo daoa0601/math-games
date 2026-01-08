@@ -4,3 +4,5 @@ export { Timer } from './Timer';
 export type { TimerProps } from './Timer';
 export { ProgressRing, CompactProgressRing } from './ProgressRing';
 export { DifficultySelector } from './DifficultySelector';
+export { SyncIndicator, type SyncStatus } from './SyncIndicator';
+export { OfflineBanner } from './OfflineBanner';

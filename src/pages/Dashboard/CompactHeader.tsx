@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { PlayerProfile } from '@/shared/schemas';
 import type { RankThreshold } from '@/shared/services/rank';
+import { SyncIndicator, type SyncStatus } from '@/shared/components/ui';
 import './CompactHeader.css';
 
 interface CompactHeaderProps {
@@ -8,11 +9,26 @@ interface CompactHeaderProps {
   rankInfo: RankThreshold;
   streak: number;
   isGuest?: boolean;
+  isFirebaseUser?: boolean;
+  syncStatus?: SyncStatus;
   onLogout?: () => void;
+  onSignIn?: () => void;
 }
 
-export function CompactHeader({ profile, rankInfo, streak, isGuest, onLogout }: CompactHeaderProps) {
+export function CompactHeader({
+  profile,
+  rankInfo,
+  streak,
+  isGuest,
+  isFirebaseUser,
+  syncStatus,
+  onLogout,
+  onSignIn,
+}: CompactHeaderProps) {
   const { t } = useTranslation();
+
+  // Show sync indicator only for Firebase users
+  const showSyncStatus = isFirebaseUser && syncStatus;
 
   return (
     <header className="compact-header">
@@ -25,11 +41,16 @@ export function CompactHeader({ profile, rankInfo, streak, isGuest, onLogout }: 
             ? t('login.guestLabel', 'Guest')
             : (profile.displayName || profile.id)}
         </span>
-        <span className="compact-header__rank-name">
-          {isGuest
-            ? t('login.guestHint', 'Progress saved locally')
-            : t(rankInfo.displayNameKey)}
-        </span>
+        <div className="compact-header__status">
+          <span className="compact-header__rank-name">
+            {isGuest
+              ? t('login.guestHint', 'Progress saved locally')
+              : t(rankInfo.displayNameKey)}
+          </span>
+          {showSyncStatus && (
+            <SyncIndicator status={syncStatus} className="compact-header__sync" />
+          )}
+        </div>
       </div>
       {streak > 0 && !isGuest && (
         <div className="compact-header__streak" title={t('player.streak')}>
@@ -37,26 +58,32 @@ export function CompactHeader({ profile, rankInfo, streak, isGuest, onLogout }: 
           <span className="compact-header__streak-label">streak</span>
         </div>
       )}
-      {onLogout && (
+      {isGuest && onSignIn && (
+        <button
+          className="compact-header__logout"
+          onClick={onSignIn}
+          title={t('login.signIn', 'Sign In')}
+          aria-label={t('login.signIn', 'Sign In')}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+        </button>
+      )}
+      {!isGuest && onLogout && (
         <button
           className="compact-header__logout"
           onClick={onLogout}
-          title={isGuest ? t('login.signIn', 'Sign In') : t('login.logout', 'Logout')}
-          aria-label={isGuest ? t('login.signIn', 'Sign In') : t('login.logout', 'Logout')}
+          title={t('login.logout', 'Logout')}
+          aria-label={t('login.logout', 'Logout')}
         >
-          {isGuest ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-              <polyline points="10 17 15 12 10 7" />
-              <line x1="15" y1="12" x2="3" y2="12" />
-            </svg>
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-          )}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
         </button>
       )}
     </header>

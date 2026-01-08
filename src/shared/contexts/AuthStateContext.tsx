@@ -14,6 +14,9 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
   isOffline: boolean; // True when API server is unavailable (localStorage-only mode)
+  // Firebase-specific state
+  isFirebaseUser: boolean; // True when user is authenticated via Firebase
+  isAnonymous: boolean; // True when Firebase user is anonymous (can be upgraded)
 }
 
 export const AuthStateContext = createContext<AuthState | null>(null);

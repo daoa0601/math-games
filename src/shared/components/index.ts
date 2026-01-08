@@ -4,6 +4,9 @@ export * from './ui';
 // Layout components
 export * from './layout';
 
+// Auth components
+export * from './auth';
+
 // Gamification components
 export * from './gamification';
 

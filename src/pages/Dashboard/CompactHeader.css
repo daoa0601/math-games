@@ -35,11 +35,22 @@
   color: var(--text);
 }
 
+.compact-header__status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
 .compact-header__rank-name {
   font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--muted);
+}
+
+.compact-header__sync {
+  padding-left: var(--space-sm);
+  border-left: 1px solid var(--border);
 }
 
 .compact-header__streak {
