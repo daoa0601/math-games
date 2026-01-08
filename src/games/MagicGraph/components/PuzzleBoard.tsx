@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo, memo } from 'react';
 import type { Line, LineWithStatus, GraphNode } from '../logic/types';
 import { getLineStatus } from '../logic/solver';
 
@@ -25,7 +25,7 @@ const BOARD_HEIGHT = 280;
 const NODE_RADIUS = 24;
 const PADDING = 40;
 
-export function PuzzleBoard({
+export const PuzzleBoard = memo(function PuzzleBoard({
     nodes,
     lines,
     nodeValues,
@@ -37,9 +37,25 @@ export function PuzzleBoard({
     justPlacedNodeId,
     isCompleted,
 }: PuzzleBoardProps) {
-    // Calculate line statuses
-    const lineStatuses: LineWithStatus[] = lines.map((line) =>
-        getLineStatus(line, nodeValues, targetSum)
+    // Pre-compute scaled positions for all nodes (avoid recalculating in render)
+    const scaledPositions = useMemo(() => {
+        const scaleX = (BOARD_WIDTH - PADDING * 2) / 300;
+        const scaleY = (BOARD_HEIGHT - PADDING * 2) / 250;
+        return new Map(
+            nodes.map((node) => [
+                node.id,
+                {
+                    x: node.position.x * scaleX + PADDING,
+                    y: node.position.y * scaleY + PADDING,
+                },
+            ])
+        );
+    }, [nodes]);
+
+    // Calculate line statuses - memoized to avoid recalculation on unrelated state changes
+    const lineStatuses: LineWithStatus[] = useMemo(
+        () => lines.map((line) => getLineStatus(line, nodeValues, targetSum)),
+        [lines, nodeValues, targetSum]
     );
 
     // Get status class for line (including impossible state from Auditor)
@@ -49,28 +65,25 @@ export function PuzzleBoard({
         return isImpossible ? `${baseClass} mg-edge--impossible` : baseClass;
     };
 
-    // Calculate scaled positions
-    const getScaledPosition = (node: GraphNode) => {
-        // Original positions are in 0-300 range, scale to fit board with padding
-        const scaleX = (BOARD_WIDTH - PADDING * 2) / 300;
-        const scaleY = (BOARD_HEIGHT - PADDING * 2) / 250;
-        return {
-            x: node.position.x * scaleX + PADDING,
-            y: node.position.y * scaleY + PADDING,
-        };
-    };
+    // Get scaled position from pre-computed map
+    const getScaledPosition = useCallback(
+        (nodeId: string) => scaledPositions.get(nodeId) ?? { x: 0, y: 0 },
+        [scaledPositions]
+    );
 
-    // Get line path between multiple nodes
-    const getLinePath = (line: Line): string => {
-        const points = line.nodeIds
-            .map((id) => nodes.find((n) => n.id === id))
-            .filter(Boolean)
-            .map((n) => getScaledPosition(n!));
+    // Get line path between multiple nodes - O(1) lookups instead of O(n)
+    const getLinePath = useCallback(
+        (line: Line): string => {
+            const points = line.nodeIds
+                .map((id) => scaledPositions.get(id))
+                .filter(Boolean) as { x: number; y: number }[];
 
-        if (points.length < 2) return '';
+            if (points.length < 2) return '';
 
-        return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-    };
+            return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+        },
+        [scaledPositions]
+    );
 
     // Get ARIA label for node
     const getNodeAriaLabel = (node: GraphNode, value: number | null | undefined): string => {
@@ -163,7 +176,7 @@ export function PuzzleBoard({
 
             {/* Render nodes */}
             {nodes.map((node) => {
-                const pos = getScaledPosition(node);
+                const pos = getScaledPosition(node.id);
                 const value = nodeValues.get(node.id);
                 const isEmpty = value === null || value === undefined;
                 const isFixed = node.isFixed;
@@ -227,4 +240,4 @@ export function PuzzleBoard({
             })}
         </svg>
     );
-}
+});
