@@ -14,10 +14,11 @@ import {
   loginPlayer,
   logout as apiLogout,
   fetchPlayerProfile,
+  checkApiAvailability,
   type LoginResult,
 } from '../services/api';
 import type { PlayerProfile } from '../services/player';
-import { createDefaultProfile, savePlayerProfile } from '../services/player';
+import { getPlayerProfile, createDefaultProfile, savePlayerProfile } from '../services/player';
 import { GUEST_MODE_KEY } from '../constants';
 import { AuthStateContext, type AuthState } from './AuthStateContext';
 import { AuthAPIContext, type AuthAPI } from './AuthAPIContext';
@@ -42,20 +43,44 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
       isLoggedIn: playerId !== null || isGuest,
       isGuest,
       playerId,
-      isLoading: false,
+      isLoading: true, // Start with loading while we check API
       error: null,
+      isOffline: false,
     };
   });
 
-  // Verify login on mount (check if server has the profile)
+  // Check API availability and verify login on mount
   useEffect(() => {
-    const verifyLogin = async () => {
+    const initializeAuth = async () => {
       // Skip server verification for guests - they use local storage only
       if (state.isGuest) {
+        setState(s => ({ ...s, isLoading: false }));
         return;
       }
-      if (state.playerId) {
-        setState(s => ({ ...s, isLoading: true }));
+
+      // First check if the API server is available
+      const apiAvailable = await checkApiAvailability();
+
+      if (!apiAvailable) {
+        // API is unavailable - enable offline mode with localStorage data
+        const localProfile = getPlayerProfile();
+        setState({
+          isLoggedIn: true,
+          isGuest: false,
+          playerId: localProfile.id,
+          isLoading: false,
+          error: null,
+          isOffline: true,
+        });
+        if (onLogin) {
+          onLogin(localProfile, false);
+        }
+        return;
+      }
+
+      // API is available - verify login with server
+      const playerId = getCurrentPlayerId();
+      if (playerId) {
         const result = await fetchPlayerProfile();
         if (result.error) {
           // Player ID in localStorage but not on server - clear it
@@ -66,16 +91,34 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
             playerId: null,
             isLoading: false,
             error: null,
+            isOffline: false,
           });
         } else {
-          setState(s => ({ ...s, isLoading: false }));
+          setState({
+            isLoggedIn: true,
+            isGuest: false,
+            playerId,
+            isLoading: false,
+            error: null,
+            isOffline: false,
+          });
           if (result.data && onLogin) {
             onLogin(result.data, false);
           }
         }
+      } else {
+        // No player ID - need to login
+        setState({
+          isLoggedIn: false,
+          isGuest: false,
+          playerId: null,
+          isLoading: false,
+          error: null,
+          isOffline: false,
+        });
       }
     };
-    verifyLogin();
+    initializeAuth();
     // Only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -99,6 +142,7 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
         playerId: playerId.trim().toLowerCase(),
         isLoading: false,
         error: null,
+        isOffline: false,
       });
 
       if (onLogin) {
@@ -126,6 +170,7 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
       playerId: null,
       isLoading: false,
       error: null,
+      isOffline: false,
     });
 
     if (onLogin) {
@@ -143,6 +188,7 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
       playerId: null,
       isLoading: false,
       error: null,
+      isOffline: false,
     });
     if (onLogout) {
       onLogout();

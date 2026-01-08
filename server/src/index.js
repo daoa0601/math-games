@@ -9,6 +9,12 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// ============ HEALTH CHECK ============
+
+app.get('/api/players/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // ============ PLAYER ROUTES ============
 
 // Register a new player or get existing one by ID

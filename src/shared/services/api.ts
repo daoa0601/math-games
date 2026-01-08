@@ -11,6 +11,53 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const PLAYER_ID_KEY = 'math-games-player-id';
 const GUEST_MODE_KEY = 'math-games-guest-mode';
 
+// Track API availability status
+let apiAvailable: boolean | null = null;
+
+/**
+ * Check if the API server is available
+ * Returns true if server responds, false if unreachable
+ */
+export async function checkApiAvailability(): Promise<boolean> {
+  // Return cached result if we've already checked
+  if (apiAvailable !== null) {
+    return apiAvailable;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
+    const response = await fetch(`${API_BASE_URL}/api/players/health`, {
+      method: 'GET',
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+    apiAvailable = response.ok;
+    return apiAvailable;
+  } catch {
+    // Network error, server unreachable, or timeout
+    apiAvailable = false;
+    return false;
+  }
+}
+
+/**
+ * Check if the API is known to be available
+ * Returns null if not yet checked
+ */
+export function isApiAvailable(): boolean | null {
+  return apiAvailable;
+}
+
+/**
+ * Reset API availability check (for retrying)
+ */
+export function resetApiAvailability(): void {
+  apiAvailable = null;
+}
+
 /**
  * Get the current player ID from localStorage
  */
