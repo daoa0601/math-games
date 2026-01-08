@@ -204,12 +204,13 @@ export function generatePuzzle(
             // Randomly select nodes to keep visible (fixed)
             const indices = filledNodes.map((_, i) => i);
             shuffleArray(indices);
-            const keepVisible = indices.slice(0, hints);
+            // Use Set for O(1) lookups instead of O(n) includes
+            const keepVisibleSet = new Set(indices.slice(0, hints));
 
             const maskedNodes = filledNodes.map((n, i) => ({
                 ...n,
-                isFixed: keepVisible.includes(i),
-                value: keepVisible.includes(i) ? n.value : null,
+                isFixed: keepVisibleSet.has(i),
+                value: keepVisibleSet.has(i) ? n.value : null,
             }));
 
             // Verify unique solution
@@ -234,12 +235,13 @@ export function generatePuzzle(
     // Fallback: return puzzle with most nodes hidden but accept multiple solutions
     const indices = filledNodes.map((_, i) => i);
     shuffleArray(indices);
-    const keepVisible = indices.slice(0, Math.max(1, Math.floor(basePuzzle.nodes.length / 2)));
+    // Use Set for O(1) lookups
+    const keepVisibleSet = new Set(indices.slice(0, Math.max(1, Math.floor(basePuzzle.nodes.length / 2))));
 
     const fallbackNodes = filledNodes.map((n, i) => ({
         ...n,
-        isFixed: keepVisible.includes(i),
-        value: keepVisible.includes(i) ? n.value : null,
+        isFixed: keepVisibleSet.has(i),
+        value: keepVisibleSet.has(i) ? n.value : null,
     }));
 
     return {
@@ -262,38 +264,83 @@ function shuffleArray<T>(array: T[]): void {
 
 /**
  * Check if k numbers from the array can sum to exactly target.
- * Uses recursive combination checking.
+ * Uses dynamic programming subset sum for better performance.
  */
 function canSumTo(arr: number[], k: number, target: number): boolean {
     if (k === 0) return target === 0;
-    if (k === 1) return arr.includes(target);
     if (arr.length < k) return false;
 
-    // Optimization: early termination
+    // Quick check for single number
+    if (k === 1) {
+        for (const num of arr) {
+            if (num === target) return true;
+        }
+        return false;
+    }
+
+    // Early termination: check if target is achievable
     const sortedArr = [...arr].sort((a, b) => a - b);
     const minPossibleSum = sortedArr.slice(0, k).reduce((a, b) => a + b, 0);
     const maxPossibleSum = sortedArr.slice(-k).reduce((a, b) => a + b, 0);
     if (target < minPossibleSum || target > maxPossibleSum) return false;
 
-    // Generate combinations
-    function* combinations(arr: number[], k: number, start = 0): Generator<number[]> {
-        if (k === 0) {
-            yield [];
-            return;
-        }
-        for (let i = start; i <= arr.length - k; i++) {
-            for (const combo of combinations(arr, k - 1, i + 1)) {
-                yield [arr[i], ...combo];
+    // For small arrays, use direct enumeration (faster than DP overhead)
+    if (arr.length <= 6) {
+        return canSumToEnumerate(arr, k, target);
+    }
+
+    // DP approach: dp[count][sum] = true if we can achieve sum using exactly count numbers
+    // Use Map for sparse storage since target can be large
+    const dp: Map<number, Set<number>> = new Map();
+    dp.set(0, new Set([0]));
+
+    for (const num of arr) {
+        // Iterate backwards through counts to avoid using same number twice
+        for (let count = Math.min(k - 1, dp.size - 1); count >= 0; count--) {
+            const sums = dp.get(count);
+            if (!sums) continue;
+
+            const nextCount = count + 1;
+            if (!dp.has(nextCount)) {
+                dp.set(nextCount, new Set());
+            }
+            const nextSums = dp.get(nextCount)!;
+
+            for (const prevSum of sums) {
+                const newSum = prevSum + num;
+                if (newSum <= target) {
+                    nextSums.add(newSum);
+                    // Early exit if we found the target
+                    if (nextCount === k && newSum === target) {
+                        return true;
+                    }
+                }
             }
         }
     }
 
-    for (const combo of combinations(arr, k)) {
-        if (combo.reduce((a, b) => a + b, 0) === target) {
-            return true;
-        }
+    const finalSums = dp.get(k);
+    return finalSums ? finalSums.has(target) : false;
+}
+
+/**
+ * Direct enumeration for small arrays (avoids DP overhead)
+ */
+function canSumToEnumerate(arr: number[], k: number, target: number): boolean {
+    const n = arr.length;
+
+    function search(index: number, count: number, sum: number): boolean {
+        if (count === k) return sum === target;
+        if (index >= n || count > k || sum > target) return false;
+        if (n - index < k - count) return false; // Not enough elements left
+
+        // Take current element
+        if (search(index + 1, count + 1, sum + arr[index])) return true;
+        // Skip current element
+        return search(index + 1, count, sum);
     }
-    return false;
+
+    return search(0, 0, 0);
 }
 
 /**
@@ -376,6 +423,25 @@ export interface NodeAnalysis {
 }
 
 /**
+ * Build a mapping from node IDs to the lines they belong to.
+ * This allows O(1) lookups instead of O(m*n) filtering.
+ */
+function buildNodeToLinesMap(lines: Line[]): Map<string, Line[]> {
+    const nodeToLines = new Map<string, Line[]>();
+    for (const line of lines) {
+        for (const nodeId of line.nodeIds) {
+            const existing = nodeToLines.get(nodeId);
+            if (existing) {
+                existing.push(line);
+            } else {
+                nodeToLines.set(nodeId, [line]);
+            }
+        }
+    }
+    return nodeToLines;
+}
+
+/**
  * Analyze each empty node to find valid number options.
  * A number is valid if placing it keeps all lines potentially solvable.
  */
@@ -393,6 +459,9 @@ export function analyzeNodes(
     });
     const unusedNumbers = availableNumbers.filter(n => !usedNumbers.has(n));
 
+    // Pre-compute node-to-lines mapping for O(1) lookups
+    const nodeToLines = buildNodeToLinesMap(lines);
+
     const analyses: NodeAnalysis[] = [];
 
     for (const node of nodes) {
@@ -401,15 +470,18 @@ export function analyzeNodes(
 
         const validOptions: number[] = [];
 
+        // Get lines for this node using pre-computed map (O(1) instead of O(m*n))
+        const nodeLines = nodeToLines.get(node.id) ?? [];
+
         // Try each unused number for this node
         for (const num of unusedNumbers) {
             // Temporarily place this number
             const testValues = new Map(nodeValues);
             testValues.set(node.id, num);
 
-            // Check if all lines containing this node remain possible
-            const nodeLines = lines.filter(l => l.nodeIds.includes(node.id));
-            const tempUsed = new Set([...usedNumbers, num]);
+            // Create temp used set for this placement
+            const tempUsed = new Set(usedNumbers);
+            tempUsed.add(num);
             const tempUnused = availableNumbers.filter(n => !tempUsed.has(n));
 
             const allPossible = nodeLines.every(line => {
@@ -578,13 +650,17 @@ export function deriveAlgebraicHints(
     }
 
     // Find relationships between lines (shared nodes)
+    // Use Sets for O(1) lookups instead of O(n) includes
     for (let i = 0; i < lines.length; i++) {
+        const lineISet = new Set(lines[i].nodeIds);
         for (let j = i + 1; j < lines.length; j++) {
-            const shared = lines[i].nodeIds.filter(id => lines[j].nodeIds.includes(id));
+            const lineJSet = new Set(lines[j].nodeIds);
+            const shared = lines[i].nodeIds.filter(id => lineJSet.has(id));
 
             if (shared.length > 0) {
-                const unique1 = lines[i].nodeIds.filter(id => !shared.includes(id));
-                const unique2 = lines[j].nodeIds.filter(id => !shared.includes(id));
+                const sharedSet = new Set(shared);
+                const unique1 = lines[i].nodeIds.filter(id => !sharedSet.has(id));
+                const unique2 = lines[j].nodeIds.filter(id => !sharedSet.has(id));
 
                 // Check if uniques are all unknown or have known values
                 const getTerms = (ids: string[]): string[] => {

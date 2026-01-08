@@ -7,6 +7,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   type ReactNode,
 } from 'react';
 import {
@@ -149,7 +150,12 @@ export function AuthProvider({ children, onLogin, onLogout }: AuthProviderProps)
     setState(s => ({ ...s, error: null }));
   }, []);
 
-  const api: AuthAPI = { login, loginAsGuest, logout, clearError };
+  const api: AuthAPI = useMemo(() => ({
+    login,
+    loginAsGuest,
+    logout,
+    clearError,
+  }), [login, loginAsGuest, logout, clearError]);
 
   return (
     <AuthStateContext.Provider value={state}>

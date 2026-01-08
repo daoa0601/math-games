@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, memo, useMemo, useCallback, type CSSProperties } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import type { Piece, Rotation3D } from '../logic/types';
 import { getExplicitPattern } from '@/shared/utils';
@@ -21,7 +21,7 @@ interface DraggablePieceProps {
 // Minimum distance (in pixels) to consider as a drag vs click
 const DRAG_THRESHOLD = 5;
 
-function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePieceProps) {
+const DraggablePiece = memo(function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePieceProps) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: piece.id,
         data: { piece, rotation },
@@ -30,11 +30,11 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
     // Track mouse position at start of interaction to distinguish clicks from drags
     const mouseDownPos = useRef<{ x: number; y: number } | null>(null);
 
-    const handleMouseDown = (e: React.MouseEvent) => {
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
         mouseDownPos.current = { x: e.clientX, y: e.clientY };
-    };
+    }, []);
 
-    const handleClick = (e: React.MouseEvent) => {
+    const handleClick = useCallback((e: React.MouseEvent) => {
         // Calculate distance moved since mousedown
         const movedDistance = mouseDownPos.current
             ? Math.hypot(
@@ -49,34 +49,46 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
             onSelect();
         }
         mouseDownPos.current = null;
-    };
+    }, [onSelect]);
 
-    // Check if piece has 3D depth (z > 0)
-    const is3DPiece = piece.layout.some((p) => p.z > 0);
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') onSelect();
+    }, [onSelect]);
 
-    // Calculate piece bounds for preview
-    const maxX = Math.max(...piece.layout.map((p) => p.x)) + 1;
-    const maxY = Math.max(...piece.layout.map((p) => p.y)) + 1;
+    // Memoize piece calculations
+    const { is3DPiece, previewGrid, patternClass } = useMemo(() => {
+        const is3D = piece.layout.some((p) => p.z > 0);
+        const maxX = Math.max(...piece.layout.map((p) => p.x)) + 1;
+        const maxY = Math.max(...piece.layout.map((p) => p.y)) + 1;
 
-    // Create preview grid for 2D pieces
-    const previewGrid: boolean[][] = Array(maxY)
-        .fill(null)
-        .map(() => Array(maxX).fill(false));
+        const grid: boolean[][] = Array(maxY)
+            .fill(null)
+            .map(() => Array(maxX).fill(false));
 
-    piece.layout.forEach((pos) => {
-        previewGrid[pos.y][pos.x] = true;
-    });
+        piece.layout.forEach((pos) => {
+            grid[pos.y][pos.x] = true;
+        });
 
-    const style = transform
-        ? {
+        return {
+            is3DPiece: is3D,
+            previewGrid: grid,
+            patternClass: getExplicitPattern(piece.color),
+        };
+    }, [piece.layout, piece.color]);
+
+    const style = useMemo((): CSSProperties | undefined => {
+        if (!transform) return undefined;
+        return {
             transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
             zIndex: isDragging ? 1000 : undefined,
             opacity: isDragging ? 0.8 : 1,
-        }
-        : undefined;
+        };
+    }, [transform, isDragging]);
 
-    // Get pattern class for this piece's color
-    const patternClass = getExplicitPattern(piece.color);
+    // Memoize cell style to avoid creating new objects per cell
+    const filledCellStyle = useMemo((): CSSProperties => ({
+        backgroundColor: piece.color,
+    }), [piece.color]);
 
     return (
         <div
@@ -90,7 +102,7 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
                 className="sa-card__clickable"
                 onMouseDown={handleMouseDown}
                 onClick={handleClick}
-                onKeyDown={(e) => e.key === 'Enter' && onSelect()}
+                onKeyDown={handleKeyDown}
                 role="button"
                 tabIndex={0}
                 aria-pressed={isSelected}
@@ -110,7 +122,7 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
                                         <div
                                             key={x}
                                             className={`sa-preview__cell ${filled ? patternClass : 'sa-preview__cell--empty'}`}
-                                            style={{ backgroundColor: filled ? piece.color : undefined }}
+                                            style={filled ? filledCellStyle : undefined}
                                         />
                                     ))}
                                 </div>
@@ -122,13 +134,18 @@ function DraggablePiece({ piece, isSelected, onSelect, rotation }: DraggablePiec
             </div>
         </div>
     );
-}
+});
 
 export function PieceInventory({ pieces, selectedPieceId, onSelectPiece, rotation }: PieceInventoryProps) {
+    // Stable callback factory to avoid creating new functions per piece
+    const handleSelectPiece = useCallback((pieceId: string) => {
+        onSelectPiece(pieceId);
+    }, [onSelectPiece]);
+
     if (pieces.length === 0) {
         return (
             <div className="sa-inventory">
-                <p style={{ color: 'var(--muted)', margin: 0 }}>
+                <p className="sa-inventory__empty">
                     All pieces placed! 🎉
                 </p>
             </div>
@@ -142,7 +159,7 @@ export function PieceInventory({ pieces, selectedPieceId, onSelectPiece, rotatio
                     key={piece.id}
                     piece={piece}
                     isSelected={selectedPieceId === piece.id}
-                    onSelect={() => onSelectPiece(piece.id)}
+                    onSelect={handleSelectPiece.bind(null, piece.id)}
                     rotation={rotation}
                 />
             ))}

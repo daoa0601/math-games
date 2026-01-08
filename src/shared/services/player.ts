@@ -182,10 +182,14 @@ export function savePlayerProfile(profile: PlayerProfile): void {
 }
 
 /**
- * Update specific fields in the player profile
+ * Update specific fields in the player profile.
+ * Optionally accepts an existing profile to avoid re-reading from storage.
  */
-export function updatePlayerProfile(updates: Partial<PlayerProfile>): PlayerProfile {
-  const profile = getPlayerProfile();
+export function updatePlayerProfile(
+  updates: Partial<PlayerProfile>,
+  existingProfile?: PlayerProfile
+): PlayerProfile {
+  const profile = existingProfile ?? getPlayerProfile();
   const updated = { ...profile, ...updates };
 
   // Recalculate rank if stats changed
@@ -202,7 +206,8 @@ export function updatePlayerProfile(updates: Partial<PlayerProfile>): PlayerProf
  */
 export function updateDisplayName(name: string): PlayerProfile {
   const trimmed = name.trim().substring(0, 20); // Max 20 characters
-  return updatePlayerProfile({ displayName: trimmed });
+  const profile = getPlayerProfile();
+  return updatePlayerProfile({ displayName: trimmed }, profile);
 }
 
 /**
@@ -212,7 +217,7 @@ export function updatePreferences(preferences: Partial<PlayerPreferences>): Play
   const profile = getPlayerProfile();
   return updatePlayerProfile({
     preferences: { ...profile.preferences, ...preferences },
-  });
+  }, profile);
 }
 
 /**
@@ -239,10 +244,11 @@ export function updateStats(updates: Partial<PlayerStats>): {
   const newRank = calculateRank(newStats);
   const rankedUp = newRank !== previousRank;
 
+  // Pass existing profile to avoid re-reading
   const updated = updatePlayerProfile({
     stats: newStats,
     rank: newRank,
-  });
+  }, profile);
 
   return { profile: updated, rankedUp, previousRank, newRank };
 }
@@ -257,10 +263,11 @@ export function updateStreak(): { profile: PlayerProfile; streakMaintained: bool
 
   // First play ever
   if (!profile.lastPlayedDate) {
+    // Pass existing profile to avoid re-reading
     const updated = updatePlayerProfile({
       streak: 1,
       lastPlayedDate: today,
-    });
+    }, profile);
     return { profile: updated, streakMaintained: true, isNewStreak: true };
   }
 
@@ -273,18 +280,20 @@ export function updateStreak(): { profile: PlayerProfile; streakMaintained: bool
 
   // Next day - increment streak
   if (daysSinceLastPlay === 1) {
+    // Pass existing profile to avoid re-reading
     const updated = updatePlayerProfile({
       streak: profile.streak + 1,
       lastPlayedDate: today,
-    });
+    }, profile);
     return { profile: updated, streakMaintained: true, isNewStreak: false };
   }
 
   // Gap in days - reset streak
+  // Pass existing profile to avoid re-reading
   const updated = updatePlayerProfile({
     streak: 1,
     lastPlayedDate: today,
-  });
+  }, profile);
   return { profile: updated, streakMaintained: false, isNewStreak: true };
 }
 
@@ -292,8 +301,9 @@ export function updateStreak(): { profile: PlayerProfile; streakMaintained: bool
  * Record that the player played today
  */
 export function recordPlaySession(): PlayerProfile {
+  const profile = getPlayerProfile();
   const today = getTodayDate();
-  return updatePlayerProfile({ lastPlayedDate: today });
+  return updatePlayerProfile({ lastPlayedDate: today }, profile);
 }
 
 /**
@@ -307,9 +317,10 @@ export function unlockAchievement(achievementId: string): { profile: PlayerProfi
     return { profile, isNew: false };
   }
 
+  // Pass existing profile to avoid re-reading
   const updated = updatePlayerProfile({
     achievements: [...profile.achievements, achievementId],
-  });
+  }, profile);
 
   return { profile: updated, isNew: true };
 }

@@ -3,7 +3,7 @@
  * Expandable section showing all achievements organized by category
  */
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   getAchievementsByCategory,
@@ -115,14 +115,18 @@ interface AchievementCardProps {
   isUnlocked: boolean;
 }
 
-function AchievementCard({ achievement, isUnlocked }: AchievementCardProps) {
+const AchievementCard = memo(function AchievementCard({ achievement, isUnlocked }: AchievementCardProps) {
   const { t } = useTranslation();
   const rarityColor = getRarityColor(achievement.rarity);
+
+  const style = useMemo(() => ({
+    '--rarity-color': rarityColor
+  } as React.CSSProperties), [rarityColor]);
 
   return (
     <div
       className={`achievement-card ${isUnlocked ? 'achievement-card--unlocked' : 'achievement-card--locked'}`}
-      style={{ '--rarity-color': rarityColor } as React.CSSProperties}
+      style={style}
     >
       <div className="achievement-card__icon">
         {isUnlocked ? achievement.icon : '🔒'}
@@ -146,6 +150,6 @@ function AchievementCard({ achievement, isUnlocked }: AchievementCardProps) {
       </div>
     </div>
   );
-}
+});
 
 export default AchievementsGallery;
