@@ -1,0 +1,99 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function: Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function: Check if user owns the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Helper function: Validate display name
+    function isValidDisplayName(name) {
+      return name is string && name.size() <= 20;
+    }
+
+    // Helper function: Validate non-negative number
+    function isNonNegative(value) {
+      return value is number && value >= 0;
+    }
+
+    // Users collection - each user can only access their own data
+    match /users/{userId} {
+      // User root document (if needed for metadata)
+      allow read, write: if isOwner(userId);
+
+      // Player profile document
+      match /profile/{docId} {
+        allow read: if isOwner(userId);
+
+        allow create: if isOwner(userId)
+          && isValidDisplayName(request.resource.data.displayName)
+          && isNonNegative(request.resource.data.stats.totalGamesPlayed)
+          && isNonNegative(request.resource.data.stats.totalPuzzlesSolved)
+          && isNonNegative(request.resource.data.stats.totalWins);
+
+        allow update: if isOwner(userId)
+          && isValidDisplayName(request.resource.data.displayName)
+          && isNonNegative(request.resource.data.stats.totalGamesPlayed)
+          && isNonNegative(request.resource.data.stats.totalPuzzlesSolved)
+          && isNonNegative(request.resource.data.stats.totalWins)
+          // Prevent stats from being decreased (anti-cheat)
+          && request.resource.data.stats.totalGamesPlayed >= resource.data.stats.totalGamesPlayed
+          && request.resource.data.stats.totalPuzzlesSolved >= resource.data.stats.totalPuzzlesSolved
+          && request.resource.data.stats.totalWins >= resource.data.stats.totalWins;
+
+        allow delete: if isOwner(userId);
+      }
+
+      // Daily challenges subcollection
+      match /dailyChallenges/{date} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        // Updates allowed to add more completions
+        allow update: if isOwner(userId)
+          && request.resource.data.completions.size() >= resource.data.completions.size();
+        allow delete: if isOwner(userId);
+      }
+
+      // Game progress subcollection
+      match /gameProgress/{gameId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow update: if isOwner(userId)
+          // Prevent total score from decreasing
+          && request.resource.data.totalScore >= resource.data.totalScore;
+        allow delete: if isOwner(userId);
+      }
+
+      // Streaks subcollection
+      match /streaks/{gameId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Leaderboards collection (Phase 2 - optional)
+    match /leaderboards/{gameId} {
+      // Anyone can read leaderboards
+      allow read: if true;
+
+      match /entries/{entryId} {
+        allow read: if true;
+        // Only authenticated users can write their own entries
+        allow create, update: if isAuthenticated()
+          && request.resource.data.playerId == request.auth.uid
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() <= 20
+          && request.resource.data.time is number
+          && request.resource.data.time > 0;
+        // Users can only delete their own entries
+        allow delete: if isAuthenticated()
+          && resource.data.playerId == request.auth.uid;
+      }
+    }
+  }
+}
