@@ -435,7 +435,8 @@
     gap: var(--space-xl);
     align-items: start;
     width: 100%;
-    max-width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
     flex: 1;
   }
 
