@@ -335,5 +335,22 @@
             "step6Title": "Che Do 3D",
             "step6": "Chuyen sang che do 3D cho cac cau do phuc tap. Dung cac nut camera de thay doi goc nhin."
         }
+    },
+    "login": {
+        "title": "Trò Chơi Toán",
+        "subtitle": "Nhập ID người chơi để tiếp tục",
+        "playerIdLabel": "ID Người Chơi",
+        "playerIdPlaceholder": "VD: nguoichoi123",
+        "hint": "ID mới? Tài khoản sẽ được tạo tự động.",
+        "loading": "Đang tải...",
+        "submit": "Tiếp tục",
+        "or": "hoặc",
+        "guest": "Chơi thử",
+        "guestLabel": "Khách",
+        "guestHint": "Tiến độ lưu tại máy",
+        "signIn": "Đăng nhập",
+        "logout": "Đăng xuất",
+        "whatIsThis": "ID Người Chơi là gì?",
+        "explanation": "ID Người Chơi là mã định danh duy nhất để theo dõi tiến độ của bạn. Sử dụng cùng ID trên mọi thiết bị để đồng bộ thống kê và thành tựu."
     }
 }

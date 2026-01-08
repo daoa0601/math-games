@@ -10,6 +10,7 @@ import type { LoginResult } from '../services/api';
 
 export interface AuthAPI {
   login: (playerId: string) => Promise<LoginResult | null>;
+  loginAsGuest: () => void;
   logout: () => void;
   clearError: () => void;
 }

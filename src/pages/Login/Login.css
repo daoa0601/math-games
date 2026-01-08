@@ -115,6 +115,35 @@
   cursor: not-allowed;
 }
 
+.login-button--guest {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.login-button--guest:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
 .login-info {
   margin-top: 2rem;
   padding-top: 1.5rem;
