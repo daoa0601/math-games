@@ -63,7 +63,8 @@ src/
         └── tabs/           # Tab panel components
             ├── PlayTab.tsx
             ├── StatsTab.tsx
-            └── AchievementsTab.tsx
+            ├── AchievementsTab.tsx
+            └── LearnTab.tsx
 ```
 
 ### Path Aliases
@@ -100,13 +101,14 @@ Games are lazy-loaded in `App.tsx`:
 
 ### Dashboard Tabs
 
-The Dashboard uses a tabbed layout with three views:
+The Dashboard uses a tabbed layout with four views:
 
 | Tab | Component | Content |
 |-----|-----------|---------|
 | Play | `PlayTab` | Game grid + DailyChallengeBanner |
 | Stats | `StatsTab` | Overall stats, rank progress, per-game breakdown |
 | Achievements | `AchievementsTab` | Full gallery by category |
+| Learn | `LearnTab` | Educational content and game tutorials |
 
 ```typescript
 import { DashboardTabs, type DashboardTabId } from '@/shared/components/layout';
@@ -309,15 +311,18 @@ e2e/
 
 ## Theme System
 
-**Dark mode only** - The Linear Editorial design is dark-first. No light theme.
+**Dark-first design** - The Linear Editorial aesthetic is optimized for dark mode. While `ThemeContext` supports light/dark switching, the design system is built around the dark palette.
 
 ```css
+/* Dark theme (default) */
 :root {
-  --bg: #000;
-  --surface: #0a0a0a;
-  --text: #fff;
+  --bg: #0a0f1a;
+  --surface: #111827;
+  --text: #f8fafc;
 }
 ```
+
+See `docs/ARCHITECTURE.md` for theme implementation details.
 
 ---
 

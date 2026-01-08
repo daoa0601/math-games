@@ -10,7 +10,6 @@
 
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
 import {
   GameLayout,
   DifficultySelector,
@@ -22,11 +21,9 @@ import {
   PersonalBestIndicator,
   HelpButton,
 } from '@/shared/components';
-import { useGameTimer, useGameRewards, useAnnounce } from '@/shared/hooks';
-import { usePlayer } from '@/shared/contexts';
+import { useGameTimer, useGameRewards, useGameInit, useAnnounce } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
-import { isDailyCompleted, completeDailyChallenge } from '@/shared/services/daily';
-import { shouldShowTutorial } from '@/shared/services/tutorialProgress';
+import { completeDailyChallenge } from '@/shared/services/daily';
 import { RaceTrack, StepCards, HistoryLog, SequenceInfoBadge, SequenceRaceTutorial } from './components';
 import { useSequenceRaceState, useAIOpponent, useHintSystem } from './hooks';
 import { applyMove, isHumanTurn } from './logic/engine';
@@ -37,28 +34,32 @@ import './SequenceRace.css';
 export function SequenceRaceGame() {
   const { t } = useTranslation('sequenceRace');
   const { t: tc } = useTranslation('common');
-  const [searchParams] = useSearchParams();
 
   // ─────────────────────────────────────────────────────────────────
-  // Daily Mode Detection
+  // Game Initialization (consolidated hook)
   // ─────────────────────────────────────────────────────────────────
 
-  const isDailyMode = searchParams.get('daily') === 'true';
-  const [dailyCompleted, setDailyCompleted] = useState(() => isDailyMode && isDailyCompleted('sequence-race'));
+const {
+    isDailyMode,
+    dailyCompleted,
+    setDailyCompleted,
+    showTutorial,
+    setShowTutorial,
+    practiceMode,
+    handlePracticeModeChange,
+    handleTimeWarning,
+  } = useGameInit({ gameId: 'sequence-race' });
 
-  // Memoize daily config to avoid regeneration - safe to use during render
-  const dailyConfig = useMemo(() => isDailyMode ? getDailySequenceRaceConfig() : null, [isDailyMode]);
+  // Daily config for seeded puzzle generation
+  const dailyConfigRef = useRef(isDailyMode ? getDailySequenceRaceConfig() : null);
 
-  // Tutorial state
-  const [showTutorial, setShowTutorial] = useState(() =>
-    shouldShowTutorial('sequence-race')
-  );
+  // Screen reader announcements for game events
+  const { announce } = useAnnounce();
 
   // ─────────────────────────────────────────────────────────────────
-  // Player and Rewards
+  // Rewards
   // ─────────────────────────────────────────────────────────────────
 
-  const { profile, updatePreferences } = usePlayer();
   const {
     handleCompletion,
     rewards,
@@ -69,25 +70,32 @@ export function SequenceRaceGame() {
   } = useGameRewards();
 
   // ─────────────────────────────────────────────────────────────────
-  // Screen Reader Announcements
+  // Timer
   // ─────────────────────────────────────────────────────────────────
 
-  const { announce } = useAnnounce();
+  // Track game over state for timer - needs to be declared before useGameTimer
+  const [isGameOver, setIsGameOver] = useState(false);
 
-  const handleTimeWarning = useCallback((secondsRemaining: number) => {
-    if (secondsRemaining === 30) {
-      announce(t('timer.warning30', '30 seconds remaining'), 'polite');
-    } else if (secondsRemaining === 10) {
-      announce(t('timer.warning10', '10 seconds remaining! Hurry!'), 'assertive');
-    }
-  }, [announce, t]);
+  const {
+    timeLeft,
+    showTimeUp,
+    timerClass,
+    formattedTime,
+    elapsedTime,
+    isPracticeMode,
+    isPaused,
+    resetTimer,
+    pauseTimer,
+    resumeTimer,
+  } = useGameTimer({
+    isGameOver,
+    practiceMode,
+    onTimeWarning: handleTimeWarning,
+  });
 
   // ─────────────────────────────────────────────────────────────────
-  // Game State (extracted hook) - defined first to provide isGameOver
+  // Game State (extracted hook)
   // ─────────────────────────────────────────────────────────────────
-
-  // Use ref for resetTimer to break circular dependency with useGameTimer
-  const resetTimerRef = useRef<() => void>(() => {});
 
   const {
     difficulty,
@@ -105,35 +113,14 @@ export function SequenceRaceGame() {
     handleModeChange: handleModeChangeBase,
     undoLastMove,
   } = useSequenceRaceState({
-    onResetTimer: () => resetTimerRef.current(),
-    initialConfig: dailyConfig ?? undefined,
+    onResetTimer: resetTimer,
+    initialConfig: dailyConfigRef.current ?? undefined,
   });
 
-  // ─────────────────────────────────────────────────────────────────
-  // Timer - now uses gameState.gameOver directly
-  // ─────────────────────────────────────────────────────────────────
-
-  const {
-    timeLeft,
-    showTimeUp,
-    timerClass,
-    formattedTime,
-    elapsedTime,
-    isPracticeMode,
-    isPaused,
-    resetTimer,
-    pauseTimer,
-    resumeTimer,
-  } = useGameTimer({
-    isGameOver: gameState.gameOver,
-    practiceMode: profile.preferences.practiceMode,
-    onTimeWarning: handleTimeWarning,
-  });
-
-  // Update ref after useGameTimer is called (in effect to avoid render-phase mutation)
+  // Sync isGameOver state with gameState.gameOver
   useEffect(() => {
-    resetTimerRef.current = resetTimer;
-  }, [resetTimer]);
+    setIsGameOver(gameState.gameOver);
+  }, [gameState.gameOver]);
 
   // ─────────────────────────────────────────────────────────────────
   // Hint System (extracted hook)
@@ -229,17 +216,6 @@ export function SequenceRaceGame() {
       announce(tc('announcements.aiWins'), 'assertive');
     }
   }, [gameState.winner, gameState.target, gameState.history.length, announce, tc]);
-
-  // ─────────────────────────────────────────────────────────────────
-  // Practice Mode
-  // ─────────────────────────────────────────────────────────────────
-
-  const handlePracticeModeChange = useCallback(
-    (newPracticeMode: boolean) => {
-      updatePreferences({ practiceMode: newPracticeMode });
-    },
-    [updatePreferences]
-  );
 
   // ─────────────────────────────────────────────────────────────────
   // Player Move Handler

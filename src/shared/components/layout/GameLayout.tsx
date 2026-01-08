@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
+import type { StorageGameId } from '@/shared/types';
 import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
 import { SkipLinks } from '@/shared/components/SkipLinks';
 import { ThemeToggle } from '@/shared/components/ThemeToggle';
-import { LearnModal, type GameId } from '@/shared/components/LearnModal';
+import { LearnModal } from '@/shared/components/LearnModal';
 
 interface GameLayoutProps {
     title: string;
@@ -13,7 +14,7 @@ interface GameLayoutProps {
     /** Optional content to display in the header (e.g., SoundToggle) */
     headerRight?: ReactNode;
     /** Game ID for the Learn modal */
-    gameId?: GameId;
+    gameId?: StorageGameId;
 }
 
 export function GameLayout({ title, children, headerRight, gameId }: GameLayoutProps) {

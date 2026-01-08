@@ -77,26 +77,43 @@ import { GameLayout } from '../../shared/components';
 
 ### CSS
 
-- Use BEM naming convention: `.block__element--modifier`
+- Use flat, semantic class names (not BEM)
 - Define component-specific styles in colocated `.css` files
 - Use CSS custom properties from the design system
+- See `visual-refactor.md` for full design system spec
+
+**Core class patterns:**
+- `.slab` - Card/container surfaces
+- `.action` - Interactive buttons
+- `.label` - Text labels and metadata
+- `.nav__item` - Navigation elements
 
 ```css
 /* Component.css */
-.game-card {
+.slab {
   padding: var(--space-md);
-  background: var(--color-surface);
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
-.game-card__title {
-  font-family: var(--font-display);
-  color: var(--color-primary);
+.action {
+  font-family: var(--font-mono);
+  color: var(--text);
+  background: transparent;
 }
 
-.game-card--highlighted {
-  border-color: var(--color-accent);
+.label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
 }
 ```
+
+**Constraints:**
+- NO gradients (flat colors only)
+- NO box-shadow (use 1px borders)
+- NO border-radius >2px
+- Target <150 lines per CSS file
 
 ### Component Structure
 
@@ -114,9 +131,9 @@ export function ComponentName({ title, onAction }: ComponentNameProps) {
   const [state, setState] = useState(false);
 
   return (
-    <div className="component-name">
-      <h2 className="component-name__title">{title}</h2>
-      <button onClick={onAction}>Action</button>
+    <div className="slab">
+      <h2 className="label">{title}</h2>
+      <button className="action" onClick={onAction}>Action</button>
     </div>
   );
 }

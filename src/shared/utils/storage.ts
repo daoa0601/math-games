@@ -5,8 +5,7 @@
 import { getGameProgressKey } from '../constants';
 import { type StorageGameId, STORAGE_GAME_IDS } from '../types';
 
-// Re-export for backwards compatibility
-export type GameId = StorageGameId;
+// Use StorageGameId directly - GameId alias is deprecated in ../types/game.ts
 
 export interface LevelProgress {
     levelId: string;
@@ -16,7 +15,7 @@ export interface LevelProgress {
 }
 
 export interface GameProgress {
-    gameId: GameId;
+    gameId: StorageGameId;
     unlockedLevels: string[]; // Level IDs that are unlocked
     completedLevels: Map<string, LevelProgress>;
     totalScore: number;
@@ -24,7 +23,7 @@ export interface GameProgress {
 }
 
 interface StoredGameProgress {
-    gameId: GameId;
+    gameId: StorageGameId;
     unlockedLevels: string[];
     completedLevels: [string, LevelProgress][]; // Map serialized as entries
     totalScore: number;
@@ -34,14 +33,14 @@ interface StoredGameProgress {
 /**
  * Get storage key for a game
  */
-function getStorageKey(gameId: GameId): string {
+function getStorageKey(gameId: StorageGameId): string {
     return getGameProgressKey(gameId);
 }
 
 /**
  * Get default progress for a game
  */
-function getDefaultProgress(gameId: GameId): GameProgress {
+function getDefaultProgress(gameId: StorageGameId): GameProgress {
     return {
         gameId,
         unlockedLevels: [], // First level is always unlocked by default
@@ -54,7 +53,7 @@ function getDefaultProgress(gameId: GameId): GameProgress {
 /**
  * Load game progress from localStorage
  */
-export function getProgress(gameId: GameId): GameProgress {
+export function getProgress(gameId: StorageGameId): GameProgress {
     try {
         const key = getStorageKey(gameId);
         const stored = localStorage.getItem(key);
@@ -103,7 +102,7 @@ export function saveProgress(progress: GameProgress): void {
  * Mark a level as completed and optionally update best time
  */
 export function completeLevel(
-    gameId: GameId,
+    gameId: StorageGameId,
     levelId: string,
     timeSeconds: number,
     nextLevelId?: string
@@ -140,7 +139,7 @@ export function completeLevel(
 /**
  * Check if a level is unlocked
  */
-export function isLevelUnlocked(gameId: GameId, levelId: string, firstLevelId: string): boolean {
+export function isLevelUnlocked(gameId: StorageGameId, levelId: string, firstLevelId: string): boolean {
     // First level is always unlocked
     if (levelId === firstLevelId) {
         return true;
@@ -153,7 +152,7 @@ export function isLevelUnlocked(gameId: GameId, levelId: string, firstLevelId: s
 /**
  * Check if a level is completed
  */
-export function isLevelCompleted(gameId: GameId, levelId: string): boolean {
+export function isLevelCompleted(gameId: StorageGameId, levelId: string): boolean {
     const progress = getProgress(gameId);
     return progress.completedLevels.get(levelId)?.completed ?? false;
 }
@@ -161,7 +160,7 @@ export function isLevelCompleted(gameId: GameId, levelId: string): boolean {
 /**
  * Get best time for a level
  */
-export function getBestTime(gameId: GameId, levelId: string): number | null {
+export function getBestTime(gameId: StorageGameId, levelId: string): number | null {
     const progress = getProgress(gameId);
     return progress.completedLevels.get(levelId)?.bestTime ?? null;
 }
@@ -169,7 +168,7 @@ export function getBestTime(gameId: GameId, levelId: string): number | null {
 /**
  * Get total score for a game
  */
-export function getTotalScore(gameId: GameId): number {
+export function getTotalScore(gameId: StorageGameId): number {
     const progress = getProgress(gameId);
     return progress.totalScore;
 }
@@ -177,7 +176,7 @@ export function getTotalScore(gameId: GameId): number {
 /**
  * Reset all progress for a game
  */
-export function resetProgress(gameId: GameId): void {
+export function resetProgress(gameId: StorageGameId): void {
     try {
         const key = getStorageKey(gameId);
         localStorage.removeItem(key);
@@ -232,7 +231,7 @@ export interface PersonalBestResult {
  * Use this before completing to show preview, or after completing for result.
  */
 export function checkPersonalBest(
-    gameId: GameId,
+    gameId: StorageGameId,
     levelId: string,
     timeSeconds: number
 ): PersonalBestResult {
@@ -253,7 +252,7 @@ export function checkPersonalBest(
  * This is a wrapper around completeLevel that includes PB detection.
  */
 export function completeLevelWithPB(
-    gameId: GameId,
+    gameId: StorageGameId,
     levelId: string,
     timeSeconds: number,
     nextLevelId?: string
@@ -270,7 +269,7 @@ export function completeLevelWithPB(
 /**
  * Get all personal bests for a game (for leaderboard display)
  */
-export function getAllBestTimes(gameId: GameId): Array<{
+export function getAllBestTimes(gameId: StorageGameId): Array<{
     levelId: string;
     bestTime: number;
     completedAt: string | null;
@@ -295,7 +294,7 @@ export function getAllBestTimes(gameId: GameId): Array<{
 /**
  * Get game-wide best time (fastest across all levels)
  */
-export function getGameFastestTime(gameId: GameId): number | null {
+export function getGameFastestTime(gameId: StorageGameId): number | null {
     const allTimes = getAllBestTimes(gameId);
     return allTimes.length > 0 ? allTimes[0].bestTime : null;
 }
@@ -303,7 +302,7 @@ export function getGameFastestTime(gameId: GameId): number | null {
 /**
  * Get average best time across all completed levels
  */
-export function getGameAverageTime(gameId: GameId): number | null {
+export function getGameAverageTime(gameId: StorageGameId): number | null {
     const allTimes = getAllBestTimes(gameId);
     if (allTimes.length === 0) return null;
 

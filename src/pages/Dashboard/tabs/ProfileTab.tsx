@@ -5,7 +5,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '@/shared/contexts';
-import { ACHIEVEMENTS, type AchievementCategory } from '@/shared/services/achievements';
+import { ACHIEVEMENTS, type AchievementCategory } from '@/shared/services';
 import './ProfileTab.css';
 
 const CATEGORIES: AchievementCategory[] = ['global', 'magic-graph', 'sequence-race', 'shape-architect'];
