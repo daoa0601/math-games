@@ -6,21 +6,18 @@
  * - Daily challenge data
  * - Game progress tracking
  * - Real-time listeners
+ *
+ * Uses dynamic imports via the loader module to defer Firebase SDK loading.
  */
 
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  onSnapshot,
-  serverTimestamp,
-  type DocumentReference,
-  type Unsubscribe,
-  type Timestamp,
+import type {
+  DocumentReference,
+  Unsubscribe,
+  Timestamp,
 } from 'firebase/firestore';
 import { getFirebaseDb } from './index';
 import { getCurrentUser } from './auth';
+import { getCachedFirestoreModule } from './loader';
 
 // Collection paths
 const USERS_COLLECTION = 'users';
@@ -87,8 +84,9 @@ export interface FirestoreResult<T> {
  */
 function getProfileDocRef(userId: string): DocumentReference | null {
   const db = getFirebaseDb();
-  if (!db) return null;
-  return doc(db, USERS_COLLECTION, userId, PROFILE_DOC, 'data');
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) return null;
+  return firestoreModule.doc(db, USERS_COLLECTION, userId, PROFILE_DOC, 'data');
 }
 
 /**
@@ -100,13 +98,18 @@ export async function getPlayerProfileFromFirestore(): Promise<FirestoreResult<F
     return { data: null, error: 'Not authenticated' };
   }
 
+  const firestoreModule = getCachedFirestoreModule();
+  if (!firestoreModule) {
+    return { data: null, error: 'Firestore not initialized' };
+  }
+
   const docRef = getProfileDocRef(user.uid);
   if (!docRef) {
     return { data: null, error: 'Firestore not initialized' };
   }
 
   try {
-    const snapshot = await getDoc(docRef);
+    const snapshot = await firestoreModule.getDoc(docRef);
     if (snapshot.exists()) {
       return { data: snapshot.data() as FirestorePlayerProfile, error: null };
     }
@@ -127,24 +130,29 @@ export async function savePlayerProfileToFirestore(
     return { data: null, error: 'Not authenticated' };
   }
 
+  const firestoreModule = getCachedFirestoreModule();
+  if (!firestoreModule) {
+    return { data: null, error: 'Firestore not initialized' };
+  }
+
   const docRef = getProfileDocRef(user.uid);
   if (!docRef) {
     return { data: null, error: 'Firestore not initialized' };
   }
 
   try {
-    const existingDoc = await getDoc(docRef);
-    const now = serverTimestamp();
+    const existingDoc = await firestoreModule.getDoc(docRef);
+    const now = firestoreModule.serverTimestamp();
 
     if (existingDoc.exists()) {
       // Update existing profile
-      await updateDoc(docRef, {
+      await firestoreModule.updateDoc(docRef, {
         ...profile,
         updatedAt: now,
       });
     } else {
       // Create new profile
-      await setDoc(docRef, {
+      await firestoreModule.setDoc(docRef, {
         ...profile,
         createdAt: now,
         updatedAt: now,
@@ -166,10 +174,13 @@ export function subscribeToPlayerProfile(
   const user = getCurrentUser();
   if (!user) return null;
 
+  const firestoreModule = getCachedFirestoreModule();
+  if (!firestoreModule) return null;
+
   const docRef = getProfileDocRef(user.uid);
   if (!docRef) return null;
 
-  return onSnapshot(
+  return firestoreModule.onSnapshot(
     docRef,
     (snapshot) => {
       if (snapshot.exists()) {
@@ -197,19 +208,20 @@ export async function getDailyChallenge(
   }
 
   const db = getFirebaseDb();
-  if (!db) {
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) {
     return { data: null, error: 'Firestore not initialized' };
   }
 
   try {
-    const docRef = doc(
+    const docRef = firestoreModule.doc(
       db,
       USERS_COLLECTION,
       user.uid,
       DAILY_CHALLENGES_COLLECTION,
       date
     );
-    const snapshot = await getDoc(docRef);
+    const snapshot = await firestoreModule.getDoc(docRef);
 
     if (snapshot.exists()) {
       return { data: snapshot.data() as FirestoreDailyChallenge, error: null };
@@ -235,12 +247,13 @@ export async function saveDailyChallengeCompletion(
   }
 
   const db = getFirebaseDb();
-  if (!db) {
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) {
     return { data: null, error: 'Firestore not initialized' };
   }
 
   try {
-    const docRef = doc(
+    const docRef = firestoreModule.doc(
       db,
       USERS_COLLECTION,
       user.uid,
@@ -248,8 +261,8 @@ export async function saveDailyChallengeCompletion(
       date
     );
 
-    const existingDoc = await getDoc(docRef);
-    const now = serverTimestamp();
+    const existingDoc = await firestoreModule.getDoc(docRef);
+    const now = firestoreModule.serverTimestamp();
 
     const newCompletion = {
       gameId,
@@ -260,12 +273,12 @@ export async function saveDailyChallengeCompletion(
 
     if (existingDoc.exists()) {
       const data = existingDoc.data() as FirestoreDailyChallenge;
-      await updateDoc(docRef, {
+      await firestoreModule.updateDoc(docRef, {
         completions: [...data.completions, newCompletion],
         completedAt: now,
       });
     } else {
-      await setDoc(docRef, {
+      await firestoreModule.setDoc(docRef, {
         completions: [newCompletion],
         completedAt: now,
       });
@@ -289,19 +302,20 @@ export async function getGameProgress(
   }
 
   const db = getFirebaseDb();
-  if (!db) {
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) {
     return { data: null, error: 'Firestore not initialized' };
   }
 
   try {
-    const docRef = doc(
+    const docRef = firestoreModule.doc(
       db,
       USERS_COLLECTION,
       user.uid,
       GAME_PROGRESS_COLLECTION,
       gameId
     );
-    const snapshot = await getDoc(docRef);
+    const snapshot = await firestoreModule.getDoc(docRef);
 
     if (snapshot.exists()) {
       return { data: snapshot.data() as FirestoreGameProgress, error: null };
@@ -325,12 +339,13 @@ export async function updateGameProgress(
   }
 
   const db = getFirebaseDb();
-  if (!db) {
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) {
     return { data: null, error: 'Firestore not initialized' };
   }
 
   try {
-    const docRef = doc(
+    const docRef = firestoreModule.doc(
       db,
       USERS_COLLECTION,
       user.uid,
@@ -338,16 +353,16 @@ export async function updateGameProgress(
       gameId
     );
 
-    const existingDoc = await getDoc(docRef);
-    const now = serverTimestamp();
+    const existingDoc = await firestoreModule.getDoc(docRef);
+    const now = firestoreModule.serverTimestamp();
 
     if (existingDoc.exists()) {
-      await updateDoc(docRef, {
+      await firestoreModule.updateDoc(docRef, {
         ...updates,
         lastPlayed: now,
       });
     } else {
-      await setDoc(docRef, {
+      await firestoreModule.setDoc(docRef, {
         unlockedLevels: [],
         completedLevels: {},
         totalScore: 0,
@@ -374,19 +389,20 @@ export async function getGameStreak(
   }
 
   const db = getFirebaseDb();
-  if (!db) {
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) {
     return { data: null, error: 'Firestore not initialized' };
   }
 
   try {
-    const docRef = doc(
+    const docRef = firestoreModule.doc(
       db,
       USERS_COLLECTION,
       user.uid,
       STREAKS_COLLECTION,
       gameId
     );
-    const snapshot = await getDoc(docRef);
+    const snapshot = await firestoreModule.getDoc(docRef);
 
     if (snapshot.exists()) {
       return { data: snapshot.data() as { currentStreak: number; longestStreak: number; lastCompletedDate: string | null }, error: null };
@@ -412,12 +428,13 @@ export async function updateGameStreak(
   }
 
   const db = getFirebaseDb();
-  if (!db) {
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) {
     return { data: null, error: 'Firestore not initialized' };
   }
 
   try {
-    const docRef = doc(
+    const docRef = firestoreModule.doc(
       db,
       USERS_COLLECTION,
       user.uid,
@@ -425,7 +442,7 @@ export async function updateGameStreak(
       gameId
     );
 
-    await setDoc(docRef, {
+    await firestoreModule.setDoc(docRef, {
       currentStreak,
       longestStreak,
       lastCompletedDate,
