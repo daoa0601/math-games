@@ -172,6 +172,19 @@ function heuristicEval(state: SequenceState, isMaximizing: boolean): number {
 }
 
 /**
+ * Create a canonical memoization key for game state.
+ * Uses bitfield encoding for available steps to avoid sorting overhead.
+ */
+function createStateKey(position: number, availableSteps: number[], isMaximizing: boolean): string {
+    // Encode available steps as a bitmask (assumes steps are small integers < 32)
+    let stepMask = 0;
+    for (const step of availableSteps) {
+        stepMask |= (1 << step);
+    }
+    return `${position}-${stepMask}-${isMaximizing ? 1 : 0}`;
+}
+
+/**
  * Minimax algorithm with memoization and depth limit.
  * Returns score from AI's perspective (positive = AI winning)
  * @param depth Current depth (starts at 0)
@@ -184,8 +197,8 @@ function minimax(
     depth: number = 0,
     maxDepth: number = 20
 ): MinimaxResult {
-    // Create state key for memoization
-    const key = `${state.currentPosition}-${[...state.availableSteps].sort((a, b) => a - b).join(',')}-${isMaximizing}`;
+    // Create state key for memoization (O(n) instead of O(n log n) sort)
+    const key = createStateKey(state.currentPosition, state.availableSteps, isMaximizing);
 
     if (memo.has(key)) {
         return memo.get(key)!;

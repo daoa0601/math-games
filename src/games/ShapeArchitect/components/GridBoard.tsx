@@ -1,4 +1,4 @@
-import { useMemo, memo, useCallback } from 'react';
+import { useMemo, memo, useCallback, type CSSProperties } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import type { CellState, Piece, Position3D, PlacedPiece, Rotation3D } from '../logic/types';
 import { getPieceWorldPositions, findNearestValidPosition } from '../logic/engine';
@@ -18,7 +18,7 @@ interface DroppableCellProps {
     dataCellAttr: string;
 }
 
-function DroppableCell({
+const DroppableCell = memo(function DroppableCell({
     position,
     cellClass,
     bgColor,
@@ -37,14 +37,19 @@ function DroppableCell({
         disabled: !isTarget,
     });
 
+    const style = useMemo((): CSSProperties | undefined => {
+        if (!bgColor && !canPlace) return undefined;
+        return {
+            backgroundColor: bgColor,
+            cursor: canPlace ? 'pointer' : undefined,
+        };
+    }, [bgColor, canPlace]);
+
     return (
         <div
             ref={setNodeRef}
             className={`${cellClass} ${isOver ? 'sa-cell--drag-over' : ''}`}
-            style={{
-                backgroundColor: bgColor,
-                cursor: canPlace ? 'pointer' : undefined,
-            }}
+            style={style}
             onClick={onClick}
             onMouseEnter={onMouseEnter}
             onKeyDown={onKeyDown}
@@ -54,7 +59,7 @@ function DroppableCell({
             data-cell={dataCellAttr}
         />
     );
-}
+});
 
 interface GridBoardProps {
     grid: CellState[][][];

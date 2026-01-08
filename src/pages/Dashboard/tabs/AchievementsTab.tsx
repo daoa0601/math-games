@@ -4,9 +4,10 @@
  * Displays all achievements organized by category with unlock status
  */
 
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '@/shared/contexts/usePlayerHooks';
-import { ACHIEVEMENTS, type AchievementCategory } from '@/shared/services/achievements';
+import { ACHIEVEMENTS, type AchievementCategory, type Achievement } from '@/shared/services/achievements';
 import './AchievementsTab.css';
 
 const CATEGORY_ICONS: Record<AchievementCategory, string> = {
@@ -23,6 +24,16 @@ const RARITY_CLASSES: Record<string, string> = {
   legendary: 'rarity-legendary',
 };
 
+// Pre-compute achievements by category (static, computed once)
+const ACHIEVEMENTS_BY_CATEGORY: Record<AchievementCategory, Achievement[]> = {
+  global: ACHIEVEMENTS.filter((a) => a.category === 'global'),
+  'magic-graph': ACHIEVEMENTS.filter((a) => a.category === 'magic-graph'),
+  'sequence-race': ACHIEVEMENTS.filter((a) => a.category === 'sequence-race'),
+  'shape-architect': ACHIEVEMENTS.filter((a) => a.category === 'shape-architect'),
+};
+
+const CATEGORIES: AchievementCategory[] = ['global', 'magic-graph', 'sequence-race', 'shape-architect'];
+
 export function AchievementsTab() {
   const { t } = useTranslation();
   const { profile } = usePlayer();
@@ -31,8 +42,11 @@ export function AchievementsTab() {
   const totalAchievements = ACHIEVEMENTS.length;
   const unlockedCount = unlockedAchievements.length;
 
-  // Group achievements by category
-  const categories: AchievementCategory[] = ['global', 'magic-graph', 'sequence-race', 'shape-architect'];
+  // Use Set for O(1) lookups instead of O(n) array.includes()
+  const unlockedSet = useMemo(
+    () => new Set(unlockedAchievements),
+    [unlockedAchievements]
+  );
 
   return (
     <div
@@ -50,8 +64,8 @@ export function AchievementsTab() {
 
       {/* Categories */}
       <div className="achievements-tab__categories">
-        {categories.map((category) => {
-          const categoryAchievements = ACHIEVEMENTS.filter((a) => a.category === category);
+        {CATEGORIES.map((category) => {
+          const categoryAchievements = ACHIEVEMENTS_BY_CATEGORY[category];
 
           return (
             <section key={category} className="achievements-category">
@@ -66,7 +80,7 @@ export function AchievementsTab() {
 
               <div className="achievements-category__grid">
                 {categoryAchievements.map((achievement) => {
-                  const isUnlocked = unlockedAchievements.includes(achievement.id);
+                  const isUnlocked = unlockedSet.has(achievement.id);
 
                   return (
                     <div

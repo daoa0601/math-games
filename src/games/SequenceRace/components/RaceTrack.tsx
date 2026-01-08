@@ -1,3 +1,4 @@
+import { useMemo, type CSSProperties } from 'react';
 import type { SequenceState, GameMode } from '../logic/types';
 
 interface RaceTrackProps {
@@ -14,18 +15,46 @@ function AvatarEmoji({ isAI }: { isAI?: boolean }) {
     return <span aria-hidden="true">{isAI ? '🤖' : '🏃'}</span>;
 }
 
+interface MarkerData {
+    value: number;
+    percent: number;
+    isMajor: boolean;
+    style: CSSProperties;
+}
+
 export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral', previewPosition, isUrgent }: RaceTrackProps) {
     const { target, currentPosition, gameOver, winner } = state;
     const positionPercent = (currentPosition / target) * 100;
 
-    // Generate markers (every 5 units or at least 5 markers)
-    const markerInterval = target <= 15 ? 1 : target <= 30 ? 5 : 10;
-    const markers = [];
-    for (let i = 0; i <= target; i += markerInterval) {
-        const percent = (i / target) * 100;
-        const isMajor = i === 0 || i === target || i % (markerInterval * 2) === 0;
-        markers.push({ value: i, percent, isMajor });
-    }
+    // Memoize markers array - only recalculate when target changes
+    const markers = useMemo((): MarkerData[] => {
+        const interval = target <= 15 ? 1 : target <= 30 ? 5 : 10;
+        const result: MarkerData[] = [];
+        for (let i = 0; i <= target; i += interval) {
+            const percent = (i / target) * 100;
+            const isMajor = i === 0 || i === target || i % (interval * 2) === 0;
+            result.push({
+                value: i,
+                percent,
+                isMajor,
+                style: { position: 'absolute', left: `${percent}%` },
+            });
+        }
+        return result;
+    }, [target]);
+
+    // Memoize position styles
+    const playerStyle = useMemo((): CSSProperties => ({
+        left: `${positionPercent}%`,
+    }), [positionPercent]);
+
+    const previewStyle = useMemo((): CSSProperties | undefined => {
+        if (previewPosition === null || previewPosition === undefined ||
+            previewPosition === currentPosition || previewPosition > target) {
+            return undefined;
+        }
+        return { left: `${(previewPosition / target) * 100}%` };
+    }, [previewPosition, currentPosition, target]);
 
     return (
         <div className={`sr-track${isUrgent ? ' sr-track--urgent' : ''}`}>
@@ -39,7 +68,7 @@ export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral
                         <div
                             key={marker.value}
                             className={`sr-marker ${marker.isMajor ? 'sr-marker--major' : ''}`}
-                            style={{ position: 'absolute', left: `${marker.percent}%` }}
+                            style={marker.style}
                         >
                             {marker.isMajor && (
                                 <span className="sr-marker__label">{marker.value}</span>
@@ -53,17 +82,17 @@ export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral
                     className={`sr-avatar sr-avatar--player ${
                         gameOver && winner !== 'player' && winner !== null ? 'sr-avatar--loser' : ''
                     }`}
-                    style={{ left: `${positionPercent}%` }}
+                    style={playerStyle}
                     aria-label={gameMode === 'two-player' ? 'Shared player position' : 'Your runner'}
                 >
                     <AvatarEmoji />
                 </div>
 
                 {/* Preview Ghost Marker (shows where player would land on hover) */}
-                {previewPosition !== null && previewPosition !== undefined && previewPosition !== currentPosition && previewPosition <= target && (
+                {previewStyle && (
                     <div
                         className="sr-preview"
-                        style={{ left: `${(previewPosition / target) * 100}%` }}
+                        style={previewStyle}
                         aria-hidden="true"
                     />
                 )}
@@ -74,7 +103,7 @@ export function RaceTrack({ state, gameMode, isAIThinking, aiReaction = 'neutral
                         className={`sr-avatar sr-avatar--ai ${
                             gameOver && winner === 'player' ? 'sr-avatar--loser' : ''
                         }`}
-                        style={{ left: `${positionPercent}%` }}
+                        style={playerStyle}
                         aria-label="AI opponent"
                     >
                         <AvatarEmoji isAI />

@@ -32,6 +32,7 @@ interface InstancedVoxelsProps {
 
 // Reusable objects for matrix calculations (avoid GC pressure)
 const tempMatrix = new THREE.Matrix4();
+const tempVector = new THREE.Vector3();
 
 /**
  * Group voxels by color and type for efficient instanced rendering
@@ -97,7 +98,7 @@ function InstancedVoxelGroup({
     for (let i = 0; i < voxels.length; i++) {
       const voxel = voxels[i];
       tempMatrix.makeTranslation(voxel.position[0], voxel.position[1], voxel.position[2]);
-      tempMatrix.scale(new THREE.Vector3(scale, scale, scale));
+      tempMatrix.scale(tempVector.set(scale, scale, scale));
       meshRef.current.setMatrixAt(i, tempMatrix);
     }
 
