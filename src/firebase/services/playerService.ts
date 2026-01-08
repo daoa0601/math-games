@@ -3,19 +3,14 @@
  *
  * Handles player profile CRUD operations with Firestore.
  * Mirrors the localStorage player service but syncs to cloud.
+ *
+ * Uses dynamic imports via the loader module to defer Firebase SDK loading.
  */
 
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  onSnapshot,
-  serverTimestamp,
-  type Unsubscribe,
-} from 'firebase/firestore';
+import type { Unsubscribe } from 'firebase/firestore';
 import { getFirebaseDb } from '../index';
 import { getCurrentUser } from '../auth';
+import { getCachedFirestoreModule } from '../loader';
 import type { PlayerProfile, PlayerStats, PlayerPreferences } from '@/shared/schemas/playerProfile.schema';
 import { calculateRank } from '@/shared/services/rank';
 import { createDefaultProfile, createDefaultStats } from '@/shared/services/player';
@@ -72,11 +67,12 @@ export async function getFirestoreProfile(): Promise<PlayerProfile | null> {
   if (!user) return null;
 
   const db = getFirebaseDb();
-  if (!db) return null;
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) return null;
 
   try {
-    const docRef = doc(db, USERS_COLLECTION, user.uid);
-    const snapshot = await getDoc(docRef);
+    const docRef = firestoreModule.doc(db, USERS_COLLECTION, user.uid);
+    const snapshot = await firestoreModule.getDoc(docRef);
 
     if (!snapshot.exists()) {
       return null;
@@ -99,24 +95,25 @@ export async function saveFirestoreProfile(profile: PlayerProfile): Promise<bool
   if (!user) return false;
 
   const db = getFirebaseDb();
-  if (!db) return false;
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) return false;
 
   try {
-    const docRef = doc(db, USERS_COLLECTION, user.uid);
-    const existingDoc = await getDoc(docRef);
+    const docRef = firestoreModule.doc(db, USERS_COLLECTION, user.uid);
+    const existingDoc = await firestoreModule.getDoc(docRef);
 
     const firestoreData = toFirestoreProfile(profile);
 
     if (existingDoc.exists()) {
-      await updateDoc(docRef, {
+      await firestoreModule.updateDoc(docRef, {
         ...firestoreData,
-        updatedAt: serverTimestamp(),
+        updatedAt: firestoreModule.serverTimestamp(),
       });
     } else {
-      await setDoc(docRef, {
+      await firestoreModule.setDoc(docRef, {
         ...firestoreData,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        createdAt: firestoreModule.serverTimestamp(),
+        updatedAt: firestoreModule.serverTimestamp(),
       });
     }
 
@@ -135,14 +132,15 @@ export async function updateFirestoreProfile(updates: Partial<PlayerProfile>): P
   if (!user) return false;
 
   const db = getFirebaseDb();
-  if (!db) return false;
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) return false;
 
   try {
-    const docRef = doc(db, USERS_COLLECTION, user.uid);
+    const docRef = firestoreModule.doc(db, USERS_COLLECTION, user.uid);
 
     // Convert updates to Firestore format
     const firestoreUpdates: Record<string, unknown> = {
-      updatedAt: serverTimestamp(),
+      updatedAt: firestoreModule.serverTimestamp(),
     };
 
     if (updates.displayName !== undefined) {
@@ -166,7 +164,7 @@ export async function updateFirestoreProfile(updates: Partial<PlayerProfile>): P
       firestoreUpdates.preferences = updates.preferences;
     }
 
-    await updateDoc(docRef, firestoreUpdates);
+    await firestoreModule.updateDoc(docRef, firestoreUpdates);
     return true;
   } catch (error) {
     console.error('[Firebase] Failed to update profile:', error);
@@ -184,11 +182,12 @@ export function subscribeToProfile(
   if (!user) return null;
 
   const db = getFirebaseDb();
-  if (!db) return null;
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) return null;
 
-  const docRef = doc(db, USERS_COLLECTION, user.uid);
+  const docRef = firestoreModule.doc(db, USERS_COLLECTION, user.uid);
 
-  return onSnapshot(
+  return firestoreModule.onSnapshot(
     docRef,
     (snapshot) => {
       if (snapshot.exists()) {

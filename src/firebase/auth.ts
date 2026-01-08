@@ -6,26 +6,30 @@
  * - Google Sign-In
  * - Email/Password authentication
  * - Account linking (anonymous → permanent)
+ *
+ * Uses dynamic imports via the loader module to defer Firebase SDK loading.
  */
 
-import {
-  signInAnonymously,
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  linkWithCredential,
-  GoogleAuthProvider,
-  EmailAuthProvider,
-  signOut as firebaseSignOut,
-  onAuthStateChanged as firebaseOnAuthStateChanged,
-  type User,
-  type Unsubscribe,
-  type AuthCredential,
+import type {
+  User,
+  Unsubscribe,
+  AuthCredential,
 } from 'firebase/auth';
 import { getFirebaseAuth } from './index';
+import { getCachedAuthModule } from './loader';
 
-// Google provider instance (reused)
-const googleProvider = new GoogleAuthProvider();
+// Lazy-initialized Google provider
+let googleProvider: InstanceType<typeof import('firebase/auth').GoogleAuthProvider> | null = null;
+
+function getGoogleProvider() {
+  if (!googleProvider) {
+    const authModule = getCachedAuthModule();
+    if (authModule) {
+      googleProvider = new authModule.GoogleAuthProvider();
+    }
+  }
+  return googleProvider;
+}
 
 export interface AuthResult {
   user: User | null;
@@ -39,12 +43,13 @@ export interface AuthResult {
  */
 export async function signInAnonymous(): Promise<AuthResult> {
   const auth = getFirebaseAuth();
-  if (!auth) {
+  const authModule = getCachedAuthModule();
+  if (!auth || !authModule) {
     return { user: null, error: 'Firebase not initialized', isNewUser: false };
   }
 
   try {
-    const result = await signInAnonymously(auth);
+    const result = await authModule.signInAnonymously(auth);
     return {
       user: result.user,
       error: null,
@@ -64,12 +69,14 @@ export async function signInAnonymous(): Promise<AuthResult> {
  */
 export async function signInWithGoogle(): Promise<AuthResult> {
   const auth = getFirebaseAuth();
-  if (!auth) {
+  const authModule = getCachedAuthModule();
+  const provider = getGoogleProvider();
+  if (!auth || !authModule || !provider) {
     return { user: null, error: 'Firebase not initialized', isNewUser: false };
   }
 
   try {
-    const result = await signInWithPopup(auth, googleProvider);
+    const result = await authModule.signInWithPopup(auth, provider);
     return {
       user: result.user,
       error: null,
@@ -89,12 +96,13 @@ export async function signInWithGoogle(): Promise<AuthResult> {
  */
 export async function signInWithEmail(email: string, password: string): Promise<AuthResult> {
   const auth = getFirebaseAuth();
-  if (!auth) {
+  const authModule = getCachedAuthModule();
+  if (!auth || !authModule) {
     return { user: null, error: 'Firebase not initialized', isNewUser: false };
   }
 
   try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
+    const result = await authModule.signInWithEmailAndPassword(auth, email, password);
     return {
       user: result.user,
       error: null,
@@ -114,12 +122,13 @@ export async function signInWithEmail(email: string, password: string): Promise<
  */
 export async function createAccountWithEmail(email: string, password: string): Promise<AuthResult> {
   const auth = getFirebaseAuth();
-  if (!auth) {
+  const authModule = getCachedAuthModule();
+  if (!auth || !authModule) {
     return { user: null, error: 'Firebase not initialized', isNewUser: false };
   }
 
   try {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
+    const result = await authModule.createUserWithEmailAndPassword(auth, email, password);
     return {
       user: result.user,
       error: null,
@@ -140,7 +149,9 @@ export async function createAccountWithEmail(email: string, password: string): P
  */
 export async function linkAnonymousToGoogle(): Promise<AuthResult> {
   const auth = getFirebaseAuth();
-  if (!auth || !auth.currentUser) {
+  const authModule = getCachedAuthModule();
+  const provider = getGoogleProvider();
+  if (!auth || !auth.currentUser || !authModule || !provider) {
     return { user: null, error: 'No user signed in', isNewUser: false };
   }
 
@@ -149,10 +160,10 @@ export async function linkAnonymousToGoogle(): Promise<AuthResult> {
   }
 
   try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const result = await authModule.signInWithPopup(auth, provider);
+    const credential = authModule.GoogleAuthProvider.credentialFromResult(result);
     if (credential) {
-      await linkWithCredential(auth.currentUser, credential);
+      await authModule.linkWithCredential(auth.currentUser, credential);
     }
     return {
       user: auth.currentUser,
@@ -173,7 +184,8 @@ export async function linkAnonymousToGoogle(): Promise<AuthResult> {
  */
 export async function linkAnonymousToEmail(email: string, password: string): Promise<AuthResult> {
   const auth = getFirebaseAuth();
-  if (!auth || !auth.currentUser) {
+  const authModule = getCachedAuthModule();
+  if (!auth || !auth.currentUser || !authModule) {
     return { user: null, error: 'No user signed in', isNewUser: false };
   }
 
@@ -182,8 +194,8 @@ export async function linkAnonymousToEmail(email: string, password: string): Pro
   }
 
   try {
-    const credential: AuthCredential = EmailAuthProvider.credential(email, password);
-    await linkWithCredential(auth.currentUser, credential);
+    const credential: AuthCredential = authModule.EmailAuthProvider.credential(email, password);
+    await authModule.linkWithCredential(auth.currentUser, credential);
     return {
       user: auth.currentUser,
       error: null,
@@ -203,12 +215,13 @@ export async function linkAnonymousToEmail(email: string, password: string): Pro
  */
 export async function signOut(): Promise<{ error: string | null }> {
   const auth = getFirebaseAuth();
-  if (!auth) {
+  const authModule = getCachedAuthModule();
+  if (!auth || !authModule) {
     return { error: 'Firebase not initialized' };
   }
 
   try {
-    await firebaseSignOut(auth);
+    await authModule.signOut(auth);
     return { error: null };
   } catch (error) {
     return { error: getErrorMessage(error) };
@@ -228,11 +241,12 @@ export function getCurrentUser(): User | null {
  */
 export function onAuthStateChanged(callback: (user: User | null) => void): Unsubscribe | null {
   const auth = getFirebaseAuth();
-  if (!auth) {
+  const authModule = getCachedAuthModule();
+  if (!auth || !authModule) {
     return null;
   }
 
-  return firebaseOnAuthStateChanged(auth, callback);
+  return authModule.onAuthStateChanged(auth, callback);
 }
 
 /**
