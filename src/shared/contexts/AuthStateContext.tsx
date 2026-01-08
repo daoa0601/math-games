@@ -12,6 +12,7 @@ export interface AuthState {
   playerId: string | null;
   isLoading: boolean;
   error: string | null;
+  isOffline: boolean; // True when API server is unavailable (localStorage-only mode)
 }
 
 export const AuthStateContext = createContext<AuthState | null>(null);
