@@ -56,6 +56,11 @@ export function DashboardTabs({ activeTab, onTabChange, achievementCount }: Dash
     [onTabChange]
   );
 
+  // Memoized handler for tab clicks to avoid creating new functions in map loop
+  const handleTabClick = useCallback((tabId: DashboardTabId) => {
+    onTabChange(tabId);
+  }, [onTabChange]);
+
   return (
     <nav className="dashboard-tabs" role="tablist" aria-label={t('dashboard.tabsLabel')}>
       {TABS.map((tab, index) => (
@@ -69,7 +74,7 @@ export function DashboardTabs({ activeTab, onTabChange, achievementCount }: Dash
           aria-controls={`tabpanel-${tab.id}`}
           tabIndex={activeTab === tab.id ? 0 : -1}
           className={`dashboard-tabs__tab ${activeTab === tab.id ? 'dashboard-tabs__tab--active' : ''}`}
-          onClick={() => onTabChange(tab.id)}
+          onClick={() => handleTabClick(tab.id)}
           onKeyDown={(e) => handleKeyDown(e, index)}
           data-testid={`tab-${tab.id}`}
         >

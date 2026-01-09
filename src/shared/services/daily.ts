@@ -143,9 +143,17 @@ export function getTodayCompletions(): Map<
 
 /**
  * Check if all three games are completed today
+ * Optimized to use a single storage read instead of N reads
  */
 export function isAllGamesCompletedToday(): boolean {
-  return GAME_IDS.every((gameId) => isDailyCompleted(gameId));
+  const state = getDailyChallengeState();
+  const today = getTodaySeed();
+
+  return GAME_IDS.every((gameId) =>
+    state.completions.some(
+      (c) => c.date === today && c.gameId === gameId && c.completed
+    )
+  );
 }
 
 /**

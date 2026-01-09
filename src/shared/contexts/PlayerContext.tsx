@@ -21,7 +21,7 @@ import {
   updateStreak as updateStreakService,
   updateStats as updateStatsService,
   recordPlaySession,
-  unlockAchievement as unlockAchievementService,
+  unlockAchievementsBatch,
   isFirstPlayToday,
 } from '../services/player';
 import {
@@ -230,23 +230,28 @@ export function PlayerProvider({ children, initialProfile }: PlayerProviderProps
 
     const newAchievementIds = checkAchievements(enrichedContext, currentProfile.achievements);
 
+    if (newAchievementIds.length === 0) {
+      return { newAchievements: [] };
+    }
+
+    // Batch unlock all achievements in a single storage operation
+    const { profile: updatedProfile, newIds } = unlockAchievementsBatch(newAchievementIds);
+
+    // Map to Achievement objects and sync
     const newAchievements: Achievement[] = [];
-    newAchievementIds.forEach((id) => {
-      const { isNew } = unlockAchievementService(id);
-      if (isNew) {
-        const achievement = getAchievementById(id);
-        if (achievement) {
-          newAchievements.push(achievement);
-          // Sync to server (fire and forget)
-          unlockAchievementApi(id).catch(console.error);
-          // Sync to Firebase (debounced)
-          syncAchievementToFirebase(id);
-        }
+    newIds.forEach((id) => {
+      const achievement = getAchievementById(id);
+      if (achievement) {
+        newAchievements.push(achievement);
+        // Sync to server (fire and forget)
+        unlockAchievementApi(id).catch(console.error);
+        // Sync to Firebase (debounced)
+        syncAchievementToFirebase(id);
       }
     });
 
     if (newAchievements.length > 0) {
-      setProfile(getPlayerProfile());
+      setProfile(updatedProfile);
     }
 
     return { newAchievements };

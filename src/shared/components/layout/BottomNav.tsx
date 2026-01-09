@@ -80,6 +80,11 @@ export function BottomNav({ activeTab, onTabChange, onFeedbackClick }: BottomNav
     setIsMoreMenuOpen(false);
   }, [onFeedbackClick]);
 
+  // Memoized handler for tab changes to avoid creating new functions in map loop
+  const handleTabClick = useCallback((id: NavTabId) => {
+    onTabChange(id);
+  }, [onTabChange]);
+
   const isMoreActive = activeTab === 'settings' || isMoreMenuOpen;
 
   return (
@@ -93,7 +98,7 @@ export function BottomNav({ activeTab, onTabChange, onFeedbackClick }: BottomNav
           aria-controls={`panel-${item.id}`}
           tabIndex={activeTab === item.id ? 0 : -1}
           className={`nav__item ${activeTab === item.id ? 'nav__item--active' : ''}`}
-          onClick={() => onTabChange(item.id)}
+          onClick={() => handleTabClick(item.id)}
         >
           <span className="nav__icon" aria-hidden="true">{item.glyph}</span>
           <span className="nav__label">{t(item.labelKey)}</span>
@@ -107,7 +112,7 @@ export function BottomNav({ activeTab, onTabChange, onFeedbackClick }: BottomNav
         aria-controls={`panel-${SETTINGS_TAB.id}`}
         tabIndex={activeTab === SETTINGS_TAB.id ? 0 : -1}
         className={`nav__item nav__item--desktop-only ${activeTab === SETTINGS_TAB.id ? 'nav__item--active' : ''}`}
-        onClick={() => onTabChange(SETTINGS_TAB.id)}
+        onClick={handleSettingsClick}
       >
         <span className="nav__icon" aria-hidden="true">{SETTINGS_TAB.glyph}</span>
         <span className="nav__label">{t(SETTINGS_TAB.labelKey)}</span>

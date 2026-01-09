@@ -1,12 +1,30 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '@/shared/contexts';
 import { ProgressRing } from '@/shared/components';
 import './StatsTab.css';
 
+// Memoized gradient generator to avoid inline object creation
+const RANK_GRADIENTS: Record<string, string> = {
+  beginner: 'linear-gradient(135deg, hsl(120, 60%, 50%), hsl(120, 60%, 40%))',
+  learner: 'linear-gradient(135deg, hsl(200, 70%, 55%), hsl(200, 70%, 45%))',
+  apprentice: 'linear-gradient(135deg, hsl(30, 80%, 60%), hsl(30, 80%, 50%))',
+  intermediate: 'linear-gradient(135deg, hsl(45, 90%, 55%), hsl(45, 90%, 45%))',
+  advanced: 'linear-gradient(135deg, hsl(280, 70%, 60%), hsl(280, 70%, 50%))',
+  expert: 'linear-gradient(135deg, hsl(15, 85%, 55%), hsl(15, 85%, 45%))',
+  master: 'linear-gradient(135deg, hsl(270, 75%, 60%), hsl(270, 75%, 50%))',
+  grandmaster: 'linear-gradient(135deg, hsl(50, 100%, 60%), hsl(50, 100%, 50%))',
+};
+
 export function StatsTab() {
   const { t } = useTranslation();
   const { profile, currentRankInfo, nextRank, rankProgress } = usePlayer();
   const { stats } = profile;
+
+  // Memoize the rank badge style to avoid creating new object on every render
+  const rankBadgeStyle = useMemo(() => ({
+    background: RANK_GRADIENTS[currentRankInfo.rank] || RANK_GRADIENTS.grandmaster,
+  }), [currentRankInfo.rank]);
 
   return (
     <div className="stats-tab" role="tabpanel" id="panel-stats" aria-labelledby="tab-stats">
@@ -44,23 +62,7 @@ export function StatsTab() {
           <div className="stats-tab__rank-current">
             <span
               className="stats-tab__rank-badge"
-              style={{
-                background: `linear-gradient(135deg, hsl(${currentRankInfo.rank === 'beginner' ? '120, 60%, 50%' :
-                  currentRankInfo.rank === 'learner' ? '200, 70%, 55%' :
-                  currentRankInfo.rank === 'apprentice' ? '30, 80%, 60%' :
-                  currentRankInfo.rank === 'intermediate' ? '45, 90%, 55%' :
-                  currentRankInfo.rank === 'advanced' ? '280, 70%, 60%' :
-                  currentRankInfo.rank === 'expert' ? '15, 85%, 55%' :
-                  currentRankInfo.rank === 'master' ? '270, 75%, 60%' :
-                  '50, 100%, 60%'}), hsl(${currentRankInfo.rank === 'beginner' ? '120, 60%, 40%' :
-                  currentRankInfo.rank === 'learner' ? '200, 70%, 45%' :
-                  currentRankInfo.rank === 'apprentice' ? '30, 80%, 50%' :
-                  currentRankInfo.rank === 'intermediate' ? '45, 90%, 45%' :
-                  currentRankInfo.rank === 'advanced' ? '280, 70%, 50%' :
-                  currentRankInfo.rank === 'expert' ? '15, 85%, 45%' :
-                  currentRankInfo.rank === 'master' ? '270, 75%, 50%' :
-                  '50, 100%, 50%'}))`
-              }}
+              style={rankBadgeStyle}
             >
               {currentRankInfo.icon}
             </span>

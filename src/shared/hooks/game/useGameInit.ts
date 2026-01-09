@@ -33,7 +33,7 @@
  * ```
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '@/shared/contexts';
@@ -130,7 +130,8 @@ export function useGameInit({ gameId }: UseGameInitOptions): UseGameInitReturn {
     [announce, t]
   );
 
-  return {
+  // Memoize return value to prevent creating new object reference on every render
+  return useMemo(() => ({
     isDailyMode,
     dailyCompleted,
     setDailyCompleted,
@@ -140,7 +141,14 @@ export function useGameInit({ gameId }: UseGameInitOptions): UseGameInitReturn {
     setPracticeMode,
     handlePracticeModeChange,
     handleTimeWarning,
-  };
+  }), [
+    isDailyMode,
+    dailyCompleted,
+    showTutorial,
+    practiceMode,
+    handlePracticeModeChange,
+    handleTimeWarning,
+  ]);
 }
 
 export default useGameInit;
