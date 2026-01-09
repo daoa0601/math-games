@@ -26,7 +26,7 @@ export function DailyChallengeBanner({ countdown, className = '' }: DailyChallen
   const { t } = useTranslation();
 
   // Get all daily state in a single storage read and memoize derived values
-  const { completions, allCompleted, completedGames } = useMemo(() => {
+  const { allCompleted, completedGames } = useMemo(() => {
     // Single storage read
     getDailyChallengeState();
     const todayCompletions = getTodayCompletions();
@@ -41,7 +41,6 @@ export function DailyChallengeBanner({ countdown, className = '' }: DailyChallen
     });
 
     return {
-      completions: todayCompletions,
       allCompleted: isAllCompleted,
       completedGames: new Set(completed),
     };
