@@ -29,6 +29,14 @@ function invalidateCache(gameId: StorageGameId): void {
   progressCache.delete(gameId);
 }
 
+/**
+ * Clear the entire progress cache.
+ * Exposed for testing purposes to ensure test isolation.
+ */
+export function clearProgressCache(): void {
+  progressCache.clear();
+}
+
 export interface LevelProgress {
     levelId: string;
     completed: boolean;

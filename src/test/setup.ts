@@ -1,5 +1,6 @@
 /// <reference types="vitest/globals" />
 import '@testing-library/jest-dom/vitest'
+import { clearProgressCache } from '@/shared/utils/storage';
 
 // Mock localStorage for tests
 const localStorageMock = (() => {
@@ -26,9 +27,10 @@ Object.defineProperty(globalThis, 'localStorage', {
     value: localStorageMock,
 });
 
-// Reset localStorage before each test
+// Reset localStorage and storage cache before each test
 beforeEach(() => {
     localStorage.clear();
+    clearProgressCache();
 });
 
 // Mock import.meta.env
