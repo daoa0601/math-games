@@ -59,6 +59,8 @@
   align-items: center;
   padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--border);
+  /* Fixed width for language stability */
+  min-width: 5.5rem;
 }
 
 .compact-header__streak-count {

@@ -55,7 +55,7 @@ export function CompactHeader({
       {streak > 0 && !isGuest && (
         <div className="compact-header__streak" title={t('player.streak')}>
           <span className="compact-header__streak-count">{streak}</span>
-          <span className="compact-header__streak-label">streak</span>
+          <span className="compact-header__streak-label">{t('player.streak')}</span>
         </div>
       )}
       {isGuest && onSignIn && (
