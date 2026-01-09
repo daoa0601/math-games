@@ -1,0 +1,36 @@
+/* LanguageSwitcher - Fixed width for language stability */
+
+.lang-switcher {
+  /* Fixed width to prevent layout shift between languages */
+  min-width: 4.5rem;
+  height: 2.25rem;
+  padding: var(--space-xs) var(--space-sm);
+
+  /* Styling */
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  white-space: nowrap;
+
+  transition: border-color var(--motion-fast) var(--ease-out),
+              color var(--motion-fast) var(--ease-out);
+}
+
+.lang-switcher:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+.lang-switcher:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

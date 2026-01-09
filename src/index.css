@@ -300,6 +300,13 @@ body {
   overflow: visible;
 }
 
+/* Back link - fixed width for language stability */
+.back-link {
+  min-width: 11rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
 /* On mobile, wrap header to prevent overlap with game content */
 @media (max-width: 480px) {
   .game-header {

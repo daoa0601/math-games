@@ -51,4 +51,3 @@ export type { AnnouncePriority } from './ScreenReaderAnnounce';
 export { SkipLinks } from './SkipLinks';
 export { SoundToggle } from './SoundToggle';
 export type { SoundToggleProps } from './SoundToggle';
-export { ThemeToggle } from './ThemeToggle';

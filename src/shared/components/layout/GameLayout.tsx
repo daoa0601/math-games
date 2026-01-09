@@ -5,7 +5,6 @@ import type { ReactNode } from 'react';
 import type { StorageGameId } from '@/shared/types';
 import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
 import { SkipLinks } from '@/shared/components/SkipLinks';
-import { ThemeToggle } from '@/shared/components/ThemeToggle';
 import { LearnModal } from '@/shared/components/LearnModal';
 
 interface GameLayoutProps {
@@ -37,9 +36,8 @@ export function GameLayout({ title, children, headerRight, gameId }: GameLayoutP
                             ?
                         </button>
                     )}
-                    <ThemeToggle />
                     <LanguageSwitcher />
-                    <Link to="/" className="action action--secondary">
+                    <Link to="/" className="action action--secondary back-link">
                         ← {t('backToGames')}
                     </Link>
                 </div>
