@@ -130,7 +130,8 @@ function migrateProfile(oldProfile: Record<string, unknown>): PlayerProfile {
   };
 
   // Filter achievements to only keep the 10 core ones
-  const coreAchievements = [
+  // Use Set for O(1) lookup instead of O(n) array.includes()
+  const coreAchievementsSet = new Set([
     'global_first_steps',
     'global_all_games',
     'global_streak_30',
@@ -141,11 +142,11 @@ function migrateProfile(oldProfile: Record<string, unknown>): PlayerProfile {
     'sr_hard_winner',
     'sa_first_build',
     'sa_master_architect',
-  ];
+  ]);
 
   const oldAchievements = Array.isArray(oldProfile.achievements) ? oldProfile.achievements : [];
   const filteredAchievements = oldAchievements.filter((id) =>
-    typeof id === 'string' && coreAchievements.includes(id)
+    typeof id === 'string' && coreAchievementsSet.has(id)
   );
 
   const migratedProfile: PlayerProfile = {
@@ -323,6 +324,29 @@ export function unlockAchievement(achievementId: string): { profile: PlayerProfi
   }, profile);
 
   return { profile: updated, isNew: true };
+}
+
+/**
+ * Batch unlock multiple achievements in a single storage operation
+ * Returns the list of newly unlocked achievement IDs
+ */
+export function unlockAchievementsBatch(achievementIds: string[]): { profile: PlayerProfile; newIds: string[] } {
+  const profile = getPlayerProfile();
+  const existingSet = new Set(profile.achievements);
+
+  // Filter to only truly new achievements
+  const newIds = achievementIds.filter((id) => !existingSet.has(id));
+
+  if (newIds.length === 0) {
+    return { profile, newIds: [] };
+  }
+
+  // Pass existing profile to avoid re-reading
+  const updated = updatePlayerProfile({
+    achievements: [...profile.achievements, ...newIds],
+  }, profile);
+
+  return { profile: updated, newIds };
 }
 
 /**

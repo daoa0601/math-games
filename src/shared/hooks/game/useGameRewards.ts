@@ -7,7 +7,7 @@
  * - Timed mode = full tracking (stats update, achievements check)
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { usePlayer } from '@/shared/contexts';
 import type { Achievement, AchievementContext, GameId } from '@/shared/services';
 import type { PlayerRank } from '@/shared/services/rank';
@@ -156,7 +156,8 @@ export function useGameRewards(): UseGameRewardsReturn {
     setToastQueue((prev) => prev.filter((a) => a.id !== id));
   }, []);
 
-  return {
+  // Memoize return value to prevent creating new object reference on every render
+  return useMemo(() => ({
     handleCompletion,
     rewards,
     clearRewards,
@@ -164,7 +165,14 @@ export function useGameRewards(): UseGameRewardsReturn {
     setShowingRankUp,
     toastQueue,
     dismissToast,
-  };
+  }), [
+    handleCompletion,
+    rewards,
+    clearRewards,
+    showingRankUp,
+    toastQueue,
+    dismissToast,
+  ]);
 }
 
 /**

@@ -7,7 +7,7 @@ import { useFocusTrap } from '@/shared/hooks/accessibility';
 import type { Piece, Position3D, Rotation3D, CellState } from '../logic/types';
 import { canPlacePiece, getPieceWorldPositions } from '../logic/engine';
 import { RotationControls } from './RotationControls';
-import { useSharedBoxGeometry } from '../hooks';
+import { useSharedBoxGeometry, useThreeCleanup } from '../hooks';
 import { Canvas3DErrorBoundary } from './Canvas3DErrorBoundary';
 import './PlacementModal.css';
 
@@ -50,6 +50,8 @@ function PiecePreview3D({
     rotation: Rotation3D;
     isValid: boolean;
 }) {
+    // Clean up Three.js resources on unmount to prevent memory leaks
+    useThreeCleanup();
     const sharedGeometry = useSharedBoxGeometry();
     const worldPositions = getPieceWorldPositions(piece, position, rotation);
 

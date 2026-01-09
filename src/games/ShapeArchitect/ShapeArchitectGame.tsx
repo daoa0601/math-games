@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DndContext, pointerWithin } from '@dnd-kit/core';
 import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, PersonalBestIndicator, HelpButton } from '@/shared/components';
@@ -79,6 +79,22 @@ export function ShapeArchitectGame() {
         return !localStorage.getItem('shape-architect-rotated');
     });
 
+    // Refs for setTimeout cleanup to prevent memory leaks
+    const placementErrorTimeoutRef = useRef<number | null>(null);
+    const moveErrorTimeoutRef = useRef<number | null>(null);
+
+    // Cleanup timeouts on unmount
+    useEffect(() => {
+        return () => {
+            if (placementErrorTimeoutRef.current) {
+                clearTimeout(placementErrorTimeoutRef.current);
+            }
+            if (moveErrorTimeoutRef.current) {
+                clearTimeout(moveErrorTimeoutRef.current);
+            }
+        };
+    }, []);
+
     // Get total score (re-computed when progressVersion changes)
     // progressVersion is intentionally used as a trigger to force re-computation after level completion
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -157,7 +173,10 @@ export function ShapeArchitectGame() {
         onError: (errorKey) => {
             playSound('error');
             setPlacementError(t(`errors.${errorKey}`));
-            setTimeout(() => setPlacementError(null), 2000);
+            if (placementErrorTimeoutRef.current) {
+                clearTimeout(placementErrorTimeoutRef.current);
+            }
+            placementErrorTimeoutRef.current = window.setTimeout(() => setPlacementError(null), 2000);
         },
         disabled: showTimeUp || gameState.isSolved,
     });
@@ -183,7 +202,10 @@ export function ShapeArchitectGame() {
         onError: (errorKey) => {
             playSound('error');
             setPlacementError(t(`errors.${errorKey}`));
-            setTimeout(() => setPlacementError(null), 2000);
+            if (moveErrorTimeoutRef.current) {
+                clearTimeout(moveErrorTimeoutRef.current);
+            }
+            moveErrorTimeoutRef.current = window.setTimeout(() => setPlacementError(null), 2000);
         },
         disabled: showTimeUp || gameState.isSolved,
     });

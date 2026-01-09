@@ -17,7 +17,7 @@ export function useThrottledHover(
     // Keep handler ref up to date (in effect to avoid accessing refs during render)
     useEffect(() => {
         handlerRef.current = handler;
-    });
+    }, [handler]);
 
     // Cleanup on unmount
     useEffect(() => {

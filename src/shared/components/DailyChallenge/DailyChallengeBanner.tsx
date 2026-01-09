@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getTodayCompletions, isAllGamesCompletedToday } from '@/shared/services/daily';
+import { getTodayCompletions, isAllGamesCompletedToday, getDailyChallengeState } from '@/shared/services/daily';
 import type { StorageGameId } from '@/shared/schemas';
 import './DailyChallengeBanner.css';
 
@@ -25,19 +25,27 @@ interface DailyChallengeBannerProps {
 export function DailyChallengeBanner({ countdown, className = '' }: DailyChallengeBannerProps) {
   const { t } = useTranslation();
 
-  const completions = useMemo(() => getTodayCompletions(), []);
-  const allCompleted = useMemo(() => isAllGamesCompletedToday(), []);
+  // Get all daily state in a single storage read and memoize derived values
+  const { completions, allCompleted, completedGames } = useMemo(() => {
+    // Single storage read
+    getDailyChallengeState();
+    const todayCompletions = getTodayCompletions();
+    const isAllCompleted = isAllGamesCompletedToday();
 
-  // Convert Map to Set of completed game IDs
-  const completedGames = useMemo(() => {
+    // Build completed games set
     const completed: StorageGameId[] = [];
-    completions.forEach((completion, gameId) => {
+    todayCompletions.forEach((completion, gameId) => {
       if (completion !== null) {
         completed.push(gameId);
       }
     });
-    return new Set(completed);
-  }, [completions]);
+
+    return {
+      completions: todayCompletions,
+      allCompleted: isAllCompleted,
+      completedGames: new Set(completed),
+    };
+  }, []);
 
   return (
     <div className={`daily-challenge-banner ${allCompleted ? 'daily-challenge-banner--completed' : ''} ${className}`} data-testid="daily-challenge-banner">

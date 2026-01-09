@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   getTodayCompletions,
-  getGameStreak,
+  getDailyChallengeState,
   isAllGamesCompletedToday,
 } from '../../services';
 import {
@@ -62,9 +62,15 @@ export function DailyChallenge({ className = '' }: DailyChallengeProps) {
     return () => clearInterval(timer);
   }, []);
 
-  // Get completion status for all games
-  const completions = useMemo(() => getTodayCompletions(), []);
-  const allCompleted = useMemo(() => isAllGamesCompletedToday(), []);
+  // Get completion status and streaks for all games (single storage read)
+  const { completions, streaks, allCompleted } = useMemo(() => {
+    const state = getDailyChallengeState();
+    return {
+      completions: getTodayCompletions(),
+      streaks: state.streaks,
+      allCompleted: isAllGamesCompletedToday(),
+    };
+  }, []);
 
   return (
     <section className={`daily-challenge ${className}`}>
@@ -95,7 +101,7 @@ export function DailyChallenge({ className = '' }: DailyChallengeProps) {
           const completion = completions.get(game.id);
           const isCompleted = completion?.completed ?? false;
           const timeSeconds = completion?.timeSeconds;
-          const streak = getGameStreak(game.id);
+          const streak = streaks[game.id];
 
           return (
             <Link

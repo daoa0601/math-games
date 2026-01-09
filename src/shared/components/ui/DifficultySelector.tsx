@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import './DifficultySelector.css';
 
@@ -38,13 +39,18 @@ export function DifficultySelector<T extends Difficulty>({
 }: DifficultySelectorProps<T>) {
     const { t } = useTranslation('common');
 
+    // Memoized handler to avoid creating new functions in map loop
+    const handleClick = useCallback((difficulty: T) => {
+        onChange(difficulty);
+    }, [onChange]);
+
     return (
         <div className="difficulty-selector">
             {options.map((d) => (
                 <button
                     key={d}
                     className={`difficulty-btn difficulty-btn--${d} ${value === d ? 'difficulty-btn--active' : ''}`}
-                    onClick={() => onChange(d)}
+                    onClick={() => handleClick(d)}
                     aria-pressed={value === d}
                 >
                     {DIFFICULTY_EMOJI[d]} {t(`difficulty.${d}`)}

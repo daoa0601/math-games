@@ -32,7 +32,9 @@ export function isTutorialSkipped(gameId: string): boolean {
 }
 
 export function shouldShowTutorial(gameId: string): boolean {
-  return !isTutorialCompleted(gameId) && !isTutorialSkipped(gameId);
+  // Optimized: single storage read instead of two
+  const progress = storage.get();
+  return !(progress.completedTutorials[gameId] || progress.skippedTutorials[gameId]);
 }
 
 export function markTutorialCompleted(gameId: string): void {
