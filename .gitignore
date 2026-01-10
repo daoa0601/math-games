@@ -43,8 +43,7 @@ coverage
 .DS_Store
 Thumbs.db
 
-# Claude Code local settings
-.claude/
+
 
 # Deployment caches
 .vercel

@@ -1,5 +1,8 @@
 # Performance Analysis Report
 
+> **Last Updated:** 2026-01-10  
+> **Status:** Several critical issues have been addressed. See annotations below.
+
 This document identifies performance anti-patterns, inefficient algorithms, and optimization opportunities discovered in the math-games codebase.
 
 ## Summary
@@ -184,23 +187,11 @@ const filteredAchievements = oldAchievements.filter((id) =>
 
 ## 3. Storage N+1 Patterns
 
-### CRITICAL: Achievement Unlock Loop
+### ~~CRITICAL: Achievement Unlock Loop~~ ✅ FIXED
 
-**File:** `src/shared/contexts/PlayerContext.tsx:234-249`
+**File:** `src/shared/contexts/PlayerContext.tsx`
 
-```typescript
-newAchievementIds.forEach((id) => {
-  const { isNew } = unlockAchievementService(id);  // Reads storage each iteration
-  // ...
-});
-if (newAchievements.length > 0) {
-  setProfile(getPlayerProfile());  // Another storage read
-}
-```
-
-**Problem:** N+1 reads: one per achievement + final refresh.
-
-**Fix:** Batch achievement unlocks:
+**Status:** Uses `profileRef` pattern to avoid redundant storage reads. Achievement checks now efficient.
 ```typescript
 function unlockAchievementsBatch(ids: string[]): { newIds: string[] } {
   const profile = getPlayerProfile();  // Single read
@@ -213,26 +204,11 @@ function unlockAchievementsBatch(ids: string[]): { newIds: string[] } {
 }
 ```
 
-### CRITICAL: All Games Completed Check
+### ~~CRITICAL: All Games Completed Check~~ ✅ FIXED
 
-**File:** `src/shared/services/daily.ts:147-149`
+**File:** `src/shared/services/daily.ts:148-157`
 
-```typescript
-export function isAllGamesCompletedToday(): boolean {
-  return GAME_IDS.every((gameId) => isDailyCompleted(gameId));  // 3 storage reads
-}
-```
-
-**Fix:**
-```typescript
-export function isAllGamesCompletedToday(): boolean {
-  const state = getDailyChallengeState();  // Single read
-  const today = getTodaySeed();
-  return GAME_IDS.every(gameId =>
-    state.completions.some(c => c.date === today && c.gameId === gameId && c.completed)
-  );
-}
-```
+**Status:** Now uses single storage read with `getDailyChallengeState()`.
 
 ### CRITICAL: getGameStreak() Inside Loop
 
@@ -450,4 +426,4 @@ With 1000+ voxels, each with its own `useFrame` hook, performance degrades.
 
 ---
 
-*Generated: 2026-01-09*
+*Last updated: 2026-01-10*
