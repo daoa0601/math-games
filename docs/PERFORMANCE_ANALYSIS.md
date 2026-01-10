@@ -1,6 +1,6 @@
 # Performance Analysis Report
 
-> **Last Updated:** 2026-01-10  
+> **Last Updated:** 2026-01-10
 > **Status:** Several critical issues have been addressed. See annotations below.
 
 This document identifies performance anti-patterns, inefficient algorithms, and optimization opportunities discovered in the math-games codebase.
@@ -9,16 +9,63 @@ This document identifies performance anti-patterns, inefficient algorithms, and 
 
 | Category | Critical | High | Medium | Total |
 |----------|----------|------|--------|-------|
-| React Re-renders | 1 | 3 | 6 | 10 |
-| Algorithm Inefficiencies | 2 | 3 | 6 | 11 |
+| React Re-renders | 2 | 3 | 6 | 11 |
+| Algorithm Inefficiencies | 3 | 4 | 6 | 13 |
 | Storage N+1 Patterns | 3 | 2 | 3 | 8 |
+| Firebase Sync Patterns | 2 | 2 | 1 | 5 |
 | Hook Anti-patterns | 1 | 3 | 4 | 8 |
 | Three.js Memory Leaks | 3 | 0 | 3 | 6 |
-| **Total** | **10** | **11** | **22** | **43** |
+| **Total** | **14** | **14** | **23** | **51** |
 
 ---
 
 ## 1. React Re-render Issues
+
+### CRITICAL: Inline Functions in Nested Grid Loop
+
+**File:** `src/games/ShapeArchitect/components/GridBoard.tsx:371-396`
+
+```tsx
+// Line 371-379: handleClick created inside nested map (height × width iterations)
+const handleClick = () => {
+    if (cell === 1) {
+        onCellClick(position);
+    } else if (cell === 2 && cellData && onPlacedPieceClick) {
+        onPlacedPieceClick(cellData.pieceId);
+    }
+};
+
+// Line 395: inline arrow for onMouseEnter
+onMouseEnter={() => cell === 1 && handleMouseEnter(position)}
+
+// Line 396: inline arrow for onKeyDown
+onKeyDown={(e) => handleGridKeyDown(e, x, y, cell)}
+```
+
+**Problem:** Three inline functions are created for every grid cell on every render. For a 10×10 grid, creates 300 new function objects per render. Even with `DroppableCell` memoized, the new function references cause prop comparison to fail.
+
+**Fix:** Extract cell-level handlers using a child component pattern or use data attributes:
+```tsx
+// Option 1: Memoized cell wrapper with stable handlers
+const CellWrapper = memo(function CellWrapper({
+    x, y, cell, onCellClick, onPlacedPieceClick, ...rest
+}) {
+    const handleClick = useCallback(() => {
+        if (cell === 1) onCellClick({ x, y, z: 0 });
+        else if (cell === 2) onPlacedPieceClick?.(pieceId);
+    }, [x, y, cell, onCellClick, onPlacedPieceClick, pieceId]);
+
+    return <DroppableCell onClick={handleClick} {...rest} />;
+});
+
+// Option 2: Data attributes with single handler at grid level
+const handleCellClick = useCallback((e: React.MouseEvent) => {
+    const { x, y, cell, pieceId } = e.currentTarget.dataset;
+    // ... handle based on data attributes
+}, [onCellClick, onPlacedPieceClick]);
+```
+
+---
 
 ### CRITICAL: Inline Gradient Style Object
 
@@ -165,6 +212,44 @@ const nodeMap = useMemo(() =>
 );
 ```
 
+---
+
+### HIGH: O(n²) Lookup in cellColorMap
+
+**File:** `src/games/ShapeArchitect/components/GridBoard.tsx:165-181`
+
+```typescript
+const cellColorMap = useMemo(() => {
+    const colorMap = new Map<string, {...}>();
+    for (const placed of placedPieces) {
+        const piece = levelPieces.find(p => p.id === placed.pieceId);  // O(n) per iteration
+        if (!piece) continue;
+        // ...
+    }
+    return colorMap;
+}, [placedPieces, levelPieces]);
+```
+
+**Problem:** `Array.find()` inside a loop creates O(n×m) complexity. With 10 placed pieces and 30 level pieces, performs up to 300 comparisons.
+
+**Fix:** Pre-index pieces by ID:
+```typescript
+const levelPiecesById = useMemo(() =>
+    new Map(levelPieces.map(p => [p.id, p])),
+    [levelPieces]
+);
+
+const cellColorMap = useMemo(() => {
+    const colorMap = new Map<string, {...}>();
+    for (const placed of placedPieces) {
+        const piece = levelPiecesById.get(placed.pieceId);  // O(1)
+        if (!piece) continue;
+        // ...
+    }
+    return colorMap;
+}, [placedPieces, levelPiecesById]);
+```
+
 ### MEDIUM: .filter() + .includes() Pattern
 
 **File:** `src/shared/services/player.ts:147-149`
@@ -253,7 +338,132 @@ export function shouldShowTutorial(gameId: string): boolean {
 
 ---
 
-## 4. Hook Anti-patterns
+## 4. Firebase Sync Patterns
+
+### CRITICAL: Achievement Sync Loop (N+1 Network Calls)
+
+**File:** `src/shared/contexts/PlayerContext.tsx:244-252`
+
+```typescript
+newIds.forEach((id) => {
+    const achievement = getAchievementById(id);
+    if (achievement) {
+        newAchievements.push(achievement);
+        unlockAchievementApi(id).catch(console.error);  // N API calls
+        syncAchievementToFirebase(id);                   // N Firebase calls
+    }
+});
+```
+
+**Problem:** Individual Firebase sync calls in a loop instead of batching. Unlocking 3 achievements triggers 6 network operations instead of 2 batched operations.
+
+**Fix:** Use the existing batch function in `syncManager.ts:341-359`:
+```typescript
+// After the loop, batch sync all achievements
+if (newIds.length > 0) {
+    unlockAchievementsBatchApi(newIds).catch(console.error);
+    syncAchievementsBatch(newIds);  // Already exists, unused
+}
+```
+
+---
+
+### CRITICAL: Debounce Stale Closure Bug
+
+**File:** `src/firebase/sync/syncManager.ts:268-319`
+
+```typescript
+syncDebounceTimer = setTimeout(async () => {
+    if (now - lastSyncTime < MIN_SYNC_INTERVAL_MS) {
+        // Recursive call captures stale 'profile' from closure
+        syncDebounceTimer = setTimeout(
+            () => syncToFirestore(profile),  // ❌ Stale profile!
+            MIN_SYNC_INTERVAL_MS - (now - lastSyncTime)
+        );
+        return;
+    }
+    // ...
+}, SYNC_DEBOUNCE_MS);
+```
+
+**Problem:** Recursive rescheduling captures profile from closure. Race conditions can cause older profile data to overwrite newer data.
+
+**Fix:** Use module-level pending state:
+```typescript
+let pendingProfile: PlayerProfile | null = null;
+
+export function syncToFirestore(profile: PlayerProfile) {
+    pendingProfile = profile;  // Always update to latest
+
+    if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+
+    syncDebounceTimer = setTimeout(async () => {
+        if (!pendingProfile) return;
+        const profileToSync = pendingProfile;
+        pendingProfile = null;
+        await performSync(profileToSync);
+    }, SYNC_DEBOUNCE_MS);
+}
+```
+
+---
+
+### HIGH: Profile Listener Full Re-merge on Every Update
+
+**File:** `src/firebase/sync/syncManager.ts:171-246`
+
+```typescript
+function handleRemoteProfileChange(remoteProfile: PlayerProfile | null) {
+    // Creates new Set for every achievement merge
+    const merged = new Set([...localProfile.achievements, ...remoteProfile.achievements]);
+
+    // Performs multiple Math.max() comparisons for each field
+    // Creates new Date objects on every comparison
+    // Full profile save triggers PlayerContext re-renders
+    saveLocalProfile(merged);
+}
+```
+
+**Problem:** Firestore listeners fire frequently with offline persistence. Each remote change triggers expensive merge operations and cascading re-renders.
+
+**Fix:** Debounce the profile merge or use shallow comparison before full merge.
+
+---
+
+### HIGH: Auth State Object Recreation
+
+**File:** `src/firebase/FirebaseAuthContext.tsx:93-100`
+
+```typescript
+setState({
+    user,
+    isAuthenticated: user !== null,
+    isAnonymous: user?.isAnonymous ?? false,
+    isLoading: false,
+    error: null,
+    isFirebaseAvailable: true,
+});
+```
+
+**Problem:** Creates entirely new state object on every auth change, even when only one field changes.
+
+**Fix:** Use functional update with comparison:
+```typescript
+setState(prev => {
+    if (prev.user === user && !prev.isLoading) return prev;
+    return {
+        ...prev,
+        user,
+        isAuthenticated: user !== null,
+        isAnonymous: user?.isAnonymous ?? false,
+        isLoading: false,
+    };
+});
+```
+
+---
+
+## 5. Hook Anti-patterns
 
 ### CRITICAL: Missing useEffect Dependency Array
 
