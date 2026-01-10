@@ -2,81 +2,88 @@
 
 > **Last Updated:** 2026-01-10
 
-This document tracks known E2E test failures that are pre-existing issues, not caused by recent changes.
+This document tracks known E2E test failures and their resolution status.
 
 ## Summary
 
-| Spec File | Failing Tests | Root Cause | Status |
-|-----------|---------------|------------|--------|
-| `dashboard.spec.ts` | 2 | Panel ID inconsistency | ⚠️ Open |
-| `progression.spec.ts` | 6 | i18n + streak logic mismatch | ⚠️ Open |
-| `daily-challenge.spec.ts` | 3 | CSS class + keyboard nav | ⚠️ Open |
-| `magic-graph.spec.ts` | 4 | Mobile Chrome UI overlap | ⚠️ Open |
+| Spec File | Issue | Status |
+|-----------|-------|--------|
+| `dashboard.spec.ts` | Panel ID inconsistency | ✅ Fixed |
+| `progression.spec.ts` | i18n mismatch | ✅ Fixed (tests accept both locales) |
+| `progression.spec.ts` | Streak logic | ✅ Fixed (test removed) |
+| `daily-challenge.spec.ts` | Completion state stale | ✅ Fixed |
+| `daily-challenge.spec.ts` | Mobile Safari keyboard nav | ⚠️ Browser limitation (skip) |
+| `magic-graph.spec.ts` | Mobile Chrome UI overlap | ✅ Fixed |
 
 ---
 
-## dashboard.spec.ts
+## ✅ Fixed Issues
 
-### `should switch tabs when clicked` (Mobile Chrome & Safari)
+### dashboard.spec.ts - Panel ID Standardization
 
-**Error:** Test looks for `#panel-learn` but actual element ID is inconsistent across tabs.
+**Issue:** AchievementsTab used `id="tabpanel-achievements"` while BottomNav expected `panel-achievements`.
 
-**Current State:**
-- LearnTab: `id="panel-learn"` (inconsistent)
-- AchievementsTab: `id="tabpanel-achievements"`
-- DashboardTabs uses: `aria-controls="tabpanel-${tab.id}"`
-
-**Fix Options:**
-1. Standardize all panel IDs to `panel-{tabId}` format
-2. Update tests to match actual IDs
+**Fix:** Changed AchievementsTab.tsx to use `id="panel-achievements"` (consistent with other tabs).
 
 ---
 
-## progression.spec.ts
+### progression.spec.ts - i18n Mismatch
 
-### i18n Mismatch
-**Error:** Tests expect English (`"Intermediate"`) but app uses Vietnamese (`"Trung cấp"`).
+**Issue:** Tests expected English rank names but app defaults to Vietnamese.
 
-**Fix:** Set locale to English in test setup or use regex matching.
-
-### Streak Logic
-**Error:** Streak starts at 1 on first visit (not 0).
-
-**Root Cause:** `updateStreak()` is called on first load, which correctly sets streak to 1.
-
-**Fix:** Update test expectations to match actual (correct) app behavior.
-
----
-
-## daily-challenge.spec.ts
-
-### Completion State Not Loading
-**Error:** `.daily-challenge-banner__dot--completed` not found.
-
-**Investigation Needed:** Verify the actual CSS class name in `DailyChallengeBanner.tsx`.
-
-### Mobile Safari Keyboard Navigation
-**Error:** Tab key navigation fails on mobile.
-
-**Fix:** Skip test on mobile browsers:
+**Status:** Already fixed - tests now use regex patterns accepting both languages:
 ```typescript
-test.skip(({ browserName }) => browserName === 'webkit', 'Mobile Safari keyboard nav differs');
+expect(playerInfo.rank).toMatch(/Intermediate|Trung cấp/);
 ```
 
 ---
 
-## magic-graph.spec.ts
+### progression.spec.ts - Streak Logic
 
-### Mobile Chrome Click Interception
+**Issue:** Tests expected streak=0 on first visit, but app correctly sets streak=1.
 
-**Affected Tests:** Node interactions on Mobile Chrome viewport.
+**Status:** Already fixed - test was deleted with explanation:
+```typescript
+// DELETED: 'should start with zero streak' test
+// Reason: Tests implementation detail. The app correctly sets streak to 1 on first visit
+```
 
-**Error:** "?" help button intercepts pointer events.
+---
 
-**Fix Options:**
-1. Adjust game layout CSS to prevent overlap
-2. Dismiss help button before interactions in tests
-3. Scroll/reposition before clicking
+### daily-challenge.spec.ts - Completion State
+
+**Issue:** `useMemo` with empty dependencies never updated completion status after mount.
+
+**Fix:** Added `completionCount` prop to DailyChallengeBanner that triggers re-render:
+- Parent (PlayTab) calculates completion count on each render
+- Banner's useMemo now depends on `completionCount` prop
+
+---
+
+### magic-graph.spec.ts - Mobile Chrome Click Interception
+
+**Issue:** Header "?" button intercepted clicks on puzzle nodes on mobile viewport.
+
+**Fix:** Added proper z-index layering in MagicGraph.css mobile media query:
+```css
+.mg-board-wrapper {
+  position: relative;
+  z-index: 1;  /* Below game-header which has z-index: 10 */
+}
+```
+
+---
+
+## ⚠️ Known Limitations
+
+### daily-challenge.spec.ts - Mobile Safari Keyboard Navigation
+
+**Issue:** Tab key navigation behaves differently on Mobile Safari.
+
+**Status:** Browser limitation - recommend skipping on mobile:
+```typescript
+test.skip(({ browserName }) => browserName === 'webkit', 'Mobile Safari keyboard nav differs');
+```
 
 ---
 
@@ -89,19 +96,6 @@ npx playwright test e2e/dashboard.spec.ts
 # Debug with UI
 npx playwright test e2e/dashboard.spec.ts --ui
 
-# Single test by line
-npx playwright test e2e/dashboard.spec.ts:176
+# Full E2E suite
+npm run test:e2e
 ```
-
----
-
-## Priority
-
-| Priority | Issue | Effort |
-|----------|-------|--------|
-| High | Panel ID standardization | Low |
-| High | MagicGraph Mobile overlap | Medium |
-| Medium | i18n in progression tests | Low |
-| Medium | Streak test expectations | Low |
-| Low | Daily challenge CSS class | Medium |
-| Low | Mobile keyboard nav | Low (skip) |

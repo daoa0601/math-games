@@ -20,9 +20,11 @@ const GAMES: GameInfo[] = [
 interface DailyChallengeBannerProps {
   countdown: string;
   className?: string;
+  /** Pass completion count to trigger re-render when games are completed */
+  completionCount?: number;
 }
 
-export function DailyChallengeBanner({ countdown, className = '' }: DailyChallengeBannerProps) {
+export function DailyChallengeBanner({ countdown, className = '', completionCount = 0 }: DailyChallengeBannerProps) {
   const { t } = useTranslation();
 
   // Get all daily state in a single storage read and memoize derived values
@@ -44,7 +46,8 @@ export function DailyChallengeBanner({ countdown, className = '' }: DailyChallen
       allCompleted: isAllCompleted,
       completedGames: new Set(completed),
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completionCount]);
 
   return (
     <div className={`daily-challenge-banner ${allCompleted ? 'daily-challenge-banner--completed' : ''} ${className}`} data-testid="daily-challenge-banner">

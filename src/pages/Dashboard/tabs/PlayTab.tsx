@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { GameCard } from '@/shared/components/layout/GameCard';
 import { DailyChallengeBanner } from '@/shared/components/DailyChallenge/DailyChallengeBanner';
 import { getProgress } from '@/shared/utils/storage';
+import { getTodayCompletions } from '@/shared/services/daily';
 import { toStorageId } from '@/shared/types';
 import type { ComponentGameId } from '@/shared/types';
 
@@ -58,6 +59,14 @@ function getTimeUntilMidnight(): string {
 const DailyChallengeBannerWithCountdown = memo(function DailyChallengeBannerWithCountdown() {
   const [countdown, setCountdown] = useState(getTimeUntilMidnight());
 
+  // Calculate completion count on each render - cheap operation (single localStorage read)
+  // This ensures the banner updates when navigating back after completing a game
+  const completions = getTodayCompletions();
+  let completionCount = 0;
+  completions.forEach((completion) => {
+    if (completion !== null) completionCount++;
+  });
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCountdown(getTimeUntilMidnight());
@@ -66,7 +75,7 @@ const DailyChallengeBannerWithCountdown = memo(function DailyChallengeBannerWith
     return () => clearInterval(interval);
   }, []);
 
-  return <DailyChallengeBanner countdown={countdown} />;
+  return <DailyChallengeBanner countdown={countdown} completionCount={completionCount} />;
 });
 
 /**

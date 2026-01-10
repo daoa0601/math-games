@@ -9,10 +9,10 @@ This document identifies performance anti-patterns, inefficient algorithms, and 
 
 | Category | Originally Found | Fixed | Remaining |
 |----------|-----------------|-------|-----------|
-| React Re-rendering | 8 patterns | 5 | 3 |
-| Storage Access | 7 patterns | 5 | 2 |
+| React Re-rendering | 8 patterns | 7 | 1 |
+| Storage Access | 7 patterns | 6 | 1 |
 | Algorithm Efficiency | 9 patterns | 6 | 3 |
-| Three.js Memory | 5 patterns | 3 | 2 |
+| Three.js Memory | 5 patterns | 5 | 0 |
 | Context Providers | 1 pattern | 1 | 0 |
 
 ---
@@ -26,6 +26,8 @@ The following high-priority issues have been resolved:
 - **AuthContext.tsx**: API object now wrapped in `useMemo` (lines 221-226)
 - **GridBoard.tsx**: `DroppableCell` now memo-wrapped (line 21)
 - **PieceInventory.tsx**: `DraggablePiece` now memo-wrapped (line 24)
+- **StatsTab.tsx**: Gradient style extracted to `RANK_GRADIENTS` constant and memoized (lines 8-27)
+- **useThrottledHover.ts**: Added missing `[handler]` dependency array (line 20)
 
 ### Algorithms
 - **solver.ts**: `canSumTo()` now uses DP with early termination (lines 269-324)
@@ -35,6 +37,11 @@ The following high-priority issues have been resolved:
 ### Storage
 - **daily.ts**: `isAllGamesCompletedToday()` now uses single storage read (lines 148-157)
 - **PlayerContext.tsx**: Uses `profileRef` pattern to avoid redundant reads (lines 216-253)
+- **DailyChallenge.tsx**: Single memoized fetch for streaks (lines 66-73)
+
+### Three.js Memory
+- **ShapeArchitectGame.tsx**: setTimeout IDs stored in refs with cleanup (lines 83-96)
+- **PlacementModal.tsx**: `useThreeCleanup()` added to PiecePreview3D (line 54)
 
 ---
 

@@ -52,7 +52,7 @@ export function AchievementsTab() {
     <div
       className="achievements-tab"
       role="tabpanel"
-      id="tabpanel-achievements"
+      id="panel-achievements"
       aria-labelledby="tab-achievements"
     >
       {/* Header with progress */}

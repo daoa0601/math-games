@@ -375,9 +375,12 @@
     justify-content: flex-start;
   }
 
-  /* Add margin above board to clear header actions row */
+  /* Add margin above board to clear header actions row.
+     Use position:relative + z-index:1 to ensure SVG stays below game-header (z-index:10) */
   .mg-board-wrapper {
     margin-top: 32px;
+    position: relative;
+    z-index: 1;
   }
 
   /* Ensure daily badge doesn't overlap */
