@@ -117,8 +117,10 @@ export function Dashboard() {
           streak={profile.streak}
           isGuest={isGuest}
           isFirebaseUser={isFirebaseUser}
+          isAnonymous={isAnonymous}
           onLogout={isGuest ? undefined : logout}
           onSignIn={isGuest ? handleSignInClick : undefined}
+          onLogin={isAnonymous ? handleLinkClick : undefined}
         />
 
         {/* Show link banner for anonymous Firebase users */}

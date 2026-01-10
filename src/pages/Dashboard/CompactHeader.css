@@ -78,6 +78,7 @@
   color: var(--muted);
 }
 
+.compact-header__login,
 .compact-header__logout {
   display: flex;
   align-items: center;
@@ -91,6 +92,7 @@
   transition: border-color 0.15s, color 0.15s;
 }
 
+.compact-header__login:hover,
 .compact-header__logout:hover {
   border-color: var(--accent);
   color: var(--text);

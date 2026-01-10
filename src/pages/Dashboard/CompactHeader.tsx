@@ -10,9 +10,11 @@ interface CompactHeaderProps {
   streak: number;
   isGuest?: boolean;
   isFirebaseUser?: boolean;
+  isAnonymous?: boolean;
   syncStatus?: SyncStatus;
   onLogout?: () => void;
   onSignIn?: () => void;
+  onLogin?: () => void;
 }
 
 export function CompactHeader({
@@ -21,9 +23,11 @@ export function CompactHeader({
   streak,
   isGuest,
   isFirebaseUser,
+  isAnonymous,
   syncStatus,
   onLogout,
   onSignIn,
+  onLogin,
 }: CompactHeaderProps) {
   const { t } = useTranslation();
 
@@ -60,10 +64,24 @@ export function CompactHeader({
       )}
       {isGuest && onSignIn && (
         <button
-          className="compact-header__logout"
+          className="compact-header__login"
           onClick={onSignIn}
           title={t('login.signIn', 'Sign In')}
           aria-label={t('login.signIn', 'Sign In')}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+        </button>
+      )}
+      {isAnonymous && !isGuest && onLogin && (
+        <button
+          className="compact-header__login"
+          onClick={onLogin}
+          title={t('auth.signIn', 'Sign In')}
+          aria-label={t('auth.signIn', 'Sign In')}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
