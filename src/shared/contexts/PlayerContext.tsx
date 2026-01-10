@@ -163,6 +163,8 @@ export function PlayerProvider({ children, initialProfile }: PlayerProviderProps
   const checkStreak = useCallback((): StreakResult => {
     const { profile: updated, streakMaintained, isNewStreak } = updateStreakService();
     setProfile(updated);
+    // Sync streak changes to Firebase (debounced)
+    syncToFirestore(updated);
     return { streakMaintained, isNewStreak };
   }, []);
 

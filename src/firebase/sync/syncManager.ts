@@ -41,6 +41,9 @@ const SYNC_DEBOUNCE_MS = 2000; // 2 second debounce
 const MIN_SYNC_INTERVAL_MS = 5000; // Minimum 5 seconds between syncs
 let lastSyncTime = 0;
 
+// Concurrent sync protection
+let ongoingSyncPromise: Promise<boolean> | null = null;
+
 /**
  * Notify all listeners of state change.
  */
@@ -176,9 +179,35 @@ function handleRemoteProfileChange(remoteProfile: PlayerProfile | null) {
     remoteProfile.achievements.length > localProfile.achievements.length;
 
   if (shouldUpdate) {
-    // Merge: take max stats, union achievements
+    // Helper to get latest date (handles null)
+    const getLatestDate = (a: string | null, b: string | null): string | null => {
+      if (!a) return b;
+      if (!b) return a;
+      return new Date(a) > new Date(b) ? a : b;
+    };
+
+    // Helper to get best time (minimum, non-null)
+    const getBestTime = (a: number | null, b: number | null): number | null => {
+      if (a === null) return b;
+      if (b === null) return a;
+      return Math.min(a, b);
+    };
+
+    // Merge: take max stats, union achievements, merge all fields
     const merged: PlayerProfile = {
       ...localProfile,
+      // Take remote displayName if local is still default
+      displayName: localProfile.displayName === 'Player' && remoteProfile.displayName !== 'Player'
+        ? remoteProfile.displayName
+        : localProfile.displayName,
+      // Merge preferences (remote values override local for explicit settings)
+      preferences: {
+        ...localProfile.preferences,
+        ...remoteProfile.preferences,
+      },
+      // Take the most recent play date
+      lastPlayedDate: getLatestDate(localProfile.lastPlayedDate, remoteProfile.lastPlayedDate),
+      // Stats: take max values (prevents data loss), merge best times (min is better)
       stats: {
         ...localProfile.stats,
         totalGamesPlayed: Math.max(localProfile.stats.totalGamesPlayed, remoteProfile.stats.totalGamesPlayed),
@@ -187,8 +216,25 @@ function handleRemoteProfileChange(remoteProfile: PlayerProfile | null) {
         magicGraphSolved: Math.max(localProfile.stats.magicGraphSolved, remoteProfile.stats.magicGraphSolved),
         sequenceRaceWins: Math.max(localProfile.stats.sequenceRaceWins, remoteProfile.stats.sequenceRaceWins),
         shapeArchitectBuilt: Math.max(localProfile.stats.shapeArchitectBuilt, remoteProfile.stats.shapeArchitectBuilt),
+        // Best times: take minimum (faster is better)
+        bestTimes: {
+          magicGraphFastest: getBestTime(
+            localProfile.stats.bestTimes.magicGraphFastest,
+            remoteProfile.stats.bestTimes.magicGraphFastest
+          ),
+          sequenceRaceFastest: getBestTime(
+            localProfile.stats.bestTimes.sequenceRaceFastest,
+            remoteProfile.stats.bestTimes.sequenceRaceFastest
+          ),
+          shapeArchitectFastest: getBestTime(
+            localProfile.stats.bestTimes.shapeArchitectFastest,
+            remoteProfile.stats.bestTimes.shapeArchitectFastest
+          ),
+        },
       },
+      // Achievements: union (never lose an achievement)
       achievements: [...new Set([...localProfile.achievements, ...remoteProfile.achievements])],
+      // Streak: take max
       streak: Math.max(localProfile.streak, remoteProfile.streak),
     };
 
@@ -225,33 +271,48 @@ export function syncToFirestore(profile: PlayerProfile): void {
       return;
     }
 
+    // Wait for any ongoing sync to complete first
+    if (ongoingSyncPromise) {
+      await ongoingSyncPromise;
+    }
+
     updateState({ status: 'syncing' });
 
-    try {
-      const success = await updateFirestoreProfile(profile);
+    // Track this sync operation
+    ongoingSyncPromise = (async (): Promise<boolean> => {
+      try {
+        const success = await updateFirestoreProfile(profile);
 
-      if (success) {
-        lastSyncTime = Date.now();
-        updateState({
-          status: 'synced',
-          lastSyncedAt: new Date(),
-          pendingChanges: false,
-          error: null,
-        });
-      } else {
+        if (success) {
+          lastSyncTime = Date.now();
+          updateState({
+            status: 'synced',
+            lastSyncedAt: new Date(),
+            pendingChanges: false,
+            error: null,
+          });
+          return true;
+        } else {
+          updateState({
+            status: 'error',
+            error: 'Failed to sync',
+            pendingChanges: true,
+          });
+          return false;
+        }
+      } catch (error) {
         updateState({
           status: 'error',
-          error: 'Failed to sync',
+          error: (error as Error).message,
           pendingChanges: true,
         });
+        return false;
+      } finally {
+        ongoingSyncPromise = null;
       }
-    } catch (error) {
-      updateState({
-        status: 'error',
-        error: (error as Error).message,
-        pendingChanges: true,
-      });
-    }
+    })();
+
+    await ongoingSyncPromise;
   }, SYNC_DEBOUNCE_MS);
 }
 

@@ -21,6 +21,8 @@ interface AuthModalProps {
   onEmailSignUp?: (email: string, password: string) => Promise<boolean>;
   isLoading?: boolean;
   error?: string | null;
+  /** Whether Firebase is available. If false, shows a warning message. */
+  isFirebaseAvailable?: boolean;
 }
 
 export function AuthModal({
@@ -32,6 +34,7 @@ export function AuthModal({
   onEmailSignUp,
   isLoading = false,
   error,
+  isFirebaseAvailable = true,
 }: AuthModalProps) {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -98,11 +101,17 @@ export function AuthModal({
           </div>
         )}
 
+        {!isFirebaseAvailable && (
+          <div className="auth-modal__warning" role="status">
+            {t('auth.firebaseUnavailable', 'Sign-in is temporarily unavailable. You can continue as a guest and your progress will be saved locally.')}
+          </div>
+        )}
+
         {!isEmailMode ? (
           <div className="auth-modal__buttons">
             <Button
               onClick={handleGoogleClick}
-              disabled={isLoading}
+              disabled={isLoading || !isFirebaseAvailable}
               className="auth-modal__google-btn"
             >
               <svg className="auth-modal__google-icon" viewBox="0 0 24 24" width="20" height="20">
@@ -123,7 +132,7 @@ export function AuthModal({
                 <Button
                   variant="secondary"
                   onClick={() => setIsEmailMode(true)}
-                  disabled={isLoading}
+                  disabled={isLoading || !isFirebaseAvailable}
                 >
                   {t('auth.useEmail', 'Use Email')}
                 </Button>

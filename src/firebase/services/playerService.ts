@@ -214,16 +214,29 @@ export async function updateFirestoreStats(stats: PlayerStats): Promise<boolean>
 
 /**
  * Unlock achievement in Firestore.
+ * Uses atomic arrayUnion to prevent race conditions between devices.
  */
 export async function unlockFirestoreAchievement(achievementId: string): Promise<boolean> {
-  const profile = await getFirestoreProfile();
-  if (!profile) return false;
+  const user = getCurrentUser();
+  if (!user) return false;
 
-  if (profile.achievements.includes(achievementId)) {
-    return true; // Already unlocked
+  const db = getFirebaseDb();
+  const firestoreModule = getCachedFirestoreModule();
+  if (!db || !firestoreModule) return false;
+
+  try {
+    const docRef = firestoreModule.doc(db, USERS_COLLECTION, user.uid);
+
+    // Use arrayUnion for atomic, idempotent achievement unlock
+    // This prevents duplicates and race conditions
+    await firestoreModule.updateDoc(docRef, {
+      achievements: firestoreModule.arrayUnion(achievementId),
+      updatedAt: firestoreModule.serverTimestamp(),
+    });
+
+    return true;
+  } catch (error) {
+    console.error('[Firebase] Failed to unlock achievement:', error);
+    return false;
   }
-
-  return updateFirestoreProfile({
-    achievements: [...profile.achievements, achievementId],
-  });
 }

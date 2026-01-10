@@ -159,11 +159,21 @@ export async function linkAnonymousToGoogle(): Promise<AuthResult> {
     return { user: null, error: 'User is not anonymous', isNewUser: false };
   }
 
+  // Store reference to user before async operation
+  const anonymousUser = auth.currentUser;
+
   try {
     const result = await authModule.signInWithPopup(auth, provider);
+
+    // Check user still exists after popup (could have signed out during)
+    if (!auth.currentUser) {
+      return { user: null, error: 'User signed out during linking', isNewUser: false };
+    }
+
     const credential = authModule.GoogleAuthProvider.credentialFromResult(result);
     if (credential) {
-      await authModule.linkWithCredential(auth.currentUser, credential);
+      // Use stored reference to ensure we're linking the same user
+      await authModule.linkWithCredential(anonymousUser, credential);
     }
     return {
       user: auth.currentUser,

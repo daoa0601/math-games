@@ -57,6 +57,16 @@
   font-size: 0.8rem;
 }
 
+.auth-modal__warning {
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: #fbbf24;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+}
+
 .auth-modal__buttons {
   display: flex;
   flex-direction: column;
