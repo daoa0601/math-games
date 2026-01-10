@@ -7,5 +7,3 @@
 
 export { DashboardPage } from './Dashboard.page';
 export { MagicGraphPage } from './MagicGraph.page';
-export { SequenceRacePage } from './SequenceRace.page';
-export { ShapeArchitectPage } from './ShapeArchitect.page';
