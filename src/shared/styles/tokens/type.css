@@ -1,10 +1,13 @@
-/* type.css - Linear Editorial typography */
-/* Playfair Display (serif headlines) + JetBrains Mono (UI/data) */
+/* type.css - Vietnamese Premium typography */
+/* Crimson Pro (serif headlines for Vietnamese) + Space Grotesk (modern geometric UI) */
+
+/* Import Vietnamese-supporting fonts */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Font families */
-  --font-display: 'Playfair Display', serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Font families - Vietnamese-friendly */
+  --font-display: 'Crimson Pro', serif;
+  --font-mono: 'Space Grotesk', sans-serif;
 
   /* Type scale - mobile first */
   --text-xs: 10px;
@@ -28,4 +31,11 @@
     --text-2xl: 48px;
     --text-hero: 72px;
   }
+}
+
+/* Vietnamese diacritic support improvements */
+.vi-text {
+  -webkit-font-feature-settings: 'ss01';
+  font-feature-settings: 'ss01';
+  letter-spacing: 0.01em;
 }

@@ -1,21 +1,14 @@
-/* ============================================
-   MAGIC GRAPH - Game-specific styles
-   Uses: game-base.css (imported globally)
-   ============================================ */
-
-/* Container */
+/* Magic Graph - Game-specific styles */
 .mg-container {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
   width: 100%;
-  max-width: 100%;
   flex: 1;
   justify-content: center;
   align-items: center;
 }
 
-/* Level Selector */
 .mg-levels {
   display: flex;
   flex-wrap: wrap;
@@ -34,32 +27,27 @@
 }
 
 .mg-level--active {
-  background: var(--accent);
+  background: var(--game-magic);
   color: var(--bg);
-  border-color: var(--accent);
+  border-color: var(--game-magic);
 }
 
-/* Board Wrapper */
 .mg-board-wrapper {
   display: flex;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
-.mg-board-wrapper--urgent .mg-board {
-  border-color: #ef4444;
-}
+.mg-board-wrapper--urgent .mg-board { border-color: #ef4444; }
 
-/* SVG Board */
 .mg-board {
   background: var(--surface);
   border: 1px solid var(--border);
 }
 
-.mg-board--completed {
-  border-color: var(--success);
-}
+.mg-board--completed { border-color: var(--success); }
 
-/* Graph Edges */
 .mg-edge {
   stroke: var(--border);
   stroke-width: 3;
@@ -69,7 +57,6 @@
 .mg-edge--incorrect, .mg-edge--overflow { stroke: #ef4444; }
 .mg-edge--impossible { stroke: #f59e0b; stroke-dasharray: 4 2; }
 
-/* Graph Nodes */
 .mg-node { cursor: pointer; }
 .mg-node--fixed { cursor: default; }
 
@@ -85,7 +72,7 @@
 }
 
 .mg-node--empty .mg-node__circle { stroke-dasharray: 4 4; }
-.mg-node--selected .mg-node__circle { stroke: var(--accent); stroke-width: 3; }
+.mg-node--selected .mg-node__circle { stroke: var(--game-magic); stroke-width: 3; }
 .mg-node--recommended .mg-node__circle { stroke: var(--success); stroke-width: 3; }
 .mg-node--just-placed { animation: flash-success var(--motion-normal) var(--ease-out); }
 
@@ -97,12 +84,9 @@
   pointer-events: none;
 }
 
-.mg-node--fixed .mg-node__text {
-  fill: var(--muted);
-}
+.mg-node--fixed .mg-node__text { fill: var(--muted); }
 .mg-node__pattern { pointer-events: none; }
 
-/* Number Inventory */
 .mg-inventory {
   display: flex;
   flex-wrap: wrap;
@@ -129,9 +113,9 @@
 }
 
 .mg-chip--selected {
-  background: var(--accent);
+  background: var(--game-magic);
   color: var(--bg);
-  border-color: var(--accent);
+  border-color: var(--game-magic);
 }
 
 .mg-chip--used {
@@ -140,7 +124,6 @@
   cursor: not-allowed;
 }
 
-/* Number Picker */
 .mg-picker {
   position: fixed;
   z-index: 50;
@@ -188,8 +171,8 @@
 }
 
 .mg-picker__option--current {
-  border-color: var(--accent);
-  background: var(--accent);
+  border-color: var(--game-magic);
+  background: var(--game-magic);
   color: var(--bg);
 }
 
@@ -211,7 +194,6 @@
   font-size: var(--text-sm);
 }
 
-/* Actions */
 .mg-actions {
   display: flex;
   gap: var(--space-sm);
@@ -219,7 +201,6 @@
   flex-wrap: wrap;
 }
 
-/* Unsolvable */
 .mg-unsolvable { text-align: center; }
 
 .mg-unsolvable-btn {
@@ -236,26 +217,6 @@
 .mg-unsolvable-feedback--correct { color: var(--success); }
 .mg-unsolvable-feedback--wrong { color: #ef4444; }
 
-/* Loading */
-.mg-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-xl);
-  color: var(--muted);
-}
-
-.mg-loading__spinner {
-  font-size: 2rem;
-  animation: spin 2s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ========================================
-   TOPOLOGY EDITOR (Grandmaster Mode)
-   ======================================== */
 .mg-editor {
   display: flex;
   flex-direction: column;
@@ -273,13 +234,13 @@
 
 .mg-editor-node__circle {
   fill: var(--bg);
-  stroke: var(--accent);
+  stroke: var(--game-magic);
   stroke-width: 2;
 }
 
-.mg-editor-node--selected .mg-editor-node__circle { fill: var(--accent); }
+.mg-editor-node--selected .mg-editor-node__circle { fill: var(--game-magic); }
 
-.mg-editor-line { stroke: var(--accent); stroke-width: 3; }
+.mg-editor-line { stroke: var(--game-magic); stroke-width: 3; }
 .mg-editor-line--preview { stroke-dasharray: 8 4; opacity: 0.7; }
 .mg-editor-line--deletable { cursor: pointer; }
 .mg-editor-line--deletable:hover { stroke: #ef4444; }
@@ -305,9 +266,9 @@
 }
 
 .mg-editor__mode-btn--active {
-  background: var(--accent);
+  background: var(--game-magic);
   color: var(--bg);
-  border-color: var(--accent);
+  border-color: var(--game-magic);
 }
 
 .mg-editor-node { cursor: pointer; }
@@ -358,51 +319,22 @@
 
 .mg-editor__actions { display: flex; gap: var(--space-sm); justify-content: center; }
 
-/* ========================================
-   RESPONSIVE
-   ======================================== */
 @media (pointer: coarse) {
   .mg-chip { width: 48px; height: 48px; }
   .mg-picker__option { min-height: 44px; }
 }
 
-/* Mobile: Prevent vertical centering that causes header overlap
-   Header is ~50px title + ~50px actions row = ~100px on mobile.
-   SVG nodes start at PADDING=40px from SVG top.
-   Need extra clearance to avoid header intercept. */
 @media (max-width: 480px) {
-  .mg-container {
-    justify-content: flex-start;
-  }
-
-  /* Add margin above board to clear header actions row.
-     Use position:relative + z-index:1 to ensure SVG stays below game-header (z-index:10) */
-  .mg-board-wrapper {
-    margin-top: 32px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Ensure daily badge doesn't overlap */
-  .mg-daily {
-    margin-top: var(--space-md);
-  }
-
-  /* Position picker BELOW node on mobile to avoid header overlap */
-  .mg-picker {
-    transform: translate(-50%, 8px);
-  }
+  .mg-container { justify-content: flex-start; }
+  .mg-board-wrapper { margin-top: 32px; }
+  .mg-picker { transform: translate(-50%, 8px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mg-node--just-placed,
-  .mg-picker,
-  .mg-loading__spinner { animation: none; }
+  .mg-picker { animation: none; }
 }
 
-/* ========================================
-   DESKTOP LAYOUT (1024px+)
-   ======================================== */
 @media (min-width: 1024px) {
   .mg-layout {
     display: grid;
@@ -430,12 +362,6 @@
     top: var(--space-lg);
   }
 
-  .mg-container {
-    max-width: none;
-  }
-
-  /* Board takes full width of main area */
-  .mg-board-wrapper {
-    width: 100%;
-  }
+  .mg-container { max-width: none; }
+  .mg-board-wrapper { width: 100%; }
 }

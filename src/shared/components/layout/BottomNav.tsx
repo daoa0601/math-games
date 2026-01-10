@@ -18,13 +18,13 @@ interface NavItem {
 
 // Main navigation tabs (shown on both mobile and desktop)
 const MAIN_TABS: NavItem[] = [
-  { id: 'home', glyph: '⌂', labelKey: 'nav.home' },
-  { id: 'profile', glyph: '◯', labelKey: 'nav.profile' },
-  { id: 'learn', glyph: '◇', labelKey: 'nav.learn' },
+  { id: 'home', glyph: '⬡', labelKey: 'nav.home' },
+  { id: 'profile', glyph: '⬢', labelKey: 'nav.profile' },
+  { id: 'learn', glyph: '⎔', labelKey: 'nav.learn' },
 ];
 
 // Settings tab (shown in desktop sidebar, hidden in mobile "more" menu)
-const SETTINGS_TAB: NavItem = { id: 'settings', glyph: '⚙', labelKey: 'nav.settings' };
+const SETTINGS_TAB: NavItem = { id: 'settings', glyph: '✦', labelKey: 'nav.settings' };
 
 export function BottomNav({ activeTab, onTabChange, onFeedbackClick }: BottomNavProps) {
   const { t } = useTranslation();

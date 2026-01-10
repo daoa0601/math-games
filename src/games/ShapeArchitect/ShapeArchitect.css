@@ -1,23 +1,14 @@
-/* ShapeArchitect - Linear Editorial (sa- prefix) */
-@import '@/shared/styles/game-base.css';
-
-/* ========================================
-   CONTAINER
-======================================== */
+/* Shape Architect - Game-specific styles */
 .sa-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-lg);
   width: 100%;
-  max-width: 100%;
   flex: 1;
   justify-content: center;
 }
 
-/* ========================================
-   2D GRID BOARD
-======================================== */
 .sa-board {
   position: relative;
   display: flex;
@@ -46,23 +37,20 @@
 
 .sa-cell--target {
   background: var(--bg);
-  border: 2px dashed var(--accent);
+  border: 2px dashed var(--game-shape);
 }
 
 .sa-cell--target:hover { border-style: solid; opacity: 0.8; }
 
 .sa-cell--filled { border: 1px solid var(--border); }
 .sa-cell--movable { cursor: pointer; }
-.sa-cell--movable:hover { opacity: 0.8; border-color: var(--accent); }
-.sa-cell--selected-for-move { border: 2px solid var(--accent); z-index: 2; }
+.sa-cell--movable:hover { opacity: 0.8; border-color: var(--game-shape); }
+.sa-cell--selected-for-move { border: 2px solid var(--game-shape); z-index: 2; }
 .sa-cell--just-placed { animation: flash-success var(--motion-normal) var(--ease-out); }
 .sa-cell--preview-valid { background: var(--success) !important; border: 2px solid var(--success) !important; opacity: 0.5; }
 .sa-cell--preview-invalid { background: #ef4444 !important; border: 2px dashed #ef4444 !important; opacity: 0.4; }
-.sa-cell--drag-over { border: 2px solid var(--accent) !important; opacity: 0.8; }
+.sa-cell--drag-over { border: 2px solid var(--game-shape) !important; opacity: 0.8; }
 
-/* ========================================
-   GHOST PREVIEW OVERLAY
-======================================== */
 .sa-ghost {
   position: absolute;
   inset: var(--space-lg);
@@ -77,11 +65,8 @@
 .sa-ghost__cell { opacity: 0.5; }
 .sa-ghost__cell--valid { border: 2px solid var(--success); }
 .sa-ghost__cell--invalid { opacity: 0.3; border: 2px dashed #ef4444; }
-.sa-ghost__cell--locked { border: 3px solid var(--accent); opacity: 0.6; }
+.sa-ghost__cell--locked { border: 3px solid var(--game-shape); opacity: 0.6; }
 
-/* ========================================
-   3D GRID BOARD
-======================================== */
 .sa-board-3d {
   width: min(600px, 90vw);
   aspect-ratio: 4 / 3;
@@ -92,7 +77,6 @@
   overflow: hidden;
 }
 
-/* 3D Error Fallback */
 .sa-3d-error {
   display: flex;
   flex-direction: column;
@@ -152,9 +136,6 @@
   margin-bottom: var(--space-md);
 }
 
-/* ========================================
-   VIEW MODE TOGGLE
-======================================== */
 .sa-view-mode {
   display: flex;
   gap: var(--space-xs);
@@ -176,19 +157,16 @@
 }
 
 .sa-view-mode__btn:hover { opacity: 0.8; }
-.sa-view-mode__btn--active { background: var(--accent); color: var(--bg); }
+.sa-view-mode__btn--active { background: var(--game-shape); color: var(--bg); }
 .sa-view-mode__badge {
   padding: var(--space-xs) var(--space-sm);
-  background: var(--accent);
+  background: var(--game-shape);
   color: var(--bg);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   text-transform: uppercase;
 }
 
-/* ========================================
-   PIECE INVENTORY
-======================================== */
 .sa-inventory {
   display: flex;
   gap: var(--space-lg);
@@ -212,8 +190,8 @@
   transition: opacity var(--motion-fast) var(--ease-out);
 }
 
-.sa-card:hover { opacity: 0.8; border-color: var(--accent); }
-.sa-card--selected { border-color: var(--accent); border-width: 2px; }
+.sa-card:hover { opacity: 0.8; border-color: var(--game-shape); }
+.sa-card--selected { border-color: var(--game-shape); border-width: 2px; }
 .sa-card--dragging { cursor: grabbing; opacity: 0.9; }
 .sa-card__clickable { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); cursor: pointer; width: 100%; }
 .sa-card__drag-handle { cursor: grab; touch-action: none; }
@@ -224,9 +202,6 @@
 .sa-preview__cell { width: 16px; height: 16px; }
 .sa-preview__cell--empty { background: transparent; }
 
-/* ========================================
-   ROTATION CONTROLS
-======================================== */
 .sa-rotation {
   display: flex;
   align-items: center;
@@ -263,18 +238,15 @@
   transition: opacity var(--motion-fast) var(--ease-out);
 }
 
-.sa-dial:hover { opacity: 0.8; border-color: var(--dial-color, var(--accent)); }
-.sa-dial--active { border-color: var(--dial-color, var(--accent)); border-width: 2px; }
+.sa-dial:hover { opacity: 0.8; border-color: var(--dial-color, var(--game-shape)); }
+.sa-dial--active { border-color: var(--dial-color, var(--game-shape)); border-width: 2px; }
 .sa-dial__face { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .sa-dial__icon { width: 20px; height: 20px; }
 .sa-dial__axis { font-family: var(--font-mono); font-size: var(--text-sm); font-weight: 600; }
 .sa-dial__angle { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); background: var(--surface); padding: 1px var(--space-xs); min-width: 28px; text-align: center; }
-.sa-dial--active .sa-dial__angle { color: var(--dial-color, var(--accent)); }
+.sa-dial--active .sa-dial__angle { color: var(--dial-color, var(--game-shape)); }
 .sa-dial__shortcut { position: absolute; top: 2px; right: 3px; font-family: var(--font-mono); font-size: 0.5rem; color: var(--muted); opacity: 0.5; }
 
-/* ========================================
-   CAMERA PRESETS
-======================================== */
 .sa-camera {
   display: flex;
   gap: 2px;
@@ -299,15 +271,12 @@
 }
 
 .sa-camera__btn:hover { opacity: 0.8; }
-.sa-camera__btn--active { background: var(--accent); color: var(--bg); }
+.sa-camera__btn--active { background: var(--game-shape); color: var(--bg); }
 .sa-camera__icon { width: 22px; height: 22px; }
 .sa-camera__label { font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; }
 .sa-camera__shortcut { position: absolute; top: 3px; right: 4px; font-family: var(--font-mono); font-size: 0.55rem; color: var(--muted); opacity: 0.5; }
 .sa-camera__btn--active .sa-camera__shortcut { color: var(--bg); opacity: 0.7; }
 
-/* ========================================
-   LAYER CONTROLS
-======================================== */
 .sa-layer {
   display: flex;
   flex-direction: column;
@@ -334,9 +303,6 @@
 .sa-layer__btn:hover:not(:disabled) { opacity: 0.8; }
 .sa-layer__btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-/* ========================================
-   LEVEL EDITOR
-======================================== */
 .sa-editor-overlay {
   position: fixed;
   inset: 0;
@@ -369,14 +335,14 @@
 .sa-editor__canvas { background: var(--bg); border: 1px solid var(--border); padding: var(--space-xs); cursor: crosshair; user-select: none; }
 .sa-editor-cell { border: 1px solid var(--border); background: transparent; transition: background var(--motion-fast) var(--ease-out); }
 .sa-editor-cell:hover { background: var(--surface); }
-.sa-editor-cell--target { background: var(--accent); border-color: var(--accent); }
+.sa-editor-cell--target { background: var(--game-shape); border-color: var(--game-shape); }
 .sa-editor__quick-actions { display: flex; gap: var(--space-sm); }
 .sa-editor__pieces { display: flex; flex-direction: column; gap: var(--space-sm); }
 .sa-editor__pieces-label { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--muted); }
 .sa-editor__piece-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: var(--space-sm); }
 .sa-piece-btn { display: flex; align-items: center; gap: var(--space-xs); padding: var(--space-sm); background: var(--bg); border: 1px solid var(--border); cursor: pointer; transition: opacity var(--motion-fast) var(--ease-out); }
 .sa-piece-btn:hover { opacity: 0.8; }
-.sa-piece-btn--selected { border-color: var(--accent); border-width: 2px; }
+.sa-piece-btn--selected { border-color: var(--game-shape); border-width: 2px; }
 .sa-piece-btn__preview { width: 16px; height: 16px; }
 .sa-piece-btn__name { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text); flex: 1; }
 .sa-piece-btn__count { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); }
@@ -386,9 +352,6 @@
 .sa-editor__error { padding: var(--space-sm) var(--space-md); background: var(--bg); border-left: 2px solid #ef4444; color: #ef4444; font-family: var(--font-mono); font-size: var(--text-sm); }
 .sa-editor__actions { display: flex; gap: var(--space-sm); justify-content: center; }
 
-/* ========================================
-   PREVIEW LOCK BUTTON
-======================================== */
 .sa-lock-btn {
   display: flex;
   align-items: center;
@@ -405,13 +368,10 @@
 
 .sa-lock-btn:hover:not(:disabled) { opacity: 0.8; }
 .sa-lock-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.sa-lock-btn--locked { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.sa-lock-btn--locked { background: var(--game-shape); border-color: var(--game-shape); color: var(--bg); }
 .sa-lock-btn__label { display: none; }
 @media (min-width: 600px) { .sa-lock-btn__label { display: inline; } }
 
-/* ========================================
-   INSTRUCTIONS & ERROR
-======================================== */
 .sa-instructions {
   text-align: center;
   color: var(--muted);
@@ -426,7 +386,7 @@
   gap: var(--space-sm);
 }
 
-.sa-instructions--move-mode { border-color: var(--accent); color: var(--accent); }
+.sa-instructions--move-mode { border-color: var(--game-shape); color: var(--game-shape); }
 .sa-instructions__move-icon { font-size: 1.2rem; }
 .sa-instructions__cancel { margin-left: var(--space-xs); padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); opacity: 0.8; }
 .sa-instructions__cancel:hover { opacity: 1; }
@@ -441,23 +401,14 @@
   border: 1px solid #ef4444;
 }
 
-/* ========================================
-   CONTROLS & HINTS
-======================================== */
 .sa-controls { display: flex; gap: var(--space-md); align-items: center; }
 .sa-hint { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--muted); padding: var(--space-xs) var(--space-sm); background: var(--surface); border: 1px solid var(--border); white-space: nowrap; }
-.sa-hint--rotation { position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); border-color: var(--accent); color: var(--accent); z-index: 10; }
+.sa-hint--rotation { position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); border-color: var(--game-shape); color: var(--game-shape); z-index: 10; }
 @media (pointer: coarse) { .sa-hint--swipe { display: flex; align-items: center; gap: var(--space-xs); } }
 
-/* ========================================
-   BOARD WRAPPER URGENCY
-======================================== */
 .sa-board-wrapper { transition: border-color var(--motion-fast) var(--ease-out); }
 .sa-board-wrapper--urgent .sa-board { border-color: #ef4444; }
 
-/* ========================================
-   RESPONSIVE
-======================================== */
 @media (max-width: 600px) {
   .sa-container { gap: var(--space-md); padding: var(--space-sm); }
   .sa-board { padding: var(--space-md); }
@@ -488,16 +439,10 @@
   .sa-camera__btn { min-width: 56px; min-height: 56px; padding: var(--space-md); }
 }
 
-/* ========================================
-   REDUCED MOTION
-======================================== */
 @media (prefers-reduced-motion: reduce) {
   .sa-ghost__cell, .sa-cell--target, .sa-cell--just-placed { animation: none; }
 }
 
-/* ========================================
-   DESKTOP LAYOUT (1024px+)
-   ======================================== */
 @media (min-width: 1024px) {
   .sa-layout {
     display: grid;
@@ -525,24 +470,8 @@
     top: var(--space-lg);
   }
 
-  .sa-container {
-    max-width: none;
-  }
-
-  /* Board takes full width of main area */
-  .sa-board-3d {
-    width: 100%;
-    max-width: none;
-  }
-
-  /* Inventory spans full width in main area */
-  .sa-inventory {
-    width: 100%;
-  }
-
-  /* 3D controls inline on desktop */
-  .sa-3d-controls {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
+  .sa-container { max-width: none; }
+  .sa-board-3d { width: 100%; max-width: none; }
+  .sa-inventory { width: 100%; }
+  .sa-3d-controls { flex-direction: row; flex-wrap: wrap; }
 }

@@ -1,19 +1,42 @@
-/* palette.css - Linear Editorial color system */
-/* Deep navy palette with sky blue accent */
+/* Vietnamese Premium Color Palette */
 
 :root {
-  /* Backgrounds */
-  --bg: #0a0f1a;
-  --surface: #111827;
+  /* Deep rich backgrounds */
+  --bg-primary: #0d1b2a;
+  --bg-secondary: #1b263b;
+  --bg-tertiary: #263545;
 
-  /* Borders */
-  --border: #1e3a5f;
+  /* Keep backward compatibility with existing system */
+  --bg: #0d1b2a;
+  --surface: #1b263b;
 
-  /* Text */
-  --text: #f8fafc;
+  /* Traditional Vietnamese accent colors */
+  --accent-gold: #d4af37;
+  --accent-emerald: #10b981;
+  --accent-coral: #f97316;
+  --accent-lotus: #e11d48;
+
+  /* Text hierarchy */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Text backward compatibility */
+  --text: #f1f5f9;
   --muted: #64748b;
 
-  /* Feedback */
-  --accent: #60a5fa;
-  --success: #4ade80;
+  /* Borders & dividers */
+  --border: #334155;
+  --border-gold: #d4af374d;
+
+  /* Game-specific Vietnamese accents */
+  --game-magic: #c084fc;
+  --game-race: #fbbf24;
+  --game-shape: #2dd4bf;
+
+  /* Success */
+  --success: #10b981;
+
+  /* Keep accent for backward compatibility */
+  --accent: #d4af37;
 }

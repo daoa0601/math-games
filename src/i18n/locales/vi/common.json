@@ -58,14 +58,14 @@
         "displayName": "Tên hiển thị"
     },
     "ranks": {
-        "beginner": "Người mới",
-        "learner": "Học viên",
-        "apprentice": "Tập sự",
-        "intermediate": "Trung cấp",
-        "advanced": "Nâng cao",
-        "expert": "Chuyên gia",
-        "master": "Bậc thầy",
-        "grandmaster": "Đại kiện tướng"
+        "beginner": "Học Sinh",
+        "learner": "Tập Sinh",
+        "apprentice": "Thợ Học",
+        "intermediate": "Thợ Thủ Công",
+        "advanced": "Nghệ Nhân",
+        "expert": "Chuyên Gia",
+        "master": "Đại Sư",
+        "grandmaster": "Vô Địch"
     },
     "rankUp": {
         "title": "Lên Hạng!",
@@ -322,18 +322,18 @@
     },
     "shapeArchitect": {
         "tutorial": {
-            "step1Title": "Chao mung den voi Kien Truc Su Hinh Khoi!",
-            "step1": "Xay dung hinh muc tieu bang cac manh ghep trong kho cua ban.",
-            "step2Title": "Hinh Muc Tieu",
-            "step2": "Luoi mau xanh cho biet noi ban can dat cac manh.",
-            "step3Title": "Cac Manh Ghep",
-            "step3": "Chon mot manh tu kho de dat len luoi.",
-            "step4Title": "Xoay Manh",
-            "step4": "Nhan R hoac dung cac nut xoay de xoay manh da chon.",
-            "step5Title": "Dat Manh",
-            "step5": "Nhan vao luoi de dat manh. Manh se tu dong khop vao vi tri hop le.",
-            "step6Title": "Che Do 3D",
-            "step6": "Chuyen sang che do 3D cho cac cau do phuc tap. Dung cac nut camera de thay doi goc nhin."
+            "step1Title": "Chào mừng đến với Kiến Trúc Sư Hình Khối!",
+            "step1": "Xây dựng hình mục tiêu bằng các mảnh ghép trong kho của bạn.",
+            "step2Title": "Hình Mục Tiêu",
+            "step2": "Lưới màu xanh cho biết nơi bạn cần đặt các mảnh.",
+            "step3Title": "Các Mảnh Ghép",
+            "step3": "Chọn một mảnh từ kho để đặt lên lưới.",
+            "step4Title": "Xoay Mảnh",
+            "step4": "Nhấn R hoặc dùng các nút xoay để xoay mảnh đã chọn.",
+            "step5Title": "Đặt Mảnh",
+            "step5": "Nhấn vào lưới để đặt mảnh. Mảnh sẽ tự động khớp vào vị trí hợp lệ.",
+            "step6Title": "Chế Độ 3D",
+            "step6": "Chuyển sang chế độ 3D cho các câu đố phức tạp. Dùng các nút camera để thay đổi góc nhìn."
         }
     },
     "login": {
@@ -350,7 +350,36 @@
         "guestHint": "Tiến độ lưu tại máy",
         "signIn": "Đăng nhập",
         "logout": "Đăng xuất",
-        "whatIsThis": "ID Người Chơi là gì?",
-        "explanation": "ID Người Chơi là mã định danh duy nhất để theo dõi tiến độ của bạn. Sử dụng cùng ID trên mọi thiết bị để đồng bộ thống kê và thành tựu."
-    }
+    "whatIsThis": "ID Người Chơi là gì?",
+    "explanation": "ID Người Chơi là mã định danh duy nhất để theo dõi tiến độ của bạn. Sử dụng cùng ID trên mọi thiết bị để đồng bộ thống kê và thành tựu.",
+    "modal": {
+        "close": "Đóng",
+        "confirm": "Xác nhận",
+        "cancel": "Hủy",
+        "validPlacement": "Vị trí hợp lệ",
+        "position": "Vị trí",
+        "place": "Đặt",
+        "rotate": "Xoay",
+        "instructions": "Hướng dẫn",
+        "dismiss": "Bỏ qua"
+    },
+    "controls": {
+        "moveControls": "Các điều khiển di chuyển mảnh",
+        "movingPiece": "Đang di chuyển mảnh",
+        "rotateX": "Xoay trục X",
+        "rotateY": "Xoay trục Y",
+        "rotateZ": "Xoay trục Z",
+        "cancelMove": "Hủy di chuyển",
+        "moveHint": "Chạm vào ô đích để di chuyển mảnh đến đó",
+        "placePiece": "Đặt mảnh",
+        "removePiece": "Xóa mảnh",
+        "rotatePiece": "Xoay mảnh"
+    },
+    "unsolvable": {
+        "button": "Khai báo không thể giải",
+        "title": "Câu đố không thể giải",
+        "description": "Bạn có chắc câu đố này không có lời giải không?"
+    },
+    "dismiss": "Bỏ qua"
+}
 }

@@ -350,7 +350,36 @@
         "guestHint": "Progress saved locally",
         "signIn": "Sign In",
         "logout": "Logout",
-        "whatIsThis": "What is a Player ID?",
-        "explanation": "Your Player ID is a unique identifier that tracks your progress. Use the same ID on any device to sync your stats and achievements."
-    }
+    "whatIsThis": "What is a Player ID?",
+    "explanation": "Your Player ID is a unique identifier that tracks your progress. Use the same ID on any device to sync your stats and achievements.",
+    "modal": {
+        "close": "Close",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "validPlacement": "Valid placement",
+        "position": "Position",
+        "place": "Place",
+        "rotate": "Rotate",
+        "instructions": "Instructions",
+        "dismiss": "Dismiss"
+    },
+    "controls": {
+        "moveControls": "Move piece controls",
+        "movingPiece": "Moving piece",
+        "rotateX": "Rotate X axis",
+        "rotateY": "Rotate Y axis",
+        "rotateZ": "Rotate Z axis",
+        "cancelMove": "Cancel move",
+        "moveHint": "Tap a target cell to move the piece there",
+        "placePiece": "Place piece",
+        "removePiece": "Remove piece",
+        "rotatePiece": "Rotate piece"
+    },
+    "unsolvable": {
+        "button": "Declare Unsolvable",
+        "title": "Unsolvable Puzzle",
+        "description": "Are you sure this puzzle has no solution?"
+    },
+    "dismiss": "Dismiss"
+}
 }

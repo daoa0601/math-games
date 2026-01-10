@@ -1,0 +1,82 @@
+/* Traditional Vietnamese Patterns - Vietnamese Premium Design System */
+
+/* Disable complex patterns on mobile for performance */
+@media (max-width: 600px) {
+  .pattern-lotus,
+  .pattern-cloud {
+    display: none;
+  }
+}
+.pattern-bamboo {
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--border-gold) 0px,
+    var(--border-gold) 1px,
+    transparent 1px,
+    transparent 20px
+  );
+  background-size: 20px 100%;
+}
+
+/* Lotus petal pattern (overlapping curves) */
+.pattern-lotus {
+  background-image:
+    radial-gradient(ellipse at 50% 0%, var(--accent-lotus) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 100%, var(--accent-lotus) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 100%, var(--accent-lotus) 0%, transparent 40%);
+  background-size: 60px 60px;
+  opacity: 0.05;
+}
+
+/* Traditional cloud pattern (geometric clouds) */
+.pattern-cloud {
+  background-image:
+    radial-gradient(circle at 20% 30%, var(--accent-gold) 2px, transparent 3px),
+    radial-gradient(circle at 80% 70%, var(--accent-gold) 2px, transparent 3px);
+  background-size: 100px 100px;
+  opacity: 0.3;
+}
+
+/* Lacquer texture (subtle wood grain) */
+.pattern-lacquer {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    var(--bg-tertiary) 2px,
+    var(--bg-tertiary) 4px
+  );
+  opacity: 0.3;
+}
+
+/* Pattern utilities */
+.pattern-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pattern-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Gold accent border */
+.border-gold-accent {
+  border: 1px solid var(--accent-gold);
+}
+
+.border-gold-accent--thick {
+  border: 2px solid var(--accent-gold);
+}
+
+/* Emerald glow hover */
+.glow-emerald:hover {
+  box-shadow: 0 0 0 1px var(--accent-emerald);
+}
+
+/* Gold glow hover */
+.glow-gold:hover {
+  box-shadow: 0 0 0 1px var(--accent-gold);
+}

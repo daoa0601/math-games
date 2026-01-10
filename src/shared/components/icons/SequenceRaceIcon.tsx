@@ -4,11 +4,11 @@ interface IconProps {
 }
 
 export function SequenceRaceIcon({ size = 64, className = '' }: IconProps) {
-  // Linear Editorial: Orange track, white figure, navy background
-  const bgColor = '#111827';
-  const trackColor = '#fb923c';
-  const figureColor = '#f8fafc';
-  const borderColor = '#1e3a5f';
+  // Vietnamese Premium: Amber track, gold accents, navy background
+  const bgColor = '#1b263b';
+  const trackColor = '#fbbf24';
+  const figureColor = '#f1f5f9';
+  const goldColor = '#d4af37';
 
   return (
     <svg
@@ -20,11 +20,12 @@ export function SequenceRaceIcon({ size = 64, className = '' }: IconProps) {
       className={className}
       aria-hidden="true"
     >
-      {/* Background */}
+      {/* Background with gold border */}
       <rect width="64" height="64" fill={bgColor} />
+      <rect width="64" height="64" fill="none" stroke={goldColor} strokeWidth="1" opacity="0.3" />
 
       {/* Track line */}
-      <rect x="6" y="44" width="52" height="4" fill={borderColor} />
+      <rect x="6" y="44" width="52" height="4" fill={goldColor} opacity="0.3" />
 
       {/* Track markers */}
       <g fill={trackColor}>
@@ -61,7 +62,7 @@ export function SequenceRaceIcon({ size = 64, className = '' }: IconProps) {
 
       {/* Finish flag */}
       <g>
-        <rect x="54" y="22" width="2" height="20" fill={borderColor} />
+        <rect x="54" y="22" width="2" height="20" fill={goldColor} opacity="0.5" />
         <rect x="56" y="22" width="6" height="8" fill={figureColor} />
         <rect x="56" y="22" width="3" height="4" fill={bgColor} />
         <rect x="59" y="26" width="3" height="4" fill={bgColor} />

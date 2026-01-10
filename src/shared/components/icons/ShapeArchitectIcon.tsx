@@ -4,12 +4,11 @@ interface IconProps {
 }
 
 export function ShapeArchitectIcon({ size = 64, className = '' }: IconProps) {
-  // Linear Editorial: Teal blocks, navy grid, white highlights
-  const bgColor = '#111827';
+  // Vietnamese Premium: Teal blocks, gold accents, navy background
+  const bgColor = '#1b263b';
   const blockColor = '#2dd4bf';
-  const blockDark = '#14b8a6';
-  const gridColor = '#1e3a5f';
-  const highlightColor = '#f8fafc';
+  const blockDark = '#0f766e';
+  const goldColor = '#d4af37';
 
   return (
     <svg
@@ -21,11 +20,12 @@ export function ShapeArchitectIcon({ size = 64, className = '' }: IconProps) {
       className={className}
       aria-hidden="true"
     >
-      {/* Background */}
+      {/* Background with gold border */}
       <rect width="64" height="64" fill={bgColor} />
+      <rect width="64" height="64" fill="none" stroke={goldColor} strokeWidth="1" opacity="0.3" />
 
-      {/* Grid pattern */}
-      <g stroke={gridColor} strokeWidth="1">
+      {/* Grid pattern with gold */}
+      <g stroke={goldColor} strokeWidth="1" opacity="0.2">
         <line x1="0" y1="16" x2="64" y2="16" />
         <line x1="0" y1="32" x2="64" y2="32" />
         <line x1="0" y1="48" x2="64" y2="48" />
@@ -41,40 +41,40 @@ export function ShapeArchitectIcon({ size = 64, className = '' }: IconProps) {
         {/* Block 1 - bottom left */}
         <polygon points="16,48 28,42 28,34 16,40" fill={blockDark} />
         <polygon points="28,42 40,48 40,40 28,34" fill={blockColor} />
-        <polygon points="16,48 28,54 40,48 28,42" fill={highlightColor} fillOpacity="0.3" />
-        <polygon points="16,48 28,54 40,48 28,42" stroke={blockColor} strokeWidth="1" fill="none" />
+        <polygon points="16,48 28,54 40,48 28,42" fill={goldColor} fillOpacity="0.2" />
+        <polygon points="16,48 28,54 40,48 28,42" stroke={goldColor} strokeWidth="1" fill="none" opacity="0.5" />
 
         {/* Block 2 - bottom right */}
         <polygon points="28,48 40,42 40,34 28,40" fill={blockDark} />
         <polygon points="40,42 52,48 52,40 40,34" fill={blockColor} />
-        <polygon points="28,48 40,54 52,48 40,42" fill={highlightColor} fillOpacity="0.3" />
-        <polygon points="28,48 40,54 52,48 40,42" stroke={blockColor} strokeWidth="1" fill="none" />
+        <polygon points="28,48 40,54 52,48 40,42" fill={goldColor} fillOpacity="0.2" />
+        <polygon points="28,48 40,54 52,48 40,42" stroke={goldColor} strokeWidth="1" fill="none" opacity="0.5" />
       </g>
 
       {/* Middle row - 1 block */}
       <g>
         <polygon points="22,40 34,34 34,26 22,32" fill={blockDark} />
         <polygon points="34,34 46,40 46,32 34,26" fill={blockColor} />
-        <polygon points="22,40 34,46 46,40 34,34" fill={highlightColor} fillOpacity="0.3" />
-        <polygon points="22,40 34,46 46,40 34,34" stroke={blockColor} strokeWidth="1" fill="none" />
+        <polygon points="22,40 34,46 46,40 34,34" fill={goldColor} fillOpacity="0.2" />
+        <polygon points="22,40 34,46 46,40 34,34" stroke={goldColor} strokeWidth="1" fill="none" opacity="0.5" />
       </g>
 
       {/* Top row - 1 block */}
       <g>
         <polygon points="28,32 40,26 40,18 28,24" fill={blockDark} />
         <polygon points="40,26 52,32 52,24 40,18" fill={blockColor} />
-        <polygon points="28,32 40,38 52,32 40,26" fill={highlightColor} fillOpacity="0.3" />
-        <polygon points="28,32 40,38 52,32 40,26" stroke={blockColor} strokeWidth="1" fill="none" />
+        <polygon points="28,32 40,38 52,32 40,26" fill={goldColor} fillOpacity="0.2" />
+        <polygon points="28,32 40,38 52,32 40,26" stroke={goldColor} strokeWidth="1" fill="none" opacity="0.5" />
       </g>
 
       {/* Target outline - where next block goes */}
       <polygon
         points="10,40 22,34 22,26 10,32"
-        stroke={highlightColor}
+        stroke={goldColor}
         strokeWidth="1"
         strokeDasharray="2 2"
         fill="none"
-        opacity="0.5"
+        opacity="0.7"
       />
     </svg>
   );

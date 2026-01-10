@@ -18,6 +18,7 @@ export interface GameCardProps {
     total: number;
   };
   isNew?: boolean;
+  showPattern?: boolean;
 }
 
 const iconMap: Record<GameId, React.ComponentType<{ size?: number; className?: string }>> = {
@@ -41,9 +42,16 @@ export const GameCard = memo(function GameCard({
   to,
   disabled,
   progress,
+  showPattern = false,
 }: GameCardProps) {
   const IconComponent = iconMap[id];
   const gameNumber = GAME_NUMBERS[id];
+
+  const cardClasses = disabled
+    ? 'slab slab--disabled'
+    : 'slab glow-emerald border-gold-accent';
+
+  const patternClasses = showPattern ? 'pattern-lacquer' : '';
 
   const content = (
     <>
@@ -73,19 +81,25 @@ export const GameCard = memo(function GameCard({
 
       {/* Number (right) */}
       <span className="slab__number">{gameNumber}</span>
+
+      {/* Vietnamese corner decorations */}
+      <div className="slab__corner slab__corner--tl"></div>
+      <div className="slab__corner slab__corner--tr"></div>
+      <div className="slab__corner slab__corner--bl"></div>
+      <div className="slab__corner slab__corner--br"></div>
     </>
   );
 
   if (disabled) {
     return (
-      <div className="slab slab--disabled" data-testid={`game-card-${id}`}>
+      <div className={`${cardClasses} ${patternClasses}`} data-testid={`game-card-${id}`}>
         {content}
       </div>
     );
   }
 
   return (
-    <Link to={to} className="slab" data-testid={`game-card-${id}`}>
+    <Link to={to} className={`${cardClasses} ${patternClasses}`} data-testid={`game-card-${id}`}>
       {content}
     </Link>
   );

@@ -1,4 +1,4 @@
-/* FeedbackModal - Linear Editorial */
+/* FeedbackModal - Vietnamese Premium */
 
 .feedback-modal {
   position: fixed;
@@ -26,7 +26,17 @@
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--border);
+  border-top: 2px solid var(--accent-gold);
   animation: slide-up var(--motion-normal) var(--ease-out);
+}
+
+.feedback-modal__card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: radial-gradient(ellipse at 50% 0%, var(--accent-lotus) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 /* Header */
@@ -37,6 +47,8 @@
   padding: var(--space-lg);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .feedback-modal__title {

@@ -1,4 +1,4 @@
-/* PlacementModal - Linear Editorial */
+/* PlacementModal - Vietnamese Premium */
 
 .placement-modal {
   position: fixed;
@@ -21,6 +21,7 @@
   position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
+  border-top: 2px solid var(--accent-gold);
   max-width: 400px;
   width: 100%;
   max-height: 90vh;
@@ -28,12 +29,23 @@
   animation: fade-in var(--motion-normal) var(--ease-out);
 }
 
+.placement-modal__card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: radial-gradient(ellipse at 50% 0%, var(--accent-lotus) 0%, transparent 50%);
+  pointer-events: none;
+}
+
 .placement-modal__card--valid {
-  border-color: var(--success);
+  border-color: var(--accent-emerald);
+  border-top: 2px solid var(--accent-emerald);
 }
 
 .placement-modal__card--invalid {
   border-color: #ef4444;
+  border-top: 2px solid #ef4444;
 }
 
 .placement-modal__header {
@@ -42,6 +54,8 @@
   justify-content: space-between;
   padding: var(--space-md) var(--space-lg);
   border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
 }
 
 .placement-modal__title {

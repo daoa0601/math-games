@@ -1,0 +1,59 @@
+{
+  "navigation": {
+    "previous": "Previous page",
+    "next": "Next page",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "home": "Home",
+    "end": "End"
+  },
+  "actions": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "select": "Select",
+    "deselect": "Deselect",
+    "close": "Close",
+    "back": "Back",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "undo": "Undo",
+    "redo": "Redo"
+  },
+  "gameControls": {
+    "moveControls": "Move piece controls",
+    "movingPiece": "Moving piece",
+    "rotateX": "Rotate X axis",
+    "rotateY": "Rotate Y axis",
+    "rotateZ": "Rotate Z axis",
+    "cancelMove": "Cancel move",
+    "moveHint": "Tap a target cell to move the piece there",
+    "placePiece": "Place piece",
+    "removePiece": "Remove piece",
+    "rotatePiece": "Rotate piece"
+  },
+  "modal": {
+    "close": "Close",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "validPlacement": "Valid placement",
+    "position": "Position",
+    "place": "Place",
+    "rotate": "Rotate",
+    "instructions": "Instructions",
+    "dismiss": "Dismiss"
+  },
+  "shortcuts": {
+    "enter": "Confirm",
+    "escape": "Cancel",
+    "space": "Select",
+    "r": "Rotate",
+    "t": "Rotate T axis",
+    "y": "Rotate Y axis",
+    "arrowKeys": "Navigate",
+    "tab": "Next focus",
+    "shiftTab": "Previous focus"
+  }
+}

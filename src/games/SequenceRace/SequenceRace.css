@@ -1,21 +1,14 @@
-/* ============================================
-   SEQUENCE RACE - Game-specific styles
-   Uses: game-base.css (imported globally)
-   ============================================ */
-
-/* Container */
+/* Sequence Race - Game-specific styles */
 .sr-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-xl);
   width: 100%;
-  max-width: 100%;
   flex: 1;
   justify-content: center;
 }
 
-/* AI First Banner */
 .sr-ai-first {
   display: flex;
   align-items: center;
@@ -33,7 +26,6 @@
   text-transform: uppercase;
 }
 
-/* Race Track */
 .sr-track {
   width: 100%;
   background: var(--surface);
@@ -61,7 +53,6 @@
   transform: translateY(-50%);
 }
 
-/* Track Markers */
 .sr-markers {
   position: absolute;
   top: 50%;
@@ -80,7 +71,7 @@
 
 .sr-marker--major {
   height: 24px;
-  background: var(--accent);
+  background: var(--game-race);
 }
 
 .sr-marker__label {
@@ -92,7 +83,6 @@
   transform: translateX(-50%);
 }
 
-/* Player Avatar */
 .sr-avatar {
   position: absolute;
   top: 50%;
@@ -113,7 +103,6 @@
 .sr-avatar--ai { top: 70%; border-color: #ef4444; border-style: dashed; }
 .sr-avatar--loser { opacity: 0.5; }
 
-/* Preview Ghost */
 .sr-preview {
   position: absolute;
   top: 30%;
@@ -127,7 +116,6 @@
   z-index: 8;
 }
 
-/* AI Reaction */
 .sr-reaction {
   position: absolute;
   top: -24px;
@@ -136,7 +124,6 @@
   font-size: 1rem;
 }
 
-/* Target Flag */
 .sr-flag {
   position: absolute;
   right: 0;
@@ -145,7 +132,6 @@
   font-size: 2rem;
 }
 
-/* Position Display */
 .sr-position {
   text-align: center;
   font-family: var(--font-mono);
@@ -155,9 +141,8 @@
   background: var(--bg);
 }
 
-.sr-position strong { color: var(--accent); }
+.sr-position strong { color: var(--game-race); }
 
-/* Step Cards */
 .sr-steps {
   display: flex;
   gap: var(--space-md);
@@ -193,7 +178,6 @@
   text-transform: uppercase;
 }
 
-/* History Log */
 .sr-history {
   width: 100%;
   max-height: 120px;
@@ -216,7 +200,6 @@
 .sr-history__entry--player { color: var(--success); }
 .sr-history__entry--ai { color: #ef4444; }
 
-/* Turn Indicator */
 .sr-turn {
   display: inline-block;
   padding: var(--space-xs) var(--space-md);
@@ -229,7 +212,6 @@
 .sr-turn--player { background: var(--bg); color: var(--success); border: 1px solid var(--success); }
 .sr-turn--ai { background: var(--bg); color: #ef4444; border: 1px solid #ef4444; }
 
-/* Sequence Badge */
 .sr-badge {
   display: flex;
   flex-direction: column;
@@ -238,21 +220,17 @@
   padding: var(--space-sm) var(--space-lg);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-left: 2px solid var(--accent);
+  border-left: 2px solid var(--game-race);
 }
 
-.sr-badge__type { font-family: var(--font-display); color: var(--accent); }
+.sr-badge__type { font-family: var(--font-display); color: var(--game-race); }
 .sr-badge__formula { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--muted); }
 
-/* Actions */
 .sr-actions {
   display: flex;
   gap: var(--space-md);
 }
 
-/* ========================================
-   RESPONSIVE
-   ======================================== */
 @media (pointer: coarse) {
   .sr-step { min-width: 72px; min-height: 88px; }
   .sr-avatar { width: 52px; height: 52px; }
@@ -269,9 +247,6 @@
   .sr-avatar { transition: none; }
 }
 
-/* ========================================
-   DESKTOP LAYOUT (1024px+)
-   ======================================== */
 @media (min-width: 1024px) {
   .sr-layout {
     display: grid;
@@ -299,12 +274,6 @@
     top: var(--space-lg);
   }
 
-  .sr-container {
-    max-width: none;
-  }
-
-  /* Track takes full width of main area */
-  .sr-track {
-    width: 100%;
-  }
+  .sr-container { max-width: none; }
+  .sr-track { width: 100%; }
 }

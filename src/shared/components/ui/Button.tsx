@@ -10,6 +10,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  showPattern?: boolean;
 }
 
 /**
@@ -28,11 +29,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       className = '',
       disabled,
       style,
+      showPattern = false,
       ...props
     },
     ref
   ) => {
-    // Map variants to action classes
     const variantMap: Record<ButtonVariant, string> = {
       primary: 'action--primary',
       secondary: 'action--secondary',
@@ -47,7 +48,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       large: { fontSize: 'var(--text-base)', padding: 'var(--space-md) var(--space-xl)' },
     };
 
-    const classes = ['action', variantMap[variant], className]
+    const classes = [
+      'action',
+      variantMap[variant],
+      variant === 'primary' ? 'glow-emerald' : '',
+      variant === 'primary' ? 'border-gold-accent' : '',
+      showPattern ? 'pattern-lacquer' : '',
+      className
+    ]
       .filter(Boolean)
       .join(' ');
 

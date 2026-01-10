@@ -1,0 +1,17 @@
+{
+  "synced": "Synced",
+  "syncing": "Syncing...",
+  "offline": "Offline",
+  "error": "Sync Error",
+  "lastSync": "Last synced",
+  "offlineMessage": "You're offline. Changes will sync when you reconnect.",
+  "retry": "Retry",
+  "syncFailed": "Sync failed",
+  "syncSuccess": "Synced successfully",
+  "changesSavedLocally": "Changes saved locally",
+  "syncingProgress": "Syncing {{completed}}/{{total}}...",
+  "noConnection": "No network connection",
+  "connectionRestored": "Connection restored",
+  "pendingChanges": "{{count}} change pending sync",
+  "pendingChanges_plural": "{{count}} changes pending sync"
+}

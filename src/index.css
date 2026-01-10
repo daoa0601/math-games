@@ -9,6 +9,7 @@
 @import './shared/styles/hints.css';
 @import './shared/styles/a11y.css';
 @import './shared/styles/patterns.css';
+@import './shared/styles/patterns-vn.css';
 @import './shared/styles/orientation.css';
 
 /* Reset */
@@ -30,6 +31,7 @@ body {
   line-height: 1.5;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #root {
@@ -99,10 +101,46 @@ body {
   text-decoration: none;
   border: none;
   transition: background var(--motion-fast) var(--ease-out);
+  position: relative;
+  touch-action: manipulation;
 }
 
 .slab:active {
   background: #1a2744;
+}
+
+.slab__corner {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: var(--accent-gold);
+  border-style: solid;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.slab__corner--tl {
+  top: 2px;
+  left: 2px;
+  border-width: 1px 0 0 1px;
+}
+
+.slab__corner--tr {
+  top: 2px;
+  right: 2px;
+  border-width: 1px 1px 0 0;
+}
+
+.slab__corner--bl {
+  bottom: 2px;
+  left: 2px;
+  border-width: 0 0 1px 1px;
+}
+
+.slab__corner--br {
+  bottom: 2px;
+  right: 2px;
+  border-width: 0 1px 1px 0;
 }
 
 .slab__glyph {
@@ -185,6 +223,7 @@ body {
   border-radius: 0;
   cursor: pointer;
   transition: opacity var(--motion-fast) var(--ease-out);
+  touch-action: manipulation;
 }
 
 .action--primary {
