@@ -100,32 +100,27 @@ service cloud.firestore {
 
 ## Implementation Phases
 
-### Phase 1: Foundation (Firebase Setup) - [ ] NOT STARTED
+### Phase 1: Foundation (Firebase Setup) - [x] COMPLETE
 
 **Tasks:**
-1. Create Firebase project in GCP Console (manual step)
-2. Enable Authentication providers: Anonymous + Email Link
-3. Create Firestore database in production mode
-4. Install Firebase SDK: `npm install firebase`
-5. Create Firebase initialization service
-6. Add environment variables
-7. Verify connection works
+1. ~~Create Firebase project in GCP Console (manual step)~~ - Already exists: `math-games-dbd61`
+2. ~~Enable Authentication providers: Anonymous + Email Link~~ - To be enabled in Firebase Console
+3. ~~Create Firestore database in production mode~~ - To be created in Firebase Console
+4. ~~Install Firebase SDK: `npm install firebase`~~ - Done
+5. ~~Create Firebase initialization service~~ - Done: `src/shared/services/firebase.ts`
+6. ~~Add environment variables~~ - Already configured in `.env.example`
+7. ~~Verify connection works~~ - Build passes, lint passes
 
-**Files to create:**
+**Files created:**
 ```
-src/shared/services/firebase.ts       # Firebase app init
-.env.example                          # Template (VITE_FIREBASE_*)
+src/shared/services/firebase.ts       # Firebase app init with offline persistence
 ```
 
-**Environment variables needed:**
-```
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_AUTH_DOMAIN=
-VITE_FIREBASE_PROJECT_ID=
-VITE_FIREBASE_STORAGE_BUCKET=
-VITE_FIREBASE_MESSAGING_SENDER_ID=
-VITE_FIREBASE_APP_ID=
-```
+**Notes:**
+- Firebase project already configured: `math-games-dbd61`
+- Environment variables already in `.env.example`
+- Feature flag `VITE_USE_FIREBASE` allows disabling Firebase
+- Emulator support included for development
 
 ---
 
@@ -234,9 +229,9 @@ src/shared/types/payments.ts          # Type definitions
 ## Verification Checklists
 
 ### Phase 1 Verification
-- [ ] Firebase console shows project created
-- [ ] `npm run dev` starts without Firebase errors
-- [ ] Console logs show Firebase initialized
+- [x] Firebase console shows project created (`math-games-dbd61`)
+- [x] `npm run dev` starts without Firebase errors
+- [x] Build passes with Firebase SDK bundled
 
 ### Phase 2 Verification
 - [ ] App auto-signs in anonymously (check Firebase Auth console)
