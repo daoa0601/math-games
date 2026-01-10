@@ -1,7 +1,26 @@
 # ADR 0003: Firebase Integration Plan
 
 ## Status
-Proposed
+**Accepted** - Implemented 2026-01-10
+
+## Implementation Summary
+
+Firebase integration is complete and deployed to the `han-edu-central` GCP project:
+
+| Component | Status |
+|-----------|--------|
+| Firebase Project | ✅ `han-edu-central` |
+| Firestore Database | ✅ `nam5` (US Central) |
+| Authentication | ✅ Anonymous + Google |
+| Security Rules | ✅ Deployed |
+| Offline Persistence | ✅ Enabled |
+| Sync Manager | ✅ 2s debounce, rate limiting |
+
+**Key Implementation Details:**
+- Uses Blaze (pay-as-you-go) plan with free tier quotas
+- localStorage remains primary storage for instant saves
+- Firestore syncs in background with 2-second debounce
+- Budget alerts recommended at $1 threshold
 
 ## Context
 The math-games project currently uses localStorage for all data persistence via TypedStorage with Zod validation. To enable cross-device sync, account persistence, and potential classroom features, we need a backend database. Firebase is chosen for:

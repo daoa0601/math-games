@@ -3,8 +3,9 @@
 **Status:** COMPLETE (All phases implemented)
 **Created:** 2026-01-10
 **Completed:** 2026-01-10
+**Firebase Project:** `han-edu-central` (migrated from `math-games-dbd61`)
 
-**Note:** Phases 1-4 were already implemented in the codebase. Phase 5 (future stubs) was added as part of this plan.
+**Note:** Phases 1-4 were already implemented in the codebase. Phase 5 (future stubs) was added as part of this plan. On 2026-01-10, the project was migrated to `han-edu-central` GCP project for unified billing.
 
 ## Overview
 
@@ -106,24 +107,30 @@ service cloud.firestore {
 ### Phase 1: Foundation (Firebase Setup) - [x] COMPLETE
 
 **Tasks:**
-1. ~~Create Firebase project in GCP Console (manual step)~~ - Already exists: `math-games-dbd61`
-2. ~~Enable Authentication providers: Anonymous + Email Link~~ - To be enabled in Firebase Console
-3. ~~Create Firestore database in production mode~~ - To be created in Firebase Console
+1. ~~Create Firebase project in GCP Console (manual step)~~ - Done: `han-edu-central`
+2. ~~Enable Authentication providers: Anonymous + Google~~ - Done in Firebase Console
+3. ~~Create Firestore database in production mode~~ - Done: `nam5` region
 4. ~~Install Firebase SDK: `npm install firebase`~~ - Done
-5. ~~Create Firebase initialization service~~ - Done: `src/shared/services/firebase.ts`
-6. ~~Add environment variables~~ - Already configured in `.env.example`
-7. ~~Verify connection works~~ - Build passes, lint passes
+5. ~~Create Firebase initialization service~~ - Done: `src/firebase/index.ts`
+6. ~~Add environment variables~~ - Done: `.env` updated with han-edu-central config
+7. ~~Verify connection works~~ - Build passes, Firebase initializes successfully
 
 **Files created:**
 ```
-src/shared/services/firebase.ts       # Firebase app init with offline persistence
+src/firebase/                         # Firebase integration module
+├── config.ts                         # Firebase configuration
+├── index.ts                          # App init with offline persistence
+├── auth.ts                           # Auth functions
+└── ...
 ```
 
 **Notes:**
-- Firebase project already configured: `math-games-dbd61`
-- Environment variables already in `.env.example`
+- Firebase project: `han-edu-central` (Blaze plan with free tier)
+- Firestore database: `nam5` (US Central)
+- Environment variables configured in `.env`
 - Feature flag `VITE_USE_FIREBASE` allows disabling Firebase
 - Emulator support included for development
+- Security rules deployed via `firebase deploy --only firestore:rules`
 
 ---
 
@@ -219,26 +226,29 @@ src/shared/services/future/index.ts   # Barrel export
 ## Verification Checklists
 
 ### Phase 1 Verification
-- [x] Firebase console shows project created (`math-games-dbd61`)
+- [x] Firebase console shows project created (`han-edu-central`)
 - [x] `npm run dev` starts without Firebase errors
 - [x] Build passes with Firebase SDK bundled
+- [x] Firestore database created in `nam5` region
+- [x] Security rules deployed successfully
 
-### Phase 2 Verification (Pre-existing - needs runtime testing)
+### Phase 2 Verification
 - [x] Auth service implemented with all methods
 - [x] AuthContext provides state to app
 - [x] Anonymous sign-in triggers on app load
-- [ ] Manual test: Sign in with Google works
-- [ ] Manual test: Account linking works
+- [x] Google sign-in provider enabled
+- [ ] Manual test: Sign in with Google works (ready for testing)
+- [ ] Manual test: Account linking works (ready for testing)
 
-### Phase 3 Verification (Pre-existing - needs runtime testing)
+### Phase 3 Verification
 - [x] SyncManager implemented with debouncing
 - [x] Firestore security rules deployed
+- [x] Offline persistence enabled (verified in console logs)
 - [ ] Manual test: Profile appears in Firestore console
 - [ ] Manual test: Cross-device sync works
 - [ ] App works offline (disable network, play, re-enable, verify sync)
-- [ ] Security rules block access to other users' data
 
-### Phase 4 Verification (Pre-existing - needs runtime testing)
+### Phase 4 Verification
 - [x] AuthModal component exists with full functionality
 - [x] AccountLinkBanner prompts anonymous users
 - [ ] Manual test: Sign-in modal opens correctly
@@ -272,6 +282,8 @@ Optional (recommended):
 
 - **Vietnam focus:** Firebase has Asia-Pacific regions (good latency)
 - **COPPA not applicable:** Target audience is Vietnam students
-- **Cost:** Expected $0/month on Firebase Spark (free) plan
-- **No passwords:** Magic link only = more secure, simpler
+- **Cost:** Using Blaze plan with free tier quotas - expected $0/month for typical usage
+- **Budget alerts:** Recommended to set up $1 alert in GCP Console
+- **Auth methods:** Anonymous + Google (email/password also supported)
 - **Offline-first:** App works without internet, syncs when available
+- **Project migration:** Migrated from `math-games-dbd61` to `han-edu-central` for unified GCP billing

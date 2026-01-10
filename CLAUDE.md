@@ -24,13 +24,47 @@ npm run build-storybook # Build static Storybook site
 
 ## Architecture
 
-React + TypeScript SPA for educational math games (primary to middle school). Uses Vite bundling and react-router-dom navigation.
+React + TypeScript SPA for educational math games (primary to middle school). Uses Vite bundling, react-router-dom navigation, and Firebase for optional cloud sync.
+
+### Firebase Integration
+
+The app uses Firebase for authentication and data sync while keeping localStorage as the primary data store:
+
+| Service | Purpose | Status |
+|---------|---------|--------|
+| Firebase Auth | Anonymous + Google sign-in | ✅ Enabled |
+| Cloud Firestore | Player data sync | ✅ Configured |
+| Offline Persistence | IndexedDB cache | ✅ Enabled |
+
+**Key Architecture Decisions:**
+- **localStorage-first**: All data saves to localStorage immediately, then syncs to Firestore
+- **Non-blocking auth**: Users can play immediately as guests, auth happens in background
+- **2-second debounce**: Firestore writes are debounced to reduce API calls
+- **Offline-capable**: Full gameplay works without internet, syncs when reconnected
+
+```
+src/firebase/
+├── config.ts              # Firebase configuration
+├── index.ts               # App initialization with offline persistence
+├── auth.ts                # Auth functions (anonymous, Google, email)
+├── loader.ts              # Lazy loading for code splitting
+├── FirebaseAuthContext.tsx # Auth state provider
+├── services/
+│   ├── playerService.ts   # Firestore CRUD for profiles
+│   └── migrationService.ts # localStorage → Firestore migration
+└── sync/
+    └── syncManager.ts     # Debounced sync with rate limiting
+```
+
+**Firebase Project:** `han-edu-central`
+**Feature Flag:** `VITE_USE_FIREBASE=true` (set to `false` to disable)
 
 ### Project Structure
 
 ```
 src/
 ├── App.tsx                 # Routes with React.lazy code splitting
+├── firebase/               # Firebase integration (auth, sync, services)
 ├── games/                  # Each game is a self-contained module
 │   ├── MagicGraph/         # Graph-based number placement puzzle
 │   ├── SequenceRace/       # Turn-based strategy game vs AI
@@ -40,6 +74,7 @@ src/
 │   │   ├── ui/             # Primitives: Button, Timer, ProgressRing
 │   │   ├── layout/         # Layout: GameLayout, GameCard, DashboardTabs
 │   │   ├── gamification/   # StatsDisplay, AchievementToast, RankUpOverlay
+│   │   ├── auth/           # AuthModal, SignInButton, AccountLinkBanner
 │   │   ├── DailyChallenge/ # DailyChallenge, DailyChallengeBanner
 │   │   ├── Tutorial/       # Tutorial overlay system
 │   │   └── icons/          # Custom SVG game icons

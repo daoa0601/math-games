@@ -54,12 +54,23 @@ Open http://localhost:5173 to play.
 
 - React 19 + TypeScript
 - Vite 7
+- Firebase (Authentication + Firestore)
 - Vitest (testing)
+- Playwright (E2E testing)
 - react-router-dom (navigation)
 - @dnd-kit (drag-and-drop)
 - react-i18next (English/Vietnamese)
 - canvas-confetti (win animations)
 - howler.js (sound effects - placeholder ready)
+
+## Cloud Features
+
+The app supports optional cloud sync via Firebase:
+
+- **Anonymous Auth**: Play immediately, no sign-up required
+- **Google Sign-In**: Optional account linking for cross-device sync
+- **Offline-First**: All progress saved locally, syncs when online
+- **Data Persistence**: Progress survives browser clears when signed in
 
 ## Internationalization
 

@@ -14,6 +14,7 @@ Math Gymnasium is a **React + TypeScript Single Page Application (SPA)** designe
 | Language | TypeScript 5.9 | Type safety |
 | Bundler | Vite 7 | Fast development and builds |
 | Routing | react-router-dom 7 | Client-side navigation |
+| Backend | Firebase (Firestore + Auth) | Cloud sync & authentication |
 | i18n | react-i18next | English/Vietnamese support |
 | State Validation | Zod 4 | Runtime type validation |
 | 3D Graphics | Three.js + @react-three/fiber | ShapeArchitect game |
@@ -129,6 +130,108 @@ math-gymnasium/
 1. **Read from storage**: `localStorage` -> JSON.parse -> Zod validation -> Typed data
 2. **Write to storage**: Typed data -> Zod validation -> JSON.stringify -> `localStorage`
 3. **On validation failure**: Return default value, log warning
+
+---
+
+## Firebase Integration
+
+The app uses Firebase for optional cloud sync while keeping localStorage as the primary data store.
+
+### Firebase Project
+
+| Property | Value |
+|----------|-------|
+| Project ID | `han-edu-central` |
+| Region | `nam5` (US Central) |
+| Auth Providers | Anonymous, Google |
+| Firestore | Enabled with security rules |
+
+### Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        React App                             │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │                   PlayerContext                      │    │
+│  │  - Manages player state                             │    │
+│  │  - Coordinates localStorage + Firestore             │    │
+│  └─────────────────────────────────────────────────────┘    │
+│              │                           │                   │
+│              ▼                           ▼                   │
+│  ┌──────────────────┐       ┌──────────────────────────┐    │
+│  │  TypedStorage    │       │  Firebase SyncManager    │    │
+│  │  (localStorage)  │       │  - 2s debounce           │    │
+│  │  PRIMARY         │       │  - Rate limiting         │    │
+│  │  - Instant save  │       │  - Offline queue         │    │
+│  └──────────────────┘       └──────────────────────────┘    │
+│                                          │                   │
+│                                          ▼                   │
+│                              ┌──────────────────────────┐    │
+│                              │  Firestore (Cloud)       │    │
+│                              │  SECONDARY               │    │
+│                              │  - Cross-device sync     │    │
+│                              │  - Data backup           │    │
+│                              └──────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Sync Strategy
+
+| Data Type | Sync Direction | Conflict Resolution |
+|-----------|---------------|---------------------|
+| Stats | Bidirectional | Max values win (anti-cheat) |
+| Achievements | Bidirectional | Union (never lose) |
+| Preferences | Bidirectional | Last-write-wins |
+| Daily completions | Client → Server | Append-only |
+
+### Authentication Flow
+
+```
+App Launch
+    │
+    ▼
+┌─────────────────┐     Yes    ┌──────────────────┐
+│ Firebase Auth   │───────────▶│ Load from        │
+│ session exists? │            │ Firestore        │
+└────────┬────────┘            └──────────────────┘
+         │ No
+         ▼
+┌─────────────────┐
+│ Guest Mode      │◀──── User can play immediately
+│ (localStorage)  │
+└────────┬────────┘
+         │ Optional
+         ▼
+┌─────────────────┐
+│ Sign in with    │──── Google or Anonymous upgrade
+│ Google          │
+└─────────────────┘
+```
+
+### Key Files
+
+```
+src/firebase/
+├── config.ts              # Firebase configuration from env vars
+├── index.ts               # App initialization with offline persistence
+├── auth.ts                # signInAnonymous, signInWithGoogle, linkAccount
+├── loader.ts              # Lazy loading wrapper
+├── FirebaseAuthContext.tsx # React context for auth state
+├── services/
+│   ├── playerService.ts   # Firestore CRUD operations
+│   └── migrationService.ts # localStorage → Firestore migration
+└── sync/
+    └── syncManager.ts     # Debounced sync with offline queue
+```
+
+### Security Rules
+
+Firestore security rules ensure users can only access their own data:
+- Users collection scoped by `request.auth.uid`
+- Stats can only increase (anti-cheat)
+- Display names limited to 20 characters
+
+See `firestore.rules` for full implementation.
 
 ---
 
