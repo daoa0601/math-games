@@ -89,6 +89,7 @@ export async function getFirestoreProfile(): Promise<PlayerProfile | null> {
 
 /**
  * Save player profile to Firestore.
+ * Uses setDoc with merge to avoid extra read operation.
  */
 export async function saveFirestoreProfile(profile: PlayerProfile): Promise<boolean> {
   const user = getCurrentUser();
@@ -100,22 +101,14 @@ export async function saveFirestoreProfile(profile: PlayerProfile): Promise<bool
 
   try {
     const docRef = firestoreModule.doc(db, USERS_COLLECTION, user.uid);
-    const existingDoc = await firestoreModule.getDoc(docRef);
-
     const firestoreData = toFirestoreProfile(profile);
 
-    if (existingDoc.exists()) {
-      await firestoreModule.updateDoc(docRef, {
-        ...firestoreData,
-        updatedAt: firestoreModule.serverTimestamp(),
-      });
-    } else {
-      await firestoreModule.setDoc(docRef, {
-        ...firestoreData,
-        createdAt: firestoreModule.serverTimestamp(),
-        updatedAt: firestoreModule.serverTimestamp(),
-      });
-    }
+    // Use setDoc with merge to avoid extra network round-trip
+    // This handles both insert and update cases without reading first
+    await firestoreModule.setDoc(docRef, {
+      ...firestoreData,
+      updatedAt: firestoreModule.serverTimestamp(),
+    }, { merge: true });
 
     return true;
   } catch (error) {

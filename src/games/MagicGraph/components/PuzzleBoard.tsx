@@ -103,7 +103,11 @@ export const PuzzleBoard = memo(function PuzzleBoard({
     };
 
     // Get list of interactive (non-fixed) node IDs for keyboard navigation
-    const interactiveNodeIds = nodes.filter((n) => !n.isFixed).map((n) => n.id);
+    // Memoized to avoid recalculation on every render
+    const interactiveNodeIds = useMemo(
+        () => nodes.filter((n) => !n.isFixed).map((n) => n.id),
+        [nodes]
+    );
 
     // Handle keyboard navigation between nodes
     const handleNodeKeyDown = useCallback(

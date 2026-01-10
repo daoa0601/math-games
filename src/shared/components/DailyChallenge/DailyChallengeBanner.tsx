@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getTodayCompletions, isAllGamesCompletedToday, getDailyChallengeState } from '@/shared/services/daily';
+import { getDailyChallengeState } from '@/shared/services/daily';
+import { getTodaySeed } from '@/shared/utils/seededRandom';
 import type { StorageGameId } from '@/shared/schemas';
 import './DailyChallengeBanner.css';
 
@@ -27,24 +28,26 @@ interface DailyChallengeBannerProps {
 export function DailyChallengeBanner({ countdown, className = '', completionCount = 0 }: DailyChallengeBannerProps) {
   const { t } = useTranslation();
 
-  // Get all daily state in a single storage read and memoize derived values
+  // Get all daily state in a single storage read and derive all values
+  // This avoids N+1 pattern of calling getDailyChallengeState multiple times
   const { allCompleted, completedGames } = useMemo(() => {
-    // Single storage read
-    getDailyChallengeState();
-    const todayCompletions = getTodayCompletions();
-    const isAllCompleted = isAllGamesCompletedToday();
+    const state = getDailyChallengeState();
+    const today = getTodaySeed();
 
-    // Build completed games set
-    const completed: StorageGameId[] = [];
-    todayCompletions.forEach((completion, gameId) => {
-      if (completion !== null) {
-        completed.push(gameId);
+    // Build completed games set from single state read
+    const completed = new Set<StorageGameId>();
+    for (const completion of state.completions) {
+      if (completion.date === today && completion.completed) {
+        completed.add(completion.gameId);
       }
-    });
+    }
+
+    // Check if all 3 games are completed
+    const allDone = completed.size === 3;
 
     return {
-      allCompleted: isAllCompleted,
-      completedGames: new Set(completed),
+      allCompleted: allDone,
+      completedGames: completed,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completionCount]);

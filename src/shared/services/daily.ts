@@ -143,17 +143,22 @@ export function getTodayCompletions(): Map<
 
 /**
  * Check if all three games are completed today
- * Optimized to use a single storage read instead of N reads
+ * Optimized to use a single storage read and O(n) iteration with Set lookup
  */
 export function isAllGamesCompletedToday(): boolean {
   const state = getDailyChallengeState();
   const today = getTodaySeed();
 
-  return GAME_IDS.every((gameId) =>
-    state.completions.some(
-      (c) => c.date === today && c.gameId === gameId && c.completed
-    )
-  );
+  // Build Set of completed games today in a single pass - O(n)
+  const completedTodaySet = new Set<StorageGameId>();
+  for (const c of state.completions) {
+    if (c.date === today && c.completed) {
+      completedTodaySet.add(c.gameId);
+    }
+  }
+
+  // Check all games are in the set - O(k) where k is number of games (3)
+  return GAME_IDS.every(gameId => completedTodaySet.has(gameId));
 }
 
 /**

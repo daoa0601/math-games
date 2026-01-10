@@ -85,7 +85,10 @@ export function getSyncState(): SyncState {
  */
 export async function initSyncManager(): Promise<void> {
   // Set up online/offline listeners
+  // Remove existing listeners first to prevent duplicates if called multiple times
   if (typeof window !== 'undefined') {
+    window.removeEventListener('online', handleOnline);
+    window.removeEventListener('offline', handleOffline);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     isOnline = navigator.onLine;
@@ -328,13 +331,31 @@ export function syncStats(stats: PlayerStats): void {
  * Sync achievement unlock to Firestore.
  */
 export function syncAchievement(achievementId: string): void {
+  syncAchievementsBatch([achievementId]);
+}
+
+/**
+ * Sync multiple achievement unlocks to Firestore in a single operation.
+ * More efficient than calling syncAchievement multiple times.
+ */
+export function syncAchievementsBatch(achievementIds: string[]): void {
+  if (achievementIds.length === 0) return;
+
   const profile = getLocalProfile();
-  if (!profile.achievements.includes(achievementId)) {
-    syncToFirestore({
-      ...profile,
-      achievements: [...profile.achievements, achievementId],
-    });
-  }
+  const existingAchievements = new Set(profile.achievements);
+
+  // Filter to only new achievements
+  const newAchievements = achievementIds.filter(id => !existingAchievements.has(id));
+
+  if (newAchievements.length === 0) return;
+
+  // Add all new achievements at once
+  newAchievements.forEach(id => existingAchievements.add(id));
+
+  syncToFirestore({
+    ...profile,
+    achievements: Array.from(existingAchievements),
+  });
 }
 
 /**
