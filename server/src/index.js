@@ -6,7 +6,24 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+// Configure CORS to restrict origins (security: prevent unauthorized API access)
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, server-to-server)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy: Origin not allowed'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // ============ HEALTH CHECK ============
@@ -169,7 +186,7 @@ app.post('/api/players/:playerId/stats', (req, res) => {
     }
     if (bestTime.sequenceRaceFastest !== undefined) {
       if (!currentStats.sequence_race_fastest || bestTime.sequenceRaceFastest < currentStats.sequence_race_fastest) {
-        bestTimes.magic_graph_fastest = bestTime.sequenceRaceFastest;
+        bestTimes.sequence_race_fastest = bestTime.sequenceRaceFastest;
       }
     }
     if (bestTime.shapeArchitectFastest !== undefined) {
