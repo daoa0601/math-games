@@ -139,14 +139,15 @@
 }
 
 /* Desktop: Left sidebar navigation */
-@media (min-width: 1024px) {
+/* Uses aspect ratio detection: landscape + min-width for sidebar mode */
+@media (orientation: landscape) and (min-width: 768px) {
   .nav {
     position: fixed;
     left: 0;
     top: 0;
     bottom: 0;
     right: auto;
-    width: 72px;
+    width: var(--sidebar-width);
     height: 100vh;
     flex-direction: column;
     justify-content: flex-start;

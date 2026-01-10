@@ -326,7 +326,7 @@
 
 @media (max-width: 480px) {
   .mg-container { justify-content: flex-start; }
-  .mg-board-wrapper { margin-top: 32px; }
+  .mg-board-wrapper { margin-top: 48px; }
   .mg-picker { transform: translate(-50%, 8px); }
 }
 
@@ -360,6 +360,7 @@
     gap: var(--space-lg);
     position: sticky;
     top: var(--space-lg);
+    align-items: center;
   }
 
   .mg-container { max-width: none; }

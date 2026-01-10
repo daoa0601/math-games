@@ -43,40 +43,35 @@ body {
 /* Page layout */
 .page {
   min-height: 100dvh;
-  padding-bottom: 80px; /* Bottom nav space */
+  padding-bottom: 80px; /* Bottom nav space for portrait */
 }
 
-/* Content wrapper - responsive max-width */
+/* Landscape orientation on larger screens: sidebar mode */
+@media (orientation: landscape) and (min-width: 768px) {
+  .page {
+    padding-left: var(--sidebar-width);
+    padding-bottom: 0;
+  }
+}
+
+/* Content wrapper - full-width responsive */
 .content-wrap {
   width: 100%;
-  max-width: var(--content-sm);
-  margin: 0 auto;
-  padding: 0 var(--space-lg);
+  max-width: none;
+  padding: 0 var(--content-padding-mobile);
 }
 
 /* Tablet: More padding */
 @media (min-width: 768px) {
   .content-wrap {
-    padding: 0 var(--space-xl);
+    padding: 0 var(--content-padding-tablet);
   }
 }
 
-/* Desktop: Expand content area + sidebar offset */
-@media (min-width: 1024px) {
+/* Landscape on larger screens: comfortable desktop padding */
+@media (orientation: landscape) and (min-width: 768px) {
   .content-wrap {
-    max-width: var(--content-md);
-  }
-
-  .page {
-    padding-left: 72px;
-    padding-bottom: 0;
-  }
-}
-
-/* Large Desktop: Full expansion */
-@media (min-width: 1280px) {
-  .content-wrap {
-    max-width: var(--content-lg);
+    padding: 0 var(--content-padding-desktop);
   }
 }
 
@@ -278,9 +273,9 @@ body {
 /* Navigation styles moved to BottomNav.css */
 
 /* Desktop game container offset */
-@media (min-width: 1024px) {
+@media (orientation: landscape) and (min-width: 768px) {
   .game-container {
-    margin-left: 72px;
+    margin-left: var(--sidebar-width);
   }
 }
 
@@ -335,8 +330,13 @@ body {
   align-items: center;
   gap: var(--space-sm);
   flex-shrink: 0;
-  /* Prevent actions from overflowing into game area on mobile */
   overflow: visible;
+}
+
+.game-header__actions > * {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
 }
 
 /* Back link - fixed width for language stability */

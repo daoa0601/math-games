@@ -19,10 +19,21 @@
   --bp-xl: 1280px;
   --bp-2xl: 1536px;
 
-  /* Content widths */
+  /* Content widths (legacy - kept for backward compat) */
   --content-sm: 600px;
   --content-md: 900px;
   --content-lg: 1200px;
+
+  /* Layout - full-width responsive */
+  --content-padding-mobile: var(--space-lg);
+  --content-padding-tablet: var(--space-xl);
+  --content-padding-desktop: 48px;
+
+  /* Sidebar */
+  --sidebar-width: 72px;
+
+  /* Card sizing for auto-fill grid */
+  --card-min-width: 280px;
 
   /* Z-index scale */
   --z-base: 0;

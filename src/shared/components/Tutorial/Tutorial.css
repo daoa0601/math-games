@@ -159,3 +159,12 @@
     animation: none;
   }
 }
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .tutorial-tooltip {
+    min-width: 260px;
+    max-width: calc(100vw - 32px);
+    padding: var(--space-md);
+  }
+}

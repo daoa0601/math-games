@@ -50,7 +50,7 @@
 /* Stats Grid */
 .profile-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 1px;
   background: var(--border);
 }
@@ -120,7 +120,7 @@
 
 .profile-achievement-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: var(--space-sm);
 }
 
@@ -147,12 +147,3 @@
   color: var(--text);
 }
 
-@media (min-width: 768px) {
-  .profile-stats {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .profile-achievement-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
