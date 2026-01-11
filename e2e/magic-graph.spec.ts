@@ -40,11 +40,21 @@ test.describe('MagicGraph Game', () => {
       const nodeCount = await mgPage.getTotalNodeCount();
       expect(nodeCount).toBeGreaterThan(0);
 
-      // Check difficulty selector is visible
-      await expect(mgPage.difficultySelector).toBeVisible();
+      // Check settings drawer trigger is visible (difficulty is now inside drawer)
+      await expect(mgPage.settingsDrawerTrigger).toBeVisible();
 
       // Check timer is displayed
       await expect(mgPage.timerContainer).toBeVisible();
+    });
+
+    test('should display difficulty selector in settings drawer', async ({ page }) => {
+      const mgPage = new MagicGraphPage(page);
+
+      // Open settings drawer
+      await mgPage.settingsDrawerTrigger.click();
+
+      // Check difficulty selector is visible inside the drawer
+      await expect(mgPage.difficultySelector).toBeVisible({ timeout: 5000 });
     });
 
     test('should display number inventory', async ({ page }) => {
@@ -69,10 +79,14 @@ test.describe('MagicGraph Game', () => {
       await expect(mgPage.resetButton).toBeVisible();
     });
 
-    test('should have difficulty buttons', async ({ page }) => {
+    test('should have difficulty buttons in settings drawer', async ({ page }) => {
       const mgPage = new MagicGraphPage(page);
 
-      // Check difficulty buttons are rendered
+      // Open settings drawer first
+      await mgPage.settingsDrawerTrigger.click();
+      await page.waitForTimeout(300);
+
+      // Check difficulty buttons are rendered inside drawer
       const difficultyCount = await mgPage.difficultyButtons.count();
       expect(difficultyCount).toBeGreaterThan(0);
     });
@@ -162,8 +176,14 @@ test.describe('MagicGraph Game', () => {
   });
 
   test.describe('Difficulty Changes', () => {
-    test('should change difficulty level', async ({ page }) => {
-      // Get initial active difficulty
+    test('should change difficulty level via settings drawer', async ({ page }) => {
+      const mgPage = new MagicGraphPage(page);
+
+      // Open settings drawer first
+      await mgPage.settingsDrawerTrigger.click();
+      await page.waitForTimeout(300);
+
+      // Get difficulty buttons inside drawer
       const easyBtn = page.locator('.difficulty-btn--easy');
       const mediumBtn = page.locator('.difficulty-btn--medium');
 

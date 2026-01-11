@@ -28,6 +28,9 @@ export class MagicGraphPage {
   readonly pickerClose: Locator;
   readonly pickerClear: Locator;
 
+  // Settings drawer
+  readonly settingsDrawerTrigger: Locator;
+
   // Game controls
   readonly difficultySelector: Locator;
   readonly difficultyButtons: Locator;
@@ -87,7 +90,10 @@ export class MagicGraphPage {
     this.pickerClose = this.numberPicker.locator('.mg-picker__close');
     this.pickerClear = this.numberPicker.locator('.mg-picker__clear');
 
-    // Difficulty selector
+    // Settings drawer
+    this.settingsDrawerTrigger = page.locator('.settings-drawer__trigger');
+
+    // Difficulty selector (inside settings drawer)
     this.difficultySelector = page.locator('.difficulty-selector');
     this.difficultyButtons = page.locator('.difficulty-btn');
 

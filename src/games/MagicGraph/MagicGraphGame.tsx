@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton } from '@/shared/components';
+import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton, VictoryModal, SettingsDrawer, SettingsDrawerTrigger, SettingsSection } from '@/shared/components';
 import { useGameTimer, useGameRewards, useGameInit, useAnnounce, useFocusTrap } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
 import { completeDailyChallenge } from '@/shared/services/daily';
@@ -77,6 +77,7 @@ export function MagicGraphGame() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
     const [justPlacedNodeId, setJustPlacedNodeId] = useState<string | null>(null);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     // Game modal ref for focus trap (used after useGameTimer)
     const gameModalRef = useRef<HTMLDivElement>(null);
@@ -508,6 +509,7 @@ export function MagicGraphGame() {
             gameId="magic-graph"
             headerRight={
                 <>
+                    <SettingsDrawerTrigger onClick={() => setIsSettingsOpen(true)} />
                     <HelpButton gameId="magic-graph" onShowTutorial={() => setShowTutorial(true)} />
                     <SoundToggle />
                 </>
@@ -598,39 +600,6 @@ export function MagicGraphGame() {
                         onResume={resumeTimer}
                         disabled={showWin}
                     />
-
-                    {/* Difficulty Selector (hidden in daily mode) */}
-                    {!isDailyMode && (
-                        <DifficultySelector
-                            options={['easy', 'medium', 'hard', 'master', 'grandmaster']}
-                            value={difficulty}
-                            onChange={handleDifficultyChange}
-                        />
-                    )}
-
-                    {/* Game Rules */}
-                    <div className="mg-rules">
-                        <span>📜</span> {t('rules')}
-                    </div>
-
-                    {/* Game Actions (hidden in daily mode) */}
-                    {!isDailyMode && (
-                        <div className="mg-levels">
-                            <button
-                                className="action action--secondary"
-                                onClick={handleRandomPuzzle}
-                                disabled={isGenerating || isWorkerBusy}
-                            >
-                                {isGenerating || isWorkerBusy ? `⏳ ${tc('generating')}` : `🎲 ${tc('buttons.newPuzzle')}`}
-                            </button>
-                            <button
-                                className="action action--secondary"
-                                onClick={() => setShowEditor(true)}
-                            >
-                                ✏️ {t('editor.openEditor')}
-                            </button>
-                        </div>
-                    )}
 
                     {/* Puzzle Info */}
                 <div className="game-info">
@@ -807,121 +776,116 @@ export function MagicGraphGame() {
                 {/* === END SIDEBAR === */}
             </div>
 
-            {/* Win Modal - Centered */}
-            {showWin && (
-                <>
-                    <div className="game-modal__backdrop" aria-hidden="true" />
-                    <div
-                        ref={gameModalRef}
-                        className={`game-modal ${
-                            difficulty === 'grandmaster' && grandmasterFeedback?.isOptimal
-                                ? 'game-modal--optimal'
-                                : ''
-                        }`}
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="game-modal-title"
-                    >
-                        <div className="game-modal__content">
-                            {difficulty === 'grandmaster' && grandmasterFeedback ? (
-                                <>
-                                    {/* Grandmaster mode - show optimization info */}
-                                    <h2 id="game-modal-title" className="game-modal__title game-modal__title--win">
-                                        {grandmasterFeedback.isOptimal ? '🏆' : '✓'}{' '}
-                                        {grandmasterFeedback.isOptimal
-                                            ? t('win.grandmaster.optimal')
-                                            : t('win.grandmaster.valid')}
-                                    </h2>
-                                    <p className="game-modal__subtitle">{Math.floor(elapsedTime / 1000)}s</p>
-
-                                    <div className="game-modal__stats">
-                                        <div className="game-modal__stat">
-                                            <span className="game-modal__stat-value">{grandmasterFeedback.currentSum}</span>
-                                            <span className="game-modal__stat-label">{t('yourSum')}</span>
-                                        </div>
-                                        <div className="game-modal__stat">
-                                            <span className="game-modal__stat-value">{grandmasterFeedback.optimalSum}</span>
-                                            <span className="game-modal__stat-label">
-                                                {optimizationGoal === 'minimize' ? t('minimum') : t('maximum')}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="game-modal__actions">
-                                        {!grandmasterFeedback.isOptimal && (
-                                            <button className="action action--secondary" onClick={resetPuzzle}>
-                                                {tc('buttons.tryAgain')}
-                                            </button>
-                                        )}
-                                        <button className="action action--primary" onClick={nextPuzzle}>
-                                            {tc('buttons.nextPuzzle')} →
-                                        </button>
-                                    </div>
-
-                                    {!grandmasterFeedback.isOptimal && (
-                                        <p className="game-modal__insight">
-                                            💡 {t('win.grandmaster.tryAgain')}
-                                        </p>
-                                    )}
-                                </>
-                            ) : (
-                                <>
-                                    {/* Normal mode - ultra minimal */}
-                                    <h2 id="game-modal-title" className="game-modal__title game-modal__title--win">
-                                        ✓ {t('win.title')}
-                                    </h2>
-                                    <p className="game-modal__subtitle">{Math.floor(elapsedTime / 1000)}s</p>
-
-                                    <div className="game-modal__actions">
-                                        {isDailyMode ? (
-                                            <a href="/math-games/" className="action action--primary">
-                                                {tc('backToGames')}
-                                            </a>
-                                        ) : (
-                                            <button className="action action--primary" onClick={nextPuzzle}>
-                                                {tc('buttons.nextPuzzle')} →
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    <p className="game-modal__insight">
-                                        💡 {t('win.mathInsight', { nodeCount: puzzle.nodes.length, lineCount: puzzle.lines.length })}
-                                    </p>
-                                </>
-                            )}
-                        </div>
+            {/* Settings Drawer (Progressive Disclosure) */}
+            <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)}>
+                {!isDailyMode && (
+                    <SettingsSection title={tc('difficulty.title', 'Difficulty')}>
+                        <DifficultySelector
+                            options={['easy', 'medium', 'hard', 'master', 'grandmaster']}
+                            value={difficulty}
+                            onChange={handleDifficultyChange}
+                        />
+                    </SettingsSection>
+                )}
+                <SettingsSection title={t('settings.rules', 'Rules')}>
+                    <div className="game-rules">
+                        <span className="game-rules__icon">📜</span>
+                        <p className="game-rules__text">{t('rules')}</p>
                     </div>
-                </>
-            )}
+                </SettingsSection>
+                {!isDailyMode && (
+                    <SettingsSection title={t('settings.actions', 'Actions')}>
+                        <button
+                            className="action action--secondary"
+                            onClick={() => {
+                                handleRandomPuzzle();
+                                setIsSettingsOpen(false);
+                            }}
+                            disabled={isGenerating || isWorkerBusy}
+                        >
+                            {isGenerating || isWorkerBusy ? `⏳ ${tc('generating')}` : `🎲 ${tc('buttons.newPuzzle')}`}
+                        </button>
+                        <button
+                            className="action action--secondary"
+                            onClick={() => {
+                                setShowEditor(true);
+                                setIsSettingsOpen(false);
+                            }}
+                        >
+                            ✏️ {t('editor.openEditor')}
+                        </button>
+                    </SettingsSection>
+                )}
+            </SettingsDrawer>
 
-            {/* Time Up Modal - Centered */}
-            {showTimeUp && (
-                <>
-                    <div className="game-modal__backdrop" aria-hidden="true" />
-                    <div
-                        className="game-modal game-modal--lose"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="timeup-modal-title"
-                    >
-                        <div className="game-modal__content">
-                            <h2 id="timeup-modal-title" className="game-modal__title game-modal__title--lose">
-                                ⏰ {tc('timer.timeUp')}
-                            </h2>
-
-                            <div className="game-modal__actions">
-                                <button className="action action--primary" onClick={resetPuzzle}>
+            {/* Win Modal - using VictoryModal for proper portal/z-index handling */}
+            <VictoryModal
+                isOpen={showWin}
+                variant="win"
+                emoji={difficulty === 'grandmaster' && grandmasterFeedback?.isOptimal ? '🏆' : '✓'}
+                title={
+                    difficulty === 'grandmaster' && grandmasterFeedback
+                        ? grandmasterFeedback.isOptimal
+                            ? t('win.grandmaster.optimal')
+                            : t('win.grandmaster.valid')
+                        : t('win.title')
+                }
+                message={`${Math.floor(elapsedTime / 1000)}s`}
+                stats={
+                    difficulty === 'grandmaster' && grandmasterFeedback
+                        ? [
+                            { value: grandmasterFeedback.currentSum, label: t('yourSum') },
+                            {
+                                value: grandmasterFeedback.optimalSum,
+                                label: optimizationGoal === 'minimize' ? t('minimum') : t('maximum'),
+                            },
+                        ]
+                        : undefined
+                }
+                insight={
+                    difficulty === 'grandmaster' && grandmasterFeedback && !grandmasterFeedback.isOptimal
+                        ? { title: '', message: t('win.grandmaster.tryAgain') }
+                        : difficulty !== 'grandmaster'
+                            ? { title: '', message: t('win.mathInsight', { nodeCount: puzzle.nodes.length, lineCount: puzzle.lines.length }) }
+                            : undefined
+                }
+                actions={
+                    difficulty === 'grandmaster' && grandmasterFeedback ? (
+                        <>
+                            {!grandmasterFeedback.isOptimal && (
+                                <button className="action action--secondary" onClick={resetPuzzle}>
                                     {tc('buttons.tryAgain')}
                                 </button>
-                            </div>
+                            )}
+                            <button className="action action--primary" onClick={nextPuzzle}>
+                                {tc('buttons.nextPuzzle')} →
+                            </button>
+                        </>
+                    ) : isDailyMode ? (
+                        <a href="/math-games/" className="action action--primary">
+                            {tc('backToGames')}
+                        </a>
+                    ) : (
+                        <button className="action action--primary" onClick={nextPuzzle}>
+                            {tc('buttons.nextPuzzle')} →
+                        </button>
+                    )
+                }
+            />
 
-                            <p className="game-modal__insight">
-                                💡 {tc('timer.practiceMessage')}
-                            </p>
-                        </div>
-                    </div>
-                </>
-            )}
+            {/* Time Up Modal - using VictoryModal for consistency */}
+            <VictoryModal
+                isOpen={showTimeUp}
+                variant="timeUp"
+                emoji="⏰"
+                title={tc('timer.timeUp')}
+                insight={{ title: '', message: tc('timer.practiceMessage') }}
+                actions={
+                    <button className="action action--primary" onClick={resetPuzzle}>
+                        {tc('buttons.tryAgain')}
+                    </button>
+                }
+            />
 
             {/* Rank Up Overlay */}
             {showingRankUp && rewards?.rankedUp && rewards.previousRank && rewards.newRank && (

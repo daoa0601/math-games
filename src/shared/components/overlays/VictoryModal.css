@@ -1,0 +1,243 @@
+/* ============================================
+   VictoryModal - Game End Overlay
+   Linear Editorial Design
+
+   Variants: win (green), lose (red), timeUp (orange)
+   ============================================ */
+
+/* ----------------------------------------
+   Content Container
+   ---------------------------------------- */
+.victory-modal__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-lg, 16px) 0;
+  position: relative;
+}
+
+/* ----------------------------------------
+   Accent Line (variant-colored top stripe)
+   ---------------------------------------- */
+.victory-modal__accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+/* ----------------------------------------
+   Emoji
+   ---------------------------------------- */
+.victory-modal__emoji {
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: var(--space-md, 12px);
+  /* Subtle entrance animation */
+  animation: victory-emoji-pop var(--motion-normal, 250ms) var(--ease-out, ease-out);
+}
+
+@keyframes victory-emoji-pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ----------------------------------------
+   Title
+   ---------------------------------------- */
+.victory-modal__title {
+  font-family: var(--font-display, 'Crimson Pro', serif);
+  font-size: var(--text-2xl, 1.5rem);
+  font-weight: 600;
+  margin: 0 0 var(--space-sm, 8px);
+  letter-spacing: 0.02em;
+}
+
+.victory-modal__title--win {
+  color: var(--success, #10b981);
+}
+
+.victory-modal__title--lose {
+  color: #ef4444;
+}
+
+.victory-modal__title--timeUp {
+  color: var(--accent-coral, #f97316);
+}
+
+/* ----------------------------------------
+   Message
+   ---------------------------------------- */
+.victory-modal__message {
+  font-size: var(--text-base, 1rem);
+  color: var(--muted, #64748b);
+  margin: 0 0 var(--space-lg, 16px);
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+/* ----------------------------------------
+   Stats
+   ---------------------------------------- */
+.victory-modal__stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-xl, 24px);
+  margin-bottom: var(--space-lg, 16px);
+  padding: var(--space-md, 12px) var(--space-lg, 16px);
+  background: var(--bg, #0d1b2a);
+  border: 1px solid var(--border, #334155);
+}
+
+.victory-modal__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs, 4px);
+}
+
+.victory-modal__stat-value {
+  font-family: var(--font-display, 'Crimson Pro', serif);
+  font-size: var(--text-xl, 1.25rem);
+  font-weight: 600;
+  color: var(--text, #f1f5f9);
+}
+
+.victory-modal__stat-label {
+  font-family: var(--font-mono, 'Space Grotesk', monospace);
+  font-size: var(--text-xs, 0.75rem);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted, #64748b);
+}
+
+/* ----------------------------------------
+   Educational Insight
+   ---------------------------------------- */
+.victory-modal__insight {
+  width: 100%;
+  max-width: 380px;
+  padding: var(--space-md, 12px) var(--space-lg, 16px);
+  margin-bottom: var(--space-lg, 16px);
+  background: var(--bg, #0d1b2a);
+  border: 1px solid var(--border, #334155);
+  border-left: 2px solid var(--accent-gold, #d4af37);
+  text-align: left;
+}
+
+.victory-modal__insight-title {
+  font-family: var(--font-display, 'Crimson Pro', serif);
+  font-size: var(--text-base, 1rem);
+  font-weight: 500;
+  color: var(--text, #f1f5f9);
+  margin: 0 0 var(--space-xs, 4px);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 8px);
+}
+
+.victory-modal__insight-message {
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--muted, #64748b);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ----------------------------------------
+   Actions
+   ---------------------------------------- */
+.victory-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 8px);
+  width: 100%;
+  max-width: 280px;
+}
+
+/* Make buttons full width in victory modal */
+.victory-modal__actions > * {
+  width: 100%;
+}
+
+/* Row layout for multiple buttons */
+.victory-modal__actions--row {
+  flex-direction: row;
+  max-width: none;
+}
+
+/* ----------------------------------------
+   Variant-specific BottomSheet overrides
+   ---------------------------------------- */
+.victory-modal--win .bottom-sheet__card {
+  border-top-color: var(--success, #10b981);
+}
+
+.victory-modal--lose .bottom-sheet__card {
+  border-top-color: #ef4444;
+}
+
+.victory-modal--timeUp .bottom-sheet__card {
+  border-top-color: var(--accent-coral, #f97316);
+}
+
+/* ----------------------------------------
+   Mobile Adjustments
+   ---------------------------------------- */
+@media (max-width: 480px) {
+  .victory-modal__emoji {
+    font-size: 3rem;
+  }
+
+  .victory-modal__title {
+    font-size: var(--text-xl, 1.25rem);
+  }
+
+  .victory-modal__stats {
+    gap: var(--space-lg, 16px);
+    padding: var(--space-sm, 8px) var(--space-md, 12px);
+  }
+
+  .victory-modal__insight {
+    padding: var(--space-sm, 8px) var(--space-md, 12px);
+  }
+
+  .victory-modal__actions {
+    max-width: 100%;
+  }
+}
+
+/* ----------------------------------------
+   Reduced Motion
+   ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .victory-modal__emoji {
+    animation: none;
+  }
+}
+
+/* ----------------------------------------
+   High Contrast
+   ---------------------------------------- */
+.high-contrast .victory-modal__stats,
+.high-contrast .victory-modal__insight {
+  border-width: 2px;
+}
+
+.high-contrast .victory-modal__title--win {
+  color: #22c55e; /* Brighter green */
+}
+
+.high-contrast .victory-modal__title--lose {
+  color: #f87171; /* Brighter red */
+}

@@ -49,8 +49,9 @@ math-gymnasium/
 │   │
 │   ├── shared/
 │   │   ├── components/         # Reusable UI
-│   │   │   ├── ui/             # Button, Timer, ProgressRing
+│   │   │   ├── ui/             # Button, Timer, ProgressRing, BottomSheet, SettingsDrawer
 │   │   │   ├── layout/         # GameLayout, GameCard, DashboardTabs
+│   │   │   ├── overlays/       # VictoryModal (unified game-end overlay)
 │   │   │   ├── gamification/   # StatsDisplay, AchievementToast
 │   │   │   ├── DailyChallenge/ # Daily challenge system
 │   │   │   ├── Tutorial/       # Tutorial overlay
@@ -267,6 +268,79 @@ games/[GameName]/
 | `components/` | UI rendering, user interaction | React, CSS |
 | `hooks/` | React lifecycle, side effects | React hooks |
 | `*Game.tsx` | State management, orchestration | All of the above |
+
+---
+
+## UI Overlay System
+
+The app uses a unified overlay system for modals and drawers, designed mobile-first with accessibility in mind.
+
+### BottomSheet Component
+
+Portal-based modal that renders as a bottom sheet on mobile and centered modal on desktop.
+
+```typescript
+import { BottomSheet } from '@/shared/components';
+
+<BottomSheet
+  isOpen={isOpen}
+  onClose={handleClose}
+  title="Settings"
+  detent="content"  // 'content' | 'half' | 'full'
+>
+  {children}
+</BottomSheet>
+```
+
+**Features:**
+- Portal rendering (escapes overflow issues)
+- Swipe-to-dismiss on mobile (drag handle)
+- Focus trap for accessibility
+- Escape key handling
+- Backdrop click to close
+
+### SettingsDrawer (Progressive Disclosure)
+
+All three games use SettingsDrawer to reduce UI clutter:
+
+| Always Visible | Hidden in Drawer |
+|----------------|------------------|
+| Timer | Difficulty selector |
+| Game info | Mode toggle |
+| Undo/Redo | New game button |
+| Hints | Editor button |
+| Main actions | Rules |
+
+```typescript
+import { SettingsDrawer, SettingsDrawerTrigger, SettingsSection } from '@/shared/components';
+
+// In header
+<SettingsDrawerTrigger onClick={() => setIsSettingsOpen(true)} />
+
+// Settings drawer
+<SettingsDrawer isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)}>
+  <SettingsSection title="Difficulty">
+    <DifficultySelector ... />
+  </SettingsSection>
+</SettingsDrawer>
+```
+
+### VictoryModal
+
+Unified game-end overlay for win/lose/time-up states:
+
+```typescript
+import { VictoryModal } from '@/shared/components';
+
+<VictoryModal
+  isOpen={showVictory}
+  onClose={handleClose}
+  variant="win"  // 'win' | 'lose' | 'timeUp'
+  title="Congratulations!"
+  stats={[{ value: '1:23', label: 'Time' }]}
+  actions={<button>Next Puzzle</button>}
+/>
+```
 
 ---
 

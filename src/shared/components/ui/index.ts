@@ -6,3 +6,7 @@ export { ProgressRing, CompactProgressRing } from './ProgressRing';
 export { DifficultySelector } from './DifficultySelector';
 export { SyncIndicator, type SyncStatus } from './SyncIndicator';
 export { OfflineBanner } from './OfflineBanner';
+export { BottomSheet } from './BottomSheet';
+export type { BottomSheetProps, BottomSheetDetent } from './BottomSheet';
+export { SettingsDrawer, SettingsDrawerTrigger, SettingsSection } from './SettingsDrawer';
+export type { SettingsDrawerProps, SettingsDrawerTriggerProps, SettingsSectionProps } from './SettingsDrawer';

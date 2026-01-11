@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DndContext, pointerWithin } from '@dnd-kit/core';
-import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, PersonalBestIndicator, HelpButton } from '@/shared/components';
+import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton, VictoryModal, SettingsDrawer, SettingsDrawerTrigger, SettingsSection } from '@/shared/components';
 import { useGameTimer, useGameRewards, useSwipe, useAnnounce, useGameInit } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
 import { completeDailyChallenge } from '@/shared/services/daily';
@@ -74,6 +74,7 @@ export function ShapeArchitectGame() {
     const [cameraPreset, setCameraPreset] = useState<CameraPreset>('isometric');
     const [maxVisibleLayer, setMaxVisibleLayer] = useState<number>(() => gameState.level.gridSize[2] - 1);
     const [showEditor, setShowEditor] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [showRotationHint, setShowRotationHint] = useState(() => {
         // Show hint if user hasn't rotated before
         return !localStorage.getItem('shape-architect-rotated');
@@ -419,6 +420,7 @@ export function ShapeArchitectGame() {
                 gameId="shape-architect"
                 headerRight={
                     <>
+                        <SettingsDrawerTrigger onClick={() => setIsSettingsOpen(true)} />
                         <HelpButton gameId="shape-architect" onShowTutorial={() => setShowTutorial(true)} />
                         <SoundToggle />
                     </>
@@ -566,37 +568,12 @@ export function ShapeArchitectGame() {
                             disabled={gameState.isSolved}
                         />
 
-                        {/* Difficulty Selector (hidden in daily mode) */}
-                        {!isDailyMode && (
-                            <DifficultySelector
-                                options={['easy', 'medium', 'hard']}
-                                value={difficulty}
-                                onChange={handleDifficultyChange}
-                            />
-                        )}
-
-                        {/* Game Rules */}
-                        <div className="game-rules">
-                            <span className="game-rules__icon">📜</span>
-                            <p className="game-rules__text">{t('rules')}</p>
-                        </div>
-
                         {/* Score Display */}
                         {totalScore > 0 && (
                             <div className="score-display">
                                 <span className="score-display__label">{tc('stats.score')}:</span>
                                 <span className="score-display__value">{totalScore}</span>
                             </div>
-                        )}
-
-                        {/* Editor Access Button (hidden in daily mode) */}
-                        {!isDailyMode && (
-                            <button
-                                className="action action--secondary"
-                                onClick={() => setShowEditor(true)}
-                            >
-                                ✏️ {t('editor.openEditor')}
-                            </button>
                         )}
 
                         {/* Level Info */}
@@ -695,84 +672,94 @@ export function ShapeArchitectGame() {
                     </div>
                     {/* === END SIDEBAR === */}
 
-                    {/* Win Overlay */}
-                    {gameState.isSolved && (
-                        <div className="game-modal">
-                            <div className="game-modal__emoji">🧱</div>
-                            <h2 className="game-modal__title game-modal__title--success">{t('win.title')}</h2>
-                            <p className="game-modal__message">
-                                {t('win.message')}
-                            </p>
-
-                            <div className="game-modal__stats">
-                                <div className="game-modal__stat">
-                                    <span className="game-modal__stat-value">{elapsedTime}s</span>
-                                    <span className="game-modal__stat-label">{tc('stats.time')}</span>
-                                </div>
-                                <div className="game-modal__stat">
-                                    <span className="game-modal__stat-value">{gameState.level.pieces.length}</span>
-                                    <span className="game-modal__stat-label">{tc('stats.pieces')}</span>
-                                </div>
-                            </div>
-
-                            {/* Personal Best Indicator */}
-                            {rewards?.personalBest && (
-                                <PersonalBestIndicator
-                                    currentTime={rewards.personalBest.currentTime}
-                                    previousBest={rewards.personalBest.previousBest}
-                                    isNewBest={rewards.personalBest.isNewBest}
+                    {/* Settings Drawer (Progressive Disclosure) */}
+                    <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)}>
+                        {!isDailyMode && (
+                            <SettingsSection title={tc('difficulty.title', 'Difficulty')}>
+                                <DifficultySelector
+                                    options={['easy', 'medium', 'hard']}
+                                    value={difficulty}
+                                    onChange={handleDifficultyChange}
                                 />
-                            )}
-
-                            <div className="math-insight">
-                                <h4>💡 {t('win.geometryInsight.title')}</h4>
-                                <p>
-                                    {t('win.geometryInsight.message')}
-                                </p>
+                            </SettingsSection>
+                        )}
+                        <SettingsSection title={t('settings.rules', 'Rules')}>
+                            <div className="game-rules">
+                                <span className="game-rules__icon">📜</span>
+                                <p className="game-rules__text">{t('rules')}</p>
                             </div>
-                            <div className="game-actions">
-                                {/* In daily mode, show Back to Games; otherwise show game buttons */}
-                                {isDailyMode ? (
-                                    <a href="/math-games/" className="action action--primary">
-                                        {tc('backToGames')}
-                                    </a>
-                                ) : (
-                                    <>
-                                        <button className="action action--primary" onClick={nextLevel}>
-                                            {tc('buttons.nextLevel')} →
-                                        </button>
-                                        <button className="action action--secondary" onClick={startRandomLevel}>
-                                            {tc('buttons.randomLevel')}
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                        </SettingsSection>
+                        {!isDailyMode && (
+                            <SettingsSection title={t('settings.actions', 'Actions')}>
+                                <button
+                                    className="action action--secondary"
+                                    onClick={() => {
+                                        setShowEditor(true);
+                                        setIsSettingsOpen(false);
+                                    }}
+                                >
+                                    ✏️ {t('editor.openEditor')}
+                                </button>
+                            </SettingsSection>
+                        )}
+                    </SettingsDrawer>
 
-                    {/* Time Up Overlay */}
-                    {showTimeUp && (
-                        <div className="game-modal">
-                            <h2 className="game-modal__title">⏰ {tc('timer.timeUp')}</h2>
-                            <p className="game-modal__message">
-                                {tc('timer.practiceMessage')}
-                            </p>
+                    {/* Win Overlay - using VictoryModal for proper portal/z-index handling */}
+                    <VictoryModal
+                        isOpen={gameState.isSolved}
+                        variant="win"
+                        emoji="🧱"
+                        title={t('win.title')}
+                        message={t('win.message')}
+                        stats={[
+                            { value: `${elapsedTime}s`, label: tc('stats.time') },
+                            { value: gameState.level.pieces.length, label: tc('stats.pieces') },
+                        ]}
+                        personalBest={rewards?.personalBest ?? undefined}
+                        insight={{
+                            title: t('win.geometryInsight.title'),
+                            message: t('win.geometryInsight.message'),
+                        }}
+                        actions={
+                            isDailyMode ? (
+                                <a href="/math-games/" className="action action--primary">
+                                    {tc('backToGames')}
+                                </a>
+                            ) : (
+                                <>
+                                    <button className="action action--primary" onClick={nextLevel}>
+                                        {tc('buttons.nextLevel')} →
+                                    </button>
+                                    <button className="action action--secondary" onClick={startRandomLevel}>
+                                        {tc('buttons.randomLevel')}
+                                    </button>
+                                </>
+                            )
+                        }
+                    />
 
-                            <div className="math-insight">
-                                <h4>💡 {t(`hints.failure.${failureHintKey}.title`)}</h4>
-                                <p>{t(`hints.failure.${failureHintKey}.tip`)}</p>
-                            </div>
-
-                            <div className="game-actions">
+                    {/* Time Up Overlay - using VictoryModal for consistency */}
+                    <VictoryModal
+                        isOpen={showTimeUp}
+                        variant="timeUp"
+                        emoji="⏰"
+                        title={tc('timer.timeUp')}
+                        message={tc('timer.practiceMessage')}
+                        insight={{
+                            title: t(`hints.failure.${failureHintKey}.title`),
+                            message: t(`hints.failure.${failureHintKey}.tip`),
+                        }}
+                        actions={
+                            <>
                                 <button className="action action--primary" onClick={resetLevel}>
                                     {tc('buttons.tryAgain')}
                                 </button>
                                 <button className="action action--secondary" onClick={nextLevel}>
                                     {tc('buttons.skipLevel')}
                                 </button>
-                            </div>
-                        </div>
-                    )}
+                            </>
+                        }
+                    />
                 </div>
 
                 {/* Gamification Overlays */}

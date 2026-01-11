@@ -17,9 +17,11 @@ import {
   AchievementToast,
   Timer,
   SoundToggle,
-  GameOverlay,
-  PersonalBestIndicator,
+  VictoryModal,
   HelpButton,
+  SettingsDrawer,
+  SettingsDrawerTrigger,
+  SettingsSection,
 } from '@/shared/components';
 import { useGameTimer, useGameRewards, useGameInit, useAnnounce } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
@@ -162,6 +164,12 @@ const {
   // ─────────────────────────────────────────────────────────────────
 
   const [previewPosition, setPreviewPosition] = useState<number | null>(null);
+
+  // ─────────────────────────────────────────────────────────────────
+  // Settings Drawer (Progressive Disclosure)
+  // ─────────────────────────────────────────────────────────────────
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // ─────────────────────────────────────────────────────────────────
   // Turn and Game State Announcements
@@ -329,6 +337,7 @@ const {
         <>
           <HelpButton gameId="sequence-race" onShowTutorial={() => setShowTutorial(true)} />
           <SoundToggle />
+          {!isDailyMode && <SettingsDrawerTrigger onClick={() => setIsSettingsOpen(true)} />}
         </>
       }
     >
@@ -395,9 +404,9 @@ const {
           <HistoryLog history={gameState.history} />
         </div>
 
-        {/* === SIDEBAR: Controls and info === */}
+        {/* === SIDEBAR: Essential Controls Only (Progressive Disclosure) === */}
         <div className="sr-sidebar">
-          {/* Timer */}
+          {/* Timer - Always visible */}
           <Timer
             timeLeft={timeLeft}
             formattedTime={formattedTime}
@@ -410,49 +419,7 @@ const {
             disabled={gameState.gameOver}
           />
 
-          {/* Mode Toggle (hidden in daily mode) */}
-          {!isDailyMode && (
-            <div className="mode-toggle">
-              <button
-                className={`mode-toggle__btn ${gameMode === 'vs-ai' ? 'mode-toggle__btn--active' : ''}`}
-                onClick={() => handleModeChange('vs-ai')}
-              >
-                🤖 {t('mode.vsAI')}
-              </button>
-              <button
-                className={`mode-toggle__btn ${gameMode === 'two-player' ? 'mode-toggle__btn--active' : ''}`}
-                onClick={() => handleModeChange('two-player')}
-              >
-                👥 {t('mode.twoPlayer')}
-              </button>
-            </div>
-          )}
-
-          {/* Difficulty Selector (hidden in daily mode) */}
-          {!isDailyMode && gameMode === 'vs-ai' && (
-            <DifficultySelector
-              options={['easy', 'medium', 'hard']}
-              value={difficulty}
-              onChange={handleDifficultyChange}
-            />
-          )}
-
-          {/* Game Rules */}
-          <div className="game-rules">
-            <span className="game-rules__icon">📜</span>
-            <p className="game-rules__text">{t('rules')}</p>
-          </div>
-
-          {/* Game Actions (hidden in daily mode) */}
-          {!isDailyMode && (
-            <div className="level-selector">
-              <button className="action action--secondary" onClick={startRandomGame}>
-                🎲 {tc('buttons.newGame')}
-              </button>
-            </div>
-          )}
-
-          {/* Game Info Panel */}
+          {/* Game Info Panel - Always visible */}
           <div className="game-info">
             <div className="game-info__item">
               <span className="game-info__label">{t('target')}</span>
@@ -472,7 +439,7 @@ const {
             </div>
           </div>
 
-          {/* Undo Button */}
+          {/* Undo Button - Always visible when available */}
           {canUndo && (
             <button
               className="action action--secondary"
@@ -483,7 +450,7 @@ const {
             </button>
           )}
 
-          {/* Hint Toggle */}
+          {/* Hint Toggle - Always visible */}
           <button className="action action--secondary" onClick={toggleHints}>
             💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
           </button>
@@ -532,7 +499,7 @@ const {
             </div>
           )}
 
-          {/* Actions */}
+          {/* Restart - Always visible */}
           <div className="sr-actions">
             <button className="action action--secondary" onClick={restartGame}>
               🔄 {tc('buttons.restart')}
@@ -541,52 +508,100 @@ const {
         </div>
         {/* === END SIDEBAR === */}
 
-        {/* Game Over Overlay */}
-        {gameState.gameOver && (
-          <GameOverlay
-            variant={isPlayerWin ? 'win' : 'lose'}
-            emoji={gameMode === 'two-player' ? '🎊' : gameState.winner === 'player' ? '🎊' : '🤖'}
-            title={
-              gameMode === 'two-player'
-                ? `🎉 ${getWinnerLabel()}`
-                : gameState.winner === 'player'
-                  ? `🎉 ${t('gameOver.youWin')}`
-                  : `🤖 ${t('gameOver.aiWins')}`
-            }
-            message={
-              gameMode === 'two-player'
-                ? t('gameOver.goodGame')
-                : gameState.winner === 'player'
-                  ? t('gameOver.greatStrategy')
-                  : t('gameOver.betterLuck')
-            }
-            stats={[
-              { value: `${elapsedTime}s`, label: tc('stats.time') },
-              { value: gameState.history.length, label: tc('stats.moves') },
-            ]}
-            hint={
-              gameMode === 'vs-ai' && gameState.winner === 'ai' ? (
-                <>
-                  <h4>💡 {t('hints.mathTip.title')}</h4>
-                  <p>
-                    <strong>{getSequenceName(currentConfig.sequenceType || 'arithmetic')}:</strong>{' '}
-                    {getSequenceDescription(currentConfig.sequenceType || 'arithmetic')}
-                  </p>
-                  <p>{t('hints.mathTip.nimExplanation')}</p>
-                </>
-              ) : undefined
-            }
+        {/* Settings Drawer - Progressive Disclosure (hidden in daily mode) */}
+        {!isDailyMode && (
+          <SettingsDrawer
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
           >
-            {/* Personal Best Indicator (only on win) */}
-            {gameState.winner === 'player' && rewards?.personalBest && (
-              <PersonalBestIndicator
-                currentTime={rewards.personalBest.currentTime}
-                previousBest={rewards.personalBest.previousBest}
-                isNewBest={rewards.personalBest.isNewBest}
-              />
+            {/* Game Mode Section */}
+            <SettingsSection title={t('settings.gameMode', 'Game Mode')}>
+              <div className="mode-toggle">
+                <button
+                  className={`mode-toggle__btn ${gameMode === 'vs-ai' ? 'mode-toggle__btn--active' : ''}`}
+                  onClick={() => handleModeChange('vs-ai')}
+                >
+                  🤖 {t('mode.vsAI')}
+                </button>
+                <button
+                  className={`mode-toggle__btn ${gameMode === 'two-player' ? 'mode-toggle__btn--active' : ''}`}
+                  onClick={() => handleModeChange('two-player')}
+                >
+                  👥 {t('mode.twoPlayer')}
+                </button>
+              </div>
+            </SettingsSection>
+
+            {/* Difficulty Section (only for vs-ai) */}
+            {gameMode === 'vs-ai' && (
+              <SettingsSection title={tc('difficulty.title', 'Difficulty')}>
+                <DifficultySelector
+                  options={['easy', 'medium', 'hard']}
+                  value={difficulty}
+                  onChange={handleDifficultyChange}
+                />
+              </SettingsSection>
             )}
-            {/* In daily mode, show Back to Games; otherwise show game buttons */}
-            {isDailyMode ? (
+
+            {/* Game Actions Section */}
+            <SettingsSection title={t('settings.actions', 'Actions')}>
+              <button className="action action--secondary" onClick={startRandomGame}>
+                🎲 {tc('buttons.newGame')}
+              </button>
+            </SettingsSection>
+
+            {/* Game Rules Section */}
+            <SettingsSection title={t('settings.rules', 'Rules')}>
+              <div className="game-rules">
+                <span className="game-rules__icon">📜</span>
+                <p className="game-rules__text">{t('rules')}</p>
+              </div>
+            </SettingsSection>
+          </SettingsDrawer>
+        )}
+
+        {/* Game Over Overlay */}
+        <VictoryModal
+          isOpen={gameState.gameOver}
+          variant={isPlayerWin ? 'win' : 'lose'}
+          emoji={gameMode === 'two-player' ? '🎊' : gameState.winner === 'player' ? '🎊' : '🤖'}
+          title={
+            gameMode === 'two-player'
+              ? getWinnerLabel()
+              : gameState.winner === 'player'
+                ? t('gameOver.youWin')
+                : t('gameOver.aiWins')
+          }
+          message={
+            gameMode === 'two-player'
+              ? t('gameOver.goodGame')
+              : gameState.winner === 'player'
+                ? t('gameOver.greatStrategy')
+                : t('gameOver.betterLuck')
+          }
+          stats={[
+            { value: `${elapsedTime}s`, label: tc('stats.time') },
+            { value: gameState.history.length, label: tc('stats.moves') },
+          ]}
+          insight={
+            gameMode === 'vs-ai' && gameState.winner === 'ai'
+              ? {
+                  title: t('hints.mathTip.title'),
+                  message: `${getSequenceName(currentConfig.sequenceType || 'arithmetic')}: ${getSequenceDescription(currentConfig.sequenceType || 'arithmetic')}. ${t('hints.mathTip.nimExplanation')}`,
+                }
+              : undefined
+          }
+          personalBest={
+            gameState.winner === 'player' && rewards?.personalBest
+              ? {
+                  currentTime: rewards.personalBest.currentTime,
+                  previousBest: rewards.personalBest.previousBest,
+                  isNewBest: rewards.personalBest.isNewBest,
+                }
+              : undefined
+          }
+          actions={
+            isDailyMode ? (
               <a href="/math-games/" className="action action--primary">
                 {tc('backToGames')}
               </a>
@@ -599,38 +614,32 @@ const {
                   {tc('buttons.newGame')}
                 </button>
               </>
-            )}
-          </GameOverlay>
-        )}
+            )
+          }
+        />
 
         {/* Time Up Overlay */}
-        {showTimeUp && (
-          <GameOverlay
-            variant="timeUp"
-            emoji="⏰"
-            title={tc('timer.timeUp')}
-            message={tc('timer.practiceMessage')}
-            hint={
-              <>
-                <h4>💡 {t('hints.sequenceTip')}</h4>
-                <p>
-                  <strong>{getSequenceName(currentConfig.sequenceType || 'arithmetic')}:</strong>{' '}
-                  {getSequenceDescription(currentConfig.sequenceType || 'arithmetic')}
-                </p>
-                <p>
-                  {t('hints.formula')} <code>{sequenceInfo.formula}</code>
-                </p>
-              </>
-            }
-          >
-            <button className="action action--primary" onClick={restartGame}>
-              {tc('buttons.tryAgain')}
-            </button>
-            <button className="action action--secondary" onClick={startRandomGame}>
-              {tc('buttons.newGame')}
-            </button>
-          </GameOverlay>
-        )}
+        <VictoryModal
+          isOpen={showTimeUp}
+          variant="timeUp"
+          emoji="⏰"
+          title={tc('timer.timeUp')}
+          message={tc('timer.practiceMessage')}
+          insight={{
+            title: t('hints.sequenceTip'),
+            message: `${getSequenceName(currentConfig.sequenceType || 'arithmetic')}: ${getSequenceDescription(currentConfig.sequenceType || 'arithmetic')}. ${t('hints.formula')} ${sequenceInfo.formula}`,
+          }}
+          actions={
+            <>
+              <button className="action action--primary" onClick={restartGame}>
+                {tc('buttons.tryAgain')}
+              </button>
+              <button className="action action--secondary" onClick={startRandomGame}>
+                {tc('buttons.newGame')}
+              </button>
+            </>
+          }
+        />
       </div>
 
       {/* Rank Up Overlay */}

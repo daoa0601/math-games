@@ -210,25 +210,33 @@
   gap: var(--space-xs);
 }
 
-/* Mobile Bottom Sheet */
+/* Mobile Compact Toolbar - doesn't block the grid */
 @media (max-width: 480px) {
   .placement-modal {
     align-items: flex-end;
     padding: 0;
   }
 
+  /* Semi-transparent backdrop so users can see the grid */
+  .placement-modal__backdrop {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
   .placement-modal__card {
     max-width: 100%;
     width: 100%;
-    max-height: 85vh;
+    /* Compact height - only ~200px instead of 85vh */
+    max-height: none;
     margin: 0;
+    /* Slightly transparent card so grid peeks through */
+    background: rgba(17, 24, 39, 0.95);
   }
 
   /* Drag handle for bottom sheet */
   .placement-modal__drag-handle {
     display: flex;
     justify-content: center;
-    padding: var(--space-sm) 0;
+    padding: var(--space-xs) 0;
     cursor: grab;
     touch-action: none;
   }
@@ -241,37 +249,57 @@
   }
 
   .placement-modal__header {
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-xs) var(--space-md);
     border-bottom: none;
   }
 
   .placement-modal__title {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
   }
 
   .placement-modal__body {
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     padding-top: 0;
+    gap: var(--space-sm);
+  }
+
+  /* Hide the large preview on mobile - user can see piece on the grid */
+  .placement-modal__preview {
+    display: none;
+  }
+
+  /* Compact validity indicator */
+  .placement-modal__validity {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-xs);
+  }
+
+  /* Compact rotation controls */
+  .placement-modal__controls {
+    transform: scale(0.85);
+    transform-origin: center;
+    margin: calc(-1 * var(--space-xs)) 0;
+  }
+
+  /* Hide position info on mobile */
+  .placement-modal__position {
+    display: none;
   }
 
   .placement-modal__footer {
-    padding: var(--space-md);
-    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom, 0));
+    padding: var(--space-sm) var(--space-md);
+    padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0));
+    gap: var(--space-sm);
   }
 
   .placement-modal__hints {
     display: none;
   }
 
-  .placement-modal__2d-cell {
-    width: 32px;
-    height: 32px;
-  }
-
   .placement-modal__footer .btn,
   .placement-modal__footer .action {
-    min-height: 48px;
-    font-size: var(--text-base);
+    min-height: 44px;
+    font-size: var(--text-sm);
   }
 }
 

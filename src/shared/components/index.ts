@@ -26,8 +26,8 @@ export { FeedbackModal } from './FeedbackModal';
 export type { FeedbackModalProps } from './FeedbackModal';
 
 // Overlays
-export { GameOverlay } from './overlays';
-export type { GameOverlayProps } from './overlays';
+export { GameOverlay, VictoryModal } from './overlays';
+export type { GameOverlayProps, VictoryModalProps, VictoryVariant } from './overlays';
 
 // Daily Challenge
 export { DailyChallenge } from './DailyChallenge';

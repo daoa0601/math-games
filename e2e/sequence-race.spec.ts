@@ -36,12 +36,15 @@ test.describe('SequenceRace - Basic Tests', () => {
     await expect(page.locator('.timer-container')).toBeVisible();
   });
 
-  test('should display difficulty selector', async ({ page }) => {
+  test('should display difficulty selector in settings drawer', async ({ page }) => {
     await page.goto('/sequence-race');
     await page.waitForSelector('[data-testid="sequence-race-game"]', { state: 'visible' });
 
-    // Verify difficulty selector
-    await expect(page.locator('.difficulty-selector')).toBeVisible();
+    // Open settings drawer (gear icon button)
+    await page.locator('.settings-drawer__trigger').click();
+
+    // Verify difficulty selector is visible inside the drawer
+    await expect(page.locator('.difficulty-selector')).toBeVisible({ timeout: 5000 });
   });
 
   test('should have back button', async ({ page }) => {

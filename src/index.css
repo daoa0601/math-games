@@ -295,15 +295,17 @@ body {
   border-color: var(--success);
 }
 
-/* Game container */
+/* Game container - Viewport-locked layout */
 .game-container {
+  /* Fixed height viewport - prevents double scrollbars */
   min-height: 100vh;
   height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
   display: flex;
   flex-direction: column;
   padding: var(--space-sm);
   background: var(--bg);
-  overflow: hidden;
+  overflow: hidden; /* Outer container never scrolls */
 }
 
 .game-header {
@@ -323,6 +325,12 @@ body {
   font-size: var(--text-xl);
   font-weight: var(--weight-normal);
   color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: var(--space-sm);
 }
 
 .game-header__actions {
@@ -354,8 +362,9 @@ body {
   }
 
   .game-header__title {
-    flex: 1;
-    min-width: 0;
+    font-size: var(--text-lg);
+    flex: 0 1 auto;
+    max-width: calc(100% - 120px);
   }
 
   .game-header__actions {
@@ -378,7 +387,8 @@ body {
   align-items: stretch;
   justify-content: center;
   overflow: auto;
-  min-height: 0;
+  overscroll-behavior: contain; /* Prevent scroll chaining to body */
+  min-height: 0; /* Critical for flex children to shrink */
   position: relative;
   z-index: 1;
 }

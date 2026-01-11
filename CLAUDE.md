@@ -71,8 +71,9 @@ src/
 │   └── ShapeArchitect/     # Voxel-based geometry puzzle
 ├── shared/
 │   ├── components/         # Reusable UI components
-│   │   ├── ui/             # Primitives: Button, Timer, ProgressRing
+│   │   ├── ui/             # Primitives: Button, Timer, BottomSheet, SettingsDrawer
 │   │   ├── layout/         # Layout: GameLayout, GameCard, DashboardTabs
+│   │   ├── overlays/       # VictoryModal (unified game-end overlay)
 │   │   ├── gamification/   # StatsDisplay, AchievementToast, RankUpOverlay
 │   │   ├── auth/           # AuthModal, SignInButton, AccountLinkBanner
 │   │   ├── DailyChallenge/ # DailyChallenge, DailyChallengeBanner
