@@ -1,10 +1,10 @@
 /* ============================================
-   BottomSheet - Linear Editorial Design
+   BottomSheet - Playful Educational Design
 
    A unified modal system with:
    - Mobile: bottom sheet with swipe dismiss
    - Desktop: centered modal
-   - Dark theme, gold accent line signature
+   - Light theme for young learners
    ============================================ */
 
 /* z-index layer for all sheets */
@@ -31,7 +31,7 @@
 .bottom-sheet__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(10, 15, 26, 0.92); /* Deep navy, near opaque */
+  background: rgba(0, 0, 0, 0.3); /* Light backdrop for light theme */
   animation: sheet-backdrop-in var(--motion-fast, 150ms) var(--ease-out, ease-out);
 }
 
@@ -51,6 +51,7 @@
 
 /* ----------------------------------------
    Card (the sheet itself)
+   Light Theme - Playful Educational
    ---------------------------------------- */
 .bottom-sheet__card {
   position: relative;
@@ -58,18 +59,49 @@
   flex-direction: column;
   width: 100%;
   max-height: 90vh;
-  background: var(--surface, #1b263b);
-  border: 1px solid var(--border, #334155);
 
-  /* Signature gold top border - Vietnamese luxury touch */
-  border-top: 2px solid var(--accent-gold, #d4af37);
+  /* Light background */
+  background: var(--bg, #fafaf9);
+  border: 1px solid var(--border, #e7e5e4);
 
-  /* No border-radius per Linear Editorial rules */
-  border-radius: 0;
+  /* Accent top border */
+  border-top: 2px solid var(--accent, var(--accent-gold, #d4af37));
+
+  /* Premium surfaces allow radius */
+  border-radius: var(--card-radius, 8px) var(--card-radius, 8px) 0 0;
+
+  /* Lighter shadow for light theme */
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1);
 
   /* Animation */
   animation: sheet-slide-up var(--motion-normal, 250ms) var(--ease-out, ease-out);
   transition: transform var(--motion-fast, 150ms) var(--ease-out, ease-out);
+
+  /* Overflow hidden for shine effect */
+  overflow: hidden;
+}
+
+/* Subtle shine effect for light theme */
+.bottom-sheet__card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  transition: left var(--motion-normal, 250ms) var(--ease-out, ease-out);
+}
+
+.bottom-sheet__card:hover::before {
+  left: 100%;
 }
 
 .bottom-sheet__card--closing {
@@ -224,6 +256,7 @@
 
 /* ----------------------------------------
    Desktop: Centered Modal
+   Light Theme
    ---------------------------------------- */
 @media (min-width: 769px) {
   .bottom-sheet {
@@ -234,6 +267,12 @@
   .bottom-sheet__card {
     width: 90%;
     max-width: 480px;
+
+    /* Full radius on desktop */
+    border-radius: var(--card-radius, 8px);
+
+    /* Lighter shadow for light theme */
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
 
     /* Desktop animation: scale + fade instead of slide */
     animation: sheet-scale-in var(--motion-normal, 250ms) var(--ease-out, ease-out);
@@ -311,6 +350,11 @@
 
   .bottom-sheet__card {
     transition: none;
+  }
+
+  /* Disable shine effect */
+  .bottom-sheet__card::before {
+    display: none;
   }
 }
 
