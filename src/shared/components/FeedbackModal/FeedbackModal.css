@@ -1,92 +1,5 @@
-/* FeedbackModal - Vietnamese Premium */
-
-.feedback-modal {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-modal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-md);
-}
-
-.feedback-modal__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  animation: fade-in var(--motion-normal) var(--ease-out);
-}
-
-.feedback-modal__card {
-  position: relative;
-  width: 100%;
-  max-width: 480px;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--accent-gold);
-  animation: slide-up var(--motion-normal) var(--ease-out);
-}
-
-.feedback-modal__card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.03;
-  background-image: radial-gradient(ellipse at 50% 0%, var(--accent-lotus) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-/* Header */
-.feedback-modal__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-lg);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  position: relative;
-  z-index: 1;
-}
-
-.feedback-modal__title {
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  color: var(--text);
-  margin: 0;
-}
-
-.feedback-modal__close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: opacity var(--motion-fast) var(--ease-out);
-}
-
-.feedback-modal__close:hover {
-  opacity: 0.7;
-}
-
-.feedback-modal__close:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* Body */
-.feedback-modal__body {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--space-lg);
-  overscroll-behavior: contain;
-}
+/* FeedbackModal - Content Styles
+   Modal structure now handled by BottomSheet */
 
 /* Success state */
 .feedback-modal__success {
@@ -158,39 +71,12 @@
   opacity: 0.6;
 }
 
+/* Submit button in footer */
 .feedback-form__submit {
-  align-self: flex-end;
+  width: 100%;
 }
 
 .feedback-form__submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .feedback-modal__backdrop,
-  .feedback-modal__card {
-    animation: none;
-  }
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .feedback-modal {
-    padding: var(--space-sm);
-  }
-
-  .feedback-modal__card {
-    max-height: 90vh;
-  }
-
-  .feedback-modal__header,
-  .feedback-modal__body {
-    padding: var(--space-md);
-  }
-
-  .feedback-modal__title {
-    font-size: var(--text-lg);
-  }
 }

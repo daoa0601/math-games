@@ -1,102 +1,5 @@
-/* LearnModal - Vietnamese Premium */
-
-.learn-modal {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-modal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-md);
-}
-
-.learn-modal__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  animation: fade-in var(--motion-normal) var(--ease-out);
-}
-
-.learn-modal__card {
-  position: relative;
-  width: 100%;
-  max-width: 600px;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--accent-gold);
-  animation: slide-up var(--motion-normal) var(--ease-out);
-}
-
-.learn-modal__card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.03;
-  background-image: radial-gradient(ellipse at 50% 0%, var(--accent-lotus) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-/* Header */
-.learn-modal__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-lg);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  position: relative;
-  z-index: 1;
-}
-
-.learn-modal__title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.learn-modal__icon {
-  font-size: var(--text-xl);
-}
-
-.learn-modal__title {
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  color: var(--text);
-  margin: 0;
-}
-
-.learn-modal__close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: opacity var(--motion-fast) var(--ease-out);
-}
-
-.learn-modal__close:hover {
-  opacity: 0.7;
-}
-
-.learn-modal__close:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* Body */
-.learn-modal__body {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--space-lg);
-  overscroll-behavior: contain;
-}
+/* LearnModal - Content Styles
+   Modal structure now handled by BottomSheet */
 
 /* Learn Content Styles */
 .learn-content {
@@ -200,30 +103,8 @@
   color: var(--text);
 }
 
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .learn-modal__backdrop,
-  .learn-modal__card {
-    animation: none;
-  }
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .learn-modal {
-    padding: var(--space-sm);
-  }
-
-  .learn-modal__card {
-    max-height: 90vh;
-  }
-
-  .learn-modal__header,
-  .learn-modal__body {
-    padding: var(--space-md);
-  }
-
-  .learn-modal__title {
-    font-size: var(--text-lg);
-  }
+/* Sheet-specific overrides if needed */
+.learn-modal-sheet .bottom-sheet__body {
+  /* Ensure good reading experience for educational content */
+  max-width: 100%;
 }

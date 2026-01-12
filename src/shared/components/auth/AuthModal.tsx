@@ -3,10 +3,12 @@
  *
  * Modal for signing in or linking accounts.
  * Supports Google Sign-In and Email/Password.
+ * Uses BottomSheet for consistent modal behavior and accessibility.
  */
 
 import { useState, useCallback, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { BottomSheet } from '@/shared/components/ui';
 import { Button } from '../ui';
 import './AuthModal.css';
 
@@ -68,7 +70,12 @@ export function AuthModal({
     setIsSignUp(s => !s);
   }, []);
 
-  if (!isOpen) return null;
+  const handleClose = useCallback(() => {
+    setEmail('');
+    setPassword('');
+    setIsEmailMode(false);
+    onClose();
+  }, [onClose]);
 
   const title = mode === 'link'
     ? t('auth.linkAccount', 'Link Your Account')
@@ -82,17 +89,24 @@ export function AuthModal({
       ? t('auth.signUpSubtitle', 'Create an account to sync your progress')
       : t('auth.signInSubtitle', 'Sign in to access your saved progress');
 
-  return (
-    <div className="auth-modal-overlay" onClick={onClose}>
-      <div className="auth-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
-        <button className="auth-modal__close" onClick={onClose} aria-label={t('common.close', 'Close')}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+  // Footer for "Continue as guest" option
+  const footerContent = mode !== 'link' && (
+    <div className="auth-modal__guest">
+      <button type="button" onClick={handleClose}>
+        {t('auth.continueAsGuest', 'Continue as guest')}
+      </button>
+    </div>
+  );
 
-        <h2 className="auth-modal__title">{title}</h2>
+  return (
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={title}
+      className="auth-modal-sheet"
+      footer={footerContent}
+    >
+      <div className="auth-modal__content">
         <p className="auth-modal__subtitle">{subtitle}</p>
 
         {error && (
@@ -196,15 +210,7 @@ export function AuthModal({
             </button>
           </form>
         )}
-
-        {mode !== 'link' && (
-          <p className="auth-modal__guest">
-            <button type="button" onClick={onClose}>
-              {t('auth.continueAsGuest', 'Continue as guest')}
-            </button>
-          </p>
-        )}
       </div>
-    </div>
+    </BottomSheet>
   );
 }
