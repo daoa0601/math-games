@@ -3,34 +3,8 @@
    Linear Editorial Design
 
    Minimal styling - BottomSheet handles most layout
+   Trigger button styles moved to IconButton
    ============================================ */
-
-/* ----------------------------------------
-   Trigger Button (Gear Icon)
-   ---------------------------------------- */
-.settings-drawer__trigger {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  background: transparent;
-  border: 1px solid var(--border, #1e3a5f);
-  color: var(--muted, #64748b);
-  cursor: pointer;
-  transition: color var(--motion-fast, 150ms), border-color var(--motion-fast, 150ms);
-}
-
-.settings-drawer__trigger:hover {
-  color: var(--text, #f8fafc);
-  border-color: var(--accent, #60a5fa);
-}
-
-.settings-drawer__trigger:focus-visible {
-  outline: 2px solid var(--accent, #60a5fa);
-  outline-offset: 2px;
-}
 
 /* ----------------------------------------
    Drawer Content
@@ -99,10 +73,6 @@
 /* ----------------------------------------
    High Contrast Mode
    ---------------------------------------- */
-.high-contrast .settings-drawer__trigger {
-  border-width: 2px;
-}
-
 .high-contrast .settings-section__title {
   border-bottom-width: 2px;
 }

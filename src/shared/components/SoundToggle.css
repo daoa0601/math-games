@@ -1,45 +1,7 @@
-/* SoundToggle - Linear Editorial */
+/* SoundToggle - Icon wrapper and sound wave styles
+   Button styles are now handled by IconButton */
 
-.sound-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--muted);
-  cursor: pointer;
-  transition: opacity var(--motion-fast) var(--ease-out);
-}
-
-.sound-toggle:hover {
-  opacity: 0.7;
-}
-
-.sound-toggle:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* Sound ON state */
-.sound-toggle--on {
-  background: var(--bg);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-/* Sound OFF state */
-.sound-toggle--off {
-  opacity: 0.6;
-}
-
-.sound-toggle--off:hover {
-  opacity: 0.8;
-}
-
-/* SVG Icon */
+/* Icon wrapper */
 .sound-toggle__icon {
   display: flex;
   align-items: center;
@@ -48,30 +10,13 @@
   height: 20px;
 }
 
-.sound-toggle__svg {
-  width: 100%;
-  height: 100%;
-}
-
 /* Sound waves - static, no animation */
 .sound-wave {
   opacity: 0.8;
 }
 
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  .sound-toggle {
-    transition: none;
-  }
-}
-
-/* Responsive */
+/* Responsive icon sizing */
 @media (max-width: 480px) {
-  .sound-toggle {
-    width: 36px;
-    height: 36px;
-  }
-
   .sound-toggle__icon {
     width: 18px;
     height: 18px;

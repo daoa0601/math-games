@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { IconButton } from '@/shared/components/ui';
 import { isSoundEnabled, toggleSound } from '../utils';
 import './SoundToggle.css';
 
@@ -28,9 +29,8 @@ export function SoundToggle({ className = '' }: SoundToggleProps) {
     };
 
     return (
-        <button
-            type="button"
-            className={`sound-toggle ${enabled ? 'sound-toggle--on' : 'sound-toggle--off'} ${className}`}
+        <IconButton
+            className={`sound-toggle ${className}`}
             onClick={handleToggle}
             aria-label={enabled
                 ? t('sound.disable', 'Mute sounds')
@@ -41,6 +41,7 @@ export function SoundToggle({ className = '' }: SoundToggleProps) {
                 ? t('sound.disable', 'Mute sounds')
                 : t('sound.enable', 'Enable sounds')
             }
+            active={enabled}
         >
             <span className="sound-toggle__icon" aria-hidden="true">
                 {enabled ? (
@@ -51,7 +52,6 @@ export function SoundToggle({ className = '' }: SoundToggleProps) {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="sound-toggle__svg"
                     >
                         {/* Speaker body */}
                         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
@@ -67,7 +67,6 @@ export function SoundToggle({ className = '' }: SoundToggleProps) {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="sound-toggle__svg"
                     >
                         {/* Speaker body */}
                         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
@@ -77,6 +76,6 @@ export function SoundToggle({ className = '' }: SoundToggleProps) {
                     </svg>
                 )}
             </span>
-        </button>
+        </IconButton>
     );
 }
