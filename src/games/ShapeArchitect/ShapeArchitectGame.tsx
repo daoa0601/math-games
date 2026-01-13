@@ -10,7 +10,7 @@ import type { CameraPreset } from './components/CameraPresetButtons';
 import type { Position3D, LevelConfig } from './logic/types';
 import { DEFAULT_ROTATION } from './logic/types';
 import { createGameState, removePieceFromGrid } from './logic/engine';
-import { useShapeArchitectState, usePiecePlacement, usePlacedPieceMovement, useKeyboardControls } from './hooks';
+import { useShapeArchitectState, usePiecePlacement, usePlacedPieceMovement, useKeyboardControls, useThrottledHover } from './hooks';
 import '@/shared/styles/game-base.css';
 import './ShapeArchitect.css';
 
@@ -204,6 +204,10 @@ export function ShapeArchitectGame() {
         },
         disabled: showTimeUp || gameState.isSolved,
     });
+
+    // Throttle hover handlers to reduce re-renders during mouse movement
+    const throttledSetHoverPosition = useThrottledHover(setHoverPosition);
+    const throttledSetMovePreviewPosition = useThrottledHover(setMovePreviewPosition);
 
     // Save progress and show confetti when solved
     useEffect(() => {
@@ -510,7 +514,7 @@ export function ShapeArchitectGame() {
                                         levelPieces={gameState.level.pieces}
                                         onCellClick={handleCellClick}
                                         hoverPosition={effectivePreviewPosition}
-                                        onCellHover={selectedPlacedPieceId ? setMovePreviewPosition : setHoverPosition}
+                                        onCellHover={selectedPlacedPieceId ? throttledSetMovePreviewPosition : throttledSetHoverPosition}
                                         justPlacedPositions={justMovedPositions.size > 0 ? justMovedPositions : justPlacedPositions}
                                         isPreviewLocked={previewLocked}
                                         selectedPlacedPieceId={selectedPlacedPieceId}
@@ -541,7 +545,7 @@ export function ShapeArchitectGame() {
                                             levelPieces={gameState.level.pieces}
                                             onCellClick={handleCellClick}
                                             hoverPosition={effectivePreviewPosition}
-                                            onCellHover={selectedPlacedPieceId ? setMovePreviewPosition : setHoverPosition}
+                                            onCellHover={selectedPlacedPieceId ? throttledSetMovePreviewPosition : throttledSetHoverPosition}
                                             cameraPreset={cameraPreset}
                                             maxVisibleLayer={maxVisibleLayer}
                                             isPreviewLocked={previewLocked}

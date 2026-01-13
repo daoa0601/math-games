@@ -3,7 +3,6 @@ import type { DragEndEvent } from '@dnd-kit/core';
 import type { GameState, Position3D, Rotation3D } from '../logic/types';
 import {
     movePlacedPiece,
-    canMovePlacedPiece,
     findNearestValidPosition,
     getPieceWorldPositions,
     createGridWithoutPiece,
@@ -97,11 +96,44 @@ export function usePlacedPieceMovement({
         return gameState.level.pieces.find((p) => p.id === selectedPlacedPieceId) ?? null;
     }, [gameState.level.pieces, selectedPlacedPieceId]);
 
-    // Check if preview position is valid
+    // Memoize snap-to-nearest calculation to avoid expensive grid traversal on every hover
+    const snappedPreviewPosition = useMemo(() => {
+        if (!selectedPlacedPieceId || !previewPosition || !selectedPieceDefinition || !selectedPlacedPiece) {
+            return null;
+        }
+
+        const gridWithoutPiece = createGridWithoutPiece(
+            gameState.grid,
+            selectedPieceDefinition,
+            selectedPlacedPiece,
+            gameState.level.targetVoxels
+        );
+
+        return findNearestValidPosition(
+            gridWithoutPiece,
+            selectedPieceDefinition,
+            previewPosition,
+            moveRotation,
+            gameState.level.gridSize,
+            2 // search radius
+        );
+    }, [
+        selectedPlacedPieceId,
+        previewPosition,
+        moveRotation,
+        gameState.grid,
+        gameState.level.gridSize,
+        gameState.level.targetVoxels,
+        selectedPieceDefinition,
+        selectedPlacedPiece,
+    ]);
+
+    // Check if preview position is valid (uses memoized snap result)
     const isPreviewValid = useMemo(() => {
         if (!selectedPlacedPieceId || !previewPosition) return false;
-        return canMovePlacedPiece(gameState, selectedPlacedPieceId, previewPosition, moveRotation);
-    }, [gameState, selectedPlacedPieceId, previewPosition, moveRotation]);
+        // If we have a snapped position, the preview is valid
+        return snappedPreviewPosition !== null;
+    }, [selectedPlacedPieceId, previewPosition, snappedPreviewPosition]);
 
     // Trigger animation for moved cells
     const triggerMoveAnimation = useCallback((positions: Position3D[]) => {
@@ -150,28 +182,40 @@ export function usePlacedPieceMovement({
     const handleMoveToPosition = useCallback((position: Position3D): boolean => {
         if (disabled || !selectedPlacedPieceId) return false;
 
-        // Try to find nearest valid position with snap-to-nearest
         const piece = selectedPieceDefinition;
         const placedPiece = selectedPlacedPiece;
         if (!piece || !placedPiece) return false;
 
-        // Create grid without the piece being moved
-        const gridWithoutPiece = createGridWithoutPiece(
-            gameState.grid,
-            piece,
-            placedPiece,
-            gameState.level.targetVoxels
-        );
+        // Use memoized snap result if position matches current preview (common case)
+        // This avoids expensive grid traversal when clicking on the previewed position
+        const isPreviewClick = previewPosition &&
+            position.x === previewPosition.x &&
+            position.y === previewPosition.y &&
+            position.z === previewPosition.z;
 
-        // Find nearest valid position
-        const snappedPosition = findNearestValidPosition(
-            gridWithoutPiece,
-            piece,
-            position,
-            moveRotation,
-            gameState.level.gridSize,
-            2
-        );
+        let snappedPosition: Position3D | null;
+
+        if (isPreviewClick && snappedPreviewPosition) {
+            // Fast path: use memoized result
+            snappedPosition = snappedPreviewPosition;
+        } else {
+            // Slow path: compute fresh (for clicks not on preview position)
+            const gridWithoutPiece = createGridWithoutPiece(
+                gameState.grid,
+                piece,
+                placedPiece,
+                gameState.level.targetVoxels
+            );
+
+            snappedPosition = findNearestValidPosition(
+                gridWithoutPiece,
+                piece,
+                position,
+                moveRotation,
+                gameState.level.gridSize,
+                2
+            );
+        }
 
         if (!snappedPosition) {
             onError?.('cannotMove');
@@ -204,6 +248,8 @@ export function usePlacedPieceMovement({
         selectedPlacedPiece,
         gameState,
         moveRotation,
+        previewPosition,
+        snappedPreviewPosition,
         onMove,
         onError,
         clearSelection,

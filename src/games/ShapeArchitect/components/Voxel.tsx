@@ -96,9 +96,14 @@ export function Voxel({
             position={position}
             castShadow={shouldCastShadow}
             receiveShadow
-            onClick={(e) => {
-                e.stopPropagation();
-                onClick?.();
+            onPointerDown={(e) => {
+                // Use onPointerDown instead of onClick for immediate response
+                // onClick requires both pointerdown AND pointerup on same mesh,
+                // which fails if user's finger/mouse moves slightly between press and release
+                if (e.button === 0) {  // Left click only
+                    onClick?.();
+                    e.stopPropagation();  // Stop AFTER handling to ensure our code runs first
+                }
             }}
             onPointerEnter={(e) => {
                 e.stopPropagation();
