@@ -40,10 +40,11 @@ test.describe('MagicGraph Game', () => {
       const nodeCount = await mgPage.getTotalNodeCount();
       expect(nodeCount).toBeGreaterThan(0);
 
-      // Check settings drawer trigger is visible (difficulty is now inside drawer)
+      // Check settings drawer trigger is visible (timer and difficulty are now inside drawer)
       await expect(mgPage.settingsDrawerTrigger).toBeVisible();
 
-      // Check timer is displayed
+      // Timer is inside settings drawer - verify it's accessible
+      await mgPage.openSettingsDrawer();
       await expect(mgPage.timerContainer).toBeVisible();
     });
 
@@ -232,6 +233,9 @@ test.describe('MagicGraph Game', () => {
   test.describe('Timer Functionality', () => {
     test('should display timer', async ({ page }) => {
       const mgPage = new MagicGraphPage(page);
+
+      // Timer is inside settings drawer - open it first
+      await mgPage.openSettingsDrawer();
 
       // Timer should be visible
       await expect(mgPage.timerDisplay).toBeVisible();

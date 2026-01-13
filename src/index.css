@@ -1,9 +1,18 @@
-/* Linear Editorial Design System */
+/* Playful-Educational Design System + shadcn/ui Integration */
+/* Light mode default for young learners (ages 6-14) */
 
-/* Tokens */
+/* Fonts loaded via @fontsource in type.css (no external Google Fonts needed) */
+
+/* 1. Design tokens (source of truth - must come before Tailwind) */
 @import './shared/styles/tokens/index.css';
 
-/* Shared game styles */
+/* 2. Tailwind CSS v4 with tw: prefix + shadcn theme mapping */
+@import './shared/styles/shadcn-theme.css';
+
+/* 3. Premium surfaces (credit card aesthetic) */
+@import './shared/styles/premium-surfaces.css';
+
+/* 4. Shared game styles (existing - highest priority) */
 @import './shared/styles/game-base.css';
 /* animations.css DELETED - motion.css in tokens/ has all allowed animations */
 @import './shared/styles/hints.css';
@@ -25,10 +34,10 @@ html {
 }
 
 body {
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
-  line-height: 1.5;
+  line-height: var(--leading-relaxed);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -75,66 +84,112 @@ body {
   }
 }
 
-/* Grid layout - Spotify-style list */
+/* Grid layout - Spotify-style list with credit card gaps */
 .grid {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  background: var(--border);
+  gap: var(--space-md);
+  background: transparent;
 }
 
-/* Slab (game card) - Horizontal row style */
+/* Slab (game card) - Credit Card Aesthetic */
 .slab {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: var(--space-md);
-  background: var(--surface);
   padding: var(--space-md) var(--space-lg);
   min-height: 72px;
   cursor: pointer;
   text-decoration: none;
-  border: none;
-  transition: background var(--motion-fast) var(--ease-out);
   position: relative;
   touch-action: manipulation;
+  overflow: hidden;
+
+  /* Credit card surface */
+  background: var(--card-gradient, linear-gradient(135deg, #1b263b 0%, #0d1b2a 50%, #1b263b 100%));
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius, 8px);
+  box-shadow: var(--card-shadow, 0 4px 24px rgba(0, 0, 0, 0.4));
+
+  /* Smooth transitions */
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out);
+}
+
+/* Diagonal shine effect (credit card light reflection) */
+.slab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  transition: left var(--motion-normal) var(--ease-out);
+}
+
+.slab:hover::before {
+  left: 100%;
+}
+
+.slab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  border-color: var(--accent-gold);
 }
 
 .slab:active {
-  background: #1a2744;
+  transform: translateY(0);
+  box-shadow: var(--card-shadow);
 }
 
 .slab__corner {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   border-color: var(--accent-gold);
   border-style: solid;
   pointer-events: none;
-  opacity: 0.6;
+  opacity: 0.5;
+  z-index: 2;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+
+.slab:hover .slab__corner {
+  opacity: 0.8;
 }
 
 .slab__corner--tl {
-  top: 2px;
-  left: 2px;
+  top: 6px;
+  left: 6px;
   border-width: 1px 0 0 1px;
 }
 
 .slab__corner--tr {
-  top: 2px;
-  right: 2px;
+  top: 6px;
+  right: 6px;
   border-width: 1px 1px 0 0;
 }
 
 .slab__corner--bl {
-  bottom: 2px;
-  left: 2px;
+  bottom: 6px;
+  left: 6px;
   border-width: 0 0 1px 1px;
 }
 
 .slab__corner--br {
-  bottom: 2px;
-  right: 2px;
+  bottom: 6px;
+  right: 6px;
   border-width: 0 1px 1px 0;
 }
 
@@ -175,9 +230,12 @@ body {
   font-family: var(--font-display);
   font-size: var(--text-xl);
   font-weight: var(--weight-light);
-  color: var(--border);
-  opacity: 0.5;
+  color: var(--text-muted);
+  opacity: 0.6;
   line-height: 1;
+  /* Embossed text effect (credit card signature) */
+  text-shadow: var(--text-emboss, 0 1px 0 rgba(255,255,255,0.1), 0 -1px 0 rgba(0,0,0,0.3));
+  z-index: 2;
 }
 
 .slab__progress {
@@ -204,6 +262,57 @@ body {
   .slab__title {
     font-size: var(--text-xl);
   }
+}
+
+/* ============================================
+   Light Mode Game Cards
+   Subtle game-colored tints for better readability
+   ============================================ */
+[data-theme="light"] .slab {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .slab:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: var(--accent, var(--border));
+}
+
+/* Per-game tinted backgrounds in light mode
+   Note: --accent is set by [data-game] selectors in palette.css
+   Gradient RGBA must match: magic=#a78bfa, race=#fb923c, shape=#2dd4bf */
+[data-theme="light"] .slab[data-game="magic-graph"] {
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.08) 0%, white 100%);
+}
+
+[data-theme="light"] .slab[data-game="sequence-race"] {
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.08) 0%, white 100%);
+}
+
+[data-theme="light"] .slab[data-game="shape-architect"] {
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.08) 0%, white 100%);
+}
+
+/* Light mode: tone down the gold corner accents */
+[data-theme="light"] .slab__corner {
+  border-color: var(--accent, var(--border));
+  opacity: 0.3;
+}
+
+[data-theme="light"] .slab:hover .slab__corner {
+  opacity: 0.5;
+}
+
+/* Light mode: adjust number glyph for better contrast */
+[data-theme="light"] .slab__number {
+  color: var(--muted);
+  text-shadow: none;
+}
+
+/* Light mode: disable shine effect (designed for dark surfaces) */
+[data-theme="light"] .slab::before {
+  display: none;
 }
 
 /* Action buttons */
@@ -416,5 +525,14 @@ body {
 @media (prefers-reduced-motion: reduce) {
   * {
     transition-duration: 0.01ms !important;
+  }
+
+  /* Disable credit card shine effects */
+  .slab::before {
+    display: none;
+  }
+
+  .slab:hover {
+    transform: none;
   }
 }

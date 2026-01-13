@@ -1,4 +1,4 @@
-/* BottomNav - Vietnamese Premium */
+/* BottomNav - Vietnamese Premium + Credit Card Aesthetic */
 /* Mobile: Bottom bar with 3 tabs + "More" menu */
 /* Desktop: Left sidebar with all tabs + feedback */
 
@@ -8,16 +8,18 @@
   left: 0;
   right: 0;
   height: 64px;
-  background: rgba(13, 27, 42, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border);
-  border-top: 2px solid var(--accent-gold);
   display: flex;
   justify-content: space-around;
   align-items: center;
   padding-bottom: env(safe-area-inset-bottom);
   z-index: var(--z-nav);
+
+  /* Credit card surface */
+  background: var(--card-gradient, linear-gradient(135deg, #1b263b 0%, #0d1b2a 50%, #1b263b 100%));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 2px solid var(--accent-nav);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
 }
 
 .nav__item {
@@ -28,40 +30,50 @@
   padding: var(--space-sm) var(--space-md);
   color: var(--muted);
   background: transparent;
-  border: 1px solid transparent;
+  border: none;
+  border-radius: 4px;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   cursor: pointer;
-  transition: color var(--motion-fast) var(--ease-out),
-              border-color var(--motion-fast) var(--ease-out);
   min-width: var(--touch-min);
   min-height: var(--touch-min);
   /* Equal width for language stability */
   flex: 1;
   max-width: 25%;
   position: relative;
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) var(--ease-out);
 }
 
 .nav__item:hover {
   color: var(--text);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .nav__item--active {
-  color: var(--accent-gold);
-  background: var(--surface);
+  color: var(--accent-nav);
+  background: rgba(167, 139, 250, 0.1);
 }
 
+/* Violet underline indicator for active tab */
 .nav__item--active::after {
   content: '';
   position: absolute;
-  bottom: -1px;
+  bottom: 4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 12px;
+  width: 16px;
   height: 2px;
-  background: var(--accent-gold);
+  background: linear-gradient(90deg, #a78bfa 0%, #c4b5fd 50%, #a78bfa 100%);
+  border-radius: 1px;
+}
+
+.nav__item:focus-visible {
+  outline: 2px solid var(--accent-nav);
+  outline-offset: 2px;
 }
 
 .nav__icon {
@@ -82,19 +94,24 @@
   display: flex;
 }
 
-/* More menu popover */
+/* More menu popover - Credit card surface */
 .nav__menu {
   position: absolute;
   bottom: calc(100% + var(--space-sm));
   right: 0;
   min-width: 180px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border: 1px solid var(--accent-gold);
   display: flex;
   flex-direction: column;
-  animation: slide-up var(--motion-fast) var(--ease-out);
   z-index: 1;
+
+  /* Credit card aesthetic */
+  background: var(--card-gradient, linear-gradient(135deg, #1b263b 0%, #0d1b2a 50%, #1b263b 100%));
+  border: 1px solid var(--accent-nav);
+  border-radius: var(--card-radius, 8px);
+  box-shadow: var(--card-shadow, 0 4px 24px rgba(0, 0, 0, 0.4));
+  overflow: hidden;
+
+  animation: slide-up var(--motion-fast) var(--ease-out);
 }
 
 .nav__menu-item {
@@ -111,10 +128,11 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
-  transition: color var(--motion-fast) var(--ease-out),
-              background var(--motion-fast) var(--ease-out);
   text-align: left;
   width: 100%;
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) var(--ease-out);
 }
 
 .nav__menu-item:last-child {
@@ -123,13 +141,13 @@
 
 .nav__menu-item:hover {
   color: var(--text);
-  background: var(--bg);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .nav__menu-item--active {
-  color: var(--accent-gold);
-  background: var(--bg);
-  border-left: 2px solid var(--accent-gold);
+  color: var(--accent-nav);
+  background: rgba(167, 139, 250, 0.1);
+  border-left: 2px solid var(--accent-nav);
 }
 
 .nav__menu-icon {
@@ -154,9 +172,11 @@
     padding-top: var(--space-xl);
     padding-bottom: 0;
     gap: var(--space-md);
+
+    /* Desktop sidebar styling */
     border-top: none;
-    border-right: 1px solid var(--border);
-    border-right: 1px solid var(--accent-gold);
+    border-right: 2px solid var(--accent-nav);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
   }
 
   .nav__item {
@@ -166,12 +186,14 @@
     width: 100%;
     font-size: var(--text-xs);
     position: relative;
+    border-radius: 0;
   }
 
   .nav__icon {
     font-size: 24px;
   }
 
+  /* Left violet bar for active state on desktop */
   .nav__item--active::before {
     content: '';
     position: absolute;
@@ -180,7 +202,7 @@
     transform: translateY(-50%);
     width: 2px;
     height: 24px;
-    background: var(--accent-gold);
+    background: linear-gradient(90deg, #a78bfa 0%, #c4b5fd 50%, #a78bfa 100%);
   }
 
   .nav__item--active::after {
@@ -202,5 +224,9 @@
 @media (prefers-reduced-motion: reduce) {
   .nav__menu {
     animation: none;
+  }
+
+  .nav__item {
+    transition: none;
   }
 }

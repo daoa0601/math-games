@@ -50,20 +50,28 @@ math-gymnasium/
 │   ├── shared/
 │   │   ├── components/         # Reusable UI
 │   │   │   ├── ui/             # Button, Timer, ProgressRing, BottomSheet, SettingsDrawer
+│   │   │   │   └── shadcn/     # shadcn/ui components (Sheet, Dialog, Button, etc.)
 │   │   │   ├── layout/         # GameLayout, GameCard, DashboardTabs
 │   │   │   ├── overlays/       # VictoryModal (unified game-end overlay)
 │   │   │   ├── gamification/   # StatsDisplay, AchievementToast
+│   │   │   ├── auth/           # AuthModal, SignInButton, AccountLinkBanner
 │   │   │   ├── DailyChallenge/ # Daily challenge system
+│   │   │   ├── FeedbackModal/  # User feedback submission
+│   │   │   ├── LearnModal/     # Educational content modal
+│   │   │   ├── PersonalBest/   # Personal best display
 │   │   │   ├── Tutorial/       # Tutorial overlay
 │   │   │   └── icons/          # Custom SVG icons
 │   │   │
+│   │   ├── constants/          # App-wide constants
 │   │   ├── contexts/           # React Context providers
 │   │   │   └── PlayerContext   # Global player state
 │   │   │
 │   │   ├── hooks/              # Custom React hooks
 │   │   │   ├── game/           # useGameTimer, useGameRewards
 │   │   │   ├── accessibility/  # useFocusTrap, useAnnounce
-│   │   │   └── gestures/       # useSwipe, usePinchZoom
+│   │   │   ├── gestures/       # useSwipe, usePinchZoom
+│   │   │   ├── device/         # useDeviceType, useOrientation
+│   │   │   └── firebase/       # useFirebaseSync, useAuthState
 │   │   │
 │   │   ├── schemas/            # Zod validation schemas
 │   │   │   ├── playerProfile.schema.ts
@@ -76,6 +84,9 @@ math-gymnasium/
 │   │   │   ├── achievements.ts # Achievement tracking
 │   │   │   └── daily.ts        # Daily challenges
 │   │   │
+│   │   ├── machines/           # XState state machines
+│   │   ├── styles/             # CSS architecture
+│   │   ├── types/              # TypeScript type definitions
 │   │   └── utils/              # Utilities
 │   │       ├── storage.ts      # Legacy storage helpers
 │   │       ├── TypedStorage.ts # Type-safe localStorage
@@ -213,16 +224,20 @@ App Launch
 
 ```
 src/firebase/
-├── config.ts              # Firebase configuration from env vars
-├── index.ts               # App initialization with offline persistence
-├── auth.ts                # signInAnonymous, signInWithGoogle, linkAccount
-├── loader.ts              # Lazy loading wrapper
+├── config.ts               # Firebase configuration from env vars
+├── index.ts                # App initialization with offline persistence
+├── auth.ts                 # signInAnonymous, signInWithGoogle, linkAccount
+├── loader.ts               # Lazy loading wrapper
 ├── FirebaseAuthContext.tsx # React context for auth state
+├── FirebaseAuthContexts.ts # Auth context type definitions
+├── useFirebaseAuthHooks.ts # Custom hooks for auth state
 ├── services/
-│   ├── playerService.ts   # Firestore CRUD operations
+│   ├── index.ts            # Barrel export
+│   ├── playerService.ts    # Firestore CRUD operations
 │   └── migrationService.ts # localStorage → Firestore migration
 └── sync/
-    └── syncManager.ts     # Debounced sync with offline queue
+    ├── index.ts            # Barrel export
+    └── syncManager.ts      # Debounced sync with offline queue
 ```
 
 ### Security Rules
@@ -529,9 +544,9 @@ Components use CSS variables for automatic theming:
 
 | Test Type | Tool | Count | Coverage |
 |-----------|------|-------|----------|
-| Unit | Vitest | 246 | Game logic, utilities, hooks |
+| Unit | Vitest | 637 | Game logic, utilities, hooks |
 | Component | Storybook | 26 stories | Visual component development |
-| E2E | Playwright | 112 | Full user flows across all games |
+| E2E | Playwright | 260 | Full user flows across all games |
 
 ### Test Commands
 

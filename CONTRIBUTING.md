@@ -77,43 +77,52 @@ import { GameLayout } from '../../shared/components';
 
 ### CSS
 
-- Use flat, semantic class names (not BEM)
+The design system uses **two surface types**:
+
+| Surface Type | Used For | Rules |
+|--------------|----------|-------|
+| Editorial (flat) | Buttons, inputs, labels, game boards | No gradients, no shadows, border-radius ≤2px |
+| Premium (credit card) | Cards, modals, navigation, achievements | Gradients allowed, 8px radius, soft shadows |
+
+- Use semantic class names (not BEM)
 - Define component-specific styles in colocated `.css` files
 - Use CSS custom properties from the design system
-- See `visual-refactor.md` for full design system spec
+- See `CLAUDE.md` for full design system documentation
 
 **Core class patterns:**
-- `.slab` - Card/container surfaces
-- `.action` - Interactive buttons
+- `.slab` - Card/container surfaces (editorial style)
+- `.action` - Interactive buttons (editorial style)
 - `.label` - Text labels and metadata
-- `.nav__item` - Navigation elements
+- `.premium-surface` - Credit card aesthetic surfaces
 
 ```css
-/* Component.css */
-.slab {
-  padding: var(--space-md);
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-
+/* Editorial style (buttons, inputs) */
 .action {
   font-family: var(--font-mono);
   color: var(--text);
   background: transparent;
+  border: 1px solid var(--border);
+  /* NO shadows, NO gradients, NO border-radius >2px */
 }
 
-.label {
-  font-size: 0.75rem;
-  color: var(--muted);
-  text-transform: uppercase;
+/* Premium style (modals, cards) */
+.premium-surface {
+  background: var(--card-gradient);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
 }
 ```
 
-**Constraints:**
+**Editorial Surface Constraints:**
 - NO gradients (flat colors only)
 - NO box-shadow (use 1px borders)
 - NO border-radius >2px
 - Target <150 lines per CSS file
+
+**shadcn/ui Components:**
+- Located in `src/shared/components/ui/shadcn/`
+- Use `tw:` prefix for Tailwind classes (e.g., `tw:flex`, `tw:gap-2`)
+- Import with `import { Button } from '@/shared/components/ui/shadcn'`
 
 ### Component Structure
 

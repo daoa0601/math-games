@@ -168,7 +168,7 @@
 .bottom-sheet__drag-indicator {
   width: 40px;
   height: 4px;
-  background: var(--border, #334155);
+  background: var(--border, #e7e5e4);
   /* Minimal radius for the indicator only */
   border-radius: 2px;
 }
@@ -181,7 +181,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-sm, 8px) var(--space-lg, 16px);
-  border-bottom: 1px solid var(--border, #334155);
+  border-bottom: 1px solid var(--border, #e7e5e4);
   flex-shrink: 0;
 }
 
@@ -189,7 +189,7 @@
   font-family: var(--font-display, 'Crimson Pro', serif);
   font-size: var(--text-lg, 1.125rem);
   font-weight: 500;
-  color: var(--text, #f1f5f9);
+  color: var(--text, #1c1917);
   margin: 0;
   /* Subtle letter spacing for editorial feel */
   letter-spacing: 0.01em;
@@ -212,8 +212,8 @@
 }
 
 .bottom-sheet__close:hover {
-  color: var(--text, #f1f5f9);
-  border-color: var(--border, #334155);
+  color: var(--text, #1c1917);
+  border-color: var(--border, #e7e5e4);
 }
 
 .bottom-sheet__close:focus-visible {
@@ -243,7 +243,7 @@
   display: flex;
   gap: var(--space-md, 12px);
   padding: var(--space-md, 12px) var(--space-lg, 16px);
-  border-top: 1px solid var(--border, #334155);
+  border-top: 1px solid var(--border, #e7e5e4);
   flex-shrink: 0;
 
   /* Safe area padding for mobile devices with notch */

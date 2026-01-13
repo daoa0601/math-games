@@ -106,4 +106,4 @@ profileStorage.set({ ...profile, streak: 5 });
 ## References
 
 - [Zod Documentation](https://zod.dev/)
-- [TypedStorage Implementation](../src/shared/utils/TypedStorage.ts)
+- TypedStorage Implementation: `src/shared/utils/TypedStorage.ts`

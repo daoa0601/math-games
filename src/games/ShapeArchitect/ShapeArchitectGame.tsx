@@ -1,17 +1,16 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DndContext, pointerWithin } from '@dnd-kit/core';
-import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton, VictoryModal, SettingsDrawer, SettingsDrawerTrigger, SettingsSection } from '@/shared/components';
+import { GameLayout, GameShell, GameHeader, GameFooter, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton, VictoryModal, SettingsDrawer, SettingsDrawerTrigger, SettingsSection } from '@/shared/components';
 import { useGameTimer, useGameRewards, useSwipe, useAnnounce, useGameInit } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
 import { completeDailyChallenge } from '@/shared/services/daily';
-import { GridBoard, GridBoard3D, PieceInventory, LevelEditor, CameraPresetButtons, RotationControls, LayerControls, ShapeArchitectTutorial, PreviewLockButton, PlacedPieceControls, PlacementModal } from './components';
+import { GridBoard, GridBoard3D, PieceInventory, LevelEditor, CameraPresetButtons, RotationControls, LayerControls, ShapeArchitectTutorial, PreviewLockButton, PlacedPieceControls, PlacementToolbar } from './components';
 import type { CameraPreset } from './components/CameraPresetButtons';
 import type { Position3D, LevelConfig } from './logic/types';
 import { DEFAULT_ROTATION } from './logic/types';
 import { createGameState, removePieceFromGrid } from './logic/engine';
 import { useShapeArchitectState, usePiecePlacement, usePlacedPieceMovement, useKeyboardControls } from './hooks';
-import { getTotalScore } from '@/shared/utils';
 import '@/shared/styles/game-base.css';
 import './ShapeArchitect.css';
 
@@ -70,7 +69,6 @@ export function ShapeArchitectGame() {
 
     const [showHints, setShowHints] = useState(false);
     const [placementError, setPlacementError] = useState<string | null>(null);
-    const [progressVersion, setProgressVersion] = useState(0); // Trigger re-render on progress change
     const [cameraPreset, setCameraPreset] = useState<CameraPreset>('isometric');
     const [maxVisibleLayer, setMaxVisibleLayer] = useState<number>(() => gameState.level.gridSize[2] - 1);
     const [showEditor, setShowEditor] = useState(false);
@@ -96,10 +94,6 @@ export function ShapeArchitectGame() {
         };
     }, []);
 
-    // Get total score (re-computed when progressVersion changes)
-    // progressVersion is intentionally used as a trigger to force re-computation after level completion
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const totalScore = useMemo(() => getTotalScore('shape-architect'), [progressVersion]);
 
     // Rewards
     const {
@@ -241,9 +235,6 @@ export function ShapeArchitectGame() {
                 completeDailyChallenge('shape-architect', elapsedTime);
                 setDailyCompleted(true);
             }
-
-            // Trigger re-render of progress-dependent UI
-            setProgressVersion((v) => v + 1);
         }
     }, [gameState.isSolved, gameState.level.id, filteredLevels, elapsedTime, difficulty, practiceMode, handleCompletion, isDailyMode, dailyCompleted, setDailyCompleted]);
 
@@ -426,18 +417,37 @@ export function ShapeArchitectGame() {
                     </>
                 }
             >
-                <div className="sa-container sa-layout">
-                    {/* === MAIN AREA: Board and inventory === */}
-                    <div className="sa-main">
-                        {/* Daily Challenge Badge */}
-                        {isDailyMode && (
-                            <div className="daily-badge">
-                                <span className="daily-badge__icon">📅</span>
-                                <span className="daily-badge__text">{tc('daily.dailyChallenge')}</span>
-                                {dailyCompleted && <span className="daily-badge__check">✓</span>}
-                            </div>
-                        )}
+                {/* Daily Challenge Banner - Above GameShell */}
+                {isDailyMode && (
+                    <div className="sa-daily-banner">
+                        <span className="sa-daily-banner__icon">📅</span>
+                        <span className="sa-daily-banner__text">{tc('daily.dailyChallenge')}</span>
+                        {dailyCompleted && <span className="sa-daily-banner__check">✓</span>}
+                    </div>
+                )}
 
+                <GameShell gameId="shape-architect" data-testid="shape-architect-shell">
+                    {/* Header Strip: Level | Timer | Pieces Left */}
+                    <GameHeader
+                        progress={{
+                            current: gameState.level.pieces.length - gameState.remainingPieces.length,
+                            total: gameState.level.pieces.length,
+                            label: t('piecesLeft'),
+                        }}
+                        timer={{
+                            formattedTime,
+                            mode: isPracticeMode ? 'practice' : 'timed',
+                            isPaused,
+                            urgencyClass: timerClass,
+                        }}
+                        target={{
+                            value: gameState.level.name,
+                            label: t('level'),
+                        }}
+                    />
+
+                    {/* === MAIN BOARD AREA === */}
+                    <div className="game-shell__board">
                         {/* Instructions */}
                         <div className={`sa-instructions ${selectedPlacedPieceId ? 'sa-instructions--move-mode' : ''}`}>
                             {selectedPlacedPieceId ? (
@@ -543,7 +553,10 @@ export function ShapeArchitectGame() {
                                 )}
                             </div>
                         )}
+                    </div>
 
+                    {/* === CONTROLS AREA === */}
+                    <div className="game-shell__controls">
                         {/* Piece Inventory */}
                         <PieceInventory
                             pieces={gameState.remainingPieces}
@@ -551,158 +564,115 @@ export function ShapeArchitectGame() {
                             onSelectPiece={handleSelectPiece}
                             rotation={gameState.rotation}
                         />
-                    </div>
 
-                    {/* === SIDEBAR: Controls and info === */}
-                    <div className="sa-sidebar">
-                        {/* Timer with Practice/Timed Mode Toggle */}
-                        <Timer
-                            timeLeft={timeLeft}
-                            formattedTime={formattedTime}
-                            timerClass={timerClass}
-                            isPracticeMode={isPracticeMode}
-                            isPaused={isPaused}
-                            onModeChange={handlePracticeModeChange}
-                            onPause={pauseTimer}
-                            onResume={resumeTimer}
-                            disabled={gameState.isSolved}
-                        />
-
-                        {/* Score Display */}
-                        {totalScore > 0 && (
-                            <div className="score-display">
-                                <span className="score-display__label">{tc('stats.score')}:</span>
-                                <span className="score-display__value">{totalScore}</span>
-                            </div>
-                        )}
-
-                        {/* Level Info */}
-                        <div className="game-info">
-                            <div className="game-info__item">
-                                <span className="game-info__label">{t('level')}</span>
-                                <span className="game-info__value">{gameState.level.name}</span>
-                            </div>
-                            <div className="game-info__item">
-                                <span className="game-info__label">{t('piecesLeft')}</span>
-                                <span className="game-info__value">{gameState.remainingPieces.length}</span>
-                            </div>
-                            <div className="game-info__item">
-                                <span className="game-info__label">{t('rotation')}</span>
-                                <span className="game-info__value">
-                                    X:{gameState.rotation.x}° Y:{gameState.rotation.y}° Z:{gameState.rotation.z}°
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Controls - Swipe area for mobile rotation */}
+                        {/* Rotation Controls - Swipe area for mobile */}
                         <div
                             className="sa-controls"
                             ref={swipeRef as React.RefObject<HTMLDivElement>}
                             {...swipeHandlers}
                         >
-                            <button
-                                className="action action--icon"
-                                onClick={undoLastPiece}
-                                disabled={gameState.placedPieces.length === 0 || showTimeUp || gameState.isSolved}
-                                title={`${t('controls.undoTitle')} (Ctrl+Z)`}
-                            >
-                                ↩️
-                            </button>
                             <RotationControls
                                 rotation={selectedPlacedPieceId ? moveRotation : gameState.rotation}
                                 onRotateX={() => selectedPlacedPieceId ? rotateMoveAxis('x') : handleRotateAxis('x')}
-                            onRotateY={() => selectedPlacedPieceId ? rotateMoveAxis('y') : handleRotateAxis('y')}
-                            onRotateZ={() => selectedPlacedPieceId ? rotateMoveAxis('z') : handleRotateAxis('z')}
-                            disabled={(!selectedPiece && !selectedPlacedPieceId) || showTimeUp || gameState.isSolved}
-                            mode={gameState.level.type}
-                        />
-                        <PreviewLockButton
-                            locked={previewLocked}
-                            onToggle={togglePreviewLock}
-                            disabled={!selectedPiece || showTimeUp || gameState.isSolved}
-                        />
-                        {showRotationHint && selectedPiece && (
-                            <div className="sa-hint sa-hint--rotation">
-                                <span>💡 {t('hints.rotationTip')}</span>
-                            </div>
-                        )}
-                        {/* Mobile swipe hint */}
-                        {selectedPiece && (
-                            <div className="sa-hint sa-hint--swipe" aria-hidden="true">
-                                <span>👆 {t('hints.swipeRotate', '← Swipe to rotate →')}</span>
-                            </div>
-                        )}
-                        </div>
-
-                        {/* Hint Toggle */}
-                        <button
-                            className="action action--secondary"
-                            onClick={() => setShowHints(!showHints)}
-                        >
-                            💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
-                        </button>
-
-                        {/* Hints Panel */}
-                        {showHints && (
-                            <div className="game-hints">
-                                <div className="game-hints__card">
-                                    <h4>🧱 {t('hints.tetrominoTip.title')}</h4>
-                                    <p>{t('hints.tetrominoTip.message')}</p>
+                                onRotateY={() => selectedPlacedPieceId ? rotateMoveAxis('y') : handleRotateAxis('y')}
+                                onRotateZ={() => selectedPlacedPieceId ? rotateMoveAxis('z') : handleRotateAxis('z')}
+                                disabled={(!selectedPiece && !selectedPlacedPieceId) || showTimeUp || gameState.isSolved}
+                                mode={gameState.level.type}
+                            />
+                            <PreviewLockButton
+                                locked={previewLocked}
+                                onToggle={togglePreviewLock}
+                                disabled={!selectedPiece || showTimeUp || gameState.isSolved}
+                            />
+                            {showRotationHint && selectedPiece && (
+                                <div className="sa-hint sa-hint--rotation">
+                                    <span>💡 {t('hints.rotationTip')}</span>
                                 </div>
-                                <div className="game-hints__card">
-                                    <h4>🎯 {t('hints.strategy.title')}</h4>
-                                    <p>{t('hints.strategy.message')}</p>
+                            )}
+                            {/* Mobile swipe hint */}
+                            {selectedPiece && (
+                                <div className="sa-hint sa-hint--swipe" aria-hidden="true">
+                                    <span>👆 {t('hints.swipeRotate', '← Swipe to rotate →')}</span>
                                 </div>
-                                <div className="game-hints__card">
-                                    <h4>🧠 {t('hints.spatialThinking.title')}</h4>
-                                    <p>{t('hints.spatialThinking.message')}</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Actions */}
-                        <div className="game-actions">
-                            <button className="action action--secondary" onClick={resetLevel}>
-                                🔄 {tc('buttons.reset')}
-                            </button>
-                            <button className="action action--primary" onClick={nextLevel}>
-                                {tc('buttons.nextLevel')} →
-                            </button>
+                            )}
                         </div>
                     </div>
-                    {/* === END SIDEBAR === */}
 
-                    {/* Settings Drawer (Progressive Disclosure) */}
-                    <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)}>
-                        {!isDailyMode && (
-                            <SettingsSection title={tc('difficulty.title', 'Difficulty')}>
-                                <DifficultySelector
-                                    options={['easy', 'medium', 'hard']}
-                                    value={difficulty}
-                                    onChange={handleDifficultyChange}
-                                />
-                            </SettingsSection>
-                        )}
-                        <SettingsSection title={t('settings.rules', 'Rules')}>
-                            <div className="game-rules">
-                                <span className="game-rules__icon">📜</span>
-                                <p className="game-rules__text">{t('rules')}</p>
-                            </div>
-                        </SettingsSection>
-                        {!isDailyMode && (
-                            <SettingsSection title={t('settings.actions', 'Actions')}>
-                                <button
-                                    className="action action--secondary"
-                                    onClick={() => {
-                                        setShowEditor(true);
-                                        setIsSettingsOpen(false);
-                                    }}
-                                >
-                                    ✏️ {t('editor.openEditor')}
-                                </button>
-                            </SettingsSection>
-                        )}
-                    </SettingsDrawer>
+                    {/* Footer: Actions */}
+                    <GameFooter
+                        onUndo={gameState.placedPieces.length > 0 ? undoLastPiece : undefined}
+                        canUndo={gameState.placedPieces.length > 0 && !showTimeUp && !gameState.isSolved}
+                        onHint={() => setShowHints(!showHints)}
+                        onReset={resetLevel}
+                        onNext={!isDailyMode ? nextLevel : undefined}
+                        canProceed={!isDailyMode}
+                        primaryLabel={tc('buttons.nextLevel')}
+                    />
+                </GameShell>
+
+      {/* Hints Panel - Outside GameShell */}
+      {showHints && (
+        <div className="sa-hints-panel">
+          <div className="sa-hint">
+            <h4>💡 {t('hints.geometryTips.title')}</h4>
+            <p>{t('hints.geometryTips.message')}</p>
+          </div>
+          <div className="sa-hint">
+            <h4>🧩 {t('hints.rotationHelp.title')}</h4>
+            <p>{t('hints.rotationHelp.message')}</p>
+          </div>
+          <button className="sa-hints-close" onClick={() => setShowHints(false)}>
+            {tc('buttons.hideHints')}
+          </button>
+        </div>
+      )}
+
+      {/* Settings Drawer (Progressive Disclosure) */}
+      <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)}>
+        {/* Timer Controls */}
+        <SettingsSection title={tc('timer.title', 'Timer')}>
+          <Timer
+            timeLeft={timeLeft}
+            formattedTime={formattedTime}
+            timerClass={timerClass}
+            isPracticeMode={isPracticeMode}
+            isPaused={isPaused}
+            onModeChange={handlePracticeModeChange}
+            onPause={pauseTimer}
+            onResume={resumeTimer}
+            disabled={gameState.isSolved}
+          />
+        </SettingsSection>
+
+        {!isDailyMode && (
+          <SettingsSection title={tc('difficulty.title', 'Difficulty')}>
+            <DifficultySelector
+              options={['easy', 'medium', 'hard']}
+              value={difficulty}
+              onChange={handleDifficultyChange}
+            />
+          </SettingsSection>
+        )}
+        <SettingsSection title={t('settings.rules', 'Rules')}>
+          <div className="game-rules">
+            <span className="game-rules__icon">📜</span>
+            <p className="game-rules__text">{t('rules')}</p>
+          </div>
+        </SettingsSection>
+        {!isDailyMode && (
+          <SettingsSection title={t('settings.actions', 'Actions')}>
+            <button
+              className="action action--secondary"
+              onClick={() => {
+                setShowEditor(true);
+                setIsSettingsOpen(false);
+              }}
+            >
+              ✏️ {t('editor.openEditor')}
+            </button>
+          </SettingsSection>
+        )}
+      </SettingsDrawer>
 
                     {/* Win Overlay - using VictoryModal for proper portal/z-index handling */}
                     <VictoryModal
@@ -760,7 +730,6 @@ export function ShapeArchitectGame() {
                             </>
                         }
                     />
-                </div>
 
                 {/* Gamification Overlays */}
                 {showingRankUp && rewards?.rankedUp && rewards.previousRank && rewards.newRank && (
@@ -797,19 +766,22 @@ export function ShapeArchitectGame() {
                     disabled={showTimeUp || gameState.isSolved}
                 />
 
-                {/* Placement Modal for rotation preview before placing */}
-                <PlacementModal
-                    isOpen={placementModal.isOpen}
-                    piece={selectedPiece}
-                    position={placementModal.targetPosition}
-                    rotation={placementModal.rotation}
-                    grid={gameState.grid}
-                    gridSize={gameState.level.gridSize}
-                    viewMode={viewMode}
-                    onRotate={rotateModalPiece}
-                    onConfirm={handleModalConfirm}
-                    onCancel={closePlacementModal}
-                />
+                {/* Placement Toolbar for rotation controls before placing */}
+                {placementModal.isOpen && (
+                    <div className="sa-placement-toolbar-wrapper">
+                        <PlacementToolbar
+                            isOpen={placementModal.isOpen}
+                            piece={selectedPiece}
+                            position={placementModal.targetPosition}
+                            rotation={placementModal.rotation}
+                            grid={gameState.grid}
+                            gridSize={gameState.level.gridSize}
+                            onRotate={rotateModalPiece}
+                            onConfirm={handleModalConfirm}
+                            onCancel={closePlacementModal}
+                        />
+                    </div>
+                )}
 
                 {/* Level Editor Modal */}
                 {showEditor && (

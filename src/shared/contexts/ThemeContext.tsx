@@ -14,8 +14,9 @@ const THEME_KEY = 'math-games-theme';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'system';
-    return (localStorage.getItem(THEME_KEY) as Theme) || 'system';
+    if (typeof window === 'undefined') return 'light';
+    // Default to 'light' for young learners (ages 6-14) in classroom settings
+    return (localStorage.getItem(THEME_KEY) as Theme) || 'light';
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');

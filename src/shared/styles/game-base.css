@@ -6,10 +6,9 @@
 
 /* ----------------------------------------
    Per-Game Accent Colors
+   Source of truth: src/shared/styles/tokens/palette.css
+   Colors are set via [data-game] selectors there
    ---------------------------------------- */
-[data-game="magic-graph"] { --accent: #a78bfa; }    /* Violet */
-[data-game="sequence-race"] { --accent: #fb923c; }  /* Orange */
-[data-game="shape-architect"] { --accent: #2dd4bf; } /* Teal */
 
 /* ----------------------------------------
    Info Panel - scores, turns, levels
@@ -426,33 +425,5 @@
   .flash-shake { animation: none; }
 }
 
-/* ----------------------------------------
-   Desktop Layout Utilities (1024px+)
-   ---------------------------------------- */
-@media (min-width: 1024px) {
-  /* Two-column game layout: main area + sidebar */
-  .game-layout-desktop {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: var(--space-xl);
-    align-items: start;
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    flex: 1;
-  }
-
-  .game-main {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-  }
-
-  .game-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-    position: sticky;
-    top: var(--space-lg);
-  }
-}
+/* Note: Desktop two-column layout removed in favor of unified GameShell component.
+   See src/shared/components/layout/GameShell.tsx for responsive game container. */

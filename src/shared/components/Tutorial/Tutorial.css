@@ -4,19 +4,17 @@
   position: relative;
 }
 
-/* Overlay & Spotlight */
+/* Overlay - hidden (no dark backdrop for better UX) */
 .tutorial-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  z-index: var(--z-tutorial-backdrop);
-  pointer-events: none;
+  display: none;
 }
 
+/* Spotlight - subtle violet glow around highlighted element */
 .tutorial-spotlight {
   position: absolute;
-  /* Large spread creates overlay effect without box-shadow on main element */
-  outline: 9999px solid rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 0 4px var(--accent-nav, #a78bfa),
+              0 0 20px 8px rgba(167, 139, 250, 0.3);
+  border-radius: var(--radius-sm, 4px);
   z-index: var(--z-tutorial-spotlight);
   pointer-events: auto;
 }

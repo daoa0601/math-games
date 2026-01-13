@@ -1,41 +1,118 @@
-/* type.css - Vietnamese Premium typography */
-/* Crimson Pro (serif headlines for Vietnamese) + Space Grotesk (modern geometric UI) */
+/* type.css - Playful-Educational Typography */
+/* Nunito (friendly display) + Be Vietnam Pro (readable body) + JetBrains Mono (code/numbers) */
+/* Optimized for Vietnamese diacritics with generous line heights */
 
-/* Import Vietnamese-supporting fonts */
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+/* Font imports from @fontsource */
+@import '@fontsource-variable/nunito';
+@import '@fontsource/be-vietnam-pro/400.css';
+@import '@fontsource/be-vietnam-pro/500.css';
+@import '@fontsource/be-vietnam-pro/600.css';
+@import '@fontsource/be-vietnam-pro/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/600.css';
 
 :root {
-  /* Font families - Vietnamese-friendly */
-  --font-display: 'Crimson Pro', serif;
-  --font-mono: 'Space Grotesk', sans-serif;
+  /* ============================================
+     FONT FAMILIES
+     ============================================ */
+  /* Display: Nunito - friendly, rounded, great for headlines */
+  --font-display: 'Nunito Variable', 'Nunito', system-ui, sans-serif;
 
-  /* Type scale - mobile first */
-  --text-xs: 10px;
-  --text-sm: 11px;
-  --text-base: 13px;
-  --text-lg: 16px;
-  --text-xl: 24px;
-  --text-2xl: 32px;
-  --text-hero: 48px;
+  /* Body: Be Vietnam Pro - clean, readable, Vietnamese-optimized */
+  --font-body: 'Be Vietnam Pro', system-ui, sans-serif;
 
-  /* Weights */
-  --weight-light: 300;
+  /* Mono: JetBrains Mono - clear numbers, great for timers/scores */
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+
+  /* Backward compatibility aliases */
+  --font-sans: var(--font-body);
+
+  /* ============================================
+     TYPE SCALE (Mobile-first)
+     ============================================ */
+  --text-xs: 0.6875rem;   /* 11px */
+  --text-sm: 0.8125rem;   /* 13px */
+  --text-base: 0.9375rem; /* 15px - slightly larger for readability */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.5rem;      /* 24px */
+  --text-2xl: 2rem;       /* 32px */
+  --text-3xl: 2.5rem;     /* 40px */
+  --text-hero: 3rem;      /* 48px */
+
+  /* ============================================
+     LINE HEIGHTS
+     Generous for Vietnamese diacritics
+     ============================================ */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* ============================================
+     FONT WEIGHTS
+     ============================================ */
   --weight-normal: 400;
   --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Legacy aliases */
+  --weight-light: 400;
 }
 
-/* Tablet+ scale */
+/* ============================================
+   TABLET+ SCALE
+   Larger text for bigger screens
+   ============================================ */
 @media (min-width: 768px) {
   :root {
-    --text-xl: 32px;
-    --text-2xl: 48px;
-    --text-hero: 72px;
+    --text-base: 1rem;      /* 16px */
+    --text-lg: 1.25rem;     /* 20px */
+    --text-xl: 1.75rem;     /* 28px */
+    --text-2xl: 2.5rem;     /* 40px */
+    --text-3xl: 3rem;       /* 48px */
+    --text-hero: 4rem;      /* 64px */
   }
 }
 
-/* Vietnamese diacritic support improvements */
-.vi-text {
-  -webkit-font-feature-settings: 'ss01';
-  font-feature-settings: 'ss01';
+/* ============================================
+   BASE TYPOGRAPHY STYLES
+   ============================================ */
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  font-weight: var(--weight-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6,
+.font-display {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-normal);
+}
+
+code, pre, kbd, samp,
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* ============================================
+   VIETNAMESE DIACRITIC SUPPORT
+   ============================================ */
+.vi-text,
+:lang(vi) {
+  /* Enable Vietnamese-specific OpenType features if available */
+  font-feature-settings: 'ss01' on;
+  /* Slight letter spacing for diacritic clarity */
   letter-spacing: 0.01em;
+}
+
+/* ============================================
+   NUMERIC DISPLAY
+   For timers, scores, and statistics
+   ============================================ */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }

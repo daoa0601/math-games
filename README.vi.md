@@ -54,12 +54,23 @@ Mo http://localhost:5173 de choi.
 
 - React 19 + TypeScript
 - Vite 7
+- Firebase (Xac thuc + Firestore)
 - Vitest (testing)
+- Playwright (E2E testing)
 - react-router-dom (dieu huong)
 - @dnd-kit (keo tha)
 - react-i18next (Tieng Anh/Tieng Viet)
 - canvas-confetti (hieu ung chuc mung)
 - howler.js (hieu ung am thanh - san sang)
+
+## Tinh nang dam may
+
+Ung dung ho tro dong bo dam may tuy chon thong qua Firebase:
+
+- **Xac thuc an danh**: Choi ngay, khong can dang ky
+- **Dang nhap Google**: Lien ket tai khoan tuy chon de dong bo nhieu thiet bi
+- **Uu tien ngoai tuyen**: Tien trinh luu cuc bo, dong bo khi truc tuyen
+- **Luu tru du lieu**: Tien trinh duoc bao toan khi dang nhap
 
 ## Quoc te hoa
 

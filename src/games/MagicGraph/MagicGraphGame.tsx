@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GameLayout, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton, VictoryModal, SettingsDrawer, SettingsDrawerTrigger, SettingsSection } from '@/shared/components';
+import { GameLayout, GameShell, GameHeader, GameFooter, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton, VictoryModal, SettingsDrawer, SettingsDrawerTrigger, SettingsSection } from '@/shared/components';
 import { useGameTimer, useGameRewards, useGameInit, useAnnounce, useFocusTrap } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
 import { completeDailyChallenge } from '@/shared/services/daily';
@@ -503,6 +503,17 @@ export function MagicGraphGame() {
         playSound('click');
     }, [nodeValuesHistory, resetTimer]);
 
+    // Get target display value based on mode
+    const targetDisplay = useMemo(() => {
+        if (difficulty === 'grandmaster' && computedOptimalResult) {
+            return `${computedOptimalResult.minSum}–${computedOptimalResult.maxSum}`;
+        }
+        if (difficulty === 'master' && !targetRevealed) {
+            return '?';
+        }
+        return puzzle.targetSum;
+    }, [difficulty, computedOptimalResult, targetRevealed, puzzle.targetSum]);
+
     return (
         <GameLayout
             title={t('title')}
@@ -515,19 +526,40 @@ export function MagicGraphGame() {
                 </>
             }
         >
-            <div className="mg-container mg-layout">
-                {/* === MAIN AREA: Board and inventory === */}
-                <div className="mg-main">
-                    {/* Daily Challenge Badge */}
-                    {isDailyMode && (
-                        <div className="mg-daily">
-                            <span>📅</span>
-                            <span>{tc('daily.dailyChallenge')}</span>
-                            {dailyCompleted && <span className="mg-daily__check">✓</span>}
-                        </div>
-                    )}
+            {/* Daily Challenge Banner - Above the shell */}
+            {isDailyMode && (
+                <div className="mg-daily-banner">
+                    <span className="mg-daily-banner__icon">📅</span>
+                    <span className="mg-daily-banner__text">{tc('daily.dailyChallenge')}</span>
+                    {dailyCompleted && <span className="mg-daily-banner__check">✓</span>}
+                </div>
+            )}
 
-                    {/* Generation Loading */}
+            {/* === UNIFIED GAME SHELL === */}
+            <GameShell gameId="magic-graph">
+                {/* Header Strip: Progress | Timer | Target */}
+                <GameHeader
+                    progress={{
+                        label: puzzle.name,
+                        current: filledCount,
+                        total: puzzle.nodes.length,
+                    }}
+                    timer={{
+                        formattedTime,
+                        mode: isPracticeMode ? 'practice' : 'timed',
+                        isPaused,
+                        urgencyClass: timerClass,
+                    }}
+                    target={
+                        difficulty !== 'grandmaster'
+                            ? { label: t('targetSum'), value: targetDisplay }
+                            : { label: t('validRange'), value: targetDisplay }
+                    }
+                />
+
+                {/* Game Board Area */}
+                <div className="game-board-area">
+                    {/* Generation Loading Overlay */}
                     {isGenerating && (
                         <div className="mg-loading">
                             <div className="mg-loading__spinner">🔮</div>
@@ -535,7 +567,7 @@ export function MagicGraphGame() {
                         </div>
                     )}
 
-                    {/* Game Board or Editor */}
+                    {/* Editor Mode or Game Board */}
                     {showEditor ? (
                         <TopologyEditor
                             onPuzzleCreated={handleCustomPuzzle}
@@ -573,22 +605,137 @@ export function MagicGraphGame() {
                             currentValue={nodeValues.get(pickerState.nodeId)}
                         />
                     )}
-
-                    {/* Number Inventory (display-only reference) */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-sm)' }}>
-                        <span className="game-info__label">{tc('availableNumbers')}</span>
-                        <NumberInventory
-                            availableNumbers={puzzle.availableNumbers}
-                            usedNumbers={usedNumbers}
-                            selectedNumber={null}
-                            onSelectNumber={() => { }}
-                        />
-                    </div>
                 </div>
 
-                {/* === SIDEBAR: Controls and info === */}
-                <div className="mg-sidebar">
-                    {/* Timer with Practice/Timed Mode Toggle */}
+                {/* Controls Area: Number Inventory */}
+                <div className="game-controls-area">
+                    <span className="game-controls-label">{tc('availableNumbers')}</span>
+                    <NumberInventory
+                        availableNumbers={puzzle.availableNumbers}
+                        usedNumbers={usedNumbers}
+                        selectedNumber={null}
+                        onSelectNumber={() => { }}
+                    />
+
+                    {/* Grandmaster mode: Optimization goal toggle */}
+                    {difficulty === 'grandmaster' && (
+                        <div className="mg-goal-toggle">
+                            <div className="mode-toggle" role="group" aria-label="Optimization goal">
+                                <button
+                                    className={`mode-toggle__btn ${optimizationGoal === 'minimize' ? 'mode-toggle__btn--active' : ''}`}
+                                    onClick={() => setOptimizationGoal('minimize')}
+                                    aria-pressed={optimizationGoal === 'minimize'}
+                                >
+                                    📉 {t('minimize')}
+                                </button>
+                                <button
+                                    className={`mode-toggle__btn ${optimizationGoal === 'maximize' ? 'mode-toggle__btn--active' : ''}`}
+                                    onClick={() => setOptimizationGoal('maximize')}
+                                    aria-pressed={optimizationGoal === 'maximize'}
+                                >
+                                    📈 {t('maximize')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Master mode: Reveal target button */}
+                    {difficulty === 'master' && !targetRevealed && (
+                        <button
+                            className="mg-reveal-btn"
+                            onClick={() => setTargetRevealed(true)}
+                            title={t('revealTargetSum')}
+                        >
+                            👁️ {t('revealTargetSum')}
+                        </button>
+                    )}
+
+                    {/* Unsolvable Button (appears after 45 seconds) */}
+                    {showUnsolvableButton && !showWin && !showTimeUp && (
+                        <div className="mg-unsolvable">
+                            <button
+                                className={`mg-unsolvable-btn ${unsolvableFeedback?.type === 'wrong' ? 'flash-shake' : ''}`}
+                                onClick={handleDeclareUnsolvable}
+                                disabled={unsolvableFeedback?.type === 'correct'}
+                            >
+                                🚫 {t('unsolvable.button', 'Declare Unsolvable')}
+                            </button>
+                            {unsolvableFeedback && (
+                                <div className={`mg-unsolvable-feedback mg-unsolvable-feedback--${unsolvableFeedback.type}`}>
+                                    {unsolvableFeedback.type === 'correct' ? '✓' : '✗'} {unsolvableFeedback.message}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer: Actions */}
+                <GameFooter
+                    onUndo={nodeValuesHistory.undo}
+                    onRedo={nodeValuesHistory.redo}
+                    canUndo={nodeValuesHistory.canUndo}
+                    canRedo={nodeValuesHistory.canRedo}
+                    onHint={() => setShowHints(!showHints)}
+                    onReset={resetPuzzle}
+                    onNext={nextPuzzle}
+                    canProceed={showWin || !showTimeUp}
+                />
+            </GameShell>
+
+            {/* Hints Panel - Outside shell, slides in */}
+            {showHints && (
+                <div className="mg-hints-panel">
+                    {/* Auditor Warning */}
+                    {impossibleLineIds.size > 0 && (
+                        <div className="mg-hint mg-hint--auditor">
+                            <h4>⚠️ {t('hints.auditor.title')}</h4>
+                            <p>
+                                {impossibleLineIds.size === 1
+                                    ? t('hints.auditor.singleLine')
+                                    : t('hints.auditor.multipleLines', { count: impossibleLineIds.size })
+                                }
+                            </p>
+                        </div>
+                    )}
+                    {/* Starter Hint */}
+                    {starterHint && starterHint.validOptions.length > 0 && (
+                        <div className="mg-hint mg-hint--starter">
+                            <h4>💡 {t('hints.starter.title')}</h4>
+                            <p>{starterHint.reason}</p>
+                        </div>
+                    )}
+                    {/* Algebraist Hints */}
+                    {algebraicHints.length > 0 && (
+                        <div className="mg-hint">
+                            <h4>📐 {t('hints.algebraist.title')}</h4>
+                            {algebraicHints.map((hint, i) => (
+                                <div key={i} className="mg-hint__equation">
+                                    <code>{hint.equation}</code>
+                                    <p>{hint.explanation}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    <div className="mg-hint">
+                        <h4>{progressHint.title}</h4>
+                        <p>{progressHint.message}</p>
+                    </div>
+                    {conceptHints.map((hint, i) => (
+                        <div key={i} className="mg-hint">
+                            <h4>{hint.title}</h4>
+                            <p>{hint.message}</p>
+                        </div>
+                    ))}
+                    <button className="mg-hints-close" onClick={() => setShowHints(false)}>
+                        {tc('buttons.close')}
+                    </button>
+                </div>
+            )}
+
+            {/* Settings Drawer (Progressive Disclosure) */}
+            <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)}>
+                {/* Timer Controls - Practice/Timed mode toggle */}
+                <SettingsSection title={tc('timer.title', 'Timer')}>
                     <Timer
                         timeLeft={timeLeft}
                         formattedTime={formattedTime}
@@ -600,184 +747,8 @@ export function MagicGraphGame() {
                         onResume={resumeTimer}
                         disabled={showWin}
                     />
+                </SettingsSection>
 
-                    {/* Puzzle Info */}
-                <div className="game-info">
-                    {difficulty === 'grandmaster' ? (
-                        <>
-                            {/* Grandmaster mode: Optimization goal selector */}
-                            <div className="game-info__item">
-                                <span className="game-info__label">{t('goal')}</span>
-                                <div className="mode-toggle" role="group" aria-label="Optimization goal">
-                                    <button
-                                        className={`mode-toggle__btn ${optimizationGoal === 'minimize' ? 'mode-toggle__btn--active' : ''}`}
-                                        onClick={() => setOptimizationGoal('minimize')}
-                                        aria-pressed={optimizationGoal === 'minimize'}
-                                    >
-                                        📉 {t('minimize')}
-                                    </button>
-                                    <button
-                                        className={`mode-toggle__btn ${optimizationGoal === 'maximize' ? 'mode-toggle__btn--active' : ''}`}
-                                        onClick={() => setOptimizationGoal('maximize')}
-                                        aria-pressed={optimizationGoal === 'maximize'}
-                                    >
-                                        📈 {t('maximize')}
-                                    </button>
-                                </div>
-                            </div>
-                            {/* Show valid sum range */}
-                            {computedOptimalResult && (
-                                <div className="game-info__item">
-                                    <span className="game-info__label">{t('validRange')}</span>
-                                    <span className="game-info__value">
-                                        {computedOptimalResult.minSum} – {computedOptimalResult.maxSum}
-                                    </span>
-                                </div>
-                            )}
-                        </>
-                    ) : (
-                        <>
-                            <div className="game-info__item">
-                                <span className="game-info__label">{t('targetSum')}</span>
-                                {difficulty === 'master' && !targetRevealed ? (
-                                    <span className="game-info__value" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-                                        <span>?</span>
-                                        <button
-                                            className="action action--secondary"
-                                            onClick={() => setTargetRevealed(true)}
-                                            title={t('revealTargetSum')}
-                                            style={{ padding: 'var(--space-xs)' }}
-                                        >
-                                            👁️
-                                        </button>
-                                    </span>
-                                ) : (
-                                    <span className="game-info__value--accent">{puzzle.targetSum}</span>
-                                )}
-                            </div>
-                            {difficulty === 'master' && (
-                                <div className="game-info__item">
-                                    <span className="game-info__label">{t('hint')}</span>
-                                    <span className="game-info__value" style={{ fontSize: 'var(--text-sm)' }}>{t('allLinesSameValue')}</span>
-                                </div>
-                            )}
-                        </>
-                    )}
-                    <div className="game-info__item">
-                        <span className="game-info__label">{t('puzzle')}</span>
-                        <span className="game-info__value">{puzzle.name}</span>
-                    </div>
-                    <div className="game-info__item">
-                        <span className="game-info__label">{t('progress')}</span>
-                        <span className="game-info__value">{filledCount}/{puzzle.nodes.length}</span>
-                    </div>
-                </div>
-
-                    {/* Unsolvable Button (appears after 45 seconds for seeded puzzles) */}
-                {showUnsolvableButton && !showWin && !showTimeUp && (
-                    <div className="mg-unsolvable">
-                        <button
-                            className={`mg-unsolvable-btn ${unsolvableFeedback?.type === 'wrong' ? 'flash-shake' : ''}`}
-                            onClick={handleDeclareUnsolvable}
-                            disabled={unsolvableFeedback?.type === 'correct'}
-                        >
-                            🚫 {t('unsolvable.button', 'Declare Unsolvable')}
-                        </button>
-                        {unsolvableFeedback && (
-                            <div className={`mg-unsolvable-feedback mg-unsolvable-feedback--${unsolvableFeedback.type}`}>
-                                {unsolvableFeedback.type === 'correct' ? '✓' : '✗'} {unsolvableFeedback.message}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Hint Toggle */}
-                <button
-                    className="action action--secondary"
-                    onClick={() => setShowHints(!showHints)}
-                >
-                    💡 {showHints ? tc('buttons.hideHints') : tc('buttons.needHelp')}
-                </button>
-
-                {/* Hints Panel */}
-                {showHints && (
-                    <div className="mg-hints">
-                        {/* Auditor Warning */}
-                        {impossibleLineIds.size > 0 && (
-                            <div className="mg-hint mg-hint--auditor">
-                                <h4>⚠️ {t('hints.auditor.title')}</h4>
-                                <p>
-                                    {impossibleLineIds.size === 1
-                                        ? t('hints.auditor.singleLine')
-                                        : t('hints.auditor.multipleLines', { count: impossibleLineIds.size })
-                                    }
-                                </p>
-                            </div>
-                        )}
-                        {/* Starter Hint */}
-                        {starterHint && starterHint.validOptions.length > 0 && (
-                            <div className="mg-hint mg-hint--starter">
-                                <h4>💡 {t('hints.starter.title')}</h4>
-                                <p>{starterHint.reason}</p>
-                                <p style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>{t('hints.starter.subtext')}</p>
-                            </div>
-                        )}
-                        {/* Algebraist Hints */}
-                        {algebraicHints.length > 0 && (
-                            <div className="mg-hint">
-                                <h4>📐 {t('hints.algebraist.title')}</h4>
-                                {algebraicHints.map((hint, i) => (
-                                    <div key={i} style={{ marginTop: 'var(--space-sm)' }}>
-                                        <code style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>{hint.equation}</code>
-                                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>{hint.explanation}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        <div className="mg-hint">
-                            <h4>{progressHint.title}</h4>
-                            <p>{progressHint.message}</p>
-                        </div>
-                        {conceptHints.map((hint, i) => (
-                            <div key={i} className="mg-hint">
-                                <h4>{hint.title}</h4>
-                                <p>{hint.message}</p>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* Actions */}
-                <div className="mg-actions">
-                    <button
-                        className="action action--secondary"
-                        onClick={nodeValuesHistory.undo}
-                        disabled={!nodeValuesHistory.canUndo}
-                        title={`${t('undo')} (Ctrl+Z)`}
-                    >
-                        ↩️
-                    </button>
-                    <button
-                        className="action action--secondary"
-                        onClick={nodeValuesHistory.redo}
-                        disabled={!nodeValuesHistory.canRedo}
-                        title={`${t('redo')} (Ctrl+Y)`}
-                    >
-                        ↪️
-                    </button>
-                    <button className="action action--secondary" onClick={resetPuzzle}>
-                        🔄 {tc('buttons.reset')}
-                    </button>
-                    <button className="action action--primary" onClick={nextPuzzle}>
-                        {tc('buttons.nextPuzzle')} →
-                    </button>
-                </div>
-                </div>
-                {/* === END SIDEBAR === */}
-            </div>
-
-            {/* Settings Drawer (Progressive Disclosure) */}
-            <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)}>
                 {!isDailyMode && (
                     <SettingsSection title={tc('difficulty.title', 'Difficulty')}>
                         <DifficultySelector

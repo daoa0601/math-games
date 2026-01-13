@@ -90,16 +90,19 @@ export const GameCard = memo(function GameCard({
     </>
   );
 
+  // Convert camelCase id to kebab-case for data-game attribute
+  const gameSlug = id.replace(/([A-Z])/g, '-$1').toLowerCase();
+
   if (disabled) {
     return (
-      <div className={`${cardClasses} ${patternClasses}`} data-testid={`game-card-${id}`}>
+      <div className={`${cardClasses} ${patternClasses}`} data-testid={`game-card-${id}`} data-game={gameSlug}>
         {content}
       </div>
     );
   }
 
   return (
-    <Link to={to} className={`${cardClasses} ${patternClasses}`} data-testid={`game-card-${id}`}>
+    <Link to={to} className={`${cardClasses} ${patternClasses}`} data-testid={`game-card-${id}`} data-game={gameSlug}>
       {content}
     </Link>
   );

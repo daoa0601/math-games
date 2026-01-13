@@ -42,4 +42,13 @@
   --z-modal: 400;
   --z-toast: 500;
   --z-nav: 100;
+
+  /* Tutorial overlay system */
+  --z-tutorial-backdrop: 200;
+  --z-tutorial-spotlight: 250;
+  --z-tutorial-tooltip: 251;
+
+  /* Additional overlay z-indexes */
+  --z-tooltip: 300;
+  --z-modal-backdrop: 350;
 }

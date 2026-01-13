@@ -8,29 +8,34 @@ Page Object Model (POM) implementations for Playwright E2E tests. Each game has 
 e2e/pages/
 ├── Dashboard.page.ts        # Dashboard with tabs (Play, Stats, Achievements)
 ├── MagicGraph.page.ts        # Graph-based number placement puzzle
-├── SequenceRace.page.ts      # Turn-based strategy game vs AI
-├── ShapeArchitect.page.ts    # 3D voxel-based geometry puzzle
 ├── index.ts                  # Barrel exports
 └── README.md                 # This file
 ```
+
+> **Note:** Page objects for SequenceRace and ShapeArchitect are documented below as planned implementations. Currently, only Dashboard and MagicGraph page objects exist.
 
 ## Usage
 
 Import page objects from the barrel export:
 
 ```typescript
-import { SequenceRacePage, ShapeArchitectPage } from '../pages';
+import { DashboardPage, MagicGraphPage } from '../pages';
 
 test('example test', async ({ page }) => {
-  const sequenceRace = new SequenceRacePage(page);
-  await sequenceRace.goto();
-  await sequenceRace.selectStep(1);
+  const dashboard = new DashboardPage(page);
+  await dashboard.goto();
+  await dashboard.playGame('magic-graph');
+
+  const magicGraph = new MagicGraphPage(page);
+  await magicGraph.waitForLoad();
 });
 ```
 
 ## Page Objects
 
-### SequenceRacePage
+### SequenceRacePage (Planned)
+
+> **Status:** Not yet implemented. The following is the intended API design.
 
 Turn-based strategy game where players race to reach a target number using arithmetic sequences.
 
@@ -83,7 +88,9 @@ const timeUp = await sequenceRace.isTimeUp();
 | `difficultySelector` | Difficulty buttons |
 | `modeToggle` | VS AI / Two Player toggle |
 
-### ShapeArchitectPage
+### ShapeArchitectPage (Planned)
+
+> **Status:** Not yet implemented. The following is the intended API design.
 
 3D voxel-based geometry puzzle where players place tetromino pieces to fill a target shape.
 

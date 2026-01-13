@@ -21,11 +21,11 @@ export function IsometricPiecePreview({ piece, size = 40 }: IsometricPiecePrevie
     });
 
     return (
-        <div className="isometric-preview" style={{ width: size, height: size }}>
+        <div className="sa-isometric-preview" style={{ width: size, height: size }}>
             {sortedLayout.map((pos, i) => (
                 <div
                     key={i}
-                    className="isometric-cell"
+                    className="sa-isometric-cell"
                     style={{
                         '--cell-x': pos.x,
                         '--cell-y': pos.y,

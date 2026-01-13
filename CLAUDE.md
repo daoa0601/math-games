@@ -44,16 +44,20 @@ The app uses Firebase for authentication and data sync while keeping localStorag
 
 ```
 src/firebase/
-├── config.ts              # Firebase configuration
-├── index.ts               # App initialization with offline persistence
-├── auth.ts                # Auth functions (anonymous, Google, email)
-├── loader.ts              # Lazy loading for code splitting
-├── FirebaseAuthContext.tsx # Auth state provider
+├── config.ts               # Firebase configuration
+├── index.ts                # App initialization with offline persistence
+├── auth.ts                 # Auth functions (anonymous, Google, email)
+├── loader.ts               # Lazy loading for code splitting
+├── FirebaseAuthContext.tsx # Auth state provider (React context)
+├── FirebaseAuthContexts.ts # Auth context type definitions
+├── useFirebaseAuthHooks.ts # Custom hooks for auth state
 ├── services/
-│   ├── playerService.ts   # Firestore CRUD for profiles
+│   ├── index.ts            # Barrel export
+│   ├── playerService.ts    # Firestore CRUD for profiles
 │   └── migrationService.ts # localStorage → Firestore migration
 └── sync/
-    └── syncManager.ts     # Debounced sync with rate limiting
+    ├── index.ts            # Barrel export
+    └── syncManager.ts      # Debounced sync with rate limiting
 ```
 
 **Firebase Project:** `han-edu-central`
@@ -72,24 +76,36 @@ src/
 ├── shared/
 │   ├── components/         # Reusable UI components
 │   │   ├── ui/             # Primitives: Button, Timer, BottomSheet, SettingsDrawer
+│   │   │   └── shadcn/     # shadcn/ui components (see shadcn section below)
 │   │   ├── layout/         # Layout: GameLayout, GameCard, DashboardTabs
 │   │   ├── overlays/       # VictoryModal (unified game-end overlay)
 │   │   ├── gamification/   # StatsDisplay, AchievementToast, RankUpOverlay
 │   │   ├── auth/           # AuthModal, SignInButton, AccountLinkBanner
 │   │   ├── DailyChallenge/ # DailyChallenge, DailyChallengeBanner
+│   │   ├── FeedbackModal/  # User feedback submission
+│   │   ├── LearnModal/     # Educational content modal with game tutorials
+│   │   ├── PersonalBest/   # Personal best display component
 │   │   ├── Tutorial/       # Tutorial overlay system
 │   │   └── icons/          # Custom SVG game icons
+│   ├── constants/          # App-wide constants
 │   ├── contexts/           # PlayerContext (stats, rank, achievements)
 │   ├── hooks/              # Categorized hooks with barrel exports
 │   │   ├── game/           # useGameTimer, useGameRewards, useGameKeyboard
 │   │   ├── accessibility/  # useFocusTrap, useAnnounce, useHighContrast
 │   │   ├── gestures/       # useSwipe, usePinchZoom, useDragScroll
+│   │   ├── device/         # useDeviceType, useOrientation
+│   │   ├── firebase/       # useFirebaseSync, useAuthState
 │   │   └── useTutorial.ts  # Cross-cutting tutorial hook
+│   ├── lib/                # Utility functions
+│   │   └── utils.ts        # cn() helper for shadcn class merging
+│   ├── machines/           # XState state machines
 │   ├── schemas/            # Zod schemas (extracted from utils)
 │   │   ├── playerProfile.schema.ts
 │   │   ├── daily.schema.ts
 │   │   └── storage.schema.ts
 │   ├── services/           # player.ts, rank.ts, achievements.ts, daily.ts
+│   ├── styles/             # CSS architecture (see CSS section below)
+│   ├── types/              # TypeScript type definitions
 │   └── utils/              # storage.ts, audio.ts, TypedStorage
 ├── i18n/                   # Internationalization (EN/VI)
 └── pages/
@@ -250,12 +266,106 @@ This disposes geometries, materials, and textures on unmount.
 ### Sound Throttling
 Module-level cooldown (2s) prevents audio chaos with multiple toasts.
 
-### CSS
-- Global design system in `src/index.css` (target: <150 lines)
-- Component-specific CSS colocated
-- Flat class names: `.slab`, `.action`, `.label`
-- CSS variables: `--bg`, `--text`, `--border`, `--accent`
-- **NO** gradients, shadows, or border-radius >2px
+### CSS Architecture
+
+**Two Surface Types:**
+
+| Type | Used For | Styling Rules |
+|------|----------|---------------|
+| Editorial (flat) | Buttons, inputs, labels, game boards | No gradients, no shadows, border-radius ≤2px |
+| Premium (credit card) | Cards, modals, navigation, achievements | Gradients allowed, 8px radius, soft shadows |
+
+**Files:**
+- `src/index.css` - Global design system + slab styling
+- `src/shared/styles/tokens/` - Design tokens (palette, type, scale, motion)
+- `src/shared/styles/shadcn-theme.css` - Tailwind v4 + shadcn variable mapping
+- `src/shared/styles/premium-surfaces.css` - Credit card aesthetic classes
+- `src/shared/styles/a11y.css` - Accessibility styles (focus rings, high contrast)
+- `src/shared/styles/game-base.css` - Shared game component styles
+- `src/shared/styles/hints.css` - Hint system styling
+- `src/shared/styles/orientation.css` - Device orientation handling
+- `src/shared/styles/patterns.css` - Decorative pattern backgrounds
+- `src/shared/styles/patterns-vn.css` - Vietnamese-themed patterns
+
+**Tailwind CSS v4 Integration:**
+- Uses `tw:` prefix (e.g., `tw:flex`, `tw:text-primary`) to avoid conflicts with existing CSS
+- Configured via CSS-first approach in `shadcn-theme.css`
+- shadcn components use `--shadcn-*` prefixed variables to avoid overwriting design tokens
+
+```typescript
+// Using cn() helper for conditional classes
+import { cn } from '@/shared/lib/utils';
+
+<div className={cn('tw:flex tw:gap-2', isActive && 'tw:bg-primary')} />
+```
+
+**Credit Card Tokens:**
+```css
+--card-gradient: linear-gradient(135deg, #1b263b 0%, #0d1b2a 50%, #1b263b 100%);
+--card-radius: 8px;
+--card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+--gold-gradient: linear-gradient(90deg, #d4af37 0%, #f5d67a 50%, #d4af37 100%);
+--text-emboss: 0 1px 0 rgba(255,255,255,0.1), 0 -1px 0 rgba(0,0,0,0.3);
+```
+
+### shadcn/ui Components
+
+Located in `src/shared/components/ui/shadcn/`. Components follow two styling modes:
+
+**Premium surfaces** (credit card aesthetic):
+| Component | Usage |
+|-----------|-------|
+| `Sheet` | Bottom sheets, side drawers |
+| `Dialog` | Modal dialogs, confirmations |
+| `Toaster` + `toast` | Toast notifications (via Sonner) |
+
+**Editorial flat style** (primitives):
+| Component | Usage |
+|-----------|-------|
+| `Button` | Buttons with variants: default, secondary, ghost, success, destructive, link |
+| `Input` | Text inputs |
+| `Label` | Form labels (uppercase, monospace) |
+| `Textarea` | Multi-line text inputs |
+| `Select` | Dropdown selects with Radix UI |
+
+```typescript
+// Example: Using Button
+import { Button } from '@/shared/components/ui/shadcn';
+
+<Button variant="default">Primary Action</Button>
+<Button variant="secondary">Cancel</Button>
+<Button variant="ghost" size="icon"><Icon /></Button>
+
+// Example: Using form primitives
+import { Input, Label, Textarea, Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/shared/components/ui/shadcn';
+
+<div>
+  <Label htmlFor="email">Email</Label>
+  <Input id="email" type="email" placeholder="you@example.com" />
+</div>
+
+<Select>
+  <SelectTrigger><SelectValue placeholder="Choose..." /></SelectTrigger>
+  <SelectContent>
+    <SelectItem value="a">Option A</SelectItem>
+    <SelectItem value="b">Option B</SelectItem>
+  </SelectContent>
+</Select>
+
+// Example: Using toast
+import { toast } from '@/shared/components/ui/shadcn';
+
+toast.success('Achievement unlocked!');
+toast.error('Game over');
+```
+
+**Adding new shadcn components:**
+1. Use `npx shadcn@latest add <component>`
+2. Component installs to `src/shared/components/ui/shadcn/`
+3. Apply `tw:` prefix to all Tailwind classes
+4. Premium surfaces: Use `premium-modal` or `premium-surface` classes
+5. Editorial primitives: No shadows, no gradients, no border-radius
+6. Export from `src/shared/components/ui/shadcn/index.ts`
 
 ### Animations
 **Minimal feedback only** - no idle animations, no playful theming.
@@ -281,29 +391,44 @@ t('ranks.intermediate');  // "Intermediate" or "Trung cấp"
 
 ## Design System
 
-**Linear Editorial** - Stark, minimal, mobile-first. See `visual-refactor.md` for full spec.
+**Vietnamese Premium** - Elegant, dark-first, mobile-friendly with credit card aesthetic for premium surfaces.
 
-### Colors (7 only)
+### Color Palette
 ```css
---bg: #0a0f1a;        /* Deep navy base */
---surface: #111827;   /* Card backgrounds */
---border: #1e3a5f;    /* Blue-tinted borders */
---text: #f8fafc;      /* Warm white */
---muted: #64748b;     /* Slate gray */
---accent: #60a5fa;    /* Sky blue feedback */
---success: #4ade80;   /* Correct answers */
+/* Backgrounds */
+--bg-primary: #0d1b2a;    /* Deep navy base */
+--bg-secondary: #1b263b;  /* Card backgrounds */
+--surface: #1b263b;       /* Alias for bg-secondary */
+
+/* Vietnamese Accents */
+--accent-gold: #d4af37;   /* Primary accent (gold) */
+--accent-emerald: #10b981; /* Success states */
+--accent-coral: #f97316;  /* Warnings */
+--accent-lotus: #e11d48;  /* Errors */
+
+/* Text */
+--text-primary: #f1f5f9;  /* Main text */
+--text-muted: #64748b;    /* Secondary text */
+--border: #334155;        /* Borders */
 ```
 
 ### Typography
-- Display: `Playfair Display` (headings, serif)
-- UI/Data: `JetBrains Mono` (buttons, labels, numbers)
+- Display: `Crimson Pro` (Vietnamese-friendly serif for headings)
+- UI/Data: `Space Grotesk` (modern geometric sans-serif)
 
-### Constraints
-- **NO** gradients (flat colors only)
-- **NO** box-shadow (use 1px borders)
-- **NO** border-radius >2px
-- **NO** idle animations
-- **Target**: <150 lines per CSS file
+### Surface Rules
+
+**Editorial surfaces** (buttons, inputs, game boards):
+- NO gradients (flat colors only)
+- NO box-shadow (use 1px borders)
+- NO border-radius >2px
+
+**Premium surfaces** (cards, modals, navigation):
+- Credit card gradient background allowed
+- 8px border-radius
+- Soft shadows (`0 4px 24px rgba(0,0,0,0.4)`)
+- Gold gradient accents on active/featured states
+- Diagonal shine animation on hover
 
 ---
 
@@ -313,9 +438,9 @@ t('ranks.intermediate');  // "Intermediate" or "Trung cấp"
 
 | Layer | Tool | Count | Purpose |
 |-------|------|-------|---------|
-| Unit | Vitest | 246 tests | Game logic, utilities, hooks |
+| Unit | Vitest | 637 tests | Game logic, utilities, hooks |
 | Component | Storybook | 26 stories | Visual component development |
-| E2E | Playwright | 112 tests | Full user flows across games |
+| E2E | Playwright | 260 tests | Full user flows across games |
 
 ### Running Tests
 

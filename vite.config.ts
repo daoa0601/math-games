@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import { threeMinifier } from '@yushijinhun/three-minifier-rollup'
 import viteCompression from 'vite-plugin-compression'
@@ -22,6 +23,7 @@ export default defineConfig(({ command }) => ({
     // Expected reduction: ~40-60% of three.js bundle size
     { ...threeMinifier(), enforce: 'pre' },
     react(),
+    tailwindcss(),
     // Pre-compress assets for faster serving
     viteCompression({ algorithm: 'gzip' }),
     viteCompression({ algorithm: 'brotliCompress', ext: '.br' }),

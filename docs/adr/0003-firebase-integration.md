@@ -257,8 +257,10 @@ src/
 │   ├── config.ts           # Firebase configuration
 │   ├── index.ts            # Firebase app initialization
 │   ├── auth.ts             # Auth helper functions
-│   └── firestore.ts        # Firestore helper functions
+│   └── loader.ts           # Lazy loading wrapper
 ```
+
+> **Note (2026-01-10):** Actual implementation uses `loader.ts` for lazy loading instead of `firestore.ts`. Firestore operations are in `services/playerService.ts`.
 
 **Deliverable:** Firebase initialized, auth working (can sign in anonymously)
 
@@ -284,10 +286,11 @@ src/shared/components/layout/CompactHeader.tsx  # Auth UI
 ```
 src/shared/components/auth/
 ├── SignInButton.tsx
-├── SignOutButton.tsx
-├── AccountLink.tsx         # Link anonymous to permanent
+├── AccountLinkBanner.tsx   # Link anonymous to permanent (renamed from AccountLink.tsx)
 └── AuthModal.tsx           # Sign-in options modal
 ```
+
+> **Note (2026-01-10):** `SignOutButton.tsx` functionality integrated into AuthModal. `AccountLink.tsx` renamed to `AccountLinkBanner.tsx`.
 
 **Deliverable:** Users can sign in with Google, anonymous auth auto-creates
 

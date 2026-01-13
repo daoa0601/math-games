@@ -1,0 +1,422 @@
+/* game-shell.css - Unified game container styling */
+/* Follows shadcn/ui patterns with playful-educational aesthetic */
+
+/* ============================================
+   GAME SHELL CONTAINER
+   ============================================ */
+.game-shell {
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+
+  /* shadcn card-like appearance */
+  background: var(--bg-card, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card, 12px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+
+  /* Stack children vertically */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* Smooth transitions for theme changes */
+  transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+/* Tablet+ responsive width */
+@media (min-width: 640px) {
+  .game-shell {
+    max-width: 520px;
+    border-radius: var(--radius-card, 16px);
+  }
+}
+
+/* Mobile edge-to-edge on very small screens */
+@media (max-width: 480px) {
+  .game-shell {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    max-width: 100%;
+  }
+}
+
+/* ============================================
+   PER-GAME THEMING
+   ============================================ */
+/* MagicGraph: Violet - puzzle, logic */
+[data-game="magic-graph"] {
+  --game-accent: var(--game-magic, #a78bfa);
+  --game-accent-light: var(--game-magic-light, #c4b5fd);
+  --game-accent-dark: var(--game-magic-dark, #7c3aed);
+  --game-bg-tint: var(--game-magic-bg, rgba(167, 139, 250, 0.08));
+}
+
+/* SequenceRace: Orange - competitive, strategy */
+[data-game="sequence-race"] {
+  --game-accent: var(--game-race, #fb923c);
+  --game-accent-light: var(--game-race-light, #fdba74);
+  --game-accent-dark: var(--game-race-dark, #ea580c);
+  --game-bg-tint: var(--game-race-bg, rgba(251, 146, 60, 0.08));
+}
+
+/* ShapeArchitect: Teal - spatial, creative */
+[data-game="shape-architect"] {
+  --game-accent: var(--game-shape, #2dd4bf);
+  --game-accent-light: var(--game-shape-light, #5eead4);
+  --game-accent-dark: var(--game-shape-dark, #0d9488);
+  --game-bg-tint: var(--game-shape-bg, rgba(45, 212, 191, 0.08));
+}
+
+/* ============================================
+   GAME HEADER STRIP
+   ============================================ */
+.game-header-strip {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+
+  /* Subtle tinted background */
+  background: var(--game-bg-tint, var(--bg-secondary, #f5f5f4));
+  border-bottom: 1px solid var(--border);
+}
+
+.game-header-strip__block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.game-header-strip__progress {
+  justify-self: start;
+}
+
+.game-header-strip__timer {
+  justify-self: center;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: var(--surface, white);
+  border: 1px solid var(--border);
+}
+
+.game-header-strip__target {
+  justify-self: end;
+  align-items: flex-end;
+}
+
+.game-header-strip__label {
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #64748b);
+}
+
+.game-header-strip__value {
+  font-family: var(--font-display, system-ui);
+  font-size: 1.125rem; /* 18px */
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text, var(--text-primary));
+}
+
+.game-header-strip__value--accent {
+  color: var(--game-accent, var(--accent-gold));
+}
+
+.game-header-strip__separator {
+  opacity: 0.4;
+  margin: 0 0.125rem;
+}
+
+/* Timer Display */
+.game-header-strip__timer-icon {
+  font-size: 1rem;
+}
+
+.game-header-strip__timer-value {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 1.25rem; /* 20px */
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text, var(--text-primary));
+}
+
+.game-header-strip__timer--practice {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.game-header-strip__timer--practice .game-header-strip__timer-value {
+  color: var(--accent-emerald, #10b981);
+}
+
+.game-header-strip__timer--paused {
+  opacity: 0.6;
+}
+
+.game-header-strip__paused-indicator {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+/* Timer urgency states */
+.game-header-strip__timer.timer--warning {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.game-header-strip__timer.timer--warning .game-header-strip__timer-value {
+  color: var(--accent-coral, #f59e0b);
+}
+
+.game-header-strip__timer.timer--critical {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  animation: pulse-critical 1s ease-in-out infinite;
+}
+
+.game-header-strip__timer.timer--critical .game-header-strip__timer-value {
+  color: var(--accent-lotus, #ef4444);
+}
+
+@keyframes pulse-critical {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ============================================
+   GAME BOARD AREA
+   ============================================ */
+.game-board-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  min-height: 280px;
+}
+
+@media (max-width: 480px) {
+  .game-board-area {
+    padding: 1rem;
+    min-height: 240px;
+  }
+}
+
+/* ============================================
+   GAME CONTROLS AREA
+   ============================================ */
+.game-controls-area {
+  padding: 1rem;
+  background: var(--bg-inset, var(--bg-secondary, #f5f5f4));
+  border-top: 1px solid var(--border);
+}
+
+.game-controls-label {
+  display: block;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #64748b);
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+/* ============================================
+   GAME FOOTER
+   ============================================ */
+.game-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--bg-card, var(--surface));
+}
+
+.game-footer__secondary {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.game-footer__spacer {
+  flex: 1;
+}
+
+/* Footer Button Base - shadcn Button inspired */
+.game-footer__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+
+  height: 2.5rem; /* 40px - shadcn lg size */
+  padding: 0 1rem;
+  border-radius: 0.5rem; /* rounded-lg */
+
+  font-family: var(--font-body, var(--font-sans, system-ui));
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  white-space: nowrap;
+
+  cursor: pointer;
+  transition: all 150ms ease;
+  outline: none;
+
+  /* Default: ghost/outline style */
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary, #64748b);
+}
+
+.game-footer__btn:hover:not(:disabled) {
+  background: var(--bg-secondary, rgba(0, 0, 0, 0.05));
+  border-color: var(--game-accent, var(--accent-gold));
+  color: var(--game-accent, var(--accent-gold));
+}
+
+.game-footer__btn:focus-visible {
+  border-color: var(--game-accent, var(--accent-gold));
+  box-shadow: 0 0 0 3px rgba(var(--game-accent, 212, 175, 55), 0.2);
+}
+
+.game-footer__btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.game-footer__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Icon-only button */
+.game-footer__btn--icon {
+  width: 2.5rem;
+  padding: 0;
+}
+
+/* Primary button - game accent color */
+.game-footer__btn--primary {
+  background: var(--game-accent, var(--accent-gold));
+  border-color: var(--game-accent, var(--accent-gold));
+  color: white;
+  font-weight: 600;
+}
+
+.game-footer__btn--primary:hover:not(:disabled) {
+  background: var(--game-accent-dark, var(--accent-gold));
+  border-color: var(--game-accent-dark, var(--accent-gold));
+  color: white;
+  filter: brightness(1.1);
+}
+
+.game-footer__btn--primary:disabled {
+  background: var(--text-muted, #64748b);
+  border-color: var(--text-muted, #64748b);
+}
+
+/* Button icon */
+.game-footer__btn-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Button label - hide on mobile for non-primary */
+.game-footer__btn-label {
+  display: none;
+}
+
+@media (min-width: 400px) {
+  .game-footer__btn-label {
+    display: inline;
+  }
+}
+
+/* Primary always shows label */
+.game-footer__btn--primary .game-footer__btn-label {
+  display: inline;
+}
+
+/* Hint badge */
+.game-footer__badge {
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: 9999px;
+  background: var(--game-accent, var(--accent-gold));
+  color: white;
+  min-width: 1.25rem;
+  text-align: center;
+}
+
+/* ============================================
+   TOUCH TARGETS
+   ============================================ */
+@media (pointer: coarse) {
+  .game-footer__btn {
+    height: 2.75rem; /* 44px touch target */
+    min-width: 2.75rem;
+  }
+
+  .game-footer__btn--icon {
+    width: 2.75rem;
+  }
+}
+
+/* ============================================
+   RESPONSIVE FOOTER LAYOUT
+   ============================================ */
+@media (max-width: 400px) {
+  .game-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .game-footer__secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .game-footer__btn--primary {
+    flex: 1;
+    max-width: 200px;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  .game-shell,
+  .game-footer__btn {
+    transition: none;
+  }
+
+  .game-header-strip__timer.timer--critical {
+    animation: none;
+  }
+}
+
+/* ============================================
+   DARK MODE OVERRIDES
+   ============================================ */
+[data-theme="dark"] .game-shell {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .game-header-strip__timer {
+  background: var(--bg-secondary, #1b263b);
+}
+
+[data-theme="dark"] .game-controls-area {
+  background: var(--bg-secondary, #1b263b);
+}

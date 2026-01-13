@@ -105,7 +105,7 @@ export class MagicGraphPage {
     this.hintButton = page.getByRole('button', { name: /need help|cần giúp|💡/i });
     this.backButton = page.locator('.action--secondary').filter({ hasText: /back|quay lại/i });
 
-    // Timer - uses timer-container class
+    // Timer - now inside SettingsDrawer (must open drawer first)
     this.timerContainer = page.locator('.timer-container');
     this.timerDisplay = page.locator('.timer-display');
     this.timerTime = page.locator('.timer-display__time');
@@ -261,16 +261,34 @@ export class MagicGraphPage {
   }
 
   /**
+   * Open settings drawer to access timer controls
+   * Timer is now inside the settings drawer
+   */
+  async openSettingsDrawer(): Promise<void> {
+    // Check if drawer is already open
+    const isOpen = await this.timerContainer.isVisible().catch(() => false);
+    if (!isOpen) {
+      await this.settingsDrawerTrigger.click();
+      // Wait for drawer animation and timer to be visible
+      await this.timerContainer.waitFor({ state: 'visible', timeout: 5000 });
+    }
+  }
+
+  /**
    * Switch to practice mode
+   * Opens settings drawer first since timer is now inside it
    */
   async switchToPracticeMode(): Promise<void> {
+    await this.openSettingsDrawer();
     await this.practiceModeBtn.click();
   }
 
   /**
    * Switch to timed mode
+   * Opens settings drawer first since timer is now inside it
    */
   async switchToTimedMode(): Promise<void> {
+    await this.openSettingsDrawer();
     await this.timedModeBtn.click();
   }
 
@@ -283,15 +301,19 @@ export class MagicGraphPage {
 
   /**
    * Get timer display text
+   * Opens settings drawer first since timer is now inside it
    */
   async getTimerText(): Promise<string | null> {
+    await this.openSettingsDrawer();
     return this.timerTime.textContent();
   }
 
   /**
    * Check if in practice mode
+   * Opens settings drawer first since timer is now inside it
    */
   async isInPracticeMode(): Promise<boolean> {
+    await this.openSettingsDrawer();
     const practiceBtn = this.practiceModeBtn;
     const classes = await practiceBtn.getAttribute('class');
     return classes?.includes('--active') ?? false;
@@ -327,22 +349,28 @@ export class MagicGraphPage {
 
   /**
    * Pause the timer
+   * Opens settings drawer first since timer is now inside it
    */
   async pauseTimer(): Promise<void> {
+    await this.openSettingsDrawer();
     await this.timerPauseBtn.click();
   }
 
   /**
    * Resume the timer
+   * Opens settings drawer first since timer is now inside it
    */
   async resumeTimer(): Promise<void> {
+    await this.openSettingsDrawer();
     await this.timerPauseBtn.click();
   }
 
   /**
    * Check if timer is paused
+   * Opens settings drawer first since timer is now inside it
    */
   async isTimerPaused(): Promise<boolean> {
+    await this.openSettingsDrawer();
     const classes = await this.timerDisplay.getAttribute('class');
     return classes?.includes('--paused') ?? false;
   }

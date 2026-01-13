@@ -16,13 +16,13 @@ test.describe('ShapeArchitect - Basic Tests', () => {
   test('should load game page', async ({ page }) => {
     await page.goto('/shape-architect');
 
-    // Verify game container is visible (may take longer due to 3D loading)
-    await expect(page.locator('[data-testid="shape-architect-game"]')).toBeVisible({ timeout: 15000 });
+    // Verify game shell is visible (may take longer due to 3D loading)
+    await expect(page.locator('[data-testid="shape-architect-shell"]')).toBeVisible({ timeout: 15000 });
   });
 
   test('should display game title', async ({ page }) => {
     await page.goto('/shape-architect');
-    await page.waitForSelector('[data-testid="shape-architect-game"]', { state: 'visible', timeout: 15000 });
+    await page.waitForSelector('[data-testid="shape-architect-shell"]', { state: 'visible', timeout: 15000 });
 
     // Verify game header
     await expect(page.locator('.game-header__title')).toBeVisible();
@@ -30,15 +30,18 @@ test.describe('ShapeArchitect - Basic Tests', () => {
 
   test('should display timer', async ({ page }) => {
     await page.goto('/shape-architect');
-    await page.waitForSelector('[data-testid="shape-architect-game"]', { state: 'visible', timeout: 15000 });
+    await page.waitForSelector('[data-testid="shape-architect-shell"]', { state: 'visible', timeout: 15000 });
 
-    // Verify timer is present
-    await expect(page.locator('.timer-container')).toBeVisible();
+    // Timer is now inside settings drawer - open it first
+    await page.locator('.settings-drawer__trigger').click();
+
+    // Verify timer is present inside the drawer
+    await expect(page.locator('.timer-container')).toBeVisible({ timeout: 5000 });
   });
 
   test('should display difficulty selector in settings drawer', async ({ page }) => {
     await page.goto('/shape-architect');
-    await page.waitForSelector('[data-testid="shape-architect-game"]', { state: 'visible', timeout: 15000 });
+    await page.waitForSelector('[data-testid="shape-architect-shell"]', { state: 'visible', timeout: 15000 });
 
     // Open settings drawer (gear icon button)
     await page.locator('.settings-drawer__trigger').click();
@@ -49,7 +52,7 @@ test.describe('ShapeArchitect - Basic Tests', () => {
 
   test('should have back button', async ({ page }) => {
     await page.goto('/shape-architect');
-    await page.waitForSelector('[data-testid="shape-architect-game"]', { state: 'visible', timeout: 15000 });
+    await page.waitForSelector('[data-testid="shape-architect-shell"]', { state: 'visible', timeout: 15000 });
 
     // Verify back button
     await expect(page.locator('.action--secondary').filter({ hasText: /back|quay lại/i })).toBeVisible();
@@ -57,7 +60,7 @@ test.describe('ShapeArchitect - Basic Tests', () => {
 
   test('should navigate back to dashboard', async ({ page }) => {
     await page.goto('/shape-architect');
-    await page.waitForSelector('[data-testid="shape-architect-game"]', { state: 'visible', timeout: 15000 });
+    await page.waitForSelector('[data-testid="shape-architect-shell"]', { state: 'visible', timeout: 15000 });
 
     // Click back button
     await page.locator('.action--secondary').filter({ hasText: /back|quay lại/i }).first().click();
@@ -68,7 +71,7 @@ test.describe('ShapeArchitect - Basic Tests', () => {
 
   test('should display puzzle board', async ({ page }) => {
     await page.goto('/shape-architect');
-    await page.waitForSelector('[data-testid="shape-architect-game"]', { state: 'visible', timeout: 15000 });
+    await page.waitForSelector('[data-testid="shape-architect-shell"]', { state: 'visible', timeout: 15000 });
 
     // Verify puzzle board (.sa-board)
     await expect(page.locator('.sa-board')).toBeVisible();
@@ -76,7 +79,7 @@ test.describe('ShapeArchitect - Basic Tests', () => {
 
   test('should display piece inventory', async ({ page }) => {
     await page.goto('/shape-architect');
-    await page.waitForSelector('[data-testid="shape-architect-game"]', { state: 'visible', timeout: 15000 });
+    await page.waitForSelector('[data-testid="shape-architect-shell"]', { state: 'visible', timeout: 15000 });
 
     // Verify inventory (.sa-inventory)
     await expect(page.locator('.sa-inventory')).toBeVisible();

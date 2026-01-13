@@ -23,8 +23,17 @@ e2e/
 │   └── test-utils.ts          # localStorage helpers, test data fixtures
 ├── pages/
 │   ├── Dashboard.page.ts      # Dashboard page object
-│   └── MagicGraph.page.ts     # MagicGraph game page object
-├── example.spec.ts            # Example tests demonstrating usage
+│   ├── MagicGraph.page.ts     # MagicGraph game page object
+│   ├── index.ts               # Barrel exports
+│   └── README.md              # Page object documentation
+├── accessibility.spec.ts      # Accessibility tests
+├── daily-challenge.spec.ts    # Daily challenge tests
+├── dashboard.spec.ts          # Dashboard tests
+├── magic-graph.spec.ts        # MagicGraph game tests
+├── navigation.spec.ts         # Navigation flow tests
+├── progression.spec.ts        # Player progression tests
+├── sequence-race.spec.ts      # SequenceRace game tests
+├── shape-architect.spec.ts    # ShapeArchitect game tests
 └── README.md                  # This file
 ```
 

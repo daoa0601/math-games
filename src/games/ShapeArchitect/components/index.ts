@@ -14,6 +14,6 @@ export { PreviewLockButton } from './PreviewLockButton';
 export { InstancedVoxels } from './InstancedVoxels';
 export type { VoxelData } from './InstancedVoxels';
 export { PlacedPieceControls } from './PlacedPieceControls';
-export { PlacementModal } from './PlacementModal';
-export type { PlacementModalProps } from './PlacementModal';
+export { PlacementToolbar } from './PlacementToolbar';
+export type { PlacementToolbarProps } from './PlacementToolbar';
 export { Canvas3DErrorBoundary } from './Canvas3DErrorBoundary';
