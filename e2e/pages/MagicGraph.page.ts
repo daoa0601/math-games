@@ -90,8 +90,8 @@ export class MagicGraphPage {
     this.pickerClose = this.numberPicker.locator('.mg-picker__close');
     this.pickerClear = this.numberPicker.locator('.mg-picker__clear');
 
-    // Settings drawer
-    this.settingsDrawerTrigger = page.locator('.settings-drawer__trigger');
+    // Settings drawer trigger - uses data-testid
+    this.settingsDrawerTrigger = page.locator('[data-testid="settings-drawer-trigger"]');
 
     // Difficulty selector (inside settings drawer)
     this.difficultySelector = page.locator('.difficulty-selector');

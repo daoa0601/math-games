@@ -12,7 +12,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { playSound } from '../../utils';
 import { getRankInfo, getNextRank, type PlayerRank } from '../../services';
-import { Button } from '@/shared/components/ui';
+import { Button } from '@/shared/components/ui/shadcn';
 import { useFocusTrap } from '../../hooks';
 import './RankUpOverlay.css';
 
@@ -178,8 +178,8 @@ export function RankUpOverlay({
 
         {/* Continue Button */}
         <Button
-          variant="primary"
-          size="large"
+          variant="default"
+          size="lg"
           onClick={handleClose}
           className="rank-up-modal__button"
         >

@@ -7,21 +7,25 @@
  * - New game / Random buttons
  * - Game rules
  *
- * Uses BottomSheet internally for consistent modal behavior.
+ * Uses shadcn Sheet for consistent modal behavior.
  * Triggered by gear icon in game header.
  */
 
 import { type ReactNode, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BottomSheet } from './BottomSheet';
-import { IconButton } from './IconButton';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/shared/components/ui/shadcn';
+import { Button } from '@/shared/components/ui/shadcn';
 import './SettingsDrawer.css';
 
 export interface SettingsDrawerProps {
+  /** Whether the drawer is open (deprecated: use open) */
+  isOpen?: boolean;
   /** Whether the drawer is open */
-  isOpen: boolean;
-  /** Callback when drawer should close */
-  onClose: () => void;
+  open?: boolean;
+  /** Callback when drawer should close (deprecated: use onOpenChange) */
+  onClose?: () => void;
+  /** Callback when drawer open state changes */
+  onOpenChange?: (open: boolean) => void;
   /** Settings content (difficulty selector, mode toggle, etc.) */
   children: ReactNode;
   /** Optional title override (defaults to "Settings") */
@@ -30,35 +34,39 @@ export interface SettingsDrawerProps {
 
 /**
  * Settings drawer for game configuration.
- * Uses BottomSheet with content detent for auto-height.
+ * Uses shadcn Sheet with bottom side for slide-up behavior.
  */
 export function SettingsDrawer({
   isOpen,
+  open,
   onClose,
+  onOpenChange,
   children,
   title,
 }: SettingsDrawerProps) {
   const { t } = useTranslation('common');
 
-  // Wrap close in useCallback to prevent re-renders
-  const handleClose = useCallback(() => {
-    onClose();
-  }, [onClose]);
+  // Support both old and new API for backward compatibility
+  const isOpenState = open !== undefined ? open : isOpen;
+  const handleOpenChange = useCallback((newOpen: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(newOpen);
+    } else if (!newOpen && onClose) {
+      onClose();
+    }
+  }, [onOpenChange, onClose]);
 
   return (
-    <BottomSheet
-      isOpen={isOpen}
-      onClose={handleClose}
-      title={title ?? t('settings.title', 'Settings')}
-      detent="content"
-      dismissible
-      className="settings-drawer"
-      ariaLabel={title ?? t('settings.title', 'Settings')}
-    >
-      <div className="settings-drawer__content">
-        {children}
-      </div>
-    </BottomSheet>
+    <Sheet open={isOpenState} onOpenChange={handleOpenChange}>
+      <SheetContent side="bottom" className="settings-drawer">
+        <SheetHeader className="settings-drawer__header">
+          <SheetTitle>{title ?? t('settings.title', 'Settings')}</SheetTitle>
+        </SheetHeader>
+        <div className="settings-drawer__content">
+          {children}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -80,9 +88,12 @@ export function SettingsDrawerTrigger({
   const { t } = useTranslation('common');
 
   return (
-    <IconButton
+    <Button
+      variant="ghost"
+      size="icon"
       onClick={onClick}
       aria-label={ariaLabel ?? t('settings.openSettings', 'Open settings')}
+      data-testid="settings-drawer-trigger"
     >
       <svg
         viewBox="0 0 24 24"
@@ -97,7 +108,7 @@ export function SettingsDrawerTrigger({
         <circle cx="12" cy="12" r="3" />
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
       </svg>
-    </IconButton>
+    </Button>
   );
 }
 

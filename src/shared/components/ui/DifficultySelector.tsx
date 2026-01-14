@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import './DifficultySelector.css';
+import { RadioGroup, RadioGroupItem, Label } from '@/shared/components/ui/shadcn';
 
 type Difficulty = 'easy' | 'medium' | 'hard' | 'master' | 'grandmaster';
 
@@ -23,7 +23,7 @@ const DIFFICULTY_EMOJI: Record<Difficulty, string> = {
 
 /**
  * Shared difficulty selector component.
- * Displays difficulty options as buttons with emojis and translations.
+ * Displays difficulty options using shadcn RadioGroup with emojis and translations.
  *
  * @example
  * <DifficultySelector
@@ -39,23 +39,27 @@ export function DifficultySelector<T extends Difficulty>({
 }: DifficultySelectorProps<T>) {
     const { t } = useTranslation('common');
 
-    // Memoized handler to avoid creating new functions in map loop
-    const handleClick = useCallback((difficulty: T) => {
-        onChange(difficulty);
+    // Type-safe onChange wrapper
+    const handleChange = useCallback((newValue: string) => {
+        onChange(newValue as T);
     }, [onChange]);
 
     return (
-        <div className="difficulty-selector">
+        <RadioGroup value={value} onValueChange={handleChange} layout="horizontal" className="difficulty-selector">
             {options.map((d) => (
-                <button
-                    key={d}
-                    className={`difficulty-btn difficulty-btn--${d} ${value === d ? 'difficulty-btn--active' : ''}`}
-                    onClick={() => handleClick(d)}
-                    aria-pressed={value === d}
-                >
-                    {DIFFICULTY_EMOJI[d]} {t(`difficulty.${d}`)}
-                </button>
+                <div key={d} className="tw:flex tw:items-center tw:gap-2">
+                    <RadioGroupItem value={d} id={`difficulty-${d}`} />
+                    <Label
+                        htmlFor={`difficulty-${d}`}
+                        className={`difficulty-btn ${value === d ? 'difficulty-btn--active' : ''}`}
+                    >
+                        <span className="difficulty-btn__emoji" aria-hidden="true">
+                            {DIFFICULTY_EMOJI[d]}
+                        </span>{' '}
+                        {t(`difficulty.${d}`)}
+                    </Label>
+                </div>
             ))}
-        </div>
+        </RadioGroup>
     );
 }

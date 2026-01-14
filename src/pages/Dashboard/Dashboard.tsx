@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { usePlayer, useAuthAPI, useAuthState } from '@/shared/contexts';
+import { useSyncState } from '@/shared/hooks';
 import { BottomNav, type NavTabId } from '@/shared/components/layout';
 import { SkipLinks, FeedbackModal, AuthModal, AccountLinkBanner, type AuthMode } from '@/shared/components';
 import { useFirebaseAuthAPI, useFirebaseAuthState } from '@/firebase/useFirebaseAuthHooks';
@@ -13,7 +14,13 @@ export function Dashboard() {
   const { isGuest, isFirebaseUser, isAnonymous } = useAuthState();
   const firebaseAPI = useFirebaseAuthAPI();
   const firebaseState = useFirebaseAuthState();
+  const syncState = useSyncState();
   const [activeTab, setActiveTab] = useState<NavTabId>('home');
+
+  // Map sync manager status to SyncIndicator status
+  // syncManager: 'idle' | 'syncing' | 'synced' | 'error' | 'offline'
+  // SyncIndicator: 'synced' | 'syncing' | 'offline' | 'error'
+  const syncStatus = syncState?.status === 'idle' ? 'synced' : syncState?.status;
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('signin');
@@ -118,6 +125,7 @@ export function Dashboard() {
           isGuest={isGuest}
           isFirebaseUser={isFirebaseUser}
           isAnonymous={isAnonymous}
+          syncStatus={syncStatus}
           onLogout={isGuest ? undefined : logout}
           onSignIn={isGuest ? handleSignInClick : undefined}
           onLogin={isAnonymous ? handleLinkClick : undefined}

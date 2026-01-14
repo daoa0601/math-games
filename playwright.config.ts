@@ -109,7 +109,12 @@ export default defineConfig({
   timeout: 30000,
 
   // Reporter to use
-  reporter: [['html', { outputFolder: 'playwright-report' }], ['list']],
+  // HTML report for interactive viewing, list for console, JSON for file logs
+  reporter: [
+    ['html', { outputFolder: 'playwright-report' }],
+    ['list'],
+    ['json', { outputFile: 'logs/e2e-results.json' }],
+  ],
 
   // Shared settings for all the projects below
   use: {

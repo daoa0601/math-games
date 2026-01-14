@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { subscribeSyncState, getSyncState, type SyncState } from '@/firebase/sync';
-import { isFirebaseEnabled } from '@/firebase/index';
+import { isFirebaseEnabled } from '@/firebase';
 
 /**
  * Hook to access the current sync state.

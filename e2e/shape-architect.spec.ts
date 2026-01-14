@@ -33,7 +33,7 @@ test.describe('ShapeArchitect - Basic Tests', () => {
     await page.waitForSelector('[data-testid="shape-architect-shell"]', { state: 'visible', timeout: 15000 });
 
     // Timer is now inside settings drawer - open it first
-    await page.locator('.settings-drawer__trigger').click();
+    await page.locator('[data-testid="settings-drawer-trigger"]').click();
 
     // Verify timer is present inside the drawer
     await expect(page.locator('.timer-container')).toBeVisible({ timeout: 5000 });
@@ -44,7 +44,7 @@ test.describe('ShapeArchitect - Basic Tests', () => {
     await page.waitForSelector('[data-testid="shape-architect-shell"]', { state: 'visible', timeout: 15000 });
 
     // Open settings drawer (gear icon button)
-    await page.locator('.settings-drawer__trigger').click();
+    await page.locator('[data-testid="settings-drawer-trigger"]').click();
 
     // Verify difficulty selector is visible inside the drawer
     await expect(page.locator('.difficulty-selector')).toBeVisible({ timeout: 5000 });

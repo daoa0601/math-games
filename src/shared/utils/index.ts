@@ -1,25 +1,4 @@
 export {
-    getProgress,
-    saveProgress,
-    completeLevel,
-    isLevelUnlocked,
-    isLevelCompleted,
-    getBestTime,
-    getTotalScore,
-    resetProgress,
-    getGlobalStats,
-    // Personal Best functions
-    checkPersonalBest,
-    completeLevelWithPB,
-    getAllBestTimes,
-    getGameFastestTime,
-    getGameAverageTime,
-} from './storage';
-
-export type { LevelProgress, GameProgress, PersonalBestResult } from './storage';
-// GameId is deprecated - use StorageGameId from '../types' instead
-
-export {
     playSound,
     toggleSound,
     isSoundEnabled,
@@ -91,6 +70,26 @@ export {
 } from './colorPatterns';
 
 export type { PatternClass } from './colorPatterns';
+
+// Legacy storage utilities (stubs - replaced by Firebase/player service)
+export {
+    getProgress,
+    saveProgress,
+    completeLevel,
+    isLevelUnlocked,
+    isLevelCompleted,
+    getBestTime,
+    getTotalScore,
+    resetProgress,
+    getGlobalStats,
+    checkPersonalBest,
+    completeLevelWithPB,
+    getAllBestTimes,
+    getGameFastestTime,
+    getGameAverageTime,
+} from './storage';
+
+export type { LevelProgress, GameProgress, PersonalBestResult } from './storage';
 
 // Date utilities
 export {

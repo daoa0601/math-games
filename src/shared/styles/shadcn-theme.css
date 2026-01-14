@@ -105,4 +105,15 @@
   --shadcn-input: var(--border);
   --shadcn-ring: var(--game-accent, var(--accent-gold));
   --shadcn-radius: 8px; /* Rounded for playful aesthetic */
+
+  /* Progress component */
+  --shadcn-progress-height: 8px;
+  --shadcn-progress-radius: 4px;
+  --shadcn-progress-bg: var(--bg-secondary);
+  --shadcn-progress-fill: var(--accent-gold);
+
+  /* RadioGroup for DifficultySelector */
+  --shadcn-radio-accent: var(--accent-gold);
+  --shadcn-radio-border: var(--border);
+  --shadcn-radio-size: 20px;
 }

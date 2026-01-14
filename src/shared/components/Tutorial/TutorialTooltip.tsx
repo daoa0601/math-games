@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTutorialContext } from './TutorialContext';
-import { Button } from '@/shared/components/ui';
+import { Button } from '@/shared/components/ui/shadcn';
 
 // ═══════════════════════════════════════════════════════════════════
 // TYPES
@@ -244,19 +244,19 @@ export function TutorialTooltip({
       {/* Navigation buttons */}
       <div className="tutorial-tooltip__actions">
         {showPrevious && !isFirstStep && (
-          <Button variant="ghost" size="small" onClick={previous}>
+          <Button variant="ghost" size="sm" onClick={previous}>
             {t('tutorial.previous')}
           </Button>
         )}
 
         {showSkip && (
-          <Button variant="ghost" size="small" onClick={skip}>
+          <Button variant="ghost" size="sm" onClick={skip}>
             {t('tutorial.skip')}
           </Button>
         )}
 
         {showNext && (
-          <Button variant="primary" size="small" onClick={next}>
+          <Button variant="default" size="sm" onClick={next}>
             {isLastStep ? t('tutorial.finish') : t('tutorial.next')}
           </Button>
         )}

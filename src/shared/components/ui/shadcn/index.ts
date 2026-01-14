@@ -53,3 +53,10 @@ export {
   SelectTrigger,
   SelectValue,
 } from './select';
+
+export { Progress, type ProgressProps } from './progress';
+export {
+  RadioGroup,
+  RadioGroupItem,
+  type RadioGroupProps,
+} from './radio-group';

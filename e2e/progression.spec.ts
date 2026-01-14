@@ -163,7 +163,7 @@ test.describe('Progression System', () => {
 
       const playerInfo = await dashboard.getPlayerInfo();
       // Accept either English or Vietnamese rank name
-      expect(playerInfo.rank).toMatch(/Intermediate|Trung cấp/);
+      expect(playerInfo.rank).toMatch(/Intermediate|Thợ Thủ Công/);
 
       // Verify profile data
       const profile = await getPlayerProfile(page);
@@ -192,14 +192,14 @@ test.describe('Progression System', () => {
 
       const playerInfo = await dashboard.getPlayerInfo();
       // Accept either English or Vietnamese
-      expect(playerInfo.rank).toMatch(/Intermediate|Trung cấp/);
+      expect(playerInfo.rank).toMatch(/Intermediate|Thợ Thủ Công/);
 
       // Reload again
       await page.reload();
       await dashboard.waitForLoad();
 
       const playerInfo2 = await dashboard.getPlayerInfo();
-      expect(playerInfo2.rank).toMatch(/Intermediate|Trung cấp/);
+      expect(playerInfo2.rank).toMatch(/Intermediate|Thợ Thủ Công/);
     });
   });
 

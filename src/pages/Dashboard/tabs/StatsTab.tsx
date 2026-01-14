@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '@/shared/contexts';
-import { ProgressRing } from '@/shared/components';
+import { Progress } from '@/shared/components/ui/shadcn';
 import './StatsTab.css';
 
 // Memoized gradient generator to avoid inline object creation
@@ -77,9 +77,11 @@ export function StatsTab() {
           </div>
           {nextRank && rankProgress && (
             <div className="stats-tab__rank-progress">
-              <ProgressRing
-                progress={rankProgress.progressPercent}
-                size={80}
+              <Progress
+                value={rankProgress.progressPercent}
+                showLabel
+                labelPosition="below"
+                className="stats-tab__progress-bar"
               />
               <div className="stats-tab__rank-requirements">
                 {rankProgress.gamesNeeded > 0 && (

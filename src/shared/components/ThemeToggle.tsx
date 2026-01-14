@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { IconButton } from '@/shared/components/ui';
+import { Button } from '@/shared/components/ui/shadcn';
 import { useTheme, type Theme } from '@/shared/contexts';
 import './ThemeToggle.css';
 
@@ -86,7 +86,9 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
     const ariaLabel = t(`theme.${theme}`, `Theme: ${theme}`);
 
     return (
-        <IconButton
+        <Button
+            variant="ghost"
+            size="icon"
             className={`theme-toggle ${className}`}
             onClick={handleToggle}
             aria-label={ariaLabel}
@@ -96,6 +98,6 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
             <span className="theme-toggle__icon" aria-hidden="true">
                 {getIcon()}
             </span>
-        </IconButton>
+        </Button>
     );
 }

@@ -14,8 +14,11 @@ npm run preview      # Preview production build locally
 # Testing
 npm test             # Run unit tests in watch mode (Vitest)
 npm run test:coverage # Run unit tests with coverage report
-npm run test:e2e     # Run Playwright E2E tests
+npm run test:e2e     # Run Playwright E2E tests (logs to logs/e2e-results.{log,json})
 npm run test:e2e:ui  # Run E2E tests with interactive UI
+npm run test:e2e:report # View HTML report of last E2E test run
+cat logs/e2e-results.log # View E2E console output without re-running
+jq '.stats' logs/e2e-results.json # Parse E2E results programmatically
 
 # Component Development
 npm run storybook       # Launch Storybook component explorer
@@ -492,6 +495,37 @@ npm run test:e2e      # E2E tests (headless)
 npm run test:e2e:ui   # E2E tests with interactive UI
 npm run storybook     # Component explorer
 ```
+
+### E2E Test Results Logging
+
+**All E2E test runs are automatically logged** to avoid re-running tests to diagnose failures.
+
+```bash
+# Run tests - results automatically saved to both files
+npm run test:e2e
+
+# View human-readable console output (with colors, errors, stack traces)
+cat logs/e2e-results.log
+
+# Quick diagnostic: which tests failed?
+grep -E "✗|failed|error" logs/e2e-results.log
+
+# Get summary of last test run
+tail -20 logs/e2e-results.log
+
+# Parse programmatically (JSON format)
+cat logs/e2e-results.json | jq '.stats'
+```
+
+**Two log files are generated:**
+| File | Format | Purpose |
+|------|--------|---------|
+| `logs/e2e-results.log` | Text (console output) | Human-readable with colors, errors, stack traces |
+| `logs/e2e-results.json` | JSON | Machine-readable for programmatic analysis |
+
+`★ Insight ─────────────────────────────────────`
+**Why file logging matters:** E2E tests are slow (~5-10 minutes). Without logs, you'd need to re-run the entire suite just to see which specific test failed. The log file preserves all test names, pass/fail status, and error messages for instant inspection.
+`─────────────────────────────────────────────────`
 
 ### E2E Test Structure
 

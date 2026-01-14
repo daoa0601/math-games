@@ -33,7 +33,7 @@ test.describe('SequenceRace - Basic Tests', () => {
     await page.waitForSelector('[data-testid="sequence-race-shell"]', { state: 'visible' });
 
     // Timer is now inside settings drawer - open it first
-    await page.locator('.settings-drawer__trigger').click();
+    await page.locator('[data-testid="settings-drawer-trigger"]').click();
 
     // Verify timer is present inside the drawer
     await expect(page.locator('.timer-container')).toBeVisible({ timeout: 5000 });
@@ -44,7 +44,7 @@ test.describe('SequenceRace - Basic Tests', () => {
     await page.waitForSelector('[data-testid="sequence-race-shell"]', { state: 'visible' });
 
     // Open settings drawer (gear icon button)
-    await page.locator('.settings-drawer__trigger').click();
+    await page.locator('[data-testid="settings-drawer-trigger"]').click();
 
     // Verify difficulty selector is visible inside the drawer
     await expect(page.locator('.difficulty-selector')).toBeVisible({ timeout: 5000 });

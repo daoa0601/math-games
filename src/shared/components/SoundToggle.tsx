@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IconButton } from '@/shared/components/ui';
+import { Button } from '@/shared/components/ui/shadcn';
 import { isSoundEnabled, toggleSound } from '../utils';
 import './SoundToggle.css';
 
@@ -29,8 +29,10 @@ export function SoundToggle({ className = '' }: SoundToggleProps) {
     };
 
     return (
-        <IconButton
-            className={`sound-toggle ${className}`}
+        <Button
+            variant="ghost"
+            size="icon"
+            className={`sound-toggle ${enabled ? 'sound-toggle--active' : ''} ${className}`}
             onClick={handleToggle}
             aria-label={enabled
                 ? t('sound.disable', 'Mute sounds')
@@ -41,7 +43,6 @@ export function SoundToggle({ className = '' }: SoundToggleProps) {
                 ? t('sound.disable', 'Mute sounds')
                 : t('sound.enable', 'Enable sounds')
             }
-            active={enabled}
         >
             <span className="sound-toggle__icon" aria-hidden="true">
                 {enabled ? (
@@ -76,6 +77,6 @@ export function SoundToggle({ className = '' }: SoundToggleProps) {
                     </svg>
                 )}
             </span>
-        </IconButton>
+        </Button>
     );
 }

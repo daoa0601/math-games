@@ -1,5 +1,5 @@
 /* SoundToggle - Icon wrapper and sound wave styles
-   Button styles are now handled by IconButton */
+   Button styles now handled by shadcn Button (ghost variant) */
 
 /* Icon wrapper */
 .sound-toggle__icon {
@@ -8,6 +8,12 @@
   justify-content: center;
   width: 20px;
   height: 20px;
+}
+
+/* Active state - gold accent border */
+.sound-toggle--active {
+  border-color: var(--accent-gold) !important;
+  color: var(--accent-gold) !important;
 }
 
 /* Sound waves - static, no animation */

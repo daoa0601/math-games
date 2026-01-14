@@ -41,22 +41,18 @@ export function CompactHeader({
       </div>
       <div className="compact-header__info">
         <span className="compact-header__name">
-          {isGuest
-            ? t('login.guestLabel', 'Guest')
-            : (profile.displayName || profile.id)}
+          {profile.displayName || (isGuest ? t('login.guestLabel', 'Guest') : profile.id)}
         </span>
         <div className="compact-header__status">
           <span className="compact-header__rank-name">
-            {isGuest
-              ? t('login.guestHint', 'Progress saved locally')
-              : t(rankInfo.displayNameKey)}
+            {t(rankInfo.displayNameKey)}
           </span>
           {showSyncStatus && (
             <SyncIndicator status={syncStatus} className="compact-header__sync" />
           )}
         </div>
       </div>
-      {streak > 0 && !isGuest && (
+      {streak > 0 && (
         <div className="compact-header__streak" title={t('player.streak')}>
           <span className="compact-header__streak-count">{streak}</span>
           <span className="compact-header__streak-label">{t('player.streak')}</span>

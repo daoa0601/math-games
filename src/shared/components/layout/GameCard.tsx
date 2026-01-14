@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { MagicGraphIcon, SequenceRaceIcon, ShapeArchitectIcon } from '@/shared/components/icons';
-import { CompactProgressRing } from '@/shared/components/ui/ProgressRing';
+import { Progress } from '@/shared/components/ui/shadcn';
 
 type GameId = 'magicGraph' | 'sequenceRace' | 'shapeArchitect';
 
@@ -71,11 +71,16 @@ export const GameCard = memo(function GameCard({
       {/* Progress (optional) */}
       {progress && progress.total > 0 && (
         <div className="slab__progress">
-          <CompactProgressRing
-            completed={progress.completed}
-            total={progress.total}
-            size={36}
-          />
+          <div className="slab__progress-indicator">
+            <Progress
+              value={(progress.completed / progress.total) * 100}
+              showLabel
+              className="slab__progress-bar"
+            />
+            <span className="slab__progress-fraction">
+              {progress.completed}/{progress.total}
+            </span>
+          </div>
         </div>
       )}
 

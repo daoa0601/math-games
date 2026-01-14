@@ -6,6 +6,7 @@ import {
     generateRandomConfig,
     type SequenceType,
 } from '../presets';
+import { validateGameFairness } from '../engine';
 
 describe('SequenceRace Presets', () => {
     describe('generateSequence', () => {
@@ -126,6 +127,25 @@ describe('SequenceRace Presets', () => {
         it('generates IDs with timestamp prefix', () => {
             const config = generateRandomConfig('easy');
             expect(config.id).toMatch(/^random_\d+$/);
+        });
+
+        it('generates fair configs where player can always win', () => {
+            // Generate 100 random configs and verify all are fair
+            for (let i = 0; i < 100; i++) {
+                const config = generateRandomConfig('medium');
+                const fairness = validateGameFairness(config);
+
+                // Player should be able to win (either first or second)
+                // OR the game is a draw with perfect play (rare edge case)
+                if (!fairness.isPlayerWinnable && !fairness.isAIWinnable) {
+                    // Draw scenario - both players can avoid losing with perfect play
+                    // This is mathematically valid and rare
+                    expect(config.aiMovesFirst).toBeUndefined();
+                } else if (!fairness.isPlayerWinnable) {
+                    // Player can't win going first, but AI can - so player gets second-mover advantage
+                    expect(config.aiMovesFirst).toBe(true);
+                }
+            }
         });
     });
 });

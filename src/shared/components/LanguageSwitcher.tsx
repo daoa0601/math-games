@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { IconButton } from '@/shared/components/ui';
+import { Button } from '@/shared/components/ui/shadcn';
 import { LANGUAGE_KEY } from '../constants';
 
 export function LanguageSwitcher() {
@@ -15,7 +15,9 @@ export function LanguageSwitcher() {
     const label = isVietnamese ? 'Switch to English' : 'Chuyển sang Tiếng Việt';
 
     return (
-        <IconButton
+        <Button
+            variant="ghost"
+            size="icon"
             onClick={toggleLanguage}
             title={label}
             aria-label={label}
@@ -34,6 +36,6 @@ export function LanguageSwitcher() {
                 <line x1="2" y1="12" x2="22" y2="12" />
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
-        </IconButton>
+        </Button>
     );
 }

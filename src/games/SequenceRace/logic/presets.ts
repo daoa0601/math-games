@@ -4,7 +4,7 @@
 // ========================================
 
 import type { GameConfig, SequenceType } from './types';
-import { validateAllPresets, type FairnessResult } from './engine';
+import { validateAllPresets, validateGameFairness, type FairnessResult } from './engine';
 
 // Re-export SequenceType for consumers who import from presets
 export type { SequenceType } from './types';
@@ -257,7 +257,8 @@ export function generateRandomConfig(difficulty: 'easy' | 'medium' | 'hard'): Ga
     const maxTarget = stepPool.reduce((a, b) => a + b, 0);
     const target = minTarget + Math.floor(Math.random() * (maxTarget - minTarget));
 
-    return {
+    // Create base config
+    const baseConfig: GameConfig = {
         id: `random_${Date.now()}`,
         name: `${SEQUENCE_INFO[sequenceType].name} (${target})`,
         target,
@@ -265,6 +266,17 @@ export function generateRandomConfig(difficulty: 'easy' | 'medium' | 'hard'): Ga
         difficulty,
         sequenceType,
     };
+
+    // Validate fairness - ensure player can win
+    const fairness = validateGameFairness(baseConfig);
+
+    // If player can't win going first, check if they can win going second
+    if (!fairness.isPlayerWinnable && fairness.isAIWinnable) {
+        // Player gets second-mover advantage (AI moves first)
+        return { ...baseConfig, aiMovesFirst: true };
+    }
+
+    return baseConfig;
 }
 
 // ========================================
