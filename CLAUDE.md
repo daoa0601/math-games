@@ -266,6 +266,24 @@ This disposes geometries, materials, and textures on unmount.
 ### Sound Throttling
 Module-level cooldown (2s) prevents audio chaos with multiple toasts.
 
+### Centralized Storage Keys
+
+All localStorage keys are centralized in `src/shared/constants/storageKeys.ts`:
+
+```typescript
+// Import constants, never hardcode key strings
+import { PLAYER_KEY, LANGUAGE_KEY, SOUND_ENABLED_KEY, THEME_KEY } from '@/shared/constants/storageKeys';
+
+// Keys follow naming convention: `${STORAGE_PREFIX}-${name}`
+// STORAGE_PREFIX = 'math-games'
+```
+
+**Why this matters:**
+- Prevents typos in localStorage key strings
+- Single source of truth for all storage keys
+- Makes refactoring easier (change in one place)
+- `ALL_STATIC_KEYS` array helps with debugging/clearing data
+
 ### CSS Architecture
 
 **Two Surface Types:**
@@ -307,6 +325,29 @@ import { cn } from '@/shared/lib/utils';
 --gold-gradient: linear-gradient(90deg, #d4af37 0%, #f5d67a 50%, #d4af37 100%);
 --text-emboss: 0 1px 0 rgba(255,255,255,0.1), 0 -1px 0 rgba(0,0,0,0.3);
 ```
+
+**CSS Variables for Colors (Important Pattern):**
+Always use semantic CSS variables instead of hardcoded colors:
+
+```css
+/* ✅ Correct - uses semantic variable */
+color: var(--error);        /* Error states */
+color: var(--success);      /* Success states */
+color: var(--warning);      /* Warning states */
+border-color: var(--accent); /* Accent borders */
+
+/* ❌ Wrong - hardcoded color */
+color: #ef4444;             /* Error - doesn't adapt to themes */
+color: #10b981;             /* Success - doesn't adapt to themes */
+```
+
+**Defined in:** `src/shared/styles/tokens/palette.css`
+
+**Why this matters:**
+- Enables proper theme switching (light/dark mode)
+- Single source of truth for color semantics
+- Easier to update colors globally
+- Prevents inconsistencies across the codebase
 
 ### shadcn/ui Components
 
@@ -428,7 +469,7 @@ t('ranks.intermediate');  // "Intermediate" or "Trung cấp"
 - 8px border-radius
 - Soft shadows (`0 4px 24px rgba(0,0,0,0.4)`)
 - Gold gradient accents on active/featured states
-- Diagonal shine animation on hover
+- **NO diagonal shine animation** (removed for cleaner UX)
 
 ---
 
@@ -472,18 +513,32 @@ e2e/
 
 ## Theme System
 
-**Dark-first design** - The Linear Editorial aesthetic is optimized for dark mode. While `ThemeContext` supports light/dark switching, the design system is built around the dark palette.
+**Fully functional theme switching** - Users can toggle between light, dark, and system modes via a button in the bottom navigation.
 
+### Theme Provider Setup
+- `ThemeProvider` is in `src/main.tsx` as the outermost wrapper
+- `ThemeContext` provides `theme`, `resolvedTheme`, and `setTheme`
+- Uses `THEME_KEY` from `src/shared/constants/storageKeys.ts` (centralized localStorage keys)
+- Default: `'system'` (respects OS preference on first visit)
+
+### Theme Toggle Component
+Located at `src/shared/components/ThemeToggle.tsx`:
+- Integrated into `BottomNav` between feedback and "more" button
+- Cycles: light → dark → system → light
+- Icons: sun (light), moon (dark), circle with dot (system)
+- Persists choice to localStorage
+
+### Theme Switching Implementation
 ```css
-/* Dark theme (default) */
-:root {
-  --bg: #0a0f1a;
-  --surface: #111827;
-  --text: #f8fafc;
-}
+/* Theme is applied via data attribute on html element */
+html[data-theme="dark"]  { /* dark mode variables */ }
+html[data-theme="light"] { /* light mode variables */ }
 ```
 
-See `docs/ARCHITECTURE.md` for theme implementation details.
+**Important:** When modifying theme-related code, remember:
+- ThemeProvider is in `main.tsx`, NOT in `App.tsx` (avoid duplicates)
+- Use `THEME_KEY` constant from `storageKeys.ts`, never hardcode the key string
+- Theme defaults to `'system'`, not `'light'` (respects user's OS preference)
 
 ---
 

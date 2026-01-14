@@ -44,7 +44,7 @@
 }
 
 .game-overlay__title--lose {
-  color: #ef4444;
+  color: var(--error);
 }
 
 .game-overlay__title--timeUp {

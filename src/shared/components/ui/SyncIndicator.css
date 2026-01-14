@@ -38,7 +38,7 @@
 }
 
 .sync-indicator--error {
-  color: #ef4444;
+  color: var(--error);
 }
 
 @media (prefers-reduced-motion: reduce) {

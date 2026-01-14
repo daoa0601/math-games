@@ -43,7 +43,7 @@
 }
 
 .game-info__value--player { color: var(--success); }
-.game-info__value--ai { color: #ef4444; }
+.game-info__value--ai { color: var(--error); }
 .game-info__value--accent { color: var(--accent); }
 
 /* ----------------------------------------
@@ -105,7 +105,7 @@
 }
 
 .game-modal__title--win { color: var(--success); }
-.game-modal__title--lose { color: #ef4444; }
+.game-modal__title--lose { color: var(--error); }
 
 .game-modal__subtitle {
   font-size: var(--text-sm);
@@ -191,7 +191,7 @@
 
 .difficulty-btn--easy { border-left: 2px solid var(--success); }
 .difficulty-btn--medium { border-left: 2px solid var(--accent); }
-.difficulty-btn--hard { border-left: 2px solid #ef4444; }
+.difficulty-btn--hard { border-left: 2px solid var(--error); }
 
 /* ----------------------------------------
    Hints Panel
@@ -324,7 +324,7 @@
 .time-up-overlay__title {
   font-family: var(--font-display);
   font-size: var(--text-hero);
-  color: #ef4444;
+  color: var(--error);
 }
 
 .time-up-overlay__message {

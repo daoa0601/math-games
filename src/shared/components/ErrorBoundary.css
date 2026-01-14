@@ -24,7 +24,7 @@
   width: 64px;
   height: 64px;
   margin-bottom: var(--space-lg);
-  color: #ef4444;
+  color: var(--error);
   font-size: 2rem;
 }
 
@@ -64,7 +64,7 @@
   overflow-x: auto;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: #ef4444;
+  color: var(--error);
   white-space: pre-wrap;
   word-break: break-word;
 }

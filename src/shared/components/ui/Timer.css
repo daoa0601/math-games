@@ -120,12 +120,12 @@
 }
 
 .timer-display.timer--critical {
-  border-color: #ef4444;
+  border-color: var(--error);
   animation: flash-warning 0.5s var(--ease-out) infinite;
 }
 
 .timer-display.timer--critical .timer-display__time {
-  color: #ef4444;
+  color: var(--error);
 }
 
 .timer-display--paused {

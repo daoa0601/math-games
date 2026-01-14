@@ -77,31 +77,8 @@
   animation: sheet-slide-up var(--motion-normal, 250ms) var(--ease-out, ease-out);
   transition: transform var(--motion-fast, 150ms) var(--ease-out, ease-out);
 
-  /* Overflow hidden for shine effect */
+  /* Overflow hidden */
   overflow: hidden;
-}
-
-/* Subtle shine effect for light theme */
-.bottom-sheet__card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    135deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.5) 50%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  transition: left var(--motion-normal, 250ms) var(--ease-out, ease-out);
-}
-
-.bottom-sheet__card:hover::before {
-  left: 100%;
 }
 
 .bottom-sheet__card--closing {
@@ -350,11 +327,6 @@
 
   .bottom-sheet__card {
     transition: none;
-  }
-
-  /* Disable shine effect */
-  .bottom-sheet__card::before {
-    display: none;
   }
 }
 

@@ -39,7 +39,7 @@
 }
 
 .difficulty-btn--hard {
-  border-left: 2px solid #ef4444;
+  border-left: 2px solid var(--error);
 }
 
 .difficulty-btn--master {

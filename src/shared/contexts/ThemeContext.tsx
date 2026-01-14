@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { THEME_KEY } from '../constants/storageKeys';
 
 export type Theme = 'light' | 'dark' | 'system';
 
@@ -10,13 +11,11 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const THEME_KEY = 'math-games-theme';
-
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'light';
-    // Default to 'light' for young learners (ages 6-14) in classroom settings
-    return (localStorage.getItem(THEME_KEY) as Theme) || 'light';
+    if (typeof window === 'undefined') return 'system';
+    // Respect system preference by default, fall back to system
+    return (localStorage.getItem(THEME_KEY) as Theme) || 'system';
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');

@@ -1,0 +1,19 @@
+/* ThemeToggle - Icon wrapper styles
+   Button styles are handled by IconButton */
+
+/* Icon wrapper */
+.theme-toggle__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+/* Responsive icon sizing */
+@media (max-width: 480px) {
+  .theme-toggle__icon {
+    width: 18px;
+    height: 18px;
+  }
+}

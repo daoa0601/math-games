@@ -150,7 +150,7 @@
 
 /* Error States */
 .error-message {
-  color: #ef4444;
+  color: var(--error);
   font-size: var(--text-sm);
   margin-top: var(--space-xs);
 }
@@ -160,13 +160,13 @@
 }
 
 .input--error {
-  border-color: #ef4444;
+  border-color: var(--error);
 }
 
 /* Form Accessibility */
 .required::after {
   content: ' *';
-  color: #ef4444;
+  color: var(--error);
 }
 
 .fieldset-reset {

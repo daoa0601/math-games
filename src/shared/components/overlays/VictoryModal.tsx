@@ -61,7 +61,7 @@ export interface VictoryModalProps {
  */
 const variantAccents: Record<VictoryVariant, string> = {
   win: 'var(--success, #10b981)',
-  lose: '#ef4444',
+  lose: 'var(--error, #ef4444)',
   timeUp: 'var(--accent-coral, #f97316)',
 };
 

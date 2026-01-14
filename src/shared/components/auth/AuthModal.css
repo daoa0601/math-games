@@ -17,7 +17,7 @@
 .auth-modal__error {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+  color: var(--error);
   padding: var(--space-sm, 8px) var(--space-md, 12px);
   font-family: var(--font-mono, 'Space Grotesk', monospace);
   font-size: var(--text-sm, 0.875rem);

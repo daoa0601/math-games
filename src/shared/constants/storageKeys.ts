@@ -34,6 +34,11 @@ export const LANGUAGE_KEY = `${STORAGE_PREFIX}-lang`;
 export const SOUND_ENABLED_KEY = `${STORAGE_PREFIX}-sound-enabled`;
 
 /**
+ * Theme preference (light | dark | system)
+ */
+export const THEME_KEY = `${STORAGE_PREFIX}-theme`;
+
+/**
  * Guest mode flag (true if playing as guest)
  */
 export const GUEST_MODE_KEY = `${STORAGE_PREFIX}-guest-mode`;
@@ -79,6 +84,7 @@ export const ALL_STATIC_KEYS = [
   PLAYER_KEY,
   LANGUAGE_KEY,
   SOUND_ENABLED_KEY,
+  THEME_KEY,
   HIGH_CONTRAST_KEY,
   DAILY_CHALLENGE_KEY,
   LEADERBOARD_KEY,

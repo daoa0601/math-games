@@ -83,11 +83,11 @@
 
 /* MagicGraph Hints */
 .hint-card--auditor {
-  border-left-color: #ef4444;
+  border-left-color: var(--error);
 }
 
 .hint-card--auditor h4 {
-  color: #ef4444;
+  color: var(--error);
 }
 
 .hint-card--starter {

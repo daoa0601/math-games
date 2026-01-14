@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ThemeToggle } from '../ThemeToggle';
 import './BottomNav.css';
 
 export type NavTabId = 'home' | 'profile' | 'learn' | 'settings';
@@ -128,6 +129,11 @@ export function BottomNav({ activeTab, onTabChange, onFeedbackClick }: BottomNav
         <span className="nav__icon" aria-hidden="true">✉</span>
         <span className="nav__label">{t('nav.feedback')}</span>
       </button>
+
+      {/* Theme toggle button - visible on both mobile and desktop */}
+      <div className="nav__item">
+        <ThemeToggle />
+      </div>
 
       {/* More button - visible only on mobile */}
       <div className="nav__more-wrapper nav__more-wrapper--mobile-only">

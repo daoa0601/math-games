@@ -7,23 +7,12 @@
   --card-radius: 8px;
   --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 
-  /* Metallic gold accent (holographic-inspired) */
+  /* Metallic gold accent */
   --gold-gradient: linear-gradient(90deg, #d4af37 0%, #f5d67a 50%, #d4af37 100%);
-  --gold-shine: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(212, 175, 55, 0.3) 45%,
-    rgba(245, 214, 122, 0.5) 50%,
-    rgba(212, 175, 55, 0.3) 55%,
-    transparent 100%
-  );
 
   /* Embossed text effect */
   --text-emboss: 0 1px 0 rgba(255, 255, 255, 0.1), 0 -1px 0 rgba(0, 0, 0, 0.3);
   --text-deboss: 0 -1px 0 rgba(255, 255, 255, 0.1), 0 1px 0 rgba(0, 0, 0, 0.3);
-
-  /* Diagonal shine line animation */
-  --shine-angle: 135deg;
 }
 
 /* Premium surface base class */
@@ -33,43 +22,6 @@
   box-shadow: var(--card-shadow);
   position: relative;
   overflow: hidden;
-}
-
-/* Gold border variant */
-.premium-surface--gold-border {
-  border: 1px solid transparent;
-  background:
-    var(--card-gradient) padding-box,
-    var(--gold-gradient) border-box;
-}
-
-/* Diagonal shine effect (credit card light reflection) */
-.premium-surface::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    var(--shine-angle),
-    transparent 0%,
-    rgba(255, 255, 255, 0.03) 50%,
-    transparent 100%
-  );
-  pointer-events: none;
-  transition: left var(--motion-normal) var(--ease-out);
-}
-
-.premium-surface:hover::before {
-  left: 100%;
-}
-
-/* Reduce animation for reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .premium-surface::before {
-    display: none;
-  }
 }
 
 /* Embossed numbering (editorial signature) */
@@ -126,80 +78,4 @@
   .premium-card:hover {
     transform: none;
   }
-}
-
-/* Vietnamese corner decorations on premium surfaces */
-.premium-corners {
-  position: relative;
-}
-
-.premium-corners::before,
-.premium-corners::after {
-  content: '';
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-color: var(--accent-gold);
-  border-style: solid;
-  pointer-events: none;
-  opacity: 0.6;
-}
-
-.premium-corners::before {
-  top: 4px;
-  left: 4px;
-  border-width: 1px 0 0 1px;
-}
-
-.premium-corners::after {
-  bottom: 4px;
-  right: 4px;
-  border-width: 0 1px 1px 0;
-}
-
-/* Metallic text effect for headings */
-.premium-text {
-  background: var(--gold-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Achievement/rank badge with premium finish */
-.premium-badge {
-  background: var(--card-gradient);
-  border: 1px solid var(--accent-gold);
-  border-radius: var(--card-radius);
-  box-shadow:
-    var(--card-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  padding: var(--space-sm) var(--space-md);
-}
-
-/* Active/featured state with gold glow */
-.premium-active {
-  box-shadow:
-    var(--card-shadow),
-    0 0 20px rgba(212, 175, 55, 0.2);
-  border-color: var(--accent-gold);
-}
-
-/* Navigation highlight (credit card chip inspired) */
-.premium-nav-highlight {
-  background: linear-gradient(135deg, #1b263b 0%, #263545 100%);
-  border-left: 2px solid var(--accent-gold);
-  position: relative;
-}
-
-.premium-nav-highlight::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: var(--space-sm);
-  transform: translateY(-50%);
-  width: 4px;
-  height: 4px;
-  background: var(--accent-gold);
-  border-radius: 50%;
-  opacity: 0.8;
 }

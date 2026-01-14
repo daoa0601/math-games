@@ -119,29 +119,6 @@ body {
     border-color var(--motion-fast) var(--ease-out);
 }
 
-/* Diagonal shine effect (credit card light reflection) */
-.slab::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    135deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  transition: left var(--motion-normal) var(--ease-out);
-}
-
-.slab:hover::before {
-  left: 100%;
-}
-
 .slab:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -308,11 +285,6 @@ body {
 [data-theme="light"] .slab__number {
   color: var(--muted);
   text-shadow: none;
-}
-
-/* Light mode: disable shine effect (designed for dark surfaces) */
-[data-theme="light"] .slab::before {
-  display: none;
 }
 
 /* Action buttons */
@@ -525,11 +497,6 @@ body {
 @media (prefers-reduced-motion: reduce) {
   * {
     transition-duration: 0.01ms !important;
-  }
-
-  /* Disable credit card shine effects */
-  .slab::before {
-    display: none;
   }
 
   .slab:hover {

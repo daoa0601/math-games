@@ -69,7 +69,7 @@
 }
 
 .victory-modal__title--lose {
-  color: #ef4444;
+  color: var(--error);
 }
 
 .victory-modal__title--timeUp {
@@ -184,7 +184,7 @@
 }
 
 .victory-modal--lose .bottom-sheet__card {
-  border-top-color: #ef4444;
+  border-top-color: var(--error);
 }
 
 .victory-modal--timeUp .bottom-sheet__card {

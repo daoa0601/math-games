@@ -38,3 +38,7 @@ export { AuthAPIContext, useAuthAPI, type AuthAPI } from './AuthAPIContext';
 
 // Combined auth hook for convenience
 export { useAuth } from './useAuthCombined';
+
+// Theme context (for theme switching and preference persistence)
+export { ThemeProvider, useTheme } from './ThemeContext';
+export type { Theme } from './ThemeContext';

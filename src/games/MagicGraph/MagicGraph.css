@@ -39,7 +39,7 @@
   z-index: 1;
 }
 
-.mg-board-wrapper--urgent .mg-board { border-color: #ef4444; }
+.mg-board-wrapper--urgent .mg-board { border-color: var(--error); }
 
 .mg-board {
   background: var(--surface);
@@ -54,7 +54,7 @@
 }
 
 .mg-edge--correct { stroke: var(--success); }
-.mg-edge--incorrect, .mg-edge--overflow { stroke: #ef4444; }
+.mg-edge--incorrect, .mg-edge--overflow { stroke: var(--error); }
 .mg-edge--impossible { stroke: #f59e0b; stroke-dasharray: 4 2; }
 
 .mg-node { cursor: pointer; }
@@ -182,7 +182,7 @@
   background: transparent;
   border: none;
   border-top: 1px solid var(--border);
-  color: #ef4444;
+  color: var(--error);
   font-size: var(--text-xs);
   cursor: pointer;
 }
@@ -206,8 +206,8 @@
 .mg-unsolvable-btn {
   padding: var(--space-md) var(--space-xl);
   background: transparent;
-  border: 2px solid #ef4444;
-  color: #ef4444;
+  border: 2px solid var(--error);
+  color: var(--error);
   font-family: var(--font-mono);
   text-transform: uppercase;
   cursor: pointer;
@@ -215,7 +215,7 @@
 
 .mg-unsolvable-feedback { margin-top: var(--space-sm); font-size: var(--text-sm); }
 .mg-unsolvable-feedback--correct { color: var(--success); }
-.mg-unsolvable-feedback--wrong { color: #ef4444; }
+.mg-unsolvable-feedback--wrong { color: var(--error); }
 
 .mg-editor {
   display: flex;
@@ -243,7 +243,7 @@
 .mg-editor-line { stroke: var(--game-magic); stroke-width: 3; }
 .mg-editor-line--preview { stroke-dasharray: 8 4; opacity: 0.7; }
 .mg-editor-line--deletable { cursor: pointer; }
-.mg-editor-line--deletable:hover { stroke: #ef4444; }
+.mg-editor-line--deletable:hover { stroke: var(--error); }
 
 .mg-editor__header { text-align: center; }
 .mg-editor__header h3 {
@@ -274,7 +274,7 @@
 .mg-editor-node { cursor: pointer; }
 .mg-editor-node--dragging { cursor: grabbing; }
 .mg-editor-node--deletable { cursor: pointer; }
-.mg-editor-node--deletable:hover .mg-editor-node__circle { stroke: #ef4444; }
+.mg-editor-node--deletable:hover .mg-editor-node__circle { stroke: var(--error); }
 
 .mg-editor-node__label {
   font-family: var(--font-mono);
@@ -311,8 +311,8 @@
 .mg-editor__error {
   padding: var(--space-sm);
   background: rgba(239, 68, 68, 0.1);
-  border: 1px solid #ef4444;
-  color: #ef4444;
+  border: 1px solid var(--error);
+  color: var(--error);
   font-size: var(--text-sm);
   text-align: center;
 }
