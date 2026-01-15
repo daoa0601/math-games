@@ -32,7 +32,7 @@ export function AchievementsGallery({
   isExpanded,
   onToggle,
 }: AchievementsGalleryProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
 
   // Get stats for progress display
   const stats = useMemo(

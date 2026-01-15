@@ -124,7 +124,7 @@ export function TutorialTooltip({
   targetSelector,
   className = '',
 }: TutorialTooltipProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const { next, previous, skip, currentStep, totalSteps, isActive } =
     useTutorialContext();
 

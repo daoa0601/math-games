@@ -71,33 +71,38 @@ function SheetContent({
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          // Base styles - Vietnamese Premium credit card aesthetic
+          // Base styles
           'tw:fixed tw:z-50 tw:flex tw:flex-col',
           'tw:transition tw:ease-in-out',
           'tw:data-[state=closed]:duration-300 tw:data-[state=open]:duration-500',
-          // Credit card surface styling
-          'premium-modal',
+          // Removed 'premium-modal' class to see pure shadcn styling
+          'tw:bg-background tw:border tw:border-border',
           // Animation based on side
           side === 'right' && [
             'tw:inset-y-0 tw:right-0 tw:h-full tw:w-3/4 sm:tw:max-w-sm',
             'tw:data-[state=closed]:slide-out-to-right tw:data-[state=open]:slide-in-from-right',
-            'tw:border-l tw:border-[var(--border)]',
+            'tw:border-l',
           ],
           side === 'left' && [
             'tw:inset-y-0 tw:left-0 tw:h-full tw:w-3/4 sm:tw:max-w-sm',
             'tw:data-[state=closed]:slide-out-to-left tw:data-[state=open]:slide-in-from-left',
-            'tw:border-r tw:border-[var(--border)]',
+            'tw:border-r',
           ],
           side === 'top' && [
             'tw:inset-x-0 tw:top-0 tw:h-auto',
             'tw:data-[state=closed]:slide-out-to-top tw:data-[state=open]:slide-in-from-top',
-            'tw:border-b tw:border-[var(--border)]',
+            'tw:border-b',
           ],
-          side === 'bottom' && [
+          side === 'bottom' && !className?.includes('settings-drawer-sheet') && [
             'tw:inset-x-0 tw:bottom-0 tw:h-auto tw:max-h-[85vh]',
             'tw:data-[state=closed]:slide-out-to-bottom tw:data-[state=open]:slide-in-from-bottom',
-            // Gold accent bar on top (Vietnamese Premium signature)
-            'tw:border-t-2 tw:border-t-[var(--accent-gold)]',
+            'tw:border-t',
+          ],
+          side === 'bottom' && className?.includes('settings-drawer-sheet') && [
+            'tw:data-[state=closed]:slide-out-to-bottom tw:data-[state=open]:slide-in-from-bottom',
+            'tw:border-t',
+            'tw:h-auto tw:max-h-[85vh]',
+            // Note: Responsive behavior (positioning, centering) handled by custom CSS in SettingsDrawer.css
           ],
           className
         )}

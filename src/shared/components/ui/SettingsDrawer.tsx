@@ -13,7 +13,7 @@
 
 import { type ReactNode, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/shared/components/ui/shadcn';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/shared/components/ui/shadcn';
 import { Button } from '@/shared/components/ui/shadcn';
 import './SettingsDrawer.css';
 
@@ -58,11 +58,14 @@ export function SettingsDrawer({
 
   return (
     <Sheet open={isOpenState} onOpenChange={handleOpenChange}>
-      <SheetContent side="bottom" className="settings-drawer">
-        <SheetHeader className="settings-drawer__header">
+      <SheetContent side="bottom" className="settings-drawer-sheet tw:px-0">
+        <SheetHeader className="tw:px-6">
           <SheetTitle>{title ?? t('settings.title', 'Settings')}</SheetTitle>
+          <SheetDescription>
+            {t('settings.preferences', 'Preferences')}
+          </SheetDescription>
         </SheetHeader>
-        <div className="settings-drawer__content">
+        <div className="tw:py-4">
           {children}
         </div>
       </SheetContent>
@@ -124,9 +127,11 @@ export interface SettingsSectionProps {
 
 export function SettingsSection({ title, children }: SettingsSectionProps) {
   return (
-    <div className="settings-section">
-      <h3 className="settings-section__title">{title}</h3>
-      <div className="settings-section__content">{children}</div>
+    <div className="tw:px-6 tw:pb-4">
+      <h3 className="tw:font-mono tw:text-xs tw:uppercase tw:tracking-widest tw:text-muted-foreground tw:mb-2">
+        {title}
+      </h3>
+      <div className="tw:space-y-2">{children}</div>
     </div>
   );
 }

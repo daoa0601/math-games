@@ -8,8 +8,7 @@
  * Original: 519 lines → Refactored: ~350 lines
  */
 
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useCallback, useEffect, useMemo, useState, useRef, memo } from 'react';
 import {
   GameLayout,
   GameShell,
@@ -26,7 +25,8 @@ import {
   SettingsDrawerTrigger,
   SettingsSection,
 } from '@/shared/components';
-import { useGameTimer, useGameRewards, useGameInit, useAnnounce } from '@/shared/hooks';
+import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
+import { useGameTimer, useGameRewards, useGameInit, useAnnounce, useGameTranslations } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
 import { completeDailyChallenge } from '@/shared/services/daily';
 import { RaceTrack, StepCards, HistoryLog, SequenceInfoBadge, SequenceRaceTutorial } from './components';
@@ -36,9 +36,8 @@ import { getDailySequenceRaceConfig } from './logic/seededGenerator';
 import '@/shared/styles/game-base.css';
 import './SequenceRace.css';
 
-export function SequenceRaceGame() {
-  const { t } = useTranslation('sequenceRace');
-  const { t: tc } = useTranslation('common');
+export const SequenceRaceGame = memo(function SequenceRaceGame() {
+  const { t, tc } = useGameTranslations('sequenceRace');
 
   // ─────────────────────────────────────────────────────────────────
   // Game Initialization (consolidated hook)
@@ -511,7 +510,7 @@ const {
 
         {/* Game Mode Section */}
         {!isDailyMode && (
-          <SettingsSection title={t('settings.gameMode', 'Game Mode')}>
+          <SettingsSection title={tc('settings.gameMode', 'Game Mode')}>
             <div className="mode-toggle">
               <button
                 className={`mode-toggle__btn ${gameMode === 'vs-ai' ? 'mode-toggle__btn--active' : ''}`}
@@ -540,8 +539,15 @@ const {
           </SettingsSection>
         )}
 
+        {/* Localization Section */}
+        <SettingsSection title={tc('settings.language', 'Language')}>
+          <div className="tw:flex tw:justify-center tw:py-2">
+            <LanguageSwitcher />
+          </div>
+        </SettingsSection>
+
         {/* Game Rules Section */}
-        <SettingsSection title={t('settings.rules', 'Rules')}>
+        <SettingsSection title={tc('settings.rules', 'Rules')}>
           <div className="game-rules">
             <span className="game-rules__icon">📜</span>
             <p className="game-rules__text">{t('rules')}</p>
@@ -655,4 +661,4 @@ const {
       )}
     </GameLayout>
   );
-}
+});

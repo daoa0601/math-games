@@ -51,7 +51,7 @@ export function DifficultySelector<T extends Difficulty>({
                     <RadioGroupItem value={d} id={`difficulty-${d}`} />
                     <Label
                         htmlFor={`difficulty-${d}`}
-                        className={`difficulty-btn ${value === d ? 'difficulty-btn--active' : ''}`}
+                        className={`difficulty-btn difficulty-btn--${d} ${value === d ? 'difficulty-btn--active' : ''}`}
                     >
                         <span className="difficulty-btn__emoji" aria-hidden="true">
                             {DIFFICULTY_EMOJI[d]}

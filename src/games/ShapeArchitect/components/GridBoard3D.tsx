@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, Suspense, useRef, useEffect } from 'react';
+import React, { useMemo, useCallback, Suspense, useRef, useEffect, memo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -38,8 +38,10 @@ interface GridBoard3DProps {
 /**
  * 3D visualization of the ShapeArchitect grid using Three.js.
  * Features orbit controls for viewing from any angle.
+ *
+ * Wrapped in React.memo to prevent unnecessary re-renders of the expensive Three.js scene.
  */
-export function GridBoard3D({
+export const GridBoard3D = memo(function GridBoard3D({
     grid,
     gridSize,
     selectedPiece,
@@ -275,7 +277,7 @@ export function GridBoard3D({
             </Canvas3DErrorBoundary>
         </div>
     );
-}
+});
 
 /**
  * Camera animation component that smoothly transitions between presets

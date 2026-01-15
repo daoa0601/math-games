@@ -14,7 +14,7 @@ interface AccountLinkBannerProps {
 }
 
 export function AccountLinkBanner({ onLinkClick, onDismiss }: AccountLinkBannerProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const [dismissed, setDismissed] = useState(false);
 
   const handleDismiss = useCallback(() => {

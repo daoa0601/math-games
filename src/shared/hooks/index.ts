@@ -16,3 +16,7 @@ export * from './firebase';
 // Cross-cutting hooks (remain at root)
 export { useTutorial } from './useTutorial';
 export type { UseTutorialOptions, UseTutorialReturn } from './useTutorial';
+
+// Translation hooks
+export { useGameTranslations } from './useGameTranslations';
+export type { GameNamespace } from './useGameTranslations';

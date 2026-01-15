@@ -1,7 +1,6 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { GameLayout, GameShell, GameHeader, GameFooter, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton, VictoryModal, SettingsDrawer, SettingsDrawerTrigger, SettingsSection } from '@/shared/components';
-import { useGameTimer, useGameRewards, useGameInit, useAnnounce, useFocusTrap } from '@/shared/hooks';
+import { useGameTimer, useGameRewards, useGameInit, useAnnounce, useFocusTrap, useGameTranslations } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
 import { completeDailyChallenge } from '@/shared/services/daily';
 import { PuzzleBoard, NumberInventory, NumberPicker, TopologyEditor, MagicGraphTutorial } from './components';
@@ -18,9 +17,8 @@ interface PickerState {
     position: { x: number; y: number };
 }
 
-export function MagicGraphGame() {
-    const { t } = useTranslation('magicGraph');
-    const { t: tc } = useTranslation('common');
+export const MagicGraphGame = memo(function MagicGraphGame() {
+    const { t, tc } = useGameTranslations('magicGraph');
 
     // Game initialization (daily mode, tutorial, practice mode)
     const {
@@ -758,14 +756,14 @@ export function MagicGraphGame() {
                         />
                     </SettingsSection>
                 )}
-                <SettingsSection title={t('settings.rules', 'Rules')}>
+                <SettingsSection title={tc('settings.rules', 'Rules')}>
                     <div className="game-rules">
                         <span className="game-rules__icon">📜</span>
                         <p className="game-rules__text">{t('rules')}</p>
                     </div>
                 </SettingsSection>
                 {!isDailyMode && (
-                    <SettingsSection title={t('settings.actions', 'Actions')}>
+                    <SettingsSection title={tc('settings.actions', 'Actions')}>
                         <button
                             className="action action--secondary"
                             onClick={() => {
@@ -883,4 +881,4 @@ export function MagicGraphGame() {
             )}
         </GameLayout>
     );
-}
+});

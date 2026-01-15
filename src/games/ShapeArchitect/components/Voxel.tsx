@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import type { Mesh } from 'three';
+import * as THREE from 'three';
 import { useSharedBoxGeometry } from '../hooks';
 
 interface VoxelProps {
@@ -37,7 +37,7 @@ export function Voxel({
     onClick,
     onPointerEnter,
 }: VoxelProps) {
-    const meshRef = useRef<Mesh>(null);
+    const meshRef = useRef<THREE.Mesh>(null);
     const [hovered, setHovered] = useState(false);
     // Use shared geometry singleton for better GPU memory efficiency
     const sharedGeometry = useSharedBoxGeometry();

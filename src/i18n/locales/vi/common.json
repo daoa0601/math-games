@@ -21,11 +21,15 @@
         "moreMenu": "Tùy chọn khác"
     },
     "settings": {
+        "title": "Cài đặt",
         "preferences": "Tùy chọn",
         "sound": "Âm thanh",
         "soundDescription": "Bật hoặc tắt âm thanh trò chơi",
         "language": "Ngôn ngữ",
         "languageDescription": "Chọn ngôn ngữ ưa thích",
+        "gameMode": "Chế độ chơi",
+        "rules": "Luật chơi",
+        "actions": "Thao tác",
         "support": "Hỗ trợ",
         "about": "Thông tin",
         "version": "Phiên bản",
@@ -163,6 +167,7 @@
         }
     },
     "difficulty": {
+        "title": "Độ khó",
         "easy": "Dễ",
         "medium": "Trung bình",
         "hard": "Khó",

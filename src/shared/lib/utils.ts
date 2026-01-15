@@ -1,5 +1,13 @@
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
+
+/**
+ * Custom twMerge configured for Tailwind v4's tw: prefix.
+ * This ensures tailwind-merge recognizes and properly merges our prefixed classes.
+ */
+const twMerge = extendTailwindMerge({
+  prefix: 'tw:',
+});
 
 /**
  * Combines class names using clsx and merges Tailwind classes intelligently.

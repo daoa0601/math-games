@@ -15,7 +15,7 @@ interface SyncIndicatorProps {
 }
 
 export function SyncIndicator({ status, className = '' }: SyncIndicatorProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
 
   const labels: Record<SyncStatus, string> = {
     synced: t('sync.synced', 'Synced'),

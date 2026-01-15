@@ -1,78 +1,43 @@
-/* ============================================
-   SettingsDrawer - Progressive Disclosure
-   Linear Editorial Design
+/* SettingsDrawer - Custom overrides for shadcn Sheet */
 
-   Minimal styling - BottomSheet handles most layout
-   Trigger button styles moved to IconButton
-   ============================================ */
-
-/* ----------------------------------------
-   Drawer Content
-   ---------------------------------------- */
-.settings-drawer__content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg, 16px);
-  padding: var(--space-md, 12px) 0;
+/* Mobile: full-width bottom sheet - use bottom positioning */
+.settings-drawer-sheet {
+  /* Mobile default: position at bottom */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
-/* ----------------------------------------
-   Settings Section
-   ---------------------------------------- */
-.settings-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm, 8px);
+/* Responsive behavior: On desktop (768px+), center the sheet as a modal */
+@media (min-width: 768px) {
+  .settings-drawer-sheet {
+    /* Center positioning */
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    /* Clear bottom positioning */
+    bottom: auto !important;
+    right: auto !important;
+    /* Dimensions */
+    width: 90% !important;
+    max-width: 480px !important;
+    max-height: 90vh !important;
+    /* Styling */
+    border-radius: 8px !important;
+  }
+
+  /* Hide drag handle on desktop */
+  .settings-drawer-sheet > div:first-child {
+    display: none !important;
+  }
 }
 
-.settings-section__title {
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: var(--text-xs, 0.75rem);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--muted, #78716c);
-  margin: 0;
-  padding-bottom: var(--space-xs, 4px);
+/* Section styling improvements */
+.tw\\:px-6.tw\\:pb-4 {
+  padding-bottom: 1rem;
+}
+
+.tw\\:px-6.tw\\:pb-4:not(:last-child) {
   border-bottom: 1px solid var(--border, #e7e5e4);
-}
-
-.settings-section__content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm, 8px);
-}
-
-/* Stack buttons vertically in drawer */
-.settings-section__content .action {
-  width: 100%;
-}
-
-/* Mode toggle full width in drawer */
-.settings-section__content .mode-toggle {
-  width: 100%;
-}
-
-.settings-section__content .mode-toggle__btn {
-  flex: 1;
-}
-
-/* Difficulty selector in drawer */
-.settings-section__content .difficulty-selector {
-  width: 100%;
-}
-
-/* Game rules styling in drawer */
-.settings-section__content .game-rules {
-  margin: 0;
-  padding: var(--space-sm, 8px);
-  background: var(--bg, #fafaf9);
-  border: 1px solid var(--border, #e7e5e4);
-}
-
-/* ----------------------------------------
-   High Contrast Mode
-   ---------------------------------------- */
-.high-contrast .settings-section__title {
-  border-bottom-width: 2px;
 }

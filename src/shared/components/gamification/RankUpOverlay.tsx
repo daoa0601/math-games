@@ -27,7 +27,7 @@ export function RankUpOverlay({
   newRank,
   onClose,
 }: RankUpOverlayProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const [isVisible, setIsVisible] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 

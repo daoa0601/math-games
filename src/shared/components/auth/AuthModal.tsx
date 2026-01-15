@@ -38,7 +38,7 @@ export function AuthModal({
   error,
   isFirebaseAvailable = true,
 }: AuthModalProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isEmailMode, setIsEmailMode] = useState(false);

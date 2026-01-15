@@ -14,7 +14,7 @@ interface SignInButtonProps {
 }
 
 export function SignInButton({ onClick, disabled, variant = 'default' }: SignInButtonProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
 
   return (
     <button

@@ -21,11 +21,15 @@
         "moreMenu": "More options"
     },
     "settings": {
+        "title": "Settings",
         "preferences": "Preferences",
         "sound": "Sound",
         "soundDescription": "Enable or disable game sounds",
         "language": "Language",
         "languageDescription": "Choose your preferred language",
+        "gameMode": "Game Mode",
+        "rules": "Rules",
+        "actions": "Actions",
         "support": "Support",
         "about": "About",
         "version": "Version",
@@ -163,6 +167,7 @@
         }
     },
     "difficulty": {
+        "title": "Difficulty",
         "easy": "Easy",
         "medium": "Medium",
         "hard": "Hard",

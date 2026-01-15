@@ -26,7 +26,7 @@ export function StatsDisplay({
   variant = 'compact',
   className = '',
 }: StatsDisplayProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const rankInfo = getRankInfo(rank);
   const nextRank = getNextRank(rank);
   const progress = getRankProgress(stats, rank);

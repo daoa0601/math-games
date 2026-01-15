@@ -136,7 +136,7 @@ const DraggablePiece = memo(function DraggablePiece({ piece, isSelected, onSelec
     );
 });
 
-export function PieceInventory({ pieces, selectedPieceId, onSelectPiece, rotation }: PieceInventoryProps) {
+export const PieceInventory = memo(function PieceInventory({ pieces, selectedPieceId, onSelectPiece, rotation }: PieceInventoryProps) {
     // Stable callback factory to avoid creating new functions per piece
     const handleSelectPiece = useCallback((pieceId: string) => {
         onSelectPiece(pieceId);
@@ -165,4 +165,4 @@ export function PieceInventory({ pieces, selectedPieceId, onSelectPiece, rotatio
             ))}
         </div>
     );
-}
+});

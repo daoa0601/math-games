@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useThree } from '@react-three/fiber';
-import { Material, BufferGeometry, Texture } from 'three';
-import type { Object3D } from 'three';
+import * as THREE from 'three';
 
 /**
  * Hook to properly dispose of Three.js resources when the component unmounts.
@@ -24,9 +23,9 @@ export function useThreeCleanup() {
     // Cleanup function runs on unmount
     return () => {
       // Traverse the scene and dispose all resources
-      scene.traverse((object: Object3D) => {
+      scene.traverse((object: THREE.Object3D) => {
         // Dispose geometries
-        if ('geometry' in object && object.geometry instanceof BufferGeometry) {
+        if ('geometry' in object && object.geometry instanceof THREE.BufferGeometry) {
           object.geometry.dispose();
         }
 
@@ -37,7 +36,7 @@ export function useThreeCleanup() {
             : [object.material];
 
           for (const material of materials) {
-            if (material instanceof Material) {
+            if (material instanceof THREE.Material) {
               // Dispose any textures attached to the material
               disposeMaterialTextures(material);
               material.dispose();
@@ -61,7 +60,7 @@ export function useThreeCleanup() {
  * Disposes all textures attached to a material.
  * Materials can have multiple texture properties (map, normalMap, etc.).
  */
-function disposeMaterialTextures(material: Material) {
+function disposeMaterialTextures(material: THREE.Material) {
   // Common texture properties on Three.js materials
   const textureProperties = [
     'map',
@@ -82,7 +81,7 @@ function disposeMaterialTextures(material: Material) {
   for (const prop of textureProperties) {
     if (prop in material) {
       const texture = (material as unknown as Record<string, unknown>)[prop];
-      if (texture instanceof Texture) {
+      if (texture instanceof THREE.Texture) {
         texture.dispose();
       }
     }

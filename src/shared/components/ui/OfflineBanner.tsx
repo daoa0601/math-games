@@ -12,7 +12,7 @@ interface OfflineBannerProps {
 }
 
 export function OfflineBanner({ onRetry }: OfflineBannerProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
 
   return (
     <div className="offline-banner" role="alert">

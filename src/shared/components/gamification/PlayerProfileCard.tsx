@@ -28,7 +28,7 @@ export function PlayerProfileCard({
   onUpdateName,
   className = '',
 }: PlayerProfileCardProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(profile.displayName);
   const inputRef = useRef<HTMLInputElement>(null);

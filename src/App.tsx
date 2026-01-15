@@ -6,14 +6,33 @@ import { Login } from './pages/Login';
 import { PlayerProvider, AuthProvider, useAuthState } from './shared/contexts';
 import { ErrorBoundary } from './shared/components';
 import { FirebaseAuthProvider, initSyncManager, destroySyncManager } from './firebase';
+import { loadGameTranslations } from './i18n/lazyLoader';
 import type { PlayerProfile } from './shared/services/player';
 import './index.css';
 
 // Lazy load game components for code splitting
 // Each game will be bundled separately, reducing initial load time
-const MagicGraphGame = lazy(() => import('./games/MagicGraph').then(m => ({ default: m.MagicGraphGame })));
-const SequenceRaceGame = lazy(() => import('./games/SequenceRace').then(m => ({ default: m.SequenceRaceGame })));
-const ShapeArchitectGame = lazy(() => import('./games/ShapeArchitect').then(m => ({ default: m.ShapeArchitectGame })));
+// Translations are also lazy-loaded alongside each game
+const MagicGraphGame = lazy(() =>
+  Promise.all([
+    import('./games/MagicGraph').then(m => ({ default: m.MagicGraphGame })),
+    loadGameTranslations('magicGraph'),
+  ]).then(([module]) => module)
+);
+
+const SequenceRaceGame = lazy(() =>
+  Promise.all([
+    import('./games/SequenceRace').then(m => ({ default: m.SequenceRaceGame })),
+    loadGameTranslations('sequenceRace'),
+  ]).then(([module]) => module)
+);
+
+const ShapeArchitectGame = lazy(() =>
+  Promise.all([
+    import('./games/ShapeArchitect').then(m => ({ default: m.ShapeArchitectGame })),
+    loadGameTranslations('shapeArchitect'),
+  ]).then(([module]) => module)
+);
 
 // Simple loading spinner for Suspense fallback
 function LoadingSpinner() {

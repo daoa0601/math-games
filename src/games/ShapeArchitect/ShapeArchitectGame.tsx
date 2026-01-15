@@ -1,8 +1,7 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { DndContext, pointerWithin } from '@dnd-kit/core';
 import { GameLayout, GameShell, GameHeader, GameFooter, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton, VictoryModal, SettingsDrawer, SettingsDrawerTrigger, SettingsSection } from '@/shared/components';
-import { useGameTimer, useGameRewards, useSwipe, useAnnounce, useGameInit } from '@/shared/hooks';
+import { useGameTimer, useGameRewards, useSwipe, useAnnounce, useGameInit, useGameTranslations } from '@/shared/hooks';
 import { playSound, showConfetti } from '@/shared/utils';
 import { completeDailyChallenge } from '@/shared/services/daily';
 import { GridBoard, GridBoard3D, PieceInventory, LevelEditor, CameraPresetButtons, RotationControls, LayerControls, ShapeArchitectTutorial, PreviewLockButton, PlacedPieceControls, PlacementToolbar } from './components';
@@ -22,9 +21,8 @@ const GEOMETRY_HINT_KEYS = [
     'rotationMatters',
 ] as const;
 
-export function ShapeArchitectGame() {
-    const { t } = useTranslation('shapeArchitect');
-    const { t: tc } = useTranslation('common');
+export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
+    const { t, tc } = useGameTranslations('shapeArchitect');
 
     // ─────────────────────────────────────────────────────────────────
     // Game Initialization (consolidated hook)
@@ -657,14 +655,14 @@ export function ShapeArchitectGame() {
             />
           </SettingsSection>
         )}
-        <SettingsSection title={t('settings.rules', 'Rules')}>
+        <SettingsSection title={tc('settings.rules', 'Rules')}>
           <div className="game-rules">
             <span className="game-rules__icon">📜</span>
             <p className="game-rules__text">{t('rules')}</p>
           </div>
         </SettingsSection>
         {!isDailyMode && (
-          <SettingsSection title={t('settings.actions', 'Actions')}>
+          <SettingsSection title={tc('settings.actions', 'Actions')}>
             <button
               className="action action--secondary"
               onClick={() => {
@@ -799,4 +797,4 @@ export function ShapeArchitectGame() {
             </GameLayout>
         </DndContext>
     );
-}
+});

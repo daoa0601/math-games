@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:full": "concurrently \"npm run server:dev\" \"npm run dev\"",
-    "build": "tsc -b && vite build",
+    "build": "npm run generate:i18n-types && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
@@ -19,6 +19,7 @@
     "test:e2e:report": "playwright show-report",
     "test:e2e:desktop": "BROWSERS=desktop playwright test",
     "test:e2e:full": "BROWSERS=all playwright test",
+    "generate:i18n-types": "tsx scripts/generateTranslationTypes.ts",
     "server:install": "cd server && npm install",
     "server:dev": "cd server && npm run dev",
     "server:start": "cd server && npm start"
@@ -83,6 +84,7 @@
     "jsdom": "^27.4.0",
     "playwright": "^1.56.1",
     "storybook": "^10.1.11",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",

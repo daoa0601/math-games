@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/components/ui/shadcn';
 import { useTheme, type Theme } from '@/shared/contexts';
-import './ThemeToggle.css';
+// Removed ThemeToggle.css to see shadcn Button styles
 
 export interface ThemeToggleProps {
     /** Optional className for positioning */
@@ -89,15 +89,13 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
         <Button
             variant="ghost"
             size="icon"
-            className={`theme-toggle ${className}`}
+            className={className}
             onClick={handleToggle}
             aria-label={ariaLabel}
             aria-pressed={theme !== 'system'}
             title={ariaLabel}
         >
-            <span className="theme-toggle__icon" aria-hidden="true">
-                {getIcon()}
-            </span>
+            {getIcon()}
         </Button>
     );
 }
