@@ -1,81 +1,102 @@
-/* premium-surfaces.css - Credit Card Aesthetic for Premium Components */
+/* surfaces.css - Clean Educational Surface Styles */
 /* Applied to: Cards, Modals, Navigation highlights, Achievement displays */
 
 :root {
-  /* Credit card surface treatment */
-  --card-gradient: linear-gradient(135deg, #1b263b 0%, #0d1b2a 50%, #1b263b 100%);
+  /* Surface treatment (clean, flat) */
   --card-radius: 8px;
-  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-
-  /* Metallic gold accent */
-  --gold-gradient: linear-gradient(90deg, #d4af37 0%, #f5d67a 50%, #d4af37 100%);
-
-  /* Embossed text effect */
-  --text-emboss: 0 1px 0 rgba(255, 255, 255, 0.1), 0 -1px 0 rgba(0, 0, 0, 0.3);
-  --text-deboss: 0 -1px 0 rgba(255, 255, 255, 0.1), 0 1px 0 rgba(0, 0, 0, 0.3);
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --card-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-/* Premium surface base class */
-.premium-surface {
-  background: var(--card-gradient);
+[data-theme="dark"] {
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --card-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Clean surface base class */
+.surface {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+}
+
+/* Elevated surface (cards, modals) */
+.surface-elevated {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  position: relative;
-  overflow: hidden;
 }
 
-/* Embossed numbering (editorial signature) */
-.premium-number {
-  font-family: var(--font-display);
-  font-weight: var(--weight-light);
-  text-shadow: var(--text-emboss);
-  color: var(--text-muted);
-  opacity: 0.7;
-}
-
-/* Gold accent bar (modal/sheet signature) */
-.premium-gold-bar {
-  height: 2px;
-  background: var(--gold-gradient);
-  border-radius: 0;
-}
-
-/* Premium modal/sheet surface (dark theme) */
-.premium-modal {
-  background: var(--card-gradient);
+/* Interactive card with hover effect */
+.surface-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  border-top: 2px solid var(--accent-gold);
+  transition: box-shadow 150ms ease-out, border-color 150ms ease-out;
 }
 
-/* Light theme modal surfaces */
-.light-modal {
+.surface-card:hover {
+  box-shadow: var(--card-shadow-lg);
+  border-color: var(--game-accent, var(--accent));
+}
+
+.surface-card:active {
+  box-shadow: var(--card-shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface-card:hover {
+    box-shadow: var(--card-shadow);
+  }
+}
+
+/* Modal/sheet surface */
+.surface-modal {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--card-radius);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow-lg);
 }
 
-/* Premium card (GameCard replacement) */
-.premium-card {
-  background: var(--card-gradient);
+/* Legacy class aliases (for gradual migration) */
+.premium-surface {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  position: relative;
-  overflow: hidden;
-  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.premium-modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow-lg);
+}
+
+.premium-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 150ms ease-out, border-color 150ms ease-out;
 }
 
 .premium-card:hover {
-  transform: translateY(-2px);
-}
-
-.premium-card:active {
-  transform: translateY(0);
+  box-shadow: var(--card-shadow-lg);
+  border-color: var(--game-accent, var(--accent));
 }
 
 @media (prefers-reduced-motion: reduce) {
   .premium-card:hover {
-    transform: none;
+    box-shadow: var(--card-shadow);
   }
+}
+
+.light-modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow-lg);
 }

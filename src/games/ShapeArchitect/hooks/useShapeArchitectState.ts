@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import type { GameState, Position3D, RotationAxis, LevelConfig } from '../logic/types';
+import type { GameState, Position3D, RotationAxis, LevelConfig, Difficulty } from '../logic/types';
 import { DEFAULT_ROTATION } from '../logic/types';
 import { createGameState, rotateBy90OnAxis } from '../logic/engine';
 import { presetLevels, generateRandomLevel } from '../logic/presets';
@@ -7,7 +7,7 @@ import { getDailyShapeArchitectLevel } from '../logic/seededGenerator';
 
 export interface UseShapeArchitectStateOptions {
     isDailyMode?: boolean;
-    initialDifficulty?: 'easy' | 'medium' | 'hard';
+    initialDifficulty?: Difficulty;
 }
 
 export interface PlacementModalState {
@@ -20,10 +20,9 @@ export interface UseShapeArchitectStateReturn {
     // State
     gameState: GameState;
     currentLevelIndex: number;
-    difficulty: 'easy' | 'medium' | 'hard';
+    difficulty: Difficulty;
     filteredLevels: LevelConfig[];
     selectedPiece: ReturnType<typeof getSelectedPiece>;
-    viewMode: '2d' | '3d';
 
     // Preview lock state
     previewLocked: boolean;
@@ -42,8 +41,7 @@ export interface UseShapeArchitectStateReturn {
     nextLevel: () => void;
     previousLevel: () => void;
     startRandomLevel: () => void;
-    setDifficulty: (difficulty: 'easy' | 'medium' | 'hard') => void;
-    setViewMode: (mode: '2d' | '3d') => void;
+    setDifficulty: (difficulty: Difficulty) => void;
     togglePreviewLock: () => void;
     setHoverPosition: (position: Position3D | null) => void;
 
@@ -71,10 +69,9 @@ export function useShapeArchitectState(
     const dailyLevelRef = useRef(isDailyMode ? getDailyShapeArchitectLevel() : null);
 
     const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
-    const [difficulty, setDifficultyState] = useState<'easy' | 'medium' | 'hard'>(
+    const [difficulty, setDifficultyState] = useState<Difficulty>(
         isDailyMode ? 'medium' : initialDifficulty
     );
-    const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
     // Preview lock state
     const [previewLocked, setPreviewLocked] = useState(false);
@@ -146,8 +143,6 @@ export function useShapeArchitectState(
         if (!level) return;
         setCurrentLevelIndex(index);
         setGameState(createGameState(level));
-        // Auto-switch view mode based on level type
-        setViewMode(level.type === '3D' ? '3d' : '2d');
         // Clear preview lock
         setPreviewLocked(false);
         setLockedPosition(null);
@@ -181,7 +176,6 @@ export function useShapeArchitectState(
     const startRandomLevel = useCallback(() => {
         const level = generateRandomLevel(difficulty);
         setGameState(createGameState(level));
-        setViewMode(level.type === '3D' ? '3d' : '2d');
         setPreviewLocked(false);
         setLockedPosition(null);
         // Close placement modal
@@ -189,12 +183,11 @@ export function useShapeArchitectState(
     }, [difficulty]);
 
     // Change difficulty - generates a new random puzzle
-    const setDifficulty = useCallback((newDifficulty: 'easy' | 'medium' | 'hard') => {
+    const setDifficulty = useCallback((newDifficulty: Difficulty) => {
         setDifficultyState(newDifficulty);
         // Generate a new random puzzle for the new difficulty
         const level = generateRandomLevel(newDifficulty);
         setGameState(createGameState(level));
-        setViewMode(level.type === '3D' ? '3d' : '2d');
         setPreviewLocked(false);
         setLockedPosition(null);
         // Close placement modal
@@ -244,7 +237,6 @@ export function useShapeArchitectState(
         difficulty,
         filteredLevels,
         selectedPiece,
-        viewMode,
         previewLocked,
         lockedPosition,
         hoverPosition,
@@ -258,7 +250,6 @@ export function useShapeArchitectState(
         previousLevel,
         startRandomLevel,
         setDifficulty,
-        setViewMode,
         togglePreviewLock,
         setHoverPosition,
         openPlacementModal,

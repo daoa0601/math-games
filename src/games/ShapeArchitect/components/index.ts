@@ -1,21 +1,10 @@
 export { GridBoard } from './GridBoard';
-export { GridBoard3D } from './GridBoard3D';
 export { PieceInventory } from './PieceInventory';
 export { LevelEditor } from './LevelEditor';
-export { CameraPresetButtons, CAMERA_PRESETS } from './CameraPresetButtons';
-export type { CameraPreset, CameraPosition } from './CameraPresetButtons';
 export { RotationControls } from './RotationControls';
 export type { Rotation3D as RotationControlsRotation } from './RotationControls';
-export { LayerControls } from './LayerControls';
 export { ShapeArchitectTutorial } from './ShapeArchitectTutorial';
 export { PreviewLockButton } from './PreviewLockButton';
-export { InstancedVoxels } from './InstancedVoxels';
-export type { VoxelData } from './InstancedVoxels';
 export { PlacedPieceControls } from './PlacedPieceControls';
 export { PlacementToolbar } from './PlacementToolbar';
 export type { PlacementToolbarProps } from './PlacementToolbar';
-
-// Internal components (not exported, used only by GridBoard3D):
-// - Voxel
-// - GridFloor
-// - Canvas3DErrorBoundary

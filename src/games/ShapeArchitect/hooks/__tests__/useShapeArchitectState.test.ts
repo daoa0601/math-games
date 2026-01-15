@@ -65,20 +65,6 @@ describe('useShapeArchitectState', () => {
         expect(result.current.gameState.level.pieces.length).toBeLessThanOrEqual(6);
     });
 
-    it('auto-switches viewMode to 3d for 3D levels', () => {
-        const { result } = renderHook(() => useShapeArchitectState());
-
-        // Find a 3D level
-        const level3DIndex = result.current.filteredLevels.findIndex(l => l.type === '3D');
-
-        if (level3DIndex !== -1) {
-            act(() => {
-                result.current.loadLevel(level3DIndex);
-            });
-            expect(result.current.viewMode).toBe('3d');
-        }
-    });
-
     it('toggles preview lock', () => {
         const { result } = renderHook(() => useShapeArchitectState());
 

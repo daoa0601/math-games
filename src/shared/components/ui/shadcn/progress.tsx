@@ -29,7 +29,7 @@ function Progress({
         data-slot="progress"
         className={cn(
           "tw:bg-primary/20 tw:relative tw:h-2 tw:w-full tw:overflow-hidden tw:rounded-full",
-          "tw: flex-1"
+          "tw:flex-1"
         )}
         {...props}
       >

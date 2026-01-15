@@ -353,12 +353,8 @@ export const GridBoard = memo(function GridBoard({
                                     }
                                 }
 
-                                // Add preview styling
-                                if (previewData.positions.has(posKey)) {
-                                    cellClass += previewData.isValid
-                                        ? ' sa-cell--preview-valid'
-                                        : ' sa-cell--preview-invalid';
-                                }
+                                // Preview is handled by ghost overlay (lines 407-437)
+                                // Cell-level preview classes removed to fix double-preview bug
 
                                 // Check if clicking here could place a piece (using snap-to-nearest)
                                 const canPlaceHere = !!(selectedPiece && cell === 1 &&
@@ -434,6 +430,12 @@ export const GridBoard = memo(function GridBoard({
                             />
                         );
                     })}
+                    {/* Rotation badge shown when preview is locked */}
+                    {isPreviewLocked && rotation.z !== 0 && (
+                        <div className="sa-ghost__rotation-badge">
+                            {rotation.z}°
+                        </div>
+                    )}
                 </div>
             )}
         </div>

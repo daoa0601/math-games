@@ -18,7 +18,7 @@
  * // Always returns the same level for Jan 1, 2025
  */
 
-import type { LevelConfig, Piece, Position3D } from './types';
+import type { LevelConfig, Piece, Position3D, Difficulty } from './types';
 import type { SeededRandom } from '@/shared/utils';
 import { createSeededRandom, createDailyRandom } from '@/shared/utils';
 import { presetLevels } from './presets';
@@ -54,11 +54,15 @@ const PIECE_COLORS = [
 /**
  * Piece count ranges by difficulty.
  * More pieces = harder puzzle.
+ *
+ * Expert and Master use larger piece counts with bigger shapes.
  */
-const PIECE_COUNT_RANGE: Record<'easy' | 'medium' | 'hard', [number, number]> = {
+const PIECE_COUNT_RANGE: Record<Difficulty, [number, number]> = {
   easy: [3, 4],
   medium: [5, 6],
   hard: [7, 8],
+  expert: [6, 8],   // 6-8 pieces (36-48 cells with hexominoes)
+  master: [5, 7],   // 5-7 pieces (35-49 cells with heptominoes)
 };
 
 /**
@@ -234,6 +238,26 @@ function getBaseShapes(pieceCount: number): BaseShape[] {
     shapes.push({ name: 'Large Plus', cells: createPlusShape(3, 2), minPieces: 5, maxPieces: 8 });
     shapes.push({ name: 'U-Shape', cells: createUShape(6, 4, 2), minPieces: 5, maxPieces: 8 });
     shapes.push({ name: 'H-Shape', cells: createHShape(6, 5, 2), minPieces: 5, maxPieces: 8 });
+  }
+
+  // Extra-large shapes for expert (6-8 hexomino-sized pieces)
+  if (pieceCount >= 6 && pieceCount <= 8) {
+    shapes.push({ name: '7x7 Square', cells: createRectangle(7, 7), minPieces: 6, maxPieces: 8 });
+    shapes.push({ name: '10x5 Rectangle', cells: createRectangle(10, 5), minPieces: 6, maxPieces: 8 });
+    shapes.push({ name: '12x4 Rectangle', cells: createRectangle(12, 4), minPieces: 6, maxPieces: 8 });
+    shapes.push({ name: 'XL L-Shape', cells: createLShape(7, 3), minPieces: 6, maxPieces: 8 });
+    shapes.push({ name: 'XL T-Shape', cells: createTShape(5, 7, 2), minPieces: 6, maxPieces: 8 });
+    shapes.push({ name: 'XL Plus', cells: createPlusShape(4, 2), minPieces: 6, maxPieces: 8 });
+  }
+
+  // Massive shapes for master (5-7 heptomino-sized pieces)
+  if (pieceCount >= 5 && pieceCount <= 7) {
+    shapes.push({ name: '8x8 Square', cells: createRectangle(8, 8), minPieces: 5, maxPieces: 9 });
+    shapes.push({ name: '12x5 Rectangle', cells: createRectangle(12, 5), minPieces: 5, maxPieces: 8 });
+    shapes.push({ name: '14x4 Rectangle', cells: createRectangle(14, 4), minPieces: 5, maxPieces: 8 });
+    shapes.push({ name: 'XXL L-Shape', cells: createLShape(8, 3), minPieces: 5, maxPieces: 7 });
+    shapes.push({ name: 'XXL H-Shape', cells: createHShape(8, 6, 2), minPieces: 5, maxPieces: 8 });
+    shapes.push({ name: 'XXL U-Shape', cells: createUShape(8, 5, 2), minPieces: 5, maxPieces: 7 });
   }
 
   // Filter to shapes that support the requested piece count
@@ -505,7 +529,7 @@ function centerShape(cells: Position3D[]): Position3D[] {
  */
 export function generateCohesivePuzzle(
   rng: SeededRandom,
-  difficulty: 'easy' | 'medium' | 'hard'
+  difficulty: Difficulty
 ): LevelConfig | null {
   // 1. Determine piece count based on difficulty
   const [minPieces, maxPieces] = PIECE_COUNT_RANGE[difficulty];
@@ -548,7 +572,7 @@ export function generateCohesivePuzzle(
  */
 export function generateGuaranteedSolvableWithRetry(
   rng: SeededRandom,
-  difficulty: 'easy' | 'medium' | 'hard'
+  difficulty: Difficulty
 ): LevelConfig {
   for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
     const result = generateCohesivePuzzle(rng, difficulty);
@@ -569,14 +593,17 @@ export function generateGuaranteedSolvableWithRetry(
 
 /**
  * Get a fallback preset level matching the specified difficulty.
+ * For expert/master, falls back to hard difficulty presets.
  */
 function getFallbackPreset(
   rng: SeededRandom,
-  difficulty: 'easy' | 'medium' | 'hard'
+  difficulty: Difficulty
 ): LevelConfig {
+  // Map expert/master to hard for fallback purposes
+  const fallbackDifficulty = difficulty === 'expert' || difficulty === 'master' ? 'hard' : difficulty;
   // Filter presets by difficulty (only 2D presets)
   const matchingPresets = presetLevels.filter(
-    (level) => level.difficulty === difficulty && level.type === '2D'
+    (level) => level.difficulty === fallbackDifficulty && level.type === '2D'
   );
 
   // If no exact match, use any 2D preset
@@ -646,7 +673,7 @@ export const GENERATOR_CONSTANTS = {
  */
 export function generateValidatedLevelForTesting(
   baseSeed: string,
-  difficulty: 'easy' | 'medium' | 'hard'
+  difficulty: Difficulty
 ): LevelConfig {
   const rng = createSeededRandom(baseSeed);
   return generateGuaranteedSolvableWithRetry(rng, difficulty);

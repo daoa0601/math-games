@@ -2,13 +2,12 @@ import { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import { DndContext, pointerWithin } from '@dnd-kit/core';
 import { GameLayout, GameShell, GameHeader, GameFooter, DifficultySelector, RankUpOverlay, AchievementToast, Timer, SoundToggle, HelpButton, VictoryModal, SettingsDrawer, SettingsDrawerTrigger, SettingsSection } from '@/shared/components';
 import { useGameTimer, useGameRewards, useSwipe, useAnnounce, useGameInit, useGameTranslations } from '@/shared/hooks';
-import { playSound, showConfetti } from '@/shared/utils';
+import { playSound, showConfetti, triggerHaptic } from '@/shared/utils';
 import { completeDailyChallenge } from '@/shared/services/daily';
-import { GridBoard, GridBoard3D, PieceInventory, LevelEditor, CameraPresetButtons, RotationControls, LayerControls, ShapeArchitectTutorial, PreviewLockButton, PlacedPieceControls, PlacementToolbar } from './components';
-import type { CameraPreset } from './components/CameraPresetButtons';
-import type { Position3D, LevelConfig } from './logic/types';
+import { GridBoard, PieceInventory, LevelEditor, RotationControls, ShapeArchitectTutorial, PreviewLockButton, PlacedPieceControls, PlacementToolbar } from './components';
+import type { Position3D, LevelConfig, Difficulty } from './logic/types';
 import { DEFAULT_ROTATION } from './logic/types';
-import { createGameState, removePieceFromGrid } from './logic/engine';
+import { createGameState, removePieceFromGrid, canPlacePiece } from './logic/engine';
 import { useShapeArchitectState, usePiecePlacement, usePlacedPieceMovement, useKeyboardControls, useThrottledHover } from './hooks';
 import '@/shared/styles/game-base.css';
 import './ShapeArchitect.css';
@@ -46,13 +45,11 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
         difficulty,
         filteredLevels,
         selectedPiece,
-        viewMode,
-        setViewMode,
         previewLocked,
         effectivePreviewPosition,
         togglePreviewLock,
         setHoverPosition,
-        handleSelectPiece,
+        handleSelectPiece: handleSelectPieceBase,
         handleRotateAxis,
         resetLevel: resetLevelState,
         nextLevel: nextLevelState,
@@ -65,10 +62,14 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
         rotateModalPiece,
     } = useShapeArchitectState({ isDailyMode });
 
+    // Wrap piece selection with light haptic feedback
+    const handleSelectPiece = useCallback((pieceId: string) => {
+        triggerHaptic('light');
+        handleSelectPieceBase(pieceId);
+    }, [handleSelectPieceBase]);
+
     const [showHints, setShowHints] = useState(false);
     const [placementError, setPlacementError] = useState<string | null>(null);
-    const [cameraPreset, setCameraPreset] = useState<CameraPreset>('isometric');
-    const [maxVisibleLayer, setMaxVisibleLayer] = useState<number>(() => gameState.level.gridSize[2] - 1);
     const [showEditor, setShowEditor] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [showRotationHint, setShowRotationHint] = useState(() => {
@@ -161,10 +162,12 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
         gameState,
         onPlace: (newState) => {
             playSound('place');
+            triggerHaptic('medium'); // Satisfying tactile feedback
             setGameState(newState);
         },
         onError: (errorKey) => {
             playSound('error');
+            triggerHaptic('heavy'); // Strong feedback for errors
             setPlacementError(t(`errors.${errorKey}`));
             if (placementErrorTimeoutRef.current) {
                 clearTimeout(placementErrorTimeoutRef.current);
@@ -190,10 +193,12 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
         gameState,
         onMove: (newState) => {
             playSound('place');
+            triggerHaptic('medium');
             setGameState(newState);
         },
         onError: (errorKey) => {
             playSound('error');
+            triggerHaptic('heavy');
             setPlacementError(t(`errors.${errorKey}`));
             if (moveErrorTimeoutRef.current) {
                 clearTimeout(moveErrorTimeoutRef.current);
@@ -210,8 +215,9 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
     // Save progress and show confetti when solved
     useEffect(() => {
         if (gameState.isSolved) {
-            // Celebrate with confetti!
+            // Celebrate with confetti and strong haptic!
             playSound('win');
+            triggerHaptic('heavy'); // Celebratory feedback
             showConfetti({
                 particleCount: 100,
                 spread: 70,
@@ -251,6 +257,7 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
     }, [handleRotateAxis, showRotationHint]);
 
     // Wrap cell click to handle both placement and movement
+    // Dual UX: tap-to-place directly if valid, otherwise open modal for rotation
     const handleCellClick = useCallback((position: Position3D) => {
         setPlacementError(null);
 
@@ -260,12 +267,26 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
             return;
         }
 
-        // If a piece from inventory is selected, open placement modal
+        // If a piece from inventory is selected, check if position is valid
         if (selectedPiece) {
-            openPlacementModal(position);
+            const isValid = canPlacePiece(
+                gameState.grid,
+                selectedPiece,
+                position,
+                gameState.rotation,
+                gameState.level.gridSize
+            );
+
+            if (isValid) {
+                // Direct placement - skip modal for valid positions
+                handlePlacementCore(position, gameState.rotation);
+            } else {
+                // Open modal for rotation adjustment when position is invalid
+                openPlacementModal(position);
+            }
             return;
         }
-    }, [selectedPlacedPieceId, handleMoveToPosition, selectedPiece, openPlacementModal]);
+    }, [selectedPlacedPieceId, handleMoveToPosition, selectedPiece, gameState.grid, gameState.rotation, gameState.level.gridSize, handlePlacementCore, openPlacementModal]);
 
     // Handle confirmation from placement modal
     const handleModalConfirm = useCallback(() => {
@@ -291,7 +312,7 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
     }, [handleDragEndCore, selectedPlacedPieceId, handleMoveDragEnd]);
 
     // Change difficulty
-    const handleDifficultyChange = useCallback((newDifficulty: 'easy' | 'medium' | 'hard') => {
+    const handleDifficultyChange = useCallback((newDifficulty: Difficulty) => {
         setDifficulty(newDifficulty);
         setShowHints(false);
         resetTimer();
@@ -300,15 +321,13 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
     // Start random level with timer reset
     const startRandomLevel = useCallback(() => {
         startRandomLevelState();
-        setMaxVisibleLayer(gameState.level.gridSize[2] - 1);
         resetTimer();
-    }, [startRandomLevelState, gameState.level.gridSize, resetTimer]);
+    }, [startRandomLevelState, resetTimer]);
 
     // Handle custom level from LevelEditor
     const handleCustomLevel = useCallback((level: LevelConfig) => {
         setGameState(createGameState(level));
         setShowEditor(false);
-        setMaxVisibleLayer(level.gridSize[2] - 1);
         resetTimer();
         playSound('click');
     }, [setGameState, resetTimer]);
@@ -478,81 +497,26 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
                             </div>
                         )}
 
-                        {/* View Mode Toggle */}
-                        <div className="sa-view-mode" role="group" aria-label="View mode">
-                            <button
-                                className={`sa-view-mode__btn ${viewMode === '2d' ? 'sa-view-mode__btn--active' : ''}`}
-                                onClick={() => setViewMode('2d')}
-                                aria-pressed={viewMode === '2d'}
-                            >
-                                2D
-                            </button>
-                            <button
-                                className={`sa-view-mode__btn ${viewMode === '3d' ? 'sa-view-mode__btn--active' : ''}`}
-                                onClick={() => setViewMode('3d')}
-                                aria-pressed={viewMode === '3d'}
-                            >
-                                3D
-                            </button>
-                            {gameState.level.type === '3D' && (
-                                <span className="sa-view-mode__badge">3D Level</span>
-                            )}
-                        </div>
-
-                        {/* Grid Board */}
+                        {/* Grid Board (2D only - 3D mode removed) */}
                         {!showEditor && (
                             <div className={`sa-board-wrapper ${!isPracticeMode && timeLeft <= 10 ? 'sa-board-wrapper--urgent' : ''}`}>
-                                {viewMode === '2d' ? (
-                                    <GridBoard
-                                        grid={gameState.grid}
-                                        gridSize={gameState.level.gridSize}
-                                        selectedPiece={selectedPlacedPieceId ? null : selectedPiece}
-                                        rotation={selectedPlacedPieceId ? moveRotation : gameState.rotation}
-                                        placedPieces={gameState.placedPieces}
-                                        levelPieces={gameState.level.pieces}
-                                        onCellClick={handleCellClick}
-                                        hoverPosition={effectivePreviewPosition}
-                                        onCellHover={selectedPlacedPieceId ? throttledSetMovePreviewPosition : throttledSetHoverPosition}
-                                        justPlacedPositions={justMovedPositions.size > 0 ? justMovedPositions : justPlacedPositions}
-                                        isPreviewLocked={previewLocked}
-                                        selectedPlacedPieceId={selectedPlacedPieceId}
-                                        onPlacedPieceClick={selectPlacedPiece}
-                                        isMovePreviewValid={isMovePreviewValid}
-                                        moveRotation={moveRotation}
-                                    />
-                                ) : (
-                                    <>
-                                        <div className="sa-3d-controls">
-                                            <CameraPresetButtons
-                                                activePreset={cameraPreset}
-                                                onPresetChange={setCameraPreset}
-                                            />
-                                            <LayerControls
-                                                depth={gameState.level.gridSize[2]}
-                                                maxVisibleLayer={maxVisibleLayer}
-                                                onChange={setMaxVisibleLayer}
-                                                disabled={gameState.isSolved || showTimeUp}
-                                            />
-                                        </div>
-                                        <GridBoard3D
-                                            grid={gameState.grid}
-                                            gridSize={gameState.level.gridSize}
-                                            selectedPiece={selectedPlacedPieceId ? null : selectedPiece}
-                                            rotation={selectedPlacedPieceId ? moveRotation : gameState.rotation}
-                                            placedPieces={gameState.placedPieces}
-                                            levelPieces={gameState.level.pieces}
-                                            onCellClick={handleCellClick}
-                                            hoverPosition={effectivePreviewPosition}
-                                            onCellHover={selectedPlacedPieceId ? throttledSetMovePreviewPosition : throttledSetHoverPosition}
-                                            cameraPreset={cameraPreset}
-                                            maxVisibleLayer={maxVisibleLayer}
-                                            isPreviewLocked={previewLocked}
-                                            justPlacedPositions={justMovedPositions.size > 0 ? justMovedPositions : justPlacedPositions}
-                                            selectedPlacedPieceId={selectedPlacedPieceId}
-                                            onPlacedPieceClick={selectPlacedPiece}
-                                        />
-                                    </>
-                                )}
+                                <GridBoard
+                                    grid={gameState.grid}
+                                    gridSize={gameState.level.gridSize}
+                                    selectedPiece={selectedPlacedPieceId ? null : selectedPiece}
+                                    rotation={selectedPlacedPieceId ? moveRotation : gameState.rotation}
+                                    placedPieces={gameState.placedPieces}
+                                    levelPieces={gameState.level.pieces}
+                                    onCellClick={handleCellClick}
+                                    hoverPosition={effectivePreviewPosition}
+                                    onCellHover={selectedPlacedPieceId ? throttledSetMovePreviewPosition : throttledSetHoverPosition}
+                                    justPlacedPositions={justMovedPositions.size > 0 ? justMovedPositions : justPlacedPositions}
+                                    isPreviewLocked={previewLocked}
+                                    selectedPlacedPieceId={selectedPlacedPieceId}
+                                    onPlacedPieceClick={selectPlacedPiece}
+                                    isMovePreviewValid={isMovePreviewValid}
+                                    moveRotation={moveRotation}
+                                />
                             </div>
                         )}
                     </div>
@@ -649,7 +613,7 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
         {!isDailyMode && (
           <SettingsSection title={tc('difficulty.title', 'Difficulty')}>
             <DifficultySelector
-              options={['easy', 'medium', 'hard']}
+              options={['easy', 'medium', 'hard', 'expert', 'master'] as const}
               value={difficulty}
               onChange={handleDifficultyChange}
             />
@@ -754,7 +718,6 @@ export const ShapeArchitectGame = memo(function ShapeArchitectGame() {
                 {showTutorial && (
                     <ShapeArchitectTutorial
                         onComplete={() => setShowTutorial(false)}
-                        is3DMode={viewMode === '3d'}
                     />
                 )}
 

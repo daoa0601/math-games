@@ -3,7 +3,6 @@
  *
  * Interactive tutorial that guides new players through the Shape Architect game mechanics.
  * Uses the shared Tutorial system with game-specific steps and highlights.
- * Supports both 2D and 3D modes with conditional step display.
  */
 
 import { useTranslation } from 'react-i18next';
@@ -20,16 +19,13 @@ import {
 
 interface ShapeArchitectTutorialProps {
   onComplete: () => void;
-  is3DMode: boolean;
 }
 
 const GAME_ID = 'shape-architect';
+const TOTAL_STEPS = 5;
 
-export function ShapeArchitectTutorial({ onComplete, is3DMode }: ShapeArchitectTutorialProps) {
+export function ShapeArchitectTutorial({ onComplete }: ShapeArchitectTutorialProps) {
   const { t } = useTranslation();
-
-  // 3D mode has 6 steps, 2D mode has 5 steps
-  const totalSteps = is3DMode ? 6 : 5;
 
   const handleComplete = () => {
     markTutorialCompleted(GAME_ID);
@@ -42,7 +38,7 @@ export function ShapeArchitectTutorial({ onComplete, is3DMode }: ShapeArchitectT
   };
 
   return (
-    <Tutorial totalSteps={totalSteps} onComplete={handleComplete} onSkip={handleSkip}>
+    <Tutorial totalSteps={TOTAL_STEPS} onComplete={handleComplete} onSkip={handleSkip}>
       <TutorialSpotlight />
 
       {/* Step 1: Welcome - general introduction, no specific highlight */}
@@ -54,10 +50,10 @@ export function ShapeArchitectTutorial({ onComplete, is3DMode }: ShapeArchitectT
       </TutorialStep>
 
       {/* Step 2: Target Shape - highlight the grid board with target cells */}
-      <TutorialStep step={2} highlightSelector={is3DMode ? '.sa-board-3d' : '.sa-board'}>
+      <TutorialStep step={2} highlightSelector=".sa-board">
         <TutorialTooltip
           position="bottom"
-          targetSelector={is3DMode ? '.sa-board-3d' : '.sa-board'}
+          targetSelector=".sa-board"
           showPrevious
         >
           <h3>{t('shapeArchitect.tutorial.step2Title')}</h3>
@@ -88,16 +84,6 @@ export function ShapeArchitectTutorial({ onComplete, is3DMode }: ShapeArchitectT
           <p>{t('shapeArchitect.tutorial.step5')}</p>
         </TutorialTooltip>
       </TutorialStep>
-
-      {/* Step 6: 3D Mode - only shown when in 3D mode, highlight camera presets */}
-      {is3DMode && (
-        <TutorialStep step={6} highlightSelector=".sa-camera">
-          <TutorialTooltip position="bottom" targetSelector=".sa-camera" showPrevious>
-            <h3>{t('shapeArchitect.tutorial.step6Title')}</h3>
-            <p>{t('shapeArchitect.tutorial.step6')}</p>
-          </TutorialTooltip>
-        </TutorialStep>
-      )}
     </Tutorial>
   );
 }

@@ -130,6 +130,8 @@ describe('Generator Validation', () => {
       easy: [3, 4],
       medium: [5, 6],
       hard: [7, 8],
+      expert: [6, 8],
+      master: [5, 7],
     });
   });
 

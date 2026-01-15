@@ -2,7 +2,6 @@ import { useRef, memo, useMemo, useCallback, type CSSProperties } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import type { Piece, Rotation3D } from '../logic/types';
 import { getExplicitPattern } from '@/shared/utils';
-import { IsometricPiecePreview } from './IsometricPiecePreview';
 
 interface PieceInventoryProps {
     pieces: Piece[];
@@ -55,9 +54,8 @@ const DraggablePiece = memo(function DraggablePiece({ piece, isSelected, onSelec
         if (e.key === 'Enter') onSelect();
     }, [onSelect]);
 
-    // Memoize piece calculations
-    const { is3DPiece, previewGrid, patternClass } = useMemo(() => {
-        const is3D = piece.layout.some((p) => p.z > 0);
+    // Memoize piece calculations (2D preview only - 3D mode removed)
+    const { previewGrid, patternClass } = useMemo(() => {
         const maxX = Math.max(...piece.layout.map((p) => p.x)) + 1;
         const maxY = Math.max(...piece.layout.map((p) => p.y)) + 1;
 
@@ -70,7 +68,6 @@ const DraggablePiece = memo(function DraggablePiece({ piece, isSelected, onSelec
         });
 
         return {
-            is3DPiece: is3D,
             previewGrid: grid,
             patternClass: getExplicitPattern(piece.color),
         };
@@ -110,25 +107,19 @@ const DraggablePiece = memo(function DraggablePiece({ piece, isSelected, onSelec
             >
                 {/* Drag handle - only this area initiates drag */}
                 <div className="sa-card__drag-handle" {...listeners}>
-                    {is3DPiece ? (
-                        <div className="sa-preview" aria-label={`${piece.name} piece`}>
-                            <IsometricPiecePreview piece={piece} size={48} />
-                        </div>
-                    ) : (
-                        <div className="sa-preview" aria-label={`${piece.name} piece`}>
-                            {[...previewGrid].reverse().map((row, y) => (
-                                <div key={y} className="sa-preview__row">
-                                    {row.map((filled, x) => (
-                                        <div
-                                            key={x}
-                                            className={`sa-preview__cell ${filled ? patternClass : 'sa-preview__cell--empty'}`}
-                                            style={filled ? filledCellStyle : undefined}
-                                        />
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    <div className="sa-preview" aria-label={`${piece.name} piece`}>
+                        {[...previewGrid].reverse().map((row, y) => (
+                            <div key={y} className="sa-preview__row">
+                                {row.map((filled, x) => (
+                                    <div
+                                        key={x}
+                                        className={`sa-preview__cell ${filled ? patternClass : 'sa-preview__cell--empty'}`}
+                                        style={filled ? filledCellStyle : undefined}
+                                    />
+                                ))}
+                            </div>
+                        ))}
+                    </div>
                 </div>
                 <span className="sa-card__name">{piece.name}</span>
             </div>

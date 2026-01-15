@@ -84,6 +84,10 @@
 
   /* Default accent (can be overridden by game) */
   --accent: var(--accent-gold);
+
+  /* Game accent fallback - ensures shadcn components work outside games */
+  /* Individual games override this via [data-game="..."] selectors */
+  --game-accent: var(--accent-gold);
 }
 
 /* ============================================

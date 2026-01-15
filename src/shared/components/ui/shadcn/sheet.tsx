@@ -1,11 +1,11 @@
 /**
- * Sheet component - Vietnamese Premium styled bottom/side sheet
- * Based on shadcn/ui Sheet with credit card aesthetic
+ * Sheet component - Educational bottom/side sheet
+ * Based on shadcn/ui Sheet with clean, flat styling
  *
  * Features:
- * - Gold accent border on top (signature Vietnamese Premium element)
- * - Credit card gradient background and shadow
+ * - Clean light background
  * - Smooth slide animations
+ * - Responsive: bottom sheet on mobile, centered modal on desktop
  * - Mobile swipe-to-dismiss support (to be added in wrapper)
  */
 
@@ -120,7 +120,7 @@ function SheetContent({
             'tw:absolute tw:top-4 tw:right-4',
             'tw:rounded-sm tw:opacity-70',
             'tw:transition-opacity hover:tw:opacity-100',
-            'focus:tw:outline-none focus:tw:ring-2 focus:tw:ring-[var(--accent-gold)] focus:tw:ring-offset-2 focus:tw:ring-offset-[var(--bg-primary)]',
+            'focus:tw:outline-none focus:tw:ring-2 focus:tw:ring-ring focus:tw:ring-offset-2 focus:tw:ring-offset-background',
             'disabled:tw:pointer-events-none',
             'tw:text-[var(--text-muted)]'
           )}
@@ -166,8 +166,8 @@ function SheetTitle({
     <SheetPrimitive.Title
       data-slot="sheet-title"
       className={cn(
-        // Vietnamese Premium typography
-        'tw:font-[var(--font-display)] tw:text-lg tw:font-semibold',
+        // Educational typography
+        'tw:text-lg tw:font-semibold',
         'tw:text-[var(--text-primary)]',
         className
       )}

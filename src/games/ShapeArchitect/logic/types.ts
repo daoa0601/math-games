@@ -32,6 +32,16 @@ export const DEFAULT_ROTATION: Rotation3D = { x: 0, y: 0, z: 0 };
 /** Rotation axis type for single-axis rotation operations */
 export type RotationAxis = 'x' | 'y' | 'z';
 
+/**
+ * Puzzle difficulty levels.
+ * - easy: 3-4 tetrominoes (12-16 cells)
+ * - medium: 5-6 tetrominoes (20-24 cells)
+ * - hard: 7-8 tetrominoes (28-32 cells)
+ * - expert: 6-8 hexominoes (36-48 cells)
+ * - master: 5-7 heptominoes (35-49 cells)
+ */
+export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert' | 'master';
+
 export interface Piece {
     id: string;
     name: string;
@@ -53,7 +63,7 @@ export interface LevelConfig {
     gridSize: [number, number, number]; // [width, height, depth]
     targetVoxels: Position3D[];
     pieces: Piece[];
-    difficulty: 'easy' | 'medium' | 'hard';
+    difficulty: Difficulty;
 }
 
 /** Interaction mode for the game */

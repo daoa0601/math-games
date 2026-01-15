@@ -8,6 +8,7 @@ export type {
     Position3D,
     Rotation3D,
     RotationAxis,
+    Difficulty,
     Piece,
     PlacedPiece,
     LevelConfig,

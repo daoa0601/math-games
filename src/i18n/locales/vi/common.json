@@ -171,6 +171,7 @@
         "easy": "Dễ",
         "medium": "Trung bình",
         "hard": "Khó",
+        "expert": "Chuyên gia",
         "master": "Bậc thầy",
         "grandmaster": "Đại kiện tướng"
     },
@@ -178,6 +179,7 @@
         "easy": "Dễ",
         "medium": "Trung bình",
         "hard": "Khó",
+        "expert": "Chuyên gia",
         "master": "Bậc thầy"
     },
     "buttons": {

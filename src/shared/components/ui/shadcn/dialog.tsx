@@ -1,10 +1,10 @@
 /**
- * Dialog component - Vietnamese Premium styled modal dialog
- * Based on shadcn/ui Dialog with credit card aesthetic
+ * Dialog component - Educational modal dialog
+ * Based on shadcn/ui Dialog with clean, flat styling
  *
  * Features:
- * - Credit card gradient background and shadow
- * - Gold accent ring on focus
+ * - Clean light background (educational standard)
+ * - Functional color accents
  * - Smooth zoom animations
  * - Accessible with Radix primitives
  */
@@ -77,8 +77,9 @@ function DialogContent({
           'tw:fixed tw:top-[50%] tw:left-[50%] tw:z-50',
           'tw:w-full tw:max-w-[calc(100%-2rem)] sm:tw:max-w-lg',
           'tw:translate-x-[-50%] tw:translate-y-[-50%]',
-          // Credit card aesthetic
-          'premium-modal',
+          // Clean educational surface
+          'tw:bg-background tw:border tw:border-border tw:rounded-lg',
+          'tw:shadow-lg',
           'tw:p-6',
           // Animation
           'tw:duration-200 tw:outline-none',
@@ -97,7 +98,7 @@ function DialogContent({
               'tw:absolute tw:top-4 tw:right-4',
               'tw:rounded-sm tw:opacity-70',
               'tw:transition-opacity hover:tw:opacity-100',
-              'focus:tw:outline-none focus:tw:ring-2 focus:tw:ring-[var(--accent-gold)] focus:tw:ring-offset-2 focus:tw:ring-offset-[var(--bg-primary)]',
+              'focus:tw:outline-none focus:tw:ring-2 focus:tw:ring-ring focus:tw:ring-offset-2 focus:tw:ring-offset-background',
               'disabled:tw:pointer-events-none',
               'tw:text-[var(--text-muted)]'
             )}
@@ -147,8 +148,8 @@ function DialogTitle({
     <DialogPrimitive.Title
       data-slot="dialog-title"
       className={cn(
-        // Vietnamese Premium typography
-        'tw:font-[var(--font-display)] tw:text-lg tw:font-semibold tw:leading-none',
+        // Educational typography
+        'tw:text-lg tw:font-semibold tw:leading-none',
         'tw:text-[var(--text-primary)]',
         className
       )}

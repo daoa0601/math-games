@@ -171,6 +171,7 @@
         "easy": "Easy",
         "medium": "Medium",
         "hard": "Hard",
+        "expert": "Expert",
         "master": "Master",
         "grandmaster": "Grandmaster"
     },
@@ -178,6 +179,7 @@
         "easy": "Easy",
         "medium": "Medium",
         "hard": "Hard",
+        "expert": "Expert",
         "master": "Master"
     },
     "buttons": {

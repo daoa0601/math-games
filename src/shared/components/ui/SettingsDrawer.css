@@ -1,43 +1,37 @@
-/* SettingsDrawer - Custom overrides for shadcn Sheet */
+/* SettingsDrawer - Responsive behavior for shadcn Sheet */
+/* Mobile: bottom sheet | Desktop: centered modal */
 
-/* Mobile: full-width bottom sheet - use bottom positioning */
+/* Mobile default: bottom sheet positioning */
 .settings-drawer-sheet {
-  /* Mobile default: position at bottom */
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
 }
 
-/* Responsive behavior: On desktop (768px+), center the sheet as a modal */
+/* Desktop (768px+): centered modal */
 @media (min-width: 768px) {
   .settings-drawer-sheet {
-    /* Center positioning */
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    /* Clear bottom positioning */
     bottom: auto !important;
     right: auto !important;
-    /* Dimensions */
     width: 90% !important;
     max-width: 480px !important;
     max-height: 90vh !important;
-    /* Styling */
-    border-radius: 8px !important;
+    border-radius: var(--radius, 8px) !important;
   }
 
-  /* Hide drag handle on desktop */
+  /* Hide mobile drag handle on desktop */
   .settings-drawer-sheet > div:first-child {
     display: none !important;
   }
 }
 
-/* Section styling improvements */
-.tw\\:px-6.tw\\:pb-4 {
+/* Settings section dividers */
+.settings-section:not(:last-child) {
+  border-bottom: 1px solid var(--border);
   padding-bottom: 1rem;
-}
-
-.tw\\:px-6.tw\\:pb-4:not(:last-child) {
-  border-bottom: 1px solid var(--border, #e7e5e4);
+  margin-bottom: 1rem;
 }

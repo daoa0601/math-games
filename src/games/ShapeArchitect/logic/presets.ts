@@ -3,10 +3,14 @@
 // Increased difficulty: Easy requires 4-5 pieces minimum
 // ========================================
 
-import type { LevelConfig, Piece } from './types';
+import type { LevelConfig, Piece, Difficulty } from './types';
 import { validateAllLevels, type LevelValidation } from './engine';
 import { createSeededRandom } from '@/shared/utils';
 import { generateGuaranteedSolvableWithRetry } from './seededGenerator';
+import { HEXOMINO, HEPTOMINO, HEXOMINO_KEYS, HEPTOMINO_KEYS } from './polyominoes';
+
+// Re-export polyominoes for external use
+export { HEXOMINO, HEPTOMINO, HEXOMINO_KEYS, HEPTOMINO_KEYS };
 
 // ========================================
 // All 7 Classic Tetris Pieces (Tetrominoes)
@@ -258,153 +262,7 @@ const PENTOMINO = {
     }),
 };
 
-// ========================================
-// 3D Polycubes (True 3D pieces with z > 0)
-// ========================================
-
-const POLYCUBE_3D = {
-    // 3D Tetracubes (4 cells, extending into z)
-    Corner3D: (id: string, color: string): Piece => ({
-        id,
-        name: '3D Corner',
-        color,
-        layout: [
-            { x: 0, y: 0, z: 0 },
-            { x: 1, y: 0, z: 0 },
-            { x: 0, y: 1, z: 0 },
-            { x: 0, y: 0, z: 1 },
-        ],
-    }),
-
-    Tower4: (id: string, color: string): Piece => ({
-        id,
-        name: 'Tower',
-        color,
-        layout: [
-            { x: 0, y: 0, z: 0 },
-            { x: 0, y: 0, z: 1 },
-            { x: 0, y: 0, z: 2 },
-            { x: 0, y: 0, z: 3 },
-        ],
-    }),
-
-    L3D: (id: string, color: string): Piece => ({
-        id,
-        name: '3D L-Block',
-        color,
-        layout: [
-            { x: 0, y: 0, z: 0 },
-            { x: 0, y: 0, z: 1 },
-            { x: 0, y: 0, z: 2 },
-            { x: 1, y: 0, z: 0 },
-        ],
-    }),
-
-    T3D: (id: string, color: string): Piece => ({
-        id,
-        name: '3D T-Block',
-        color,
-        layout: [
-            { x: 0, y: 0, z: 0 },
-            { x: 1, y: 0, z: 0 },
-            { x: 2, y: 0, z: 0 },
-            { x: 1, y: 0, z: 1 },
-        ],
-    }),
-
-    Step3D: (id: string, color: string): Piece => ({
-        id,
-        name: '3D Step',
-        color,
-        layout: [
-            { x: 0, y: 0, z: 0 },
-            { x: 1, y: 0, z: 0 },
-            { x: 1, y: 0, z: 1 },
-            { x: 2, y: 0, z: 1 },
-        ],
-    }),
-
-    // Small cube (2x2x1 base)
-    Cube2x2: (id: string, color: string): Piece => ({
-        id,
-        name: '2x2 Block',
-        color,
-        layout: [
-            { x: 0, y: 0, z: 0 },
-            { x: 1, y: 0, z: 0 },
-            { x: 0, y: 1, z: 0 },
-            { x: 1, y: 1, z: 0 },
-        ],
-    }),
-
-    // 3D Pentacubes (5 cells)
-    Plus3D: (id: string, color: string): Piece => ({
-        id,
-        name: '3D Plus',
-        color,
-        layout: [
-            { x: 1, y: 0, z: 0 },
-            { x: 0, y: 0, z: 1 },
-            { x: 1, y: 0, z: 1 },
-            { x: 2, y: 0, z: 1 },
-            { x: 1, y: 0, z: 2 },
-        ],
-    }),
-
-    Stairs3D: (id: string, color: string): Piece => ({
-        id,
-        name: '3D Stairs',
-        color,
-        layout: [
-            { x: 0, y: 0, z: 0 },
-            { x: 1, y: 0, z: 0 },
-            { x: 1, y: 0, z: 1 },
-            { x: 2, y: 0, z: 1 },
-            { x: 2, y: 0, z: 2 },
-        ],
-    }),
-
-    Hook3D: (id: string, color: string): Piece => ({
-        id,
-        name: '3D Hook',
-        color,
-        layout: [
-            { x: 0, y: 0, z: 0 },
-            { x: 0, y: 0, z: 1 },
-            { x: 0, y: 0, z: 2 },
-            { x: 1, y: 0, z: 2 },
-            { x: 1, y: 1, z: 2 },
-        ],
-    }),
-
-    // 3D Hexacube (6 cells)
-    Bracket3D: (id: string, color: string): Piece => ({
-        id,
-        name: '3D Bracket',
-        color,
-        layout: [
-            { x: 0, y: 0, z: 0 },
-            { x: 1, y: 0, z: 0 },
-            { x: 0, y: 0, z: 1 },
-            { x: 0, y: 0, z: 2 },
-            { x: 1, y: 0, z: 2 },
-            { x: 0, y: 1, z: 1 },
-        ],
-    }),
-
-    // 8-cell cube (2x2x2)
-    Cube2x2x2: (id: string, color: string): Piece => ({
-        id,
-        name: '2x2x2 Cube',
-        color,
-        layout: [
-            { x: 0, y: 0, z: 0 }, { x: 1, y: 0, z: 0 },
-            { x: 0, y: 1, z: 0 }, { x: 1, y: 1, z: 0 },
-            { x: 0, y: 0, z: 1 }, { x: 1, y: 0, z: 1 },
-            { x: 0, y: 1, z: 1 }, { x: 1, y: 1, z: 1 },
-        ],
-    }),
-};
+// POLYCUBE_3D removed - 3D mode archived
 
 // ========================================
 // Themed Shapes - Fun recognizable shapes
@@ -837,223 +695,7 @@ export const presetLevels: LevelConfig[] = [
         ],
         difficulty: 'hard',
     },
-
-    // ===== 3D LEVELS - True 3D Puzzles (depth > 1) =====
-
-    // 3D Easy #1: Simple 2x2x2 Cube
-    {
-        id: '3d_easy_1',
-        name: 'Cube Stack',
-        type: '3D',
-        gridSize: [4, 4, 3],
-        targetVoxels: [
-            // 2x2x2 cube = 8 cells
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
-            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 },
-            { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 },
-        ],
-        pieces: [
-            POLYCUBE_3D.Cube2x2('c1', '#FF9800'),
-            POLYCUBE_3D.Cube2x2('c2', '#4CAF50'),
-        ],
-        difficulty: 'easy',
-    },
-
-    // 3D Easy #2: Mini Tower
-    {
-        id: '3d_easy_2',
-        name: 'Mini Tower',
-        type: '3D',
-        gridSize: [4, 5, 4],
-        targetVoxels: [
-            // 3x2 base + 3x2 second level = 12 cells
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
-            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 }, { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 },
-            { x: 1, y: 1, z: 2 }, { x: 2, y: 1, z: 2 }, { x: 1, y: 2, z: 2 }, { x: 2, y: 2, z: 2 },
-        ],
-        pieces: [
-            POLYCUBE_3D.Cube2x2('c1', '#E91E63'),
-            POLYCUBE_3D.Cube2x2('c2', '#2196F3'),
-            POLYCUBE_3D.Cube2x2('c3', '#FFEB3B'),
-        ],
-        difficulty: 'easy',
-    },
-
-    // 3D Medium #1: Cube Tower
-    {
-        id: '3d_med_1',
-        name: 'Cube Tower',
-        type: '3D',
-        gridSize: [4, 4, 5],
-        targetVoxels: [
-            // 2x2x4 tower = 16 cells = 4 Cube2x2 pieces
-            // Layer 0
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
-            // Layer 1
-            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 },
-            { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 },
-            // Layer 2
-            { x: 1, y: 1, z: 2 }, { x: 2, y: 1, z: 2 },
-            { x: 1, y: 2, z: 2 }, { x: 2, y: 2, z: 2 },
-            // Layer 3
-            { x: 1, y: 1, z: 3 }, { x: 2, y: 1, z: 3 },
-            { x: 1, y: 2, z: 3 }, { x: 2, y: 2, z: 3 },
-        ],
-        pieces: [
-            POLYCUBE_3D.Cube2x2('c1', '#FF9800'),
-            POLYCUBE_3D.Cube2x2('c2', '#4CAF50'),
-            POLYCUBE_3D.Cube2x2('c3', '#2196F3'),
-            POLYCUBE_3D.Cube2x2('c4', '#9C27B0'),
-        ],
-        difficulty: 'medium',
-    },
-
-    // 3D Medium #2: Double Cube
-    {
-        id: '3d_med_2',
-        name: 'Double Cube',
-        type: '3D',
-        gridSize: [5, 4, 3],
-        targetVoxels: [
-            // Two 2x2x2 cubes side by side = 16 cells
-            // First cube
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
-            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 },
-            { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 },
-            // Second cube
-            { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 },
-            { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
-            { x: 3, y: 1, z: 1 }, { x: 4, y: 1, z: 1 },
-            { x: 3, y: 2, z: 1 }, { x: 4, y: 2, z: 1 },
-        ],
-        pieces: [
-            POLYCUBE_3D.Cube2x2x2('c1', '#E91E63'),
-            POLYCUBE_3D.Cube2x2x2('c2', '#3F51B5'),
-        ],
-        difficulty: 'medium',
-    },
-
-    // 3D Medium #3: Flat Platform
-    {
-        id: '3d_med_3',
-        name: 'Flat Platform',
-        type: '3D',
-        gridSize: [6, 6, 3],
-        targetVoxels: [
-            // 4x4x1 platform = 16 cells
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
-            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 },
-        ],
-        pieces: [
-            POLYCUBE_3D.Cube2x2('c1', '#FF9800'),
-            POLYCUBE_3D.Cube2x2('c2', '#4CAF50'),
-            POLYCUBE_3D.Cube2x2('c3', '#2196F3'),
-            POLYCUBE_3D.Cube2x2('c4', '#E91E63'),
-        ],
-        difficulty: 'medium',
-    },
-
-    // 3D Hard #1: Tall Tower
-    {
-        id: '3d_hard_1',
-        name: 'Tall Tower',
-        type: '3D',
-        gridSize: [4, 4, 7],
-        targetVoxels: [
-            // 2x2x6 tower = 24 cells = 6 Cube2x2 pieces
-            // Layer 0
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
-            // Layer 1
-            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 },
-            { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 },
-            // Layer 2
-            { x: 1, y: 1, z: 2 }, { x: 2, y: 1, z: 2 },
-            { x: 1, y: 2, z: 2 }, { x: 2, y: 2, z: 2 },
-            // Layer 3
-            { x: 1, y: 1, z: 3 }, { x: 2, y: 1, z: 3 },
-            { x: 1, y: 2, z: 3 }, { x: 2, y: 2, z: 3 },
-            // Layer 4
-            { x: 1, y: 1, z: 4 }, { x: 2, y: 1, z: 4 },
-            { x: 1, y: 2, z: 4 }, { x: 2, y: 2, z: 4 },
-            // Layer 5
-            { x: 1, y: 1, z: 5 }, { x: 2, y: 1, z: 5 },
-            { x: 1, y: 2, z: 5 }, { x: 2, y: 2, z: 5 },
-        ],
-        pieces: [
-            POLYCUBE_3D.Cube2x2('c1', '#FF9800'),
-            POLYCUBE_3D.Cube2x2('c2', '#4CAF50'),
-            POLYCUBE_3D.Cube2x2('c3', '#2196F3'),
-            POLYCUBE_3D.Cube2x2('c4', '#9C27B0'),
-            POLYCUBE_3D.Cube2x2('c5', '#E91E63'),
-            POLYCUBE_3D.Cube2x2('c6', '#795548'),
-        ],
-        difficulty: 'hard',
-    },
-
-    // 3D Hard #2: Triple Stack
-    {
-        id: '3d_hard_2',
-        name: 'Triple Stack',
-        type: '3D',
-        gridSize: [5, 5, 4],
-        targetVoxels: [
-            // Three 2x2x2 cubes arranged in L = 24 cells
-            // First cube (bottom left)
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 },
-            { x: 1, y: 1, z: 1 }, { x: 2, y: 1, z: 1 },
-            { x: 1, y: 2, z: 1 }, { x: 2, y: 2, z: 1 },
-            // Second cube (bottom right)
-            { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 },
-            { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 },
-            { x: 3, y: 1, z: 1 }, { x: 4, y: 1, z: 1 },
-            { x: 3, y: 2, z: 1 }, { x: 4, y: 2, z: 1 },
-            // Third cube (stacked on first)
-            { x: 1, y: 1, z: 2 }, { x: 2, y: 1, z: 2 },
-            { x: 1, y: 2, z: 2 }, { x: 2, y: 2, z: 2 },
-            { x: 1, y: 1, z: 3 }, { x: 2, y: 1, z: 3 },
-            { x: 1, y: 2, z: 3 }, { x: 2, y: 2, z: 3 },
-        ],
-        pieces: [
-            POLYCUBE_3D.Cube2x2x2('c1', '#E91E63'),
-            POLYCUBE_3D.Cube2x2x2('c2', '#3F51B5'),
-            POLYCUBE_3D.Cube2x2x2('c3', '#FF9800'),
-        ],
-        difficulty: 'hard',
-    },
-
-    // 3D Hard #3: Wide Platform
-    {
-        id: '3d_hard_3',
-        name: 'Wide Platform',
-        type: '3D',
-        gridSize: [7, 6, 3],
-        targetVoxels: [
-            // 6x4 platform on ground = 24 cells
-            { x: 1, y: 1, z: 0 }, { x: 2, y: 1, z: 0 }, { x: 3, y: 1, z: 0 }, { x: 4, y: 1, z: 0 }, { x: 5, y: 1, z: 0 }, { x: 6, y: 1, z: 0 },
-            { x: 1, y: 2, z: 0 }, { x: 2, y: 2, z: 0 }, { x: 3, y: 2, z: 0 }, { x: 4, y: 2, z: 0 }, { x: 5, y: 2, z: 0 }, { x: 6, y: 2, z: 0 },
-            { x: 1, y: 3, z: 0 }, { x: 2, y: 3, z: 0 }, { x: 3, y: 3, z: 0 }, { x: 4, y: 3, z: 0 }, { x: 5, y: 3, z: 0 }, { x: 6, y: 3, z: 0 },
-            { x: 1, y: 4, z: 0 }, { x: 2, y: 4, z: 0 }, { x: 3, y: 4, z: 0 }, { x: 4, y: 4, z: 0 }, { x: 5, y: 4, z: 0 }, { x: 6, y: 4, z: 0 },
-        ],
-        pieces: [
-            POLYCUBE_3D.Cube2x2('c1', '#FF9800'),
-            POLYCUBE_3D.Cube2x2('c2', '#4CAF50'),
-            POLYCUBE_3D.Cube2x2('c3', '#2196F3'),
-            POLYCUBE_3D.Cube2x2('c4', '#9C27B0'),
-            POLYCUBE_3D.Cube2x2('c5', '#E91E63'),
-            POLYCUBE_3D.Cube2x2('c6', '#795548'),
-        ],
-        difficulty: 'hard',
-    },
-
-    // Note: THEMED_SHAPES collection is exported above for future themed levels
-    // Creating solvable levels with complex themed pieces requires careful puzzle design
+    // 3D levels removed - focusing on polished 2D experience
 ];
 
 // ========================================
@@ -1071,11 +713,13 @@ export const presetLevels: LevelConfig[] = [
  * Since we split an actual shape into pieces, the puzzle is always solvable!
  *
  * Difficulty determines piece count:
- * - Easy: 3-4 pieces
- * - Medium: 5-6 pieces
- * - Hard: 7-8 pieces
+ * - Easy: 3-4 tetrominoes (12-16 cells)
+ * - Medium: 5-6 tetrominoes (20-24 cells)
+ * - Hard: 7-8 tetrominoes (28-32 cells)
+ * - Expert: 6-8 hexominoes (36-48 cells)
+ * - Master: 5-7 heptominoes (35-49 cells)
  */
-export function generateRandomLevel(difficulty: 'easy' | 'medium' | 'hard'): LevelConfig {
+export function generateRandomLevel(difficulty: Difficulty): LevelConfig {
     // Create unique seed from timestamp + random for variety
     const seed = `random_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const rng = createSeededRandom(seed);

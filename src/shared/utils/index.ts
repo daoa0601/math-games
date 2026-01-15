@@ -98,3 +98,7 @@ export {
     isConsecutiveDay,
     isSameDay,
 } from './dateUtils';
+
+// Haptic feedback
+export { triggerHaptic, isHapticSupported } from './haptics';
+export type { HapticType } from './haptics';

@@ -1,4 +1,3 @@
-export { useThreeCleanup } from './useThreeCleanup';
 export { useShapeArchitectState } from './useShapeArchitectState';
 export type { UseShapeArchitectStateOptions, UseShapeArchitectStateReturn } from './useShapeArchitectState';
 export { usePiecePlacement } from './usePiecePlacement';
@@ -8,4 +7,3 @@ export type { UsePlacedPieceMovementOptions, UsePlacedPieceMovementReturn } from
 export { useKeyboardControls } from './useKeyboardControls';
 export type { UseKeyboardControlsOptions } from './useKeyboardControls';
 export { useThrottledHover } from './useThrottledHover';
-export { useSharedBoxGeometry, getSharedBoxGeometry } from './useSharedGeometry';

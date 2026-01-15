@@ -46,9 +46,15 @@
 .sa-cell--movable { cursor: pointer; }
 .sa-cell--movable:hover { opacity: 0.8; border-color: var(--game-shape); }
 .sa-cell--selected-for-move { border: 2px solid var(--game-shape); z-index: 2; }
-.sa-cell--just-placed { animation: flash-success var(--motion-normal) var(--ease-out); }
-.sa-cell--preview-valid { background: var(--success) !important; border: 2px solid var(--success) !important; opacity: 0.5; }
-.sa-cell--preview-invalid { background: var(--error) !important; border: 2px dashed var(--error) !important; opacity: 0.4; }
+.sa-cell--just-placed { animation: snap-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+/* Preview classes removed - using ghost overlay only (fixes double-preview bug) */
+
+/* Enhanced snap-in animation for placed pieces */
+@keyframes snap-in {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
 .sa-cell--drag-over { border: 2px solid var(--game-shape) !important; opacity: 0.8; }
 
 .sa-ghost {
@@ -66,105 +72,19 @@
 .sa-ghost__cell--valid { border: 2px solid var(--success); }
 .sa-ghost__cell--invalid { opacity: 0.3; border: 2px dashed var(--error); }
 .sa-ghost__cell--locked { border: 3px solid var(--game-shape); opacity: 0.6; }
-
-.sa-board-3d {
-  width: min(600px, 90vw);
-  aspect-ratio: 4 / 3;
-  min-height: 350px;
-  max-height: 70vh;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-
-.sa-3d-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-md);
-  padding: var(--space-xl);
-  height: 100%;
-  min-height: 200px;
-  background: var(--surface);
-  text-align: center;
-}
-
-.sa-3d-error__icon { font-size: 2rem; }
-.sa-3d-error__title {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  color: var(--text);
-  margin: 0;
-}
-
-.sa-3d-error__message {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  color: var(--muted);
-  margin: 0;
-}
-
-.sa-3d-error__details {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: var(--muted);
-  max-width: 100%;
-  overflow: auto;
-}
-
-.sa-3d-error__details summary {
-  cursor: pointer;
-  color: var(--accent);
-}
-
-.sa-3d-error__details pre {
-  margin: var(--space-sm) 0 0;
-  padding: var(--space-sm);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.sa-3d-controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
-}
-
-.sa-view-mode {
-  display: flex;
-  gap: var(--space-xs);
-  padding: var(--space-xs);
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-
-.sa-view-mode__btn {
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: opacity var(--motion-fast) var(--ease-out);
-}
-
-.sa-view-mode__btn:hover { opacity: 0.8; }
-.sa-view-mode__btn--active { background: var(--game-shape); color: var(--bg); }
-.sa-view-mode__badge {
+.sa-ghost__rotation-badge {
+  position: absolute;
+  top: -1.5rem;
+  right: 0;
   padding: var(--space-xs) var(--space-sm);
   background: var(--game-shape);
   color: var(--bg);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  text-transform: uppercase;
+  font-weight: 600;
+  border-radius: 2px;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .sa-inventory {
@@ -253,62 +173,6 @@
 .sa-dial__angle { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); background: var(--surface); padding: 1px var(--space-xs); min-width: 28px; text-align: center; }
 .sa-dial--active .sa-dial__angle { color: var(--dial-color, var(--game-shape)); }
 .sa-dial__shortcut { position: absolute; top: 2px; right: 3px; font-family: var(--font-mono); font-size: 0.5rem; color: var(--muted); opacity: 0.5; }
-
-.sa-camera {
-  display: flex;
-  gap: 2px;
-  padding: var(--space-xs);
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-
-.sa-camera__btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: var(--space-sm) var(--space-md);
-  min-width: 52px;
-  background: transparent;
-  border: 1px solid transparent;
-  cursor: pointer;
-  color: var(--muted);
-  position: relative;
-  transition: opacity var(--motion-fast) var(--ease-out);
-}
-
-.sa-camera__btn:hover { opacity: 0.8; }
-.sa-camera__btn--active { background: var(--game-shape); color: var(--bg); }
-.sa-camera__icon { width: 22px; height: 22px; }
-.sa-camera__label { font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; }
-.sa-camera__shortcut { position: absolute; top: 3px; right: 4px; font-family: var(--font-mono); font-size: 0.55rem; color: var(--muted); opacity: 0.5; }
-.sa-camera__btn--active .sa-camera__shortcut { color: var(--bg); opacity: 0.7; }
-
-.sa-layer {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  padding: var(--space-md);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  min-width: 160px;
-}
-
-.sa-layer--disabled { opacity: 0.3; pointer-events: none; }
-.sa-layer__header { display: flex; align-items: center; gap: var(--space-sm); color: var(--muted); }
-.sa-layer__icon { width: 18px; height: 18px; }
-.sa-layer__title { font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; }
-.sa-layer__slider-wrapper { display: flex; align-items: center; gap: var(--space-sm); }
-.sa-layer__label { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); min-width: 14px; text-align: center; }
-.sa-layer__slider { flex: 1; height: 8px; -webkit-appearance: none; background: var(--bg); border: 1px solid var(--border); cursor: pointer; }
-.sa-layer__slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--accent); border: 1px solid var(--border); cursor: grab; }
-.sa-layer__display { text-align: center; }
-.sa-layer__current { display: inline-block; padding: var(--space-xs) var(--space-md); background: var(--bg); border: 1px solid var(--border); font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text); }
-.sa-layer__buttons { display: flex; justify-content: center; gap: var(--space-xs); }
-.sa-layer__btn { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; background: var(--bg); border: 1px solid var(--border); cursor: pointer; color: var(--muted); transition: opacity var(--motion-fast) var(--ease-out); }
-.sa-layer__btn svg { width: 14px; height: 14px; }
-.sa-layer__btn:hover:not(:disabled) { opacity: 0.8; }
-.sa-layer__btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .sa-editor-overlay {
   position: fixed;
@@ -419,18 +283,15 @@
 @media (max-width: 600px) {
   .sa-container { gap: var(--space-md); padding: var(--space-sm); }
   .sa-board { padding: var(--space-md); }
-  .sa-board-3d { width: 95vw; min-height: 280px; max-height: 60vh; }
   .sa-cell { width: 40px; height: 40px; }
   .sa-inventory { gap: var(--space-md); padding: var(--space-md); }
   .sa-card { padding: var(--space-sm); }
   .sa-preview__cell { width: 12px; height: 12px; }
   .sa-ghost { inset: var(--space-md); }
-  .sa-3d-controls { flex-direction: column; align-items: center; }
   .sa-rotation { padding: var(--space-xs) var(--space-sm); }
   .sa-rotation__label { display: none; }
   .sa-dial { min-width: 48px; padding: var(--space-sm); }
-  .sa-dial__shortcut, .sa-camera__shortcut { display: none; }
-  .sa-camera__btn { min-width: 48px; padding: var(--space-sm); }
+  .sa-dial__shortcut { display: none; }
   .sa-controls { flex-wrap: wrap; justify-content: center; }
 }
 
@@ -443,7 +304,6 @@
   .sa-cell { min-width: 44px; min-height: 44px; }
   .sa-card { padding: var(--space-md); }
   .sa-dial { min-width: 56px; min-height: 60px; padding: var(--space-md); }
-  .sa-camera__btn { min-width: 56px; min-height: 56px; padding: var(--space-md); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -478,9 +338,7 @@
   }
 
   .sa-container { max-width: none; }
-  .sa-board-3d { width: 100%; max-width: none; }
   .sa-inventory { width: 100%; }
-  .sa-3d-controls { flex-direction: row; flex-wrap: wrap; }
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -597,29 +455,3 @@
   margin-bottom: var(--space-sm);
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   Isometric Piece Preview
-   2.5D preview of 3D shapes in inventory cards
-
-   Isometric projection formula:
-   - X offset: (x - y) * cellSize * 0.5  (diagonal left-right)
-   - Y offset: (x + y - z*2) * cellSize * 0.25  (depth + height)
-   This creates a 2:1 isometric view where z moves cells up vertically.
-   ───────────────────────────────────────────────────────────────── */
-.sa-isometric-preview {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sa-isometric-cell {
-  position: absolute;
-  width: var(--cell-size, 8px);
-  height: var(--cell-size, 8px);
-  transform:
-    translateX(calc((var(--cell-x) - var(--cell-y)) * var(--cell-size) * 0.5))
-    translateY(calc((var(--cell-x) + var(--cell-y) - var(--cell-z) * 2) * var(--cell-size) * 0.25));
-  border: 1px solid var(--border);
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-}

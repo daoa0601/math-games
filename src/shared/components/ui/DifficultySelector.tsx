@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RadioGroup, RadioGroupItem, Label } from '@/shared/components/ui/shadcn';
 
-type Difficulty = 'easy' | 'medium' | 'hard' | 'master' | 'grandmaster';
+type Difficulty = 'easy' | 'medium' | 'hard' | 'expert' | 'master' | 'grandmaster';
 
 interface DifficultySelectorProps<T extends Difficulty> {
     /** Available difficulty options */
@@ -17,6 +17,7 @@ const DIFFICULTY_EMOJI: Record<Difficulty, string> = {
     easy: '🌱',
     medium: '🌿',
     hard: '🌳',
+    expert: '🔥',
     master: '🎓',
     grandmaster: '👑',
 };
