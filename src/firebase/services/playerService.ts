@@ -128,38 +128,52 @@ export async function updateFirestoreProfile(updates: Partial<PlayerProfile>): P
   const firestoreModule = getCachedFirestoreModule();
   if (!db || !firestoreModule) return false;
 
+  // Declare variables before try block so they're accessible in catch
+  const docRef = firestoreModule.doc(db, USERS_COLLECTION, user.uid);
+  const firestoreUpdates: Record<string, unknown> = {
+    updatedAt: firestoreModule.serverTimestamp(),
+  };
+
+  // Build firestoreUpdates object
+  if (updates.displayName !== undefined) {
+    firestoreUpdates.displayName = updates.displayName;
+  }
+  if (updates.stats !== undefined) {
+    firestoreUpdates.stats = updates.stats;
+    // Recalculate rank
+    firestoreUpdates.rank = calculateRank(updates.stats);
+  }
+  if (updates.streak !== undefined) {
+    firestoreUpdates.streak = updates.streak;
+  }
+  if (updates.lastPlayedDate !== undefined) {
+    firestoreUpdates.lastPlayedDate = updates.lastPlayedDate;
+  }
+  if (updates.achievements !== undefined) {
+    firestoreUpdates.achievements = updates.achievements;
+  }
+  if (updates.preferences !== undefined) {
+    firestoreUpdates.preferences = updates.preferences;
+  }
+
   try {
-    const docRef = firestoreModule.doc(db, USERS_COLLECTION, user.uid);
-
-    // Convert updates to Firestore format
-    const firestoreUpdates: Record<string, unknown> = {
-      updatedAt: firestoreModule.serverTimestamp(),
-    };
-
-    if (updates.displayName !== undefined) {
-      firestoreUpdates.displayName = updates.displayName;
-    }
-    if (updates.stats !== undefined) {
-      firestoreUpdates.stats = updates.stats;
-      // Recalculate rank
-      firestoreUpdates.rank = calculateRank(updates.stats);
-    }
-    if (updates.streak !== undefined) {
-      firestoreUpdates.streak = updates.streak;
-    }
-    if (updates.lastPlayedDate !== undefined) {
-      firestoreUpdates.lastPlayedDate = updates.lastPlayedDate;
-    }
-    if (updates.achievements !== undefined) {
-      firestoreUpdates.achievements = updates.achievements;
-    }
-    if (updates.preferences !== undefined) {
-      firestoreUpdates.preferences = updates.preferences;
-    }
-
     await firestoreModule.updateDoc(docRef, firestoreUpdates);
     return true;
   } catch (error) {
+    // Check if this is a "document not found" error - can happen when:
+    // 1. Migration failed silently
+    // 2. Document was deleted from Firebase console
+    // 3. Race condition: auth completed but migration hasn't finished
+    if (error instanceof Error && error.message.includes('No document to update')) {
+      console.warn('[Firebase] Document missing, creating with setDoc...');
+      try {
+        await firestoreModule.setDoc(docRef, firestoreUpdates, { merge: true });
+        return true;
+      } catch (setError) {
+        console.error('[Firebase] Failed to create profile:', setError);
+        return false;
+      }
+    }
     console.error('[Firebase] Failed to update profile:', error);
     return false;
   }
@@ -217,9 +231,10 @@ export async function unlockFirestoreAchievement(achievementId: string): Promise
   const firestoreModule = getCachedFirestoreModule();
   if (!db || !firestoreModule) return false;
 
-  try {
-    const docRef = firestoreModule.doc(db, USERS_COLLECTION, user.uid);
+  // Declare docRef before try block so it's accessible in catch
+  const docRef = firestoreModule.doc(db, USERS_COLLECTION, user.uid);
 
+  try {
     // Use arrayUnion for atomic, idempotent achievement unlock
     // This prevents duplicates and race conditions
     await firestoreModule.updateDoc(docRef, {
@@ -229,6 +244,22 @@ export async function unlockFirestoreAchievement(achievementId: string): Promise
 
     return true;
   } catch (error) {
+    // Handle missing document - create it with the achievement
+    if (error instanceof Error && error.message.includes('No document to update')) {
+      console.warn('[Firebase] Document missing for achievement, creating...');
+      try {
+        // Can't use arrayUnion with setDoc on missing doc, set array directly
+        // Since doc doesn't exist, there are no existing achievements to preserve
+        await firestoreModule.setDoc(docRef, {
+          achievements: [achievementId],
+          updatedAt: firestoreModule.serverTimestamp(),
+        }, { merge: true });
+        return true;
+      } catch (setError) {
+        console.error('[Firebase] Failed to create profile with achievement:', setError);
+        return false;
+      }
+    }
     console.error('[Firebase] Failed to unlock achievement:', error);
     return false;
   }
