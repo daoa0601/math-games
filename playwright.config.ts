@@ -28,9 +28,11 @@ export default defineConfig({
   ],
   webServer: {
     command:
-      'pnpm exec wrangler d1 migrations apply DB --local && pnpm dev --host 127.0.0.1',
+      'pnpm exec wrangler d1 migrations apply DB --local && pnpm exec vite dev --port 3000 --host 127.0.0.1 --strictPort',
     reuseExistingServer: !isCi,
+    stdout: 'pipe',
+    stderr: 'pipe',
     timeout: 180_000,
-    url: 'http://127.0.0.1:3000',
+    url: 'http://127.0.0.1:3000/@vite/client',
   },
 })
