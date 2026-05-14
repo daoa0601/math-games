@@ -74,6 +74,16 @@ export class GenerationError extends Data.TaggedError('GenerationError')<{
   }
 }
 
+export class PlayerProfileValidationError extends Data.TaggedError(
+  'PlayerProfileValidationError',
+)<{
+  readonly reason: string
+}> {
+  override get message() {
+    return this.reason
+  }
+}
+
 export class SolverTimeoutError extends Data.TaggedError(
   'SolverTimeoutError',
 )<{

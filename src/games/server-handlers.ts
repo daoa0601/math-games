@@ -1,45 +1,57 @@
 import { setResponseHeader } from '@tanstack/react-start/server'
-import { Effect } from 'effect'
+import { Effect, Schema } from 'effect'
 
 import { recordGameProgress } from '@/games/progress/progress.server'
 import { savePlayerProfile } from '@/player/profile.server'
-import type { UpdatePlayerProfileInput } from '@/player/profile.validation'
+import { PlayerProfileInput } from '@/player/profile.schema'
 import {
   GameProgressValidationError,
+  HeaderService,
   OriginGuardService,
   PlayerIdentityService,
+  PlayerProfileValidationError,
   RateLimitService,
 } from '@/services'
 
+import { GameProgressRequest } from './game-progress.schema'
 import type { GameModule } from './game-module'
 
-export interface GameProgressRequest {
-  levelId: string
-  completion: unknown
+function decodeOrFail<TSchema extends Schema.Decoder<unknown>>(
+  schema: TSchema,
+  raw: unknown,
+  toError: (message: string) => GameProgressValidationError | PlayerProfileValidationError,
+): Effect.Effect<TSchema['Type'], GameProgressValidationError | PlayerProfileValidationError> {
+  return Effect.try({
+    try: () => Schema.decodeUnknownSync(schema)(raw),
+    catch: (e) => toError(e instanceof Error ? e.message : 'Validation failed'),
+  })
 }
 
-export function validateGameProgressRequest(
-  data: unknown,
-): GameProgressRequest {
-  if (data === null || typeof data !== 'object') {
-    throw new GameProgressValidationError({
-      reason: 'Invalid progress payload',
-    })
-  }
+function fallbackValidateAndScore(
+  module: GameModule<any>,
+  levelId: string,
+  rawCompletion: unknown,
+) {
+  return Effect.gen(function* () {
+    const level = module.resolveLevelConfig(levelId)
+    if (!level) return yield* new GameProgressValidationError({ reason: `Unknown level: ${levelId}` })
 
-  const obj = data as Record<string, unknown>
+    const completion = module.completionSchema
+      ? yield* Effect.try({
+          try: () => Schema.decodeUnknownSync(module.completionSchema as Schema.Decoder<unknown>)(rawCompletion),
+          catch: (e) => new GameProgressValidationError({ reason: e instanceof Error ? e.message : 'Invalid completion' }),
+        })
+      : rawCompletion
 
-  if (typeof obj.levelId !== 'string' || obj.levelId.length === 0) {
-    throw new GameProgressValidationError({ reason: 'Invalid levelId' })
-  }
+    const validation = module.validateGameState(level, completion)
+    if (validation === null) return yield* new GameProgressValidationError({ reason: 'Invalid game state' })
 
-  if (obj.completion === undefined || obj.completion === null) {
-    throw new GameProgressValidationError({
-      reason: 'Missing completion payload',
-    })
-  }
+    const { completed, moves } = validation
+    const score = module.computeScore({ completed, moves })
+    const extras = module.progressExtras?.({ levelId, score, completed, difficulty: level.difficulty }) ?? {}
 
-  return { levelId: obj.levelId, completion: obj.completion }
+    return { completed, moves, score, difficulty: level.difficulty, ...extras }
+  })
 }
 
 export function createGetCatalogHandler<TModule extends GameModule<any>>(
@@ -54,65 +66,53 @@ export function createGetCatalogHandler<TModule extends GameModule<any>>(
 
 export function createRecordProgressPipeline<TModule extends GameModule<any>>(
   module: TModule,
-  data: GameProgressRequest,
+  rawData: unknown,
 ) {
   return Effect.gen(function* () {
+    const data = yield* decodeOrFail(
+      GameProgressRequest,
+      rawData,
+      (msg) => new GameProgressValidationError({ reason: msg }),
+    )
+
     yield* (yield* OriginGuardService).assert()
 
-    yield* Effect.sync(() => setResponseHeader('cache-control', 'no-store'))
+    yield* (yield* HeaderService).setResponse('cache-control', 'no-store')
 
-    const playerId = (yield* PlayerIdentityService).getCurrentId()
+    const playerId = yield* (yield* PlayerIdentityService).resolveId()
 
     yield* (yield* RateLimitService).assert(
       `record:${module.id}:${playerId}`,
     )
 
-    const level = module.resolveLevelConfig(data.levelId)
-
-    if (!level) {
-      return yield* new GameProgressValidationError({
-        reason: `Unknown level: ${data.levelId}`,
-      })
-    }
-
-    const validation = module.validateGameState(level, data.completion)
-
-    if (validation === null) {
-      return yield* new GameProgressValidationError({
-        reason: 'Invalid game state',
-      })
-    }
-
-    const { completed, moves } = validation
-    const score = module.computeScore({ completed, moves })
-    const difficulty = level.difficulty
-    const extras =
-      module.progressExtras?.({
-        levelId: data.levelId,
-        score,
-        completed,
-        difficulty,
-      }) ?? {}
+    const result = module.validateAndComputeScore
+      ? yield* module.validateAndComputeScore(data.levelId, data.completion)
+      : yield* fallbackValidateAndScore(module, data.levelId, data.completion)
 
     return yield* recordGameProgress({
       playerId,
       gameId: module.id,
       levelId: data.levelId,
-      score,
-      completed,
-      difficulty,
-      ...extras,
+      ...result,
     })
   })
 }
 
-export function createUpdateProfilePipeline(data: UpdatePlayerProfileInput) {
+export function createUpdateProfilePipeline(rawData: unknown) {
   return Effect.gen(function* () {
+    const data = yield* Effect.try({
+      try: () => Schema.decodeUnknownSync(PlayerProfileInput)(rawData),
+      catch: (e) =>
+        new PlayerProfileValidationError({
+          reason: e instanceof Error ? e.message : 'Invalid player profile payload',
+        }),
+    })
+
     yield* (yield* OriginGuardService).assert()
 
-    yield* Effect.sync(() => setResponseHeader('cache-control', 'no-store'))
+    yield* (yield* HeaderService).setResponse('cache-control', 'no-store')
 
-    const playerId = (yield* PlayerIdentityService).getCurrentId()
+    const playerId = yield* (yield* PlayerIdentityService).resolveId()
 
     yield* (yield* RateLimitService).assert(`profile:${playerId}`)
 

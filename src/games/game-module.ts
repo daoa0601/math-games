@@ -1,3 +1,7 @@
+import type { Effect, Schema } from 'effect'
+
+import type { GameProgressValidationError } from '@/services/errors'
+
 export type GameId = 'magic-graph' | 'sequence-race' | 'shape-architect'
 
 export const GAME_IDS: readonly GameId[] = [
@@ -86,4 +90,19 @@ export interface GameModule<
     level: TConfig,
     rawCompletion: unknown,
   ) => { completed: boolean; moves: number } | null
+  readonly completionSchema?: Schema.Schema<unknown>
+  readonly validateAndComputeScore?: (
+    levelId: string,
+    completion: unknown,
+  ) => Effect.Effect<
+    {
+      completed: boolean
+      moves: number
+      score: number
+      difficulty: string
+      isOptimalSolution?: boolean
+      wasWinner?: boolean
+    },
+    GameProgressValidationError
+  >
 }

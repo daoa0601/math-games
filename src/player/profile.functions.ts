@@ -1,29 +1,21 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
-import { Effect } from 'effect'
 
 import { createUpdateProfilePipeline } from '@/games/server-handlers'
-import { AppLayer } from '@/services'
+import { runServerEffect } from '@/services'
 
 import { loadPlayerProfileOverview } from './profile.server'
-import { validatePlayerProfileInput } from './profile.validation'
 
 export const getPlayerProfileOverview = createServerFn({
   method: 'GET',
 }).handler(() => {
   setResponseHeader('cache-control', 'no-store')
 
-  return loadPlayerProfileOverview().pipe(
-    Effect.provide(AppLayer),
-    Effect.runPromise,
-  )
+  return runServerEffect(loadPlayerProfileOverview())
 })
 
 export const updatePlayerProfile = createServerFn({ method: 'POST' })
-  .inputValidator(validatePlayerProfileInput)
+  .inputValidator((data: unknown) => data)
   .handler(({ data }) =>
-    createUpdateProfilePipeline(data).pipe(
-      Effect.provide(AppLayer),
-      Effect.runPromise,
-    ),
+    runServerEffect(createUpdateProfilePipeline(data)),
   )

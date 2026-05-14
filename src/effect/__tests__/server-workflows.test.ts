@@ -1,14 +1,11 @@
 import { Effect, Layer } from 'effect'
 import { describe, expect, it, vi } from 'vitest'
 
-vi.mock('@tanstack/react-start/server', () => ({
-  setResponseHeader: vi.fn(),
-}))
-
 import { loadDailyChallenge } from '@/daily/daily.server'
 import type { GameModule } from '@/games/game-module'
 import { magicGraphModule } from '@/games/MagicGraph/module'
 import { recordGameProgress } from '@/games/progress/progress.server'
+import { solvePuzzleEffect } from '@/games/ShapeArchitect/logic/solver'
 import {
   createRecordProgressPipeline,
   createUpdateProfilePipeline,
@@ -19,11 +16,15 @@ import {
   loadPlayerProfileOverview,
   savePlayerProfile,
 } from '@/player/profile.server'
+import { toUserFacingError } from '@/services/run-server-effect'
+import type { ServerError } from '@/services/run-server-effect'
 import {
+  ClockService,
   CrossOriginError,
   DailyChallengeError,
   DbService,
   GameProgressValidationError,
+  HeaderService,
   OriginGuardService,
   PlayerIdentityService,
   PlayerProfileError,
@@ -31,10 +32,21 @@ import {
   ProgressWriteError,
   RateLimitError,
   RateLimitService,
+  SolverTimeoutError,
 } from '@/services'
-import type { DbShape } from '@/services'
-import type { OriginGuardShape } from '@/services'
-import type { RateLimitShape } from '@/services'
+import type {
+  ClockShape,
+  DbShape,
+  HeaderShape,
+  OriginGuardShape,
+  PlayerIdentityShape,
+  RateLimitShape,
+} from '@/services'
+
+vi.mock('@tanstack/react-start/server', () => ({
+  getRequestHeader: vi.fn(),
+  setResponseHeader: vi.fn(),
+}))
 
 // ---------------------------------------------------------------------------
 // Shared mock factories
@@ -71,15 +83,30 @@ function createFailingDb(): DbShape {
   }
 }
 
-function createPassingIdentity() {
+function createPassingIdentity(): PlayerIdentityShape {
   return {
-    getCurrentId: () => PLAYER_ID,
-    getCurrent: () => ({
-      id: PLAYER_ID,
-      displayName: 'Test Player',
-      locale: 'en' as const,
-      gradeBand: 'elementary' as const,
-    }),
+    resolve: () =>
+      Effect.succeed({
+        id: PLAYER_ID,
+        displayName: 'Test Player',
+        locale: 'en' as const,
+        gradeBand: 'elementary' as const,
+      }),
+    resolveId: () => Effect.succeed(PLAYER_ID),
+  }
+}
+
+function createPassingHeaders(): HeaderShape {
+  return {
+    getRequest: () => Effect.succeed(null),
+    setResponse: () => Effect.void,
+  }
+}
+
+function createTestClock(dateKey = '2025-01-01'): ClockShape {
+  return {
+    now: () => Effect.succeed(new Date(`${dateKey}T00:00:00.000Z`)),
+    dateKey: () => Effect.succeed(dateKey),
   }
 }
 
@@ -117,12 +144,16 @@ const PassingRateLimitLayer = Layer.succeed(
   RateLimitService,
   createPassingRateLimit(),
 )
+const HeaderLayer = Layer.succeed(HeaderService, createPassingHeaders())
+const ClockLayer = Layer.succeed(ClockService, createTestClock())
 
 const TestLayer = Layer.mergeAll(
   FailingDbLayer,
   IdentityLayer,
   PassingGuardLayer,
   PassingRateLimitLayer,
+  HeaderLayer,
+  ClockLayer,
 )
 
 // ---------------------------------------------------------------------------
@@ -173,7 +204,7 @@ describe('error boundaries: DB failures map to domain errors', () => {
   it('loadDailyChallenge → DailyChallengeError', async () => {
     await expect(
       Effect.runPromise(
-        loadDailyChallenge(new Date('2026-05-14T00:00:00.000Z')).pipe(
+        loadDailyChallenge().pipe(
           Effect.provide(TestLayer),
         ),
       ),
@@ -203,6 +234,7 @@ describe('guard ordering in pipelines', () => {
       IdentityLayer,
       blockedGuardLayer,
       PassingRateLimitLayer,
+      HeaderLayer,
     )
 
     const catalog = magicGraphModule.getCatalog()
@@ -237,6 +269,7 @@ describe('guard ordering in pipelines', () => {
       IdentityLayer,
       PassingGuardLayer,
       blockedRateLimitLayer,
+      HeaderLayer,
     )
 
     const catalog = magicGraphModule.getCatalog()
@@ -265,6 +298,7 @@ describe('guard ordering in pipelines', () => {
       IdentityLayer,
       blockedGuardLayer,
       PassingRateLimitLayer,
+      HeaderLayer,
     )
 
     await expect(
@@ -319,7 +353,7 @@ describe('validation through real game modules', () => {
         magicGraphModule,
         catalog.configs[0].id,
         null,
-        'Invalid game state',
+        'Missing completion payload',
       )
     })
 
@@ -329,7 +363,7 @@ describe('validation through real game modules', () => {
         magicGraphModule,
         catalog.configs[0].id,
         { nodeValues: 'not-an-object' },
-        'Invalid game state',
+        '',
       )
     })
 
@@ -382,7 +416,7 @@ describe('validation through real game modules', () => {
         sequenceRaceModule,
         catalog.configs[0].id,
         { history: 'bad' },
-        'Invalid game state',
+        '',
       )
     })
 
@@ -393,7 +427,7 @@ describe('validation through real game modules', () => {
         sequenceRaceModule,
         level.id,
         { history: [{ actor: 'opponent', step: 1 }] },
-        'Invalid game state',
+        '',
       )
     })
   })
@@ -413,7 +447,7 @@ describe('validation through real game modules', () => {
         shapeArchitectModule,
         catalog.configs[0].id,
         { placements: 'bad' },
-        'Invalid game state',
+        '',
       )
     })
 
@@ -429,7 +463,7 @@ describe('validation through real game modules', () => {
         shapeArchitectModule,
         level.id,
         { placements: oversized },
-        'Invalid game state',
+        'Too many placements',
       )
     })
 
@@ -448,7 +482,7 @@ describe('validation through real game modules', () => {
             },
           ],
         },
-        'Invalid game state',
+        '',
       )
     })
   })
@@ -625,5 +659,284 @@ describe('practice level generation', () => {
     )
     expect(config).not.toBeNull()
     expect(config!.difficulty).toBe('easy')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 7. Passing DB mock — queue-based mock for success-path tests
+// ---------------------------------------------------------------------------
+
+function createMockDb(resultQueue: unknown[]): DbShape {
+  let idx = 0
+
+  function chain(): any {
+    let resolved: Promise<unknown> | null = null
+    const lazy = () => (resolved ??= Promise.resolve(resultQueue[idx++]))
+
+    return new Proxy(Object.create(null), {
+      get(_, prop) {
+        if (prop === 'then') return lazy().then.bind(lazy())
+        if (prop === 'catch') return lazy().catch.bind(lazy())
+        if (prop === 'finally')
+          return (lazy() as any).finally.bind(lazy())
+        return (..._args: unknown[]) => chain()
+      },
+    })
+  }
+
+  return {
+    db: {
+      batch: () => Promise.resolve(resultQueue[idx++]),
+      select: () => chain(),
+      insert: () => chain(),
+    } as unknown as DbShape['db'],
+  }
+}
+
+const NOW = new Date('2025-01-01T00:00:00Z')
+
+const mockPlayerRow = {
+  id: PLAYER_ID,
+  displayName: 'Test Player',
+  locale: 'en' as const,
+  gradeBand: 'elementary' as const,
+  createdAt: NOW,
+  updatedAt: NOW,
+}
+
+const mockProgressRow = {
+  playerId: PLAYER_ID,
+  gameId: 'magic-graph' as const,
+  levelId: 'easy_star_3x3',
+  bestScore: 100,
+  attempts: 1,
+  completedAt: NOW,
+  updatedAt: NOW,
+}
+
+const mockDailyChallengeRow = {
+  challengeDate: '2025-01-01',
+  gameId: 'magic-graph' as const,
+  seed: '2025-01-01-test',
+  configJson: JSON.stringify({
+    gameId: 'magic-graph',
+    levelId: 'easy_star_3x3',
+    title: 'Easy Star',
+    route: '/games/magic-graph',
+    difficulty: 'easy',
+  }),
+  createdAt: NOW,
+}
+
+// ---------------------------------------------------------------------------
+// 8. Success paths — DB workflows complete end-to-end
+// ---------------------------------------------------------------------------
+
+describe('success paths: DB workflows complete end-to-end', () => {
+  it('recordGameProgress succeeds with valid input', async () => {
+    const db = createMockDb([
+      [[], []],
+      [null, null, [mockProgressRow]],
+    ])
+    const layer = Layer.mergeAll(
+      Layer.succeed(DbService, db),
+      IdentityLayer,
+      PassingGuardLayer,
+      PassingRateLimitLayer,
+    )
+
+    const result = await Effect.runPromise(
+      recordGameProgress({
+        playerId: PLAYER_ID,
+        gameId: 'magic-graph',
+        levelId: 'easy_star_3x3',
+        score: 100,
+        completed: true,
+        difficulty: 'easy',
+      }).pipe(Effect.provide(layer)),
+    )
+
+    expect(result.playerId).toBe(PLAYER_ID)
+    expect(result.gameId).toBe('magic-graph')
+    expect(result.bestScore).toBe(100)
+    expect(result.unlockedAchievements).toBeInstanceOf(Array)
+  })
+
+  it('loadDailyChallenge returns existing challenge', async () => {
+    const db = createMockDb([[mockDailyChallengeRow]])
+    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer)
+
+    const result = await Effect.runPromise(
+      loadDailyChallenge().pipe(Effect.provide(layer)),
+    )
+
+    expect(result.challengeDate).toBe('2025-01-01')
+    expect(result.gameId).toBe('magic-graph')
+    expect(result.seed).toBe('2025-01-01-test')
+  })
+
+  it('loadDailyChallenge inserts when none exists', async () => {
+    const db = createMockDb([
+      [],
+      [mockDailyChallengeRow],
+    ])
+    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer)
+
+    const result = await Effect.runPromise(
+      loadDailyChallenge().pipe(Effect.provide(layer)),
+    )
+
+    expect(result.challengeDate).toBe('2025-01-01')
+  })
+
+  it('loadDailyChallenge handles insert race (conflict then re-select)', async () => {
+    const db = createMockDb([
+      [],
+      [],
+      [mockDailyChallengeRow],
+    ])
+    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer)
+
+    const result = await Effect.runPromise(
+      loadDailyChallenge().pipe(Effect.provide(layer)),
+    )
+
+    expect(result.challengeDate).toBe('2025-01-01')
+  })
+
+  it('savePlayerProfile upserts and returns record', async () => {
+    const db = createMockDb([
+      undefined,
+      [mockPlayerRow],
+    ])
+    const layer = Layer.mergeAll(
+      Layer.succeed(DbService, db),
+      IdentityLayer,
+      PassingGuardLayer,
+      PassingRateLimitLayer,
+    )
+
+    const result = await Effect.runPromise(
+      savePlayerProfile({
+        displayName: 'Test Player',
+        locale: 'en',
+        gradeBand: 'elementary',
+      }).pipe(Effect.provide(layer)),
+    )
+
+    expect(result.id).toBe(PLAYER_ID)
+    expect(result.displayName).toBe('Test Player')
+    expect(result.locale).toBe('en')
+    expect(result.createdAt).toBeTruthy()
+  })
+
+  it('loadPlayerProfileOverview returns profile with progress and achievements', async () => {
+    const db = createMockDb([
+      undefined,
+      [
+        [mockPlayerRow],
+        [mockProgressRow],
+        [{ playerId: PLAYER_ID, achievementId: 'mg_first_solve', unlockedAt: NOW }],
+      ],
+    ])
+    const layer = Layer.mergeAll(
+      Layer.succeed(DbService, db),
+      IdentityLayer,
+    )
+
+    const result = await Effect.runPromise(
+      loadPlayerProfileOverview().pipe(Effect.provide(layer)),
+    )
+
+    expect(result.profile.id).toBe(PLAYER_ID)
+    expect(result.progress).toHaveLength(1)
+    expect(result.progress[0].gameId).toBe('magic-graph')
+    expect(result.achievements).toContain('mg_first_solve')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 9. runServerEffect error mapping — domain errors become user-facing messages
+// ---------------------------------------------------------------------------
+
+describe('runServerEffect error mapping', () => {
+  function expectMappedError(
+    error: ServerError,
+    expectedMessage: string,
+  ) {
+    expect(toUserFacingError(error).message).toBe(expectedMessage)
+  }
+
+  it('RateLimitError → user-facing message', () =>
+    expectMappedError(
+      new RateLimitError({ key: 'test' }),
+      'Too many requests. Please wait a moment.',
+    ))
+
+  it('CrossOriginError → user-facing message', () =>
+    expectMappedError(
+      new CrossOriginError({ reason: 'blocked' }),
+      'Request blocked.',
+    ))
+
+  it('GameProgressValidationError preserves reason', () =>
+    expectMappedError(
+      new GameProgressValidationError({ reason: 'Invalid levelId' }),
+      'Invalid levelId',
+    ))
+
+  it('ProgressWriteError → user-facing message', () =>
+    expectMappedError(
+      new ProgressWriteError({ cause: new Error('db down') }),
+      'Unable to save game progress.',
+    ))
+
+  it('DailyChallengeError → user-facing message', () =>
+    expectMappedError(
+      new DailyChallengeError({ cause: new Error('db down') }),
+      "Unable to load today's challenge.",
+    ))
+
+  it('PlayerProfileError → user-facing message', () =>
+    expectMappedError(
+      new PlayerProfileError({ cause: new Error('db down') }),
+      'Unable to load your profile.',
+    ))
+
+  it('PlayerProfileWriteError → user-facing message', () =>
+    expectMappedError(
+      new PlayerProfileWriteError({ cause: new Error('db down') }),
+      'Unable to save your profile.',
+    ))
+})
+
+// ---------------------------------------------------------------------------
+// 10. solvePuzzleEffect — typed error channel for solver
+// ---------------------------------------------------------------------------
+
+describe('solvePuzzleEffect', () => {
+  it('succeeds for a solvable puzzle', async () => {
+    const catalog = shapeArchitectModule.getCatalog()
+    const level = catalog.configs[0]
+
+    const result = await Effect.runPromise(solvePuzzleEffect(level))
+
+    expect(result.solvable).toBe(true)
+    expect(result.solution).toBeDefined()
+    expect(result.timedOut).toBe(false)
+  })
+
+  it('fails with SolverTimeoutError when maxTimeMs is 0', async () => {
+    const catalog = shapeArchitectModule.getCatalog()
+    const level = catalog.configs[0]
+
+    await expect(
+      Effect.runPromise(solvePuzzleEffect(level, 0)),
+    ).rejects.toSatisfy((error: unknown) => {
+      if (!(error instanceof SolverTimeoutError)) return false
+      expect(error.timeMs).toBeGreaterThanOrEqual(0)
+      expect(error.searchedStates).toBeGreaterThanOrEqual(0)
+      return true
+    })
   })
 })

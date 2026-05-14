@@ -1,4 +1,7 @@
 import { describe, it, expect } from 'vitest'
+
+import { createSeededRandom } from '@/shared/utils'
+
 import {
   getDailyShapeArchitectLevel,
   previewDailyLevel,
@@ -7,7 +10,7 @@ import {
   generateGuaranteedSolvableWithRetry,
   generateCohesivePuzzle,
 } from '../seededGenerator'
-import { createSeededRandom } from '@/shared/utils'
+import type { LevelConfig } from '../types'
 import { solvePuzzle } from '../solver'
 
 // ========================================
@@ -22,7 +25,7 @@ const TEST_SEEDS = ['test-seed-1', 'test-seed-2', 'daily-challenge-123']
 // ========================================
 
 describe('generateCohesivePuzzle', () => {
-  it('generates reproducible levels with same seed', () => {
+  it('generates reproducible levels with same seed (deep equality)', () => {
     const seed = 'reproducible-test-abc'
     const rng1 = createSeededRandom(seed)
     const rng2 = createSeededRandom(seed)
@@ -30,14 +33,7 @@ describe('generateCohesivePuzzle', () => {
     const level1 = generateCohesivePuzzle(rng1, 'easy')
     const level2 = generateCohesivePuzzle(rng2, 'easy')
 
-    // Both should produce same result (either both null or both valid)
-    if (level1 && level2) {
-      expect(level1.pieces.length).toBe(level2.pieces.length)
-      expect(level1.targetVoxels.length).toBe(level2.targetVoxels.length)
-      expect(level1.gridSize).toEqual(level2.gridSize)
-    } else {
-      expect(level1).toEqual(level2)
-    }
+    expect(level1).toEqual(level2)
   })
 
   it('generates different levels with different seeds using retry', () => {
@@ -113,17 +109,16 @@ describe('generateCohesivePuzzle', () => {
   })
 
   it('generates cohesive shapes that are actually solvable', () => {
-    // Test with multiple seeds using retry to ensure valid levels
     const seeds = ['solve-1-xyz', 'solve-2-xyz', 'solve-3-xyz']
 
     for (const seed of seeds) {
       const rng = createSeededRandom(seed)
       const level = generateGuaranteedSolvableWithRetry(rng, 'easy')
 
-      const result = solvePuzzle(level, 5000)
-      expect(result.solvable || result.timedOut).toBe(true)
+      const result = solvePuzzle(level, 15000)
+      expect(result.solvable).toBe(true)
     }
-  }, 30000)
+  }, 60000)
 })
 
 // ========================================
@@ -142,25 +137,22 @@ describe('Generator Validation', () => {
     })
   })
 
-  it('validates generated levels are solvable or uses fallback', () => {
+  it('validates generated levels are solvable', () => {
     for (const date of TEST_DATES) {
       const level = getDailyShapeArchitectLevel(date)
 
-      // Use longer timeout to verify solvability
-      const result = solvePuzzle(level, 10000)
+      const result = solvePuzzle(level, 30000)
 
-      // Level should be solvable or at least not definitively unsolvable
-      expect(result.solvable || result.timedOut).toBe(true)
+      expect(result.solvable).toBe(true)
     }
-  }, 60000)
+  }, 120000)
 
   it('generateValidatedLevelForTesting returns solvable level', () => {
     const level = generateValidatedLevelForTesting('test-validation', 'medium')
 
-    const result = solvePuzzle(level, 10000)
-    const isValid = result.solvable || result.timedOut
-    expect(isValid).toBe(true)
-  }, 30000)
+    const result = solvePuzzle(level, 30000)
+    expect(result.solvable).toBe(true)
+  }, 60000)
 
   it('falls back to preset when retries exhausted', () => {
     const level = getDailyShapeArchitectLevel('2025-01-01')
@@ -177,14 +169,12 @@ describe('Generator Validation', () => {
 // ========================================
 
 describe('getDailyShapeArchitectLevel', () => {
-  it('returns same level for same date', () => {
+  it('returns same level for same date (deep equality)', () => {
     const date = '2025-03-15'
     const level1 = getDailyShapeArchitectLevel(date)
     const level2 = getDailyShapeArchitectLevel(date)
 
-    expect(level1.id).toBe(level2.id)
-    expect(level1.pieces.length).toBe(level2.pieces.length)
-    expect(level1.targetVoxels.length).toBe(level2.targetVoxels.length)
+    expect(level1).toEqual(level2)
   }, 60000)
 
   it('returns different levels for different dates', () => {
@@ -231,12 +221,11 @@ describe('previewDailyLevel', () => {
   it('returns validated levels for future dates', () => {
     for (let i = 0; i <= 3; i++) {
       const level = previewDailyLevel(i)
-      const result = solvePuzzle(level, 10000)
+      const result = solvePuzzle(level, 30000)
 
-      const isValid = result.solvable || result.timedOut
-      expect(isValid).toBe(true)
+      expect(result.solvable).toBe(true)
     }
-  }, 120000)
+  }, 180000)
 })
 
 // ========================================
@@ -285,7 +274,7 @@ describe('Solvability Stress Test', () => {
       const dateStr = date.toISOString().split('T')[0]
 
       const level = getDailyShapeArchitectLevel(dateStr)
-      const result = solvePuzzle(level, 10000)
+      const result = solvePuzzle(level, 30000)
 
       results.push({
         date: dateStr,
@@ -295,7 +284,7 @@ describe('Solvability Stress Test', () => {
       })
     }
 
-    const unsolvable = results.filter((r) => !r.solvable && !r.timedOut)
+    const unsolvable = results.filter((r) => !r.solvable)
 
     if (unsolvable.length > 0) {
       console.log(
@@ -305,7 +294,69 @@ describe('Solvability Stress Test', () => {
     }
 
     expect(unsolvable.length).toBe(0)
-  }, 180000)
+  }, 360000)
+})
+
+describe('solver baseline: can detect unsolvable puzzles', () => {
+  it('returns solvable=false for a puzzle with mismatched volume', () => {
+    const unsolvableLevel: LevelConfig = {
+      id: 'unsolvable-volume',
+      name: 'Unsolvable',
+      type: '2D',
+      gridSize: [4, 4, 1],
+      targetVoxels: [
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 0, z: 0 },
+        { x: 2, y: 0, z: 0 },
+      ],
+      pieces: [
+        {
+          id: 'big',
+          name: 'Big',
+          color: '#f00',
+          layout: [
+            { x: 0, y: 0, z: 0 },
+            { x: 1, y: 0, z: 0 },
+            { x: 2, y: 0, z: 0 },
+            { x: 3, y: 0, z: 0 },
+          ],
+        },
+      ],
+      difficulty: 'easy',
+    }
+
+    const result = solvePuzzle(unsolvableLevel, 5000)
+    expect(result.solvable).toBe(false)
+    expect(result.timedOut).toBe(false)
+  })
+
+  it('returns solvable=false for a puzzle where pieces cannot fit the shape', () => {
+    const unsolvableLevel: LevelConfig = {
+      id: 'unsolvable-shape',
+      name: 'Unsolvable Shape',
+      type: '2D',
+      gridSize: [4, 4, 1],
+      targetVoxels: [
+        { x: 0, y: 0, z: 0 },
+        { x: 2, y: 2, z: 0 },
+      ],
+      pieces: [
+        {
+          id: 'domino',
+          name: 'Domino',
+          color: '#f00',
+          layout: [
+            { x: 0, y: 0, z: 0 },
+            { x: 1, y: 0, z: 0 },
+          ],
+        },
+      ],
+      difficulty: 'easy',
+    }
+
+    const result = solvePuzzle(unsolvableLevel, 5000)
+    expect(result.solvable).toBe(false)
+  })
 })
 
 describe('generateGuaranteedSolvableWithRetry', () => {
@@ -320,8 +371,8 @@ describe('generateGuaranteedSolvableWithRetry', () => {
       expect(level.pieces.length).toBeGreaterThan(0)
       expect(level.targetVoxels.length).toBeGreaterThan(0)
 
-      const result = solvePuzzle(level, 5000)
-      expect(result.solvable || result.timedOut).toBe(true)
+      const result = solvePuzzle(level, 15000)
+      expect(result.solvable).toBe(true)
     }
   }, 30000)
 

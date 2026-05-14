@@ -7,6 +7,7 @@ import { GAME_IDS } from '@/games/game-module'
 import type { GameId } from '@/games/game-module'
 import { createPlayerIdentity } from '@/player/identity.server'
 import { DbService, ProgressWriteError } from '@/services'
+import { withD1Retry } from '@/services/retry'
 
 export interface RecordGameProgressInput {
   playerId: string
@@ -48,25 +49,27 @@ export function recordGameProgress(input: RecordGameProgressInput) {
   return Effect.gen(function* () {
     const { db } = yield* DbService
 
-    const [existingAchievements, attemptsByGame] = yield* Effect.tryPromise({
-      try: () =>
-        db.batch([
-          db
-            .select({ achievementId: schema.playerAchievements.achievementId })
-            .from(schema.playerAchievements)
-            .where(eq(schema.playerAchievements.playerId, input.playerId)),
-          db
-            .select({
-              gameId: schema.gameProgress.gameId,
-              totalAttempts:
-                sql<number>`coalesce(sum(${schema.gameProgress.attempts}), 0)`,
-            })
-            .from(schema.gameProgress)
-            .where(eq(schema.gameProgress.playerId, input.playerId))
-            .groupBy(schema.gameProgress.gameId),
-        ]),
-      catch: (cause) => new ProgressWriteError({ cause }),
-    })
+    const [existingAchievements, attemptsByGame] = yield* withD1Retry(
+      Effect.tryPromise({
+        try: () =>
+          db.batch([
+            db
+              .select({ achievementId: schema.playerAchievements.achievementId })
+              .from(schema.playerAchievements)
+              .where(eq(schema.playerAchievements.playerId, input.playerId)),
+            db
+              .select({
+                gameId: schema.gameProgress.gameId,
+                totalAttempts:
+                  sql<number>`coalesce(sum(${schema.gameProgress.attempts}), 0)`,
+              })
+              .from(schema.gameProgress)
+              .where(eq(schema.gameProgress.playerId, input.playerId))
+              .groupBy(schema.gameProgress.gameId),
+          ]),
+        catch: (cause) => new ProgressWriteError({ cause }),
+      }),
+    )
 
     const gamesPlayedByType = Object.fromEntries(
       GAME_IDS.map((id) => [id, 0]),
@@ -153,10 +156,12 @@ export function recordGameProgress(input: RecordGameProgressInput) {
           ] as const)
         : ([upsertPlayer, upsertProgress, selectFinal] as const)
 
-    const writeResults = yield* Effect.tryPromise({
-      try: () => db.batch(writeBatch),
-      catch: (cause) => new ProgressWriteError({ cause }),
-    })
+    const writeResults = yield* withD1Retry(
+      Effect.tryPromise({
+        try: () => db.batch(writeBatch),
+        catch: (cause) => new ProgressWriteError({ cause }),
+      }),
+    )
 
     const finalRows = writeResults[writeResults.length - 1] as Array<
       typeof schema.gameProgress.$inferSelect

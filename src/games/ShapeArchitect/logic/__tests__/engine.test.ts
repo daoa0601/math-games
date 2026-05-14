@@ -3,7 +3,11 @@ import {
   createGrid,
   initializeGrid,
   isInBounds,
+  normalizeAngle,
+  rotateBy90OnAxis,
   rotatePieceLayout,
+  rotatePieceLayout3D,
+  findNearestValidPosition,
   getPieceWorldPositions,
   canPlacePiece,
   placePiece,
@@ -11,6 +15,10 @@ import {
   checkSolved,
   createGameState,
   tryPlacePiece,
+  canMovePlacedPiece,
+  movePlacedPiece,
+  selectPlacedPieceForMove,
+  clearMovementSelection,
   calculatePieceVolume,
   validateLevelVolume,
   validateAllLevels,
@@ -862,5 +870,373 @@ describe('validateAllLevels', () => {
     const results = validateAllLevels([])
 
     expect(results.size).toBe(0)
+  })
+})
+
+// ========================================
+// Piece Movement Tests
+// ========================================
+
+describe('selectPlacedPieceForMove', () => {
+  function stateWithPlacedPiece() {
+    const level = createTestLevel()
+    const state = createGameState(level)
+    state.selectedPieceId = level.pieces[0].id
+    return tryPlacePiece(state, { x: 0, y: 0, z: 0 })!
+  }
+
+  it('selects an existing placed piece', () => {
+    const state = stateWithPlacedPiece()
+    const result = selectPlacedPieceForMove(state, 'test-piece')
+
+    expect(result).not.toBeNull()
+    expect(result!.interactionMode).toBe('move')
+    expect(result!.selectedPlacedPieceId).toBe('test-piece')
+    expect(result!.selectedPieceId).toBeNull()
+  })
+
+  it('returns null for non-existent piece', () => {
+    const state = stateWithPlacedPiece()
+    const result = selectPlacedPieceForMove(state, 'nonexistent')
+
+    expect(result).toBeNull()
+  })
+})
+
+describe('clearMovementSelection', () => {
+  it('resets interaction mode and selection', () => {
+    const level = createTestLevel()
+    const state = createGameState(level)
+    state.interactionMode = 'move'
+    state.selectedPlacedPieceId = 'some-piece'
+
+    const result = clearMovementSelection(state)
+
+    expect(result.interactionMode).toBe('idle')
+    expect(result.selectedPlacedPieceId).toBeNull()
+  })
+})
+
+describe('canMovePlacedPiece', () => {
+  function stateWithTwoPieces() {
+    const piece1 = createTestPiece({ id: 'p1', color: '#f00' })
+    const piece2 = createTestPiece({ id: 'p2', color: '#0f0' })
+    const level = createTestLevel({
+      gridSize: [4, 3, 1],
+      targetVoxels: [
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 0, z: 0 },
+        { x: 2, y: 0, z: 0 },
+        { x: 3, y: 0, z: 0 },
+      ],
+      pieces: [piece1, piece2],
+    })
+    let state = createGameState(level)
+    state.selectedPieceId = 'p1'
+    state = tryPlacePiece(state, { x: 0, y: 0, z: 0 })!
+    state.selectedPieceId = 'p2'
+    state = tryPlacePiece(state, { x: 2, y: 0, z: 0 })!
+    return state
+  }
+
+  it('allows moving to a valid unoccupied position', () => {
+    const piece = createTestPiece()
+    const level = createTestLevel({
+      gridSize: [4, 3, 1],
+      targetVoxels: [
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 0, z: 0 },
+        { x: 2, y: 0, z: 0 },
+        { x: 3, y: 0, z: 0 },
+      ],
+      pieces: [piece],
+    })
+    let state = createGameState(level)
+    state.selectedPieceId = piece.id
+    state = tryPlacePiece(state, { x: 0, y: 0, z: 0 })!
+
+    expect(
+      canMovePlacedPiece(state, piece.id, { x: 2, y: 0, z: 0 }, DEFAULT_ROTATION),
+    ).toBe(true)
+  })
+
+  it('rejects move to position occupied by another piece', () => {
+    const state = stateWithTwoPieces()
+    expect(
+      canMovePlacedPiece(state, 'p1', { x: 2, y: 0, z: 0 }, DEFAULT_ROTATION),
+    ).toBe(false)
+  })
+
+  it('rejects move for non-existent piece id', () => {
+    const state = stateWithTwoPieces()
+    expect(
+      canMovePlacedPiece(state, 'nope', { x: 0, y: 0, z: 0 }, DEFAULT_ROTATION),
+    ).toBe(false)
+  })
+
+  it('rejects move out of bounds', () => {
+    const state = stateWithTwoPieces()
+    expect(
+      canMovePlacedPiece(state, 'p1', { x: 99, y: 0, z: 0 }, DEFAULT_ROTATION),
+    ).toBe(false)
+  })
+})
+
+describe('movePlacedPiece', () => {
+  function stateWithPiece() {
+    const piece = createTestPiece()
+    const level = createTestLevel({
+      gridSize: [4, 3, 1],
+      targetVoxels: [
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 0, z: 0 },
+        { x: 2, y: 0, z: 0 },
+        { x: 3, y: 0, z: 0 },
+      ],
+      pieces: [piece],
+    })
+    const state = createGameState(level)
+    state.selectedPieceId = piece.id
+    return tryPlacePiece(state, { x: 0, y: 0, z: 0 })!
+  }
+
+  it('moves piece to a new valid position', () => {
+    const state = stateWithPiece()
+    const result = movePlacedPiece(
+      state,
+      'test-piece',
+      { x: 2, y: 0, z: 0 },
+      DEFAULT_ROTATION,
+    )
+
+    expect(result).not.toBeNull()
+    expect(result!.grid.get(0, 0, 0)).toBe(1) // old position restored to target
+    expect(result!.grid.get(2, 0, 0)).toBe(2) // new position filled
+    expect(result!.grid.get(3, 0, 0)).toBe(2)
+    expect(result!.placedPieces[0].position).toEqual({ x: 2, y: 0, z: 0 })
+    expect(result!.interactionMode).toBe('idle')
+    expect(result!.selectedPlacedPieceId).toBeNull()
+  })
+
+  it('returns null when moving to same position and rotation', () => {
+    const state = stateWithPiece()
+    const result = movePlacedPiece(
+      state,
+      'test-piece',
+      { x: 0, y: 0, z: 0 },
+      DEFAULT_ROTATION,
+    )
+
+    expect(result).toBeNull()
+  })
+
+  it('returns null for invalid target position', () => {
+    const state = stateWithPiece()
+    const result = movePlacedPiece(
+      state,
+      'test-piece',
+      { x: 99, y: 0, z: 0 },
+      DEFAULT_ROTATION,
+    )
+
+    expect(result).toBeNull()
+  })
+
+  it('returns null for non-existent piece', () => {
+    const state = stateWithPiece()
+    const result = movePlacedPiece(
+      state,
+      'nonexistent',
+      { x: 2, y: 0, z: 0 },
+      DEFAULT_ROTATION,
+    )
+
+    expect(result).toBeNull()
+  })
+
+  it('checks solved state after move', () => {
+    const piece = createTestPiece()
+    const level = createTestLevel({
+      gridSize: [3, 1, 1],
+      targetVoxels: [
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 0, z: 0 },
+      ],
+      pieces: [piece],
+    })
+    let state = createGameState(level)
+    state.selectedPieceId = piece.id
+    state = tryPlacePiece(state, { x: 0, y: 0, z: 0 })!
+
+    expect(state.isSolved).toBe(true)
+  })
+})
+
+// ========================================
+// 3D Rotation Tests
+// ========================================
+
+describe('normalizeAngle', () => {
+  it('normalizes positive angles', () => {
+    expect(normalizeAngle(0)).toBe(0)
+    expect(normalizeAngle(90)).toBe(90)
+    expect(normalizeAngle(360)).toBe(0)
+    expect(normalizeAngle(450)).toBe(90)
+  })
+
+  it('normalizes negative angles', () => {
+    expect(normalizeAngle(-90)).toBe(270)
+    expect(normalizeAngle(-180)).toBe(180)
+    expect(normalizeAngle(-360)).toBe(0)
+  })
+})
+
+describe('rotateBy90OnAxis', () => {
+  it('rotates on z-axis only', () => {
+    const result = rotateBy90OnAxis(DEFAULT_ROTATION, 'z')
+    expect(result).toEqual({ x: 0, y: 0, z: 90 })
+  })
+
+  it('rotates on x-axis only', () => {
+    const result = rotateBy90OnAxis(DEFAULT_ROTATION, 'x')
+    expect(result).toEqual({ x: 90, y: 0, z: 0 })
+  })
+
+  it('rotates on y-axis only', () => {
+    const result = rotateBy90OnAxis(DEFAULT_ROTATION, 'y')
+    expect(result).toEqual({ x: 0, y: 90, z: 0 })
+  })
+
+  it('accumulates rotations', () => {
+    let r = DEFAULT_ROTATION
+    r = rotateBy90OnAxis(r, 'z')
+    r = rotateBy90OnAxis(r, 'z')
+    expect(r).toEqual({ x: 0, y: 0, z: 180 })
+  })
+
+  it('wraps around after 4 rotations', () => {
+    let r = DEFAULT_ROTATION
+    for (let i = 0; i < 4; i++) r = rotateBy90OnAxis(r, 'x')
+    expect(r).toEqual(DEFAULT_ROTATION)
+  })
+})
+
+describe('rotatePieceLayout3D', () => {
+  const iBlock: Position3D[] = [
+    { x: 0, y: 0, z: 0 },
+    { x: 1, y: 0, z: 0 },
+    { x: 2, y: 0, z: 0 },
+  ]
+
+  it('no rotation returns normalized layout', () => {
+    const result = rotatePieceLayout3D(iBlock, DEFAULT_ROTATION)
+    expect(result).toEqual(iBlock)
+  })
+
+  it('preserves piece volume through rotation', () => {
+    const rotations: Rotation3D[] = [
+      { x: 90, y: 0, z: 0 },
+      { x: 0, y: 90, z: 0 },
+      { x: 0, y: 0, z: 90 },
+      { x: 90, y: 90, z: 0 },
+      { x: 90, y: 0, z: 90 },
+    ]
+
+    for (const rotation of rotations) {
+      const result = rotatePieceLayout3D(iBlock, rotation)
+      expect(result.length).toBe(iBlock.length)
+    }
+  })
+
+  it('4 rotations on same axis return to original', () => {
+    const result = rotatePieceLayout3D(iBlock, { x: 0, y: 0, z: 360 })
+    expect(result).toEqual(iBlock)
+  })
+
+  it('z-axis rotation changes x/y but not z', () => {
+    const result = rotatePieceLayout3D(iBlock, { x: 0, y: 0, z: 90 })
+    expect(result.every((p) => p.z === 0)).toBe(true)
+    // After 90° z-rotation, horizontal I-block becomes vertical
+    expect(result.some((p) => p.y > 0)).toBe(true)
+  })
+
+  it('x-axis rotation changes y/z but not x for single-column piece', () => {
+    const column: Position3D[] = [
+      { x: 0, y: 0, z: 0 },
+      { x: 0, y: 1, z: 0 },
+      { x: 0, y: 2, z: 0 },
+    ]
+    const result = rotatePieceLayout3D(column, { x: 90, y: 0, z: 0 })
+    expect(result.every((p) => p.x === 0)).toBe(true)
+    expect(result.some((p) => p.z > 0)).toBe(true)
+  })
+})
+
+// ========================================
+// findNearestValidPosition Tests
+// ========================================
+
+describe('findNearestValidPosition', () => {
+  it('returns the position itself if valid', () => {
+    const level = createTestLevel({ gridSize: [4, 3, 1] })
+    const grid = initializeGrid(level)
+    const piece = level.pieces[0]
+
+    const pos = findNearestValidPosition(
+      grid,
+      piece,
+      { x: 0, y: 0, z: 0 },
+      DEFAULT_ROTATION,
+      level.gridSize,
+    )
+
+    expect(pos).toEqual({ x: 0, y: 0, z: 0 })
+  })
+
+  it('finds nearby valid position when exact position is invalid', () => {
+    const level = createTestLevel({
+      gridSize: [4, 4, 1],
+      targetVoxels: [
+        { x: 2, y: 0, z: 0 },
+        { x: 3, y: 0, z: 0 },
+      ],
+    })
+    const grid = initializeGrid(level)
+    const piece = level.pieces[0]
+
+    // Attempt at (0,0) is invalid (no target cells), but (2,0) should work
+    const pos = findNearestValidPosition(
+      grid,
+      piece,
+      { x: 0, y: 0, z: 0 },
+      DEFAULT_ROTATION,
+      level.gridSize,
+    )
+
+    expect(pos).not.toBeNull()
+    expect(pos!.x).toBeGreaterThanOrEqual(1)
+  })
+
+  it('returns null when no valid position within search radius', () => {
+    const level = createTestLevel({
+      gridSize: [10, 10, 1],
+      targetVoxels: [
+        { x: 8, y: 8, z: 0 },
+        { x: 9, y: 8, z: 0 },
+      ],
+    })
+    const grid = initializeGrid(level)
+    const piece = level.pieces[0]
+
+    const pos = findNearestValidPosition(
+      grid,
+      piece,
+      { x: 0, y: 0, z: 0 },
+      DEFAULT_ROTATION,
+      level.gridSize,
+      2,
+    )
+
+    expect(pos).toBeNull()
   })
 })

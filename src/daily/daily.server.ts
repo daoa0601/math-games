@@ -2,10 +2,10 @@ import { eq } from 'drizzle-orm'
 import { Effect } from 'effect'
 
 import { schema } from '@/db'
-import { DailyChallengeError, DbService } from '@/services'
+import { ClockService, DailyChallengeError, DbService } from '@/services'
+import { withD1Retry } from '@/services/retry'
 
 import {
-  getUtcDateKey,
   parseDailyChallengeConfig,
   planDailyChallenge,
 } from './daily.logic'
@@ -26,20 +26,22 @@ function toDailyChallengeRecord(
   }
 }
 
-export function loadDailyChallenge(date = new Date()) {
+export function loadDailyChallenge() {
   return Effect.gen(function* () {
     const { db } = yield* DbService
-    const dateKey = getUtcDateKey(date)
+    const dateKey = yield* (yield* ClockService).dateKey()
 
-    const existing = yield* Effect.tryPromise({
-      try: () =>
-        db
-          .select()
-          .from(schema.dailyChallenges)
-          .where(eq(schema.dailyChallenges.challengeDate, dateKey))
-          .limit(1),
-      catch: (cause) => new DailyChallengeError({ cause }),
-    })
+    const existing = yield* withD1Retry(
+      Effect.tryPromise({
+        try: () =>
+          db
+            .select()
+            .from(schema.dailyChallenges)
+            .where(eq(schema.dailyChallenges.challengeDate, dateKey))
+            .limit(1),
+        catch: (cause) => new DailyChallengeError({ cause }),
+      }),
+    )
 
     const existingRow = existing.at(0)
 
@@ -47,34 +49,38 @@ export function loadDailyChallenge(date = new Date()) {
 
     const planned = planDailyChallenge(dateKey)
 
-    const inserted = yield* Effect.tryPromise({
-      try: () =>
-        db
-          .insert(schema.dailyChallenges)
-          .values({
-            challengeDate: planned.challengeDate,
-            gameId: planned.gameId,
-            seed: planned.seed,
-            configJson: planned.configJson,
-          })
-          .onConflictDoNothing()
-          .returning(),
-      catch: (cause) => new DailyChallengeError({ cause }),
-    })
+    const inserted = yield* withD1Retry(
+      Effect.tryPromise({
+        try: () =>
+          db
+            .insert(schema.dailyChallenges)
+            .values({
+              challengeDate: planned.challengeDate,
+              gameId: planned.gameId,
+              seed: planned.seed,
+              configJson: planned.configJson,
+            })
+            .onConflictDoNothing()
+            .returning(),
+        catch: (cause) => new DailyChallengeError({ cause }),
+      }),
+    )
 
     const insertedRow = inserted.at(0)
 
     if (insertedRow) return toDailyChallengeRecord(insertedRow)
 
-    const winner = yield* Effect.tryPromise({
-      try: () =>
-        db
-          .select()
-          .from(schema.dailyChallenges)
-          .where(eq(schema.dailyChallenges.challengeDate, dateKey))
-          .limit(1),
-      catch: (cause) => new DailyChallengeError({ cause }),
-    })
+    const winner = yield* withD1Retry(
+      Effect.tryPromise({
+        try: () =>
+          db
+            .select()
+            .from(schema.dailyChallenges)
+            .where(eq(schema.dailyChallenges.challengeDate, dateKey))
+            .limit(1),
+        catch: (cause) => new DailyChallengeError({ cause }),
+      }),
+    )
 
     const winnerRow = winner.at(0)
 

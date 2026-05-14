@@ -10,12 +10,9 @@ import {
   PlayerProfileError,
   PlayerProfileWriteError,
 } from '@/services'
+import { withD1Retry } from '@/services/retry'
 
-import type {
-  GradeBand,
-  Locale,
-  UpdatePlayerProfileInput,
-} from './profile.validation'
+import type { GradeBand, Locale, PlayerProfileInput } from './profile.schema'
 
 export interface PlayerProfileRecord {
   id: string
@@ -70,96 +67,97 @@ function toProgressSummary(
 export function loadPlayerProfileOverview() {
   return Effect.gen(function* () {
     const { db } = yield* DbService
-    const identity = (yield* PlayerIdentityService).getCurrent()
+    const identity = yield* (yield* PlayerIdentityService).resolve()
 
-    const player = yield* Effect.tryPromise({
-      try: async () => {
-        await db
-          .insert(schema.players)
-          .values(identity)
-          .onConflictDoUpdate({
-            target: schema.players.id,
-            set: { updatedAt: sql`(unixepoch())` },
-          })
+    yield* withD1Retry(
+      Effect.tryPromise({
+        try: () =>
+          db
+            .insert(schema.players)
+            .values(identity)
+            .onConflictDoUpdate({
+              target: schema.players.id,
+              set: { updatedAt: sql`(unixepoch())` },
+            }),
+        catch: (cause) => new PlayerProfileError({ cause }),
+      }),
+    )
 
-        const [row] = await db
-          .select()
-          .from(schema.players)
-          .where(eq(schema.players.id, identity.id))
-          .limit(1)
-
-        return row
-      },
-      catch: (cause) => new PlayerProfileError({ cause }),
-    })
-
-    const progress = yield* Effect.tryPromise({
-      try: () =>
-        db
-          .select()
-          .from(schema.gameProgress)
-          .where(eq(schema.gameProgress.playerId, identity.id))
-          .orderBy(
-            asc(schema.gameProgress.gameId),
-            asc(schema.gameProgress.levelId),
-          ),
-      catch: (cause) => new PlayerProfileError({ cause }),
-    })
-
-    const achievements = yield* Effect.tryPromise({
-      try: () =>
-        db
-          .select()
-          .from(schema.playerAchievements)
-          .where(eq(schema.playerAchievements.playerId, identity.id))
-          .orderBy(asc(schema.playerAchievements.achievementId)),
-      catch: (cause) => new PlayerProfileError({ cause }),
-    })
+    const [playerRows, progress, achievements] = yield* withD1Retry(
+      Effect.tryPromise({
+        try: () =>
+          db.batch([
+            db
+              .select()
+              .from(schema.players)
+              .where(eq(schema.players.id, identity.id))
+              .limit(1),
+            db
+              .select()
+              .from(schema.gameProgress)
+              .where(eq(schema.gameProgress.playerId, identity.id))
+              .orderBy(
+                asc(schema.gameProgress.gameId),
+                asc(schema.gameProgress.levelId),
+              ),
+            db
+              .select()
+              .from(schema.playerAchievements)
+              .where(eq(schema.playerAchievements.playerId, identity.id))
+              .orderBy(asc(schema.playerAchievements.achievementId)),
+          ] as const),
+        catch: (cause) => new PlayerProfileError({ cause }),
+      }),
+    )
 
     return {
-      profile: toPlayerProfileRecord(player),
+      profile: toPlayerProfileRecord(playerRows[0]),
       progress: progress.map(toProgressSummary),
       achievements: achievements.map((row) => row.achievementId),
     }
   })
 }
 
-export function savePlayerProfile(input: UpdatePlayerProfileInput) {
+export function savePlayerProfile(input: PlayerProfileInput) {
   return Effect.gen(function* () {
     const { db } = yield* DbService
-    const identity = (yield* PlayerIdentityService).getCurrent()
+    const identity = yield* (yield* PlayerIdentityService).resolve()
 
-    yield* Effect.tryPromise({
-      try: () =>
-        db
-          .insert(schema.players)
-          .values({
-            id: identity.id,
-            displayName: input.displayName,
-            locale: input.locale,
-            gradeBand: input.gradeBand,
-          })
-          .onConflictDoUpdate({
-            target: schema.players.id,
-            set: {
+    yield* withD1Retry(
+      Effect.tryPromise({
+        try: () =>
+          db
+            .insert(schema.players)
+            .values({
+              id: identity.id,
               displayName: input.displayName,
               locale: input.locale,
               gradeBand: input.gradeBand,
-              updatedAt: sql`(unixepoch())`,
-            },
-          }),
-      catch: (cause) => new PlayerProfileWriteError({ cause }),
-    })
+            })
+            .onConflictDoUpdate({
+              target: schema.players.id,
+              set: {
+                displayName: input.displayName,
+                locale: input.locale,
+                gradeBand: input.gradeBand,
+                updatedAt: sql`(unixepoch())`,
+              },
+            }),
+        catch: (cause) => new PlayerProfileWriteError({ cause }),
+      }),
+    )
 
-    const [player] = yield* Effect.tryPromise({
-      try: () =>
-        db
-          .select()
-          .from(schema.players)
-          .where(eq(schema.players.id, identity.id))
-          .limit(1),
-      catch: (cause) => new PlayerProfileWriteError({ cause }),
-    })
+    const [player] = yield* withD1Retry(
+      Effect.tryPromise({
+        try: () =>
+          db
+            .select()
+            .from(schema.players)
+            .where(eq(schema.players.id, identity.id))
+            .limit(1),
+        catch: (cause) => new PlayerProfileWriteError({ cause }),
+      }),
+    )
 
     return toPlayerProfileRecord(player)
   })

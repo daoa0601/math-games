@@ -9,6 +9,12 @@ describe('validateLevelSearch', () => {
     })
   })
 
+  it('keeps unicode level ids', () => {
+    expect(validateLevelSearch({ level: 'puzzle-café-☕' })).toEqual({
+      level: 'puzzle-café-☕',
+    })
+  })
+
   it('drops missing and empty level ids', () => {
     expect(validateLevelSearch({})).toEqual({ level: undefined })
     expect(validateLevelSearch({ level: '' })).toEqual({ level: undefined })
@@ -16,5 +22,31 @@ describe('validateLevelSearch', () => {
 
   it('drops non-string values', () => {
     expect(validateLevelSearch({ level: 42 })).toEqual({ level: undefined })
+    expect(validateLevelSearch({ level: true })).toEqual({ level: undefined })
+    expect(validateLevelSearch({ level: null })).toEqual({ level: undefined })
+    expect(validateLevelSearch({ level: undefined })).toEqual({
+      level: undefined,
+    })
+    expect(validateLevelSearch({ level: ['array'] })).toEqual({
+      level: undefined,
+    })
+    expect(validateLevelSearch({ level: { nested: true } })).toEqual({
+      level: undefined,
+    })
+  })
+
+  it('ignores extra keys in the search object', () => {
+    const result = validateLevelSearch({
+      level: 'test',
+      extra: 'ignored',
+      __proto__: {},
+    })
+    expect(result).toEqual({ level: 'test' })
+    expect(Object.keys(result)).toEqual(['level'])
+  })
+
+  it('handles very long strings', () => {
+    const long = 'a'.repeat(1000)
+    expect(validateLevelSearch({ level: long })).toEqual({ level: long })
   })
 })

@@ -1,4 +1,4 @@
-import { Effect } from 'effect'
+import { Effect, Schema } from 'effect'
 
 import type {
   Achievement,
@@ -12,6 +12,7 @@ import { GameProgressValidationError } from '@/services/errors'
 
 import { applyMove, createGameState, getValidMoves, presetGames } from './logic'
 import type { GameConfig, HistoryEntry } from './logic'
+import { SequenceRaceCompletion as SequenceRaceCompletionSchema } from './sequence-race.schema'
 import {
   getSequenceRaceCatalog,
   getSequenceRacePracticeConfig,
@@ -143,31 +144,6 @@ function validateGameState(
   return { completed, moves }
 }
 
-export function validateAndScore(levelId: string, completion: unknown) {
-  return Effect.gen(function* () {
-    const level = resolveLevelConfig(levelId)
-
-    if (!level) {
-      return yield* new GameProgressValidationError({
-        reason: `Unknown level: ${levelId}`,
-      })
-    }
-
-    const validation = validateGameState(level, completion)
-
-    if (validation === null) {
-      return yield* new GameProgressValidationError({
-        reason: 'Invalid game state',
-      })
-    }
-
-    const { completed, moves } = validation
-    const score = computeScore({ completed, moves })
-
-    return { completed, moves, score, difficulty: level.difficulty }
-  })
-}
-
 export const sequenceRaceModule = {
   id: 'sequence-race',
   route: '/games/sequence-race',
@@ -180,6 +156,26 @@ export const sequenceRaceModule = {
   getDailyPick,
   computeScore,
   evaluateAchievements,
+  completionSchema: SequenceRaceCompletionSchema,
+  validateAndComputeScore: (levelId: string, raw: unknown) =>
+    Effect.gen(function* () {
+      const level = resolveLevelConfig(levelId)
+      if (!level) return yield* new GameProgressValidationError({ reason: `Unknown level: ${levelId}` })
+
+      const parsed = yield* Effect.try({
+        try: () => Schema.decodeUnknownSync(SequenceRaceCompletionSchema)(raw),
+        catch: (e) => new GameProgressValidationError({ reason: e instanceof Error ? e.message : 'Invalid completion' }),
+      })
+
+      const validation = validateGameState(level, parsed)
+      if (validation === null) return yield* new GameProgressValidationError({ reason: 'Invalid game state' })
+
+      const { completed, moves } = validation
+      const score = computeScore({ completed, moves })
+      const extras = progressExtras({ levelId, score, completed, difficulty: level.difficulty })
+
+      return { completed, moves, score, difficulty: level.difficulty, ...extras }
+    }),
   progressExtras,
   resolveLevelConfig,
   validateGameState,

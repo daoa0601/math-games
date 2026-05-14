@@ -139,3 +139,79 @@ test('game routes expose standalone controls and progress writes', async ({
 
   expectNoRuntimeErrors(errors)
 })
+
+test('profile round-trip: saved values persist across page reload', async ({
+  page,
+}) => {
+  const errors = collectRuntimeErrors(page)
+  const displayName = `Persist ${Date.now()}`
+
+  await page.goto('/profile')
+  await expectHydrated(page)
+
+  await page.getByLabel('Display name').fill(displayName)
+  await page.getByLabel('Language').selectOption('vi')
+  await page.getByLabel('Grade band').selectOption('high')
+  await page.getByRole('button', { name: 'Save Profile' }).click()
+  await expect(page.getByText('Profile saved to D1.')).toBeVisible()
+
+  await page.reload()
+  await expectHydrated(page)
+
+  await expect(page.getByLabel('Display name')).toHaveValue(displayName)
+  await expect(page.getByLabel('Language')).toHaveValue('vi')
+  await expect(page.getByLabel('Grade band')).toHaveValue('high')
+  await expect(page.locator('header')).toContainText(displayName)
+
+  expectNoRuntimeErrors(errors)
+})
+
+test('daily challenge shows consistent puzzle for same date', async ({
+  page,
+}) => {
+  const errors = collectRuntimeErrors(page)
+
+  await page.goto('/daily')
+  await expectHydrated(page)
+
+  const heading = page.getByRole('heading', { name: 'Daily Challenge' })
+  await expect(heading).toBeVisible()
+
+  const gameLink = page.locator('a[href^="/games/"]')
+  const firstHref = await gameLink.getAttribute('href')
+
+  await page.reload()
+  await expectHydrated(page)
+
+  const secondHref = await gameLink.getAttribute('href')
+  expect(firstHref).toBe(secondHref)
+
+  expectNoRuntimeErrors(errors)
+})
+
+test('score recording reflects in profile progress', async ({ page }) => {
+  const errors = collectRuntimeErrors(page)
+
+  // Save a profile first
+  await page.goto('/profile')
+  await expectHydrated(page)
+  const name = `Score ${Date.now()}`
+  await page.getByLabel('Display name').fill(name)
+  await page.getByRole('button', { name: 'Save Profile' }).click()
+  await expect(page.getByText('Profile saved to D1.')).toBeVisible()
+
+  // Play a game and record progress
+  await page.goto('/games/magic-graph')
+  await expectHydrated(page)
+  await page.getByRole('button', { name: 'Apply Solution' }).click()
+  await expect(page.getByText(/Saved attempt \d+; best score/)).toBeVisible()
+
+  // Check profile shows progress
+  await page.goto('/profile')
+  await expectHydrated(page)
+
+  // The profile should show at least one game played
+  await expect(page.locator('main')).toContainText(/magic/i)
+
+  expectNoRuntimeErrors(errors)
+})

@@ -18,10 +18,6 @@
  * // Always returns the same level for Jan 1, 2025
  */
 
-import { Effect } from 'effect'
-
-import { GenerationError } from '@/services/errors'
-
 import type { LevelConfig, Piece, Position3D, Difficulty } from './types'
 import type { SeededRandom } from '@/shared/utils'
 import { createSeededRandom, createDailyRandom } from '@/shared/utils'
@@ -854,27 +850,3 @@ export function generateValidatedLevelForTesting(
   return generateGuaranteedSolvableWithRetry(rng, difficulty)
 }
 
-// ============================================================================
-// Effect Pipelines
-// ============================================================================
-
-export function generateCohesivePuzzleEffect(
-  rng: SeededRandom,
-  difficulty: Difficulty,
-) {
-  return Effect.sync(() => generateCohesivePuzzle(rng, difficulty))
-}
-
-export function generateLevelEffect(
-  rng: SeededRandom,
-  difficulty: Difficulty,
-) {
-  return Effect.sync(() => generateGuaranteedSolvableWithRetry(rng, difficulty))
-}
-
-export function getDailyShapeArchitectLevelEffect(date?: string) {
-  return Effect.try({
-    try: () => getDailyShapeArchitectLevel(date),
-    catch: (cause) => new GenerationError({ cause }),
-  })
-}

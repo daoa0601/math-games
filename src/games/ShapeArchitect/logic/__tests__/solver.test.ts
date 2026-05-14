@@ -661,3 +661,117 @@ describe('solvePuzzle - Performance Metrics', () => {
     expect(result.searchedStates).toBe(0)
   })
 })
+
+// ========================================
+// Constraint Propagation / Pruning Tests
+// ========================================
+
+describe('solvePuzzle - constraint propagation', () => {
+  it('detects unsolvable disconnected regions', () => {
+    // Two isolated 1-cell pockets separated by filled space,
+    // but only domino (2-cell) pieces available → unsolvable
+    const level = createTestLevel({
+      gridSize: [5, 1, 1],
+      targetVoxels: [
+        { x: 0, y: 0, z: 0 },
+        { x: 4, y: 0, z: 0 },
+      ],
+      pieces: [
+        createTestPiece('domino', [
+          { x: 0, y: 0, z: 0 },
+          { x: 1, y: 0, z: 0 },
+        ]),
+      ],
+    })
+
+    const result = solvePuzzle(level, 5000)
+    expect(result.solvable).toBe(false)
+  })
+
+  it('solves contiguous region efficiently', () => {
+    // 4-cell contiguous L-shape with matching L-piece
+    const level = createTestLevel({
+      gridSize: [3, 3, 1],
+      targetVoxels: [
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 0, z: 0 },
+        { x: 0, y: 1, z: 0 },
+      ],
+      pieces: [
+        createTestPiece('L', [
+          { x: 0, y: 0, z: 0 },
+          { x: 1, y: 0, z: 0 },
+          { x: 0, y: 1, z: 0 },
+        ]),
+      ],
+    })
+
+    const result = solvePuzzle(level, 5000)
+    expect(result.solvable).toBe(true)
+    expect(result.searchedStates).toBeGreaterThan(0)
+  })
+
+  it('prunes faster than brute force on multi-piece puzzles', () => {
+    // 2x4 rectangle split into 2 dominoes + 1 O-block
+    const level = createTestLevel({
+      gridSize: [4, 2, 1],
+      targetVoxels: [
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 0, z: 0 },
+        { x: 2, y: 0, z: 0 },
+        { x: 3, y: 0, z: 0 },
+        { x: 0, y: 1, z: 0 },
+        { x: 1, y: 1, z: 0 },
+        { x: 2, y: 1, z: 0 },
+        { x: 3, y: 1, z: 0 },
+      ],
+      pieces: [
+        createOBlock('o1'),
+        createOBlock('o2'),
+      ],
+    })
+
+    const result = solvePuzzle(level, 5000)
+    expect(result.solvable).toBe(true)
+    expect(result.solution).toHaveLength(2)
+  })
+})
+
+// ========================================
+// isSolvable convenience function
+// ========================================
+
+describe('isSolvable', () => {
+  it('returns true for solvable puzzle', () => {
+    const level = createTestLevel({
+      gridSize: [2, 2, 1],
+      targetVoxels: [
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 0, z: 0 },
+        { x: 0, y: 1, z: 0 },
+        { x: 1, y: 1, z: 0 },
+      ],
+      pieces: [createOBlock('o1')],
+    })
+
+    expect(isSolvable(level)).toBe(true)
+  })
+
+  it('returns false for unsolvable puzzle', () => {
+    const level = createTestLevel({
+      gridSize: [5, 1, 1],
+      targetVoxels: [
+        { x: 0, y: 0, z: 0 },
+        { x: 4, y: 0, z: 0 },
+      ],
+      pieces: [
+        createTestPiece('domino', [
+          { x: 0, y: 0, z: 0 },
+          { x: 1, y: 0, z: 0 },
+        ]),
+      ],
+    })
+
+    expect(isSolvable(level)).toBe(false)
+  })
+})

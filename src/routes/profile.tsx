@@ -14,8 +14,8 @@ import type { PlayerProgressSummary } from '@/player/profile.server'
 import type {
   GradeBand,
   Locale,
-  UpdatePlayerProfileInput,
-} from '@/player/profile.validation'
+  PlayerProfileInput,
+} from '@/player/profile.schema'
 
 export const Route = createFileRoute('/profile')({
   loader: () => getPlayerProfileOverview(),
@@ -40,7 +40,7 @@ function ProfileRoute() {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
 
-    const payload: UpdatePlayerProfileInput = {
+    const payload: PlayerProfileInput = {
       displayName: String(formData.get('displayName')),
       locale: String(formData.get('locale')) as Locale,
       gradeBand: String(formData.get('gradeBand')) as GradeBand,

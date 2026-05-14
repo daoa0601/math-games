@@ -21,12 +21,6 @@ import type {
 } from '@/games/ShapeArchitect/logic'
 import { ShapeArchitectCanvas } from '@/games/ShapeArchitect/components/ShapeArchitectCanvas'
 import type { ViewMode } from '@/games/ShapeArchitect/components/ShapeArchitectCanvas'
-
-const ShapeArchitect3D = lazy(() =>
-  import('@/games/ShapeArchitect/components/ShapeArchitect3D').then((m) => ({
-    default: m.ShapeArchitect3D,
-  })),
-)
 import { useSolverWorker } from '@/games/ShapeArchitect/logic/useSolverWorker'
 import { getShapeArchitectPracticeConfig } from '@/games/ShapeArchitect/shape-architect.catalog'
 import type { ShapeArchitectPracticeDifficulty } from '@/games/ShapeArchitect/shape-architect.catalog'
@@ -34,6 +28,12 @@ import {
   getShapeArchitectLevel,
   recordShapeArchitectProgress,
 } from '@/games/ShapeArchitect/shape-architect.functions'
+
+const ShapeArchitect3D = lazy(() =>
+  import('@/games/ShapeArchitect/components/ShapeArchitect3D').then((m) => ({
+    default: m.ShapeArchitect3D,
+  })),
+)
 
 export const Route = createFileRoute('/games/shape-architect')({
   validateSearch: validateLevelSearch,
