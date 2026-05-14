@@ -3,13 +3,17 @@ import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Confetti } from '@/components/confetti'
+import { GameSessionPanel } from '@/components/game-session-panel'
 import { GamePattern } from '@/components/game-pattern'
 import { LanguageToggle } from '@/components/language-toggle'
+import { learnContent } from '@/components/learn-content'
+import { useLocale } from '@/components/locale-context'
 import { LearnSection } from '@/components/learn-section'
 import { ResponsiveSection } from '@/components/responsive-section'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { useGameSession } from '@/components/use-game-session'
 import { validateLevelSearch } from '@/games/level-search'
 import { getLineStatus, isPuzzleSolved } from '@/games/MagicGraph/logic'
 import type { GraphNode, PuzzleConfig } from '@/games/MagicGraph/logic'
@@ -43,6 +47,7 @@ function createNodeValueMap(values: NodeValues) {
 
 function MagicGraphRoute() {
   const t = useT()
+  const { locale } = useLocale()
   const { configs, initialConfigId } = Route.useLoaderData()
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordMagicGraphProgress)
@@ -105,6 +110,8 @@ function MagicGraphRoute() {
     [values],
   )
   const solved = isPuzzleSolved(config.lines, nodeValues, config.targetSum)
+  const session = useGameSession({ completed: solved, resetKey: config.id })
+  const hints = learnContent['magic-graph'][locale].tips.items ?? []
   const filledCount = Object.values(values).filter(
     (value) => value !== null,
   ).length
@@ -130,6 +137,7 @@ function MagicGraphRoute() {
   }
 
   function placeNumber(node: GraphNode) {
+    if (session.timedOut) return
     if (node.isFixed) return
 
     if (values[node.id] !== null) {
@@ -154,6 +162,7 @@ function MagicGraphRoute() {
   }
 
   async function checkCurrent() {
+    if (session.timedOut) return
     await recordAttempt(values)
   }
 
@@ -161,6 +170,7 @@ function MagicGraphRoute() {
     setValues(createInitialValues(config))
     setSelectedNumber(null)
     setSaveStatus(null)
+    session.resetSession()
   }
 
   function selectPuzzle(puzzle: PuzzleConfig) {
@@ -168,6 +178,7 @@ function MagicGraphRoute() {
     setValues(createInitialValues(puzzle))
     setSelectedNumber(null)
     setSaveStatus(null)
+    session.resetSession()
   }
 
   function generatePracticePuzzle() {
@@ -265,64 +276,85 @@ function MagicGraphRoute() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <h2 className="text-xl font-semibold leading-none">
-              {t('game.numbers')}
-            </h2>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-2">
-              {config.availableNumbers.map((number) => (
+        <div className="grid gap-4">
+          <Card>
+            <CardHeader>
+              <h2 className="text-xl font-semibold leading-none">
+                {t('game.numbers')}
+              </h2>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-2">
+                {config.availableNumbers.map((number) => (
+                  <Button
+                    variant={selectedNumber === number ? 'default' : 'outline'}
+                    size="lg"
+                    className="py-3"
+                    disabled={session.timedOut || usedNumbers.has(number)}
+                    key={number}
+                    onClick={() => setSelectedNumber(number)}
+                    type="button"
+                  >
+                    {number}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="mt-4 flex gap-2">
                 <Button
-                  variant={selectedNumber === number ? 'default' : 'outline'}
-                  size="lg"
-                  className="py-3"
-                  disabled={usedNumbers.has(number)}
-                  key={number}
-                  onClick={() => setSelectedNumber(number)}
+                  className="flex-1"
+                  disabled={session.timedOut}
+                  onClick={() => void checkCurrent()}
                   type="button"
                 >
-                  {number}
+                  {t('game.check')}
                 </Button>
-              ))}
-            </div>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={resetPuzzle}
+                  type="button"
+                >
+                  {t('game.reset')}
+                </Button>
+              </div>
 
-            <div className="mt-4 flex gap-2">
-              <Button
-                className="flex-1"
-                onClick={() => void checkCurrent()}
-                type="button"
-              >
-                {t('game.check')}
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={resetPuzzle}
-                type="button"
-              >
-                {t('game.reset')}
-              </Button>
-            </div>
+              <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
+                <span>
+                  {t('stats.filled') + ' '}
+                  {filledCount}/{config.nodes.length}
+                </span>
+                <span>
+                  {solved
+                    ? t('stats.solved')
+                    : `${selectedNumber !== null ? `${t('game.selected') + ': '}${selectedNumber}` : t('game.tapNumber')}`}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
 
-            {saveStatus ? (
-              <p className="mt-3 text-sm text-muted-foreground">{saveStatus}</p>
-            ) : null}
-
-            <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
-              <span>
-                {t('stats.filled') + ' '}
-                {filledCount}/{config.nodes.length}
-              </span>
-              <span>
-                {solved
-                  ? t('stats.solved')
-                  : `${selectedNumber !== null ? `${t('game.selected') + ': '}${selectedNumber}` : t('game.tapNumber')}`}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+          <GameSessionPanel
+            elapsedSeconds={session.elapsedSeconds}
+            hints={hints}
+            labels={{
+              hints: t('game.hints'),
+              pause: t('game.pause'),
+              practice: t('game.practice'),
+              resume: t('game.resume'),
+              timed: t('game.timed'),
+              timedOut: t('game.timedOut'),
+            }}
+            metricLabel={t('stats.filled')}
+            metricValue={`${filledCount}/${config.nodes.length}`}
+            mode={session.mode}
+            paused={session.paused}
+            remainingSeconds={session.remainingSeconds}
+            status={saveStatus}
+            timedOut={session.timedOut}
+            onModeChange={session.setMode}
+            onPausedChange={session.setPaused}
+          />
+        </div>
       </section>
 
       <ResponsiveSection

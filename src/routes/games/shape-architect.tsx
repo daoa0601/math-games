@@ -3,8 +3,11 @@ import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Confetti } from '@/components/confetti'
+import { GameSessionPanel } from '@/components/game-session-panel'
 import { GamePattern } from '@/components/game-pattern'
 import { LanguageToggle } from '@/components/language-toggle'
+import { learnContent } from '@/components/learn-content'
+import { useLocale } from '@/components/locale-context'
 import { LearnSection } from '@/components/learn-section'
 import { ResponsiveSection } from '@/components/responsive-section'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -12,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useGameSession } from '@/components/use-game-session'
 import { validateLevelSearch } from '@/games/level-search'
 import {
   DEFAULT_ROTATION,
@@ -94,6 +98,7 @@ function pieceIsPlaced(placedPieces: PlacedPiece[], piece: Piece) {
 
 function ShapeArchitectRoute() {
   const t = useT()
+  const { locale } = useLocale()
   const { configs, initialConfigId } = Route.useLoaderData()
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordShapeArchitectProgress)
@@ -188,6 +193,8 @@ function ShapeArchitectRoute() {
   }, [availableConfigs, requestedLevelId, selectedLevelId])
 
   const solved = checkSolved(grid, config.targetVoxels)
+  const session = useGameSession({ completed: solved, resetKey: config.id })
+  const hints = learnContent['shape-architect'][locale].tips.items ?? []
   const filledTargets = config.targetVoxels.filter(
     (pos) => grid.get(pos.x, pos.y, pos.z) === 2,
   ).length
@@ -215,6 +222,7 @@ function ShapeArchitectRoute() {
   }
 
   async function checkCurrent() {
+    if (session.timedOut) return
     await recordAttempt(placedPieces)
   }
 
@@ -226,6 +234,7 @@ function ShapeArchitectRoute() {
     setPendingPosition(null)
     setTapPoint(null)
     setSaveStatus(null)
+    session.resetSession()
   }
 
   function selectLevel(nextLevel: LevelConfig) {
@@ -237,9 +246,11 @@ function ShapeArchitectRoute() {
     setPendingPosition(null)
     setTapPoint(null)
     setSaveStatus(null)
+    session.resetSession()
   }
 
   function selectPiece(piece: Piece) {
+    if (session.timedOut) return
     if (pieceIsPlaced(placedPieces, piece)) return
 
     setSelectedPieceId(piece.id)
@@ -256,6 +267,7 @@ function ShapeArchitectRoute() {
   }
 
   function handleCellClick(attemptedPosition: Position3D) {
+    if (session.timedOut) return
     if (selectedPiece === null) {
       setSaveStatus(t('game.selectPiece'))
       return
@@ -287,6 +299,7 @@ function ShapeArchitectRoute() {
       : false
 
   function confirmPlacement() {
+    if (session.timedOut) return
     if (selectedPiece === null || pendingPosition === null) return
 
     const position = findNearestValidPosition(
@@ -372,7 +385,7 @@ function ShapeArchitectRoute() {
         </div>
       </header>
 
-      <section className="relative">
+      <section className="relative grid gap-4">
         <Confetti
           active={solved}
           colors={['#14b8a6', '#2dd4bf', '#5eead4', '#0d9488', '#0f766e']}
@@ -457,7 +470,7 @@ function ShapeArchitectRoute() {
                           ? 'bg-primary text-primary-foreground'
                           : 'border border-border bg-card hover:bg-muted'
                     }${placed ? ' animate-piece-snap' : ''}`}
-                    disabled={placed}
+                    disabled={session.timedOut || placed}
                     onClick={() => selectPiece(piece)}
                     type="button"
                   >
@@ -474,6 +487,7 @@ function ShapeArchitectRoute() {
             <div className="mt-4 flex gap-2">
               <Button
                 className="flex-1"
+                disabled={session.timedOut}
                 onClick={() => void checkCurrent()}
                 type="button"
               >
@@ -489,10 +503,6 @@ function ShapeArchitectRoute() {
               </Button>
             </div>
 
-            {saveStatus ? (
-              <p className="mt-3 text-sm text-muted-foreground">{saveStatus}</p>
-            ) : null}
-
             <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
               <span>
                 {t('stats.placed')} {placedPieces.length}/{config.pieces.length}
@@ -505,6 +515,28 @@ function ShapeArchitectRoute() {
             </div>
           </CardContent>
         </Card>
+
+        <GameSessionPanel
+          elapsedSeconds={session.elapsedSeconds}
+          hints={hints}
+          labels={{
+            hints: t('game.hints'),
+            pause: t('game.pause'),
+            practice: t('game.practice'),
+            resume: t('game.resume'),
+            timed: t('game.timed'),
+            timedOut: t('game.timedOut'),
+          }}
+          metricLabel={t('stats.filled')}
+          metricValue={`${filledTargets}/${config.targetVoxels.length}`}
+          mode={session.mode}
+          paused={session.paused}
+          remainingSeconds={session.remainingSeconds}
+          status={saveStatus}
+          timedOut={session.timedOut}
+          onModeChange={session.setMode}
+          onPausedChange={session.setPaused}
+        />
       </section>
 
       <ResponsiveSection

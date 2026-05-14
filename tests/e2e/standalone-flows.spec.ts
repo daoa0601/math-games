@@ -213,3 +213,31 @@ test('score recording reflects in profile progress', async ({ page }) => {
 
   expectNoRuntimeErrors(errors)
 })
+
+test('non-firebase parity surfaces are available', async ({ page }) => {
+  const errors = collectRuntimeErrors(page)
+
+  await page.goto('/profile')
+  await expectHydrated(page)
+  await expect(page.getByText('Rank')).toBeVisible()
+  await expect(page.getByText('Game Breakdown')).toBeVisible()
+  await expect(page.getByText('Total attempts').first()).toBeVisible()
+
+  await page.goto('/games/magic-graph')
+  await expectHydrated(page)
+  await expect(page.getByRole('button', { name: 'Timed' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible()
+  await expect(page.getByText('Hints')).toBeVisible()
+
+  await page.goto('/games/sequence-race')
+  await expectHydrated(page)
+  await expect(page.getByRole('button', { name: 'Practice' })).toBeVisible()
+  await expect(page.getByText('Hints')).toBeVisible()
+
+  await page.goto('/games/shape-architect')
+  await expectHydrated(page)
+  await expect(page.getByRole('button', { name: 'Timed' })).toBeVisible()
+  await expect(page.getByText('Hints')).toBeVisible()
+
+  expectNoRuntimeErrors(errors)
+})

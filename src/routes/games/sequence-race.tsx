@@ -3,8 +3,11 @@ import { useServerFn } from '@tanstack/react-start'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Confetti } from '@/components/confetti'
+import { GameSessionPanel } from '@/components/game-session-panel'
 import { GamePattern } from '@/components/game-pattern'
 import { LanguageToggle } from '@/components/language-toggle'
+import { learnContent } from '@/components/learn-content'
+import { useLocale } from '@/components/locale-context'
 import { LearnSection } from '@/components/learn-section'
 import { ResponsiveSection } from '@/components/responsive-section'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -12,6 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { useGameSession } from '@/components/use-game-session'
 import { validateLevelSearch } from '@/games/level-search'
 import {
   applyMove,
@@ -47,6 +51,7 @@ const AI_MOVE_DELAY_MS = 650
 
 function SequenceRaceRoute() {
   const t = useT()
+  const { locale } = useLocale()
   const { configs, initialConfigId, sequenceInfoByType } = Route.useLoaderData()
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordSequenceRaceProgress)
@@ -75,6 +80,11 @@ function SequenceRaceRoute() {
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
   const validMoves = useMemo(() => getValidMoves(game), [game])
   const humanTurn = isHumanTurn(game)
+  const session = useGameSession({
+    completed: game.gameOver,
+    resetKey: config.id,
+  })
+  const hints = learnContent['sequence-race'][locale].tips.items ?? []
 
   useEffect(() => {
     if (!requestedLevelId) return
@@ -129,7 +139,7 @@ function SequenceRaceRoute() {
   )
 
   useEffect(() => {
-    if (game.gameOver || game.turn !== 'ai') {
+    if (session.timedOut || game.gameOver || game.turn !== 'ai') {
       setAiThinking(false)
       return
     }
@@ -147,9 +157,10 @@ function SequenceRaceRoute() {
     return () => {
       window.clearTimeout(timer)
     }
-  }, [config.difficulty, finishTurn, game])
+  }, [config.difficulty, finishTurn, game, session.timedOut])
 
   async function playMove(step: number) {
+    if (session.timedOut) return
     if (!humanTurn || aiThinking) return
 
     const nextGame = applyMove(game, step)
@@ -161,6 +172,7 @@ function SequenceRaceRoute() {
     setGame(createGameState(config))
     setAiThinking(false)
     setSaveStatus(null)
+    session.resetSession()
   }
 
   function selectLevel(nextLevel: GameConfig) {
@@ -168,6 +180,7 @@ function SequenceRaceRoute() {
     setGame(createGameState(nextLevel))
     setAiThinking(false)
     setSaveStatus(null)
+    session.resetSession()
   }
 
   function generatePracticeLevel() {
@@ -230,6 +243,7 @@ function SequenceRaceRoute() {
                   className="py-4 text-lg"
                   disabled={
                     game.gameOver ||
+                    session.timedOut ||
                     aiThinking ||
                     !humanTurn ||
                     !validMoves.includes(step)
@@ -245,44 +259,64 @@ function SequenceRaceRoute() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Badge variant={aiThinking ? 'secondary' : 'default'}>
-                  {aiThinking ? 'AI thinking' : game.turn}
-                </Badge>
-                {game.winner ? (
-                  <Badge
-                    variant={
-                      game.winner === 'player' || game.winner === 'player1'
-                        ? 'default'
-                        : 'secondary'
-                    }
-                  >
-                    {game.winner} {t('game.wins')}
+        <div className="grid gap-4">
+          <Card>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge variant={aiThinking ? 'secondary' : 'default'}>
+                    {aiThinking ? 'AI thinking' : game.turn}
                   </Badge>
-                ) : null}
+                  {game.winner ? (
+                    <Badge
+                      variant={
+                        game.winner === 'player' || game.winner === 'player1'
+                          ? 'default'
+                          : 'secondary'
+                      }
+                    >
+                      {game.winner} {t('game.wins')}
+                    </Badge>
+                  ) : null}
+                </div>
+                <span className="text-sm text-muted-foreground capitalize">
+                  {config.difficulty} · {sequenceInfo.formula}
+                </span>
               </div>
-              <span className="text-sm text-muted-foreground capitalize">
-                {config.difficulty} · {sequenceInfo.formula}
-              </span>
-            </div>
 
-            <Button
-              variant="outline"
-              className="mt-4 w-full"
-              onClick={resetGame}
-              type="button"
-            >
-              {t('game.reset')}
-            </Button>
+              <Button
+                variant="outline"
+                className="mt-4 w-full"
+                onClick={resetGame}
+                type="button"
+              >
+                {t('game.reset')}
+              </Button>
+            </CardContent>
+          </Card>
 
-            {saveStatus ? (
-              <p className="mt-3 text-sm text-muted-foreground">{saveStatus}</p>
-            ) : null}
-          </CardContent>
-        </Card>
+          <GameSessionPanel
+            elapsedSeconds={session.elapsedSeconds}
+            hints={hints}
+            labels={{
+              hints: t('game.hints'),
+              pause: t('game.pause'),
+              practice: t('game.practice'),
+              resume: t('game.resume'),
+              timed: t('game.timed'),
+              timedOut: t('game.timedOut'),
+            }}
+            metricLabel={t('game.target')}
+            metricValue={`${game.currentPosition}/${game.target}`}
+            mode={session.mode}
+            paused={session.paused}
+            remainingSeconds={session.remainingSeconds}
+            status={saveStatus}
+            timedOut={session.timedOut}
+            onModeChange={session.setMode}
+            onPausedChange={session.setPaused}
+          />
+        </div>
       </section>
 
       <ResponsiveSection
