@@ -62,15 +62,15 @@ jobs:
       - name: Run guarded Alchemy action
         run: |
           if [ "$ALCHEMY_ACTION" = "bootstrap" ]; then
-            pnpm check
-            pnpm infra:bootstrap
-            pnpm infra:check
+            pnpm run check
+            pnpm run infra:bootstrap
+            pnpm run infra:check
           elif [ "$ALCHEMY_ACTION" = "deploy" ]; then
-            pnpm deploy
+            pnpm run deploy
           else
-            pnpm infra:plan
+            pnpm run infra:plan
           fi
 
       - name: Remote smoke
         if: ${{ env.ALCHEMY_ACTION == 'deploy' }}
-        run: pnpm infra:check && pnpm smoke:remote
+        run: pnpm run infra:check && pnpm run smoke:remote
