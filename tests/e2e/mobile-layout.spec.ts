@@ -41,9 +41,13 @@ test.describe('mobile layout — dashboard', () => {
   test('game cards are present in the page', async ({ page }) => {
     await page.goto('/')
     await expectHydrated(page)
-    await expect(page.getByText('Magic Graph')).toBeAttached()
-    await expect(page.getByText('Sequence Race')).toBeAttached()
-    await expect(page.getByText('Shape Architect')).toBeAttached()
+    await expect(page.getByText('Magic Graph', { exact: true })).toBeAttached()
+    await expect(
+      page.getByText('Sequence Race', { exact: true }),
+    ).toBeAttached()
+    await expect(
+      page.getByText('Shape Architect', { exact: true }),
+    ).toBeAttached()
   })
 })
 
