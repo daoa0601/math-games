@@ -72,7 +72,9 @@ function Home() {
     <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-5 px-4 py-6 md:gap-8 md:px-6 md:py-8">
       <header className="flex items-center justify-between gap-4 border-b border-border pb-4">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold md:text-3xl">{t('app.title')}</h1>
+          <h1 className="text-2xl font-semibold md:text-3xl">
+            {t('app.title')}
+          </h1>
           <Link
             className="rounded-full bg-muted px-3 py-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             to="/profile"
@@ -125,9 +127,7 @@ function Home() {
             <dl className="mt-6 hidden gap-3 text-sm sm:grid sm:grid-cols-3">
               <div className="border-t border-border pt-3">
                 <dt className="text-muted-foreground">{t('daily.level')}</dt>
-                <dd className="mt-1 font-semibold">
-                  {dailyChallenge.levelId}
-                </dd>
+                <dd className="mt-1 font-semibold">{dailyChallenge.levelId}</dd>
               </div>
               <div className="border-t border-border pt-3">
                 <dt className="text-muted-foreground">{t('daily.seed')}</dt>
@@ -137,7 +137,9 @@ function Home() {
               </div>
               <div className="border-t border-border pt-3">
                 <dt className="text-muted-foreground">{t('stats.progress')}</dt>
-                <dd className="mt-1 font-semibold">{t('daily.savedProgress')}</dd>
+                <dd className="mt-1 font-semibold">
+                  {t('daily.savedProgress')}
+                </dd>
               </div>
             </dl>
           </CardContent>
@@ -197,12 +199,16 @@ function Home() {
                 <CardContent>
                   <dl className="grid gap-2 text-sm">
                     <div className="flex justify-between pb-2">
-                      <dt className="text-muted-foreground">{t('stats.levels')}</dt>
+                      <dt className="text-muted-foreground">
+                        {t('stats.levels')}
+                      </dt>
                       <dd className="font-medium">{game.levelCount}</dd>
                     </div>
                     <Separator />
                     <div className="flex justify-between pt-2">
-                      <dt className="text-muted-foreground">{t('stats.completed')}</dt>
+                      <dt className="text-muted-foreground">
+                        {t('stats.completed')}
+                      </dt>
                       <dd className="font-medium">
                         {progress.completed} / {game.levelCount}
                       </dd>

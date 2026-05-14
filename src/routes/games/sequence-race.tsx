@@ -206,7 +206,10 @@ function SequenceRaceRoute() {
       </header>
 
       <section className="relative grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
-        <Confetti active={game.winner === 'player'} colors={['#f97316', '#fb923c', '#fdba74', '#ea580c', '#fbbf24']} />
+        <Confetti
+          active={game.winner === 'player'}
+          colors={['#f97316', '#fb923c', '#fdba74', '#ea580c', '#fbbf24']}
+        />
         <Card className="relative overflow-hidden">
           <GamePattern pattern="arrows" />
           <CardContent className="relative">

@@ -23,9 +23,7 @@ test.describe('mobile layout — dashboard', () => {
     await expectNoHorizontalOverflow(page)
   })
 
-  test('daily challenge detail rows are hidden on mobile', async ({
-    page,
-  }) => {
+  test('daily challenge detail rows are hidden on mobile', async ({ page }) => {
     await page.goto('/')
     await expectHydrated(page)
 
@@ -37,9 +35,7 @@ test.describe('mobile layout — dashboard', () => {
     await page.goto('/')
     await expectHydrated(page)
     await expect(page.getByRole('link', { name: 'Play Today' })).toBeVisible()
-    await expect(
-      page.getByRole('link', { name: 'Start Level' }),
-    ).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Start Level' })).toBeVisible()
   })
 
   test('game cards are present in the page', async ({ page }) => {
@@ -113,9 +109,7 @@ test.describe('mobile layout — game routes', () => {
     await page.goto('/games/sequence-race')
     await expectHydrated(page)
 
-    await expect(
-      page.getByRole('heading', { name: 'Race Line' }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Race Line' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Reset' })).toBeVisible()
   })
 

@@ -1,7 +1,7 @@
 const translations = {
   en: {
     'app.title': 'Math Games',
-    'today': 'Today',
+    today: 'Today',
     'daily.title': 'Daily Challenge',
     'daily.play': 'Play Today',
     'daily.start': 'Start Level',
@@ -58,7 +58,7 @@ const translations = {
   },
   vi: {
     'app.title': 'Trò Chơi Toán',
-    'today': 'Hôm nay',
+    today: 'Hôm nay',
     'daily.title': 'Thử Thách Hàng Ngày',
     'daily.play': 'Chơi Ngay',
     'daily.start': 'Bắt Đầu',

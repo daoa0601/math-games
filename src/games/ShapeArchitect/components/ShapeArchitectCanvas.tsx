@@ -38,13 +38,19 @@ function getThemeColors() {
   const style = getComputedStyle(document.documentElement)
   const isDark = document.documentElement.classList.contains('dark')
   return {
-    empty: style.getPropertyValue('--card').trim() || (isDark ? '#1a1f2e' : '#ffffff'),
+    empty:
+      style.getPropertyValue('--card').trim() ||
+      (isDark ? '#1a1f2e' : '#ffffff'),
     target: isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb',
     border: isDark ? 'rgba(255,255,255,0.10)' : '#e5e5e5',
     targetBorder: isDark ? 'rgba(255,255,255,0.30)' : '#0a0a0a',
     filledBorder: isDark ? 'rgba(255,255,255,0.40)' : '#0a0a0a',
-    ghostValid: isDark ? 'rgba(59, 130, 246, 0.40)' : 'rgba(59, 130, 246, 0.30)',
-    ghostInvalid: isDark ? 'rgba(239, 68, 68, 0.35)' : 'rgba(239, 68, 68, 0.20)',
+    ghostValid: isDark
+      ? 'rgba(59, 130, 246, 0.40)'
+      : 'rgba(59, 130, 246, 0.30)',
+    ghostInvalid: isDark
+      ? 'rgba(239, 68, 68, 0.35)'
+      : 'rgba(239, 68, 68, 0.20)',
     background: isDark ? '#1a1f2e' : '#fafafa',
   }
 }
@@ -116,14 +122,11 @@ function drawFlat2D(
       const isTarget = targetSet.has(key)
       const color = colorLookup.get(key)
 
-      ctx.fillStyle =
-        color ?? (isTarget ? colors.target : colors.empty)
+      ctx.fillStyle = color ?? (isTarget ? colors.target : colors.empty)
       ctx.fillRect(px, py, cellSize, cellSize)
 
       ctx.strokeStyle =
-        cellState === 2 || isTarget
-          ? colors.targetBorder
-          : colors.border
+        cellState === 2 || isTarget ? colors.targetBorder : colors.border
       ctx.lineWidth = cellState === 2 || isTarget ? 2 : 1
       ctx.strokeRect(
         px + ctx.lineWidth / 2,
@@ -133,9 +136,7 @@ function drawFlat2D(
       )
 
       if (ghostSet.has(key) && cellState !== 2) {
-        ctx.fillStyle = ghostIsValid
-          ? colors.ghostValid
-          : colors.ghostInvalid
+        ctx.fillStyle = ghostIsValid ? colors.ghostValid : colors.ghostInvalid
         ctx.fillRect(px + 1, py + 1, cellSize - 2, cellSize - 2)
       }
     }
@@ -174,7 +175,14 @@ function drawIsometric(
         const drawZ = z + zOffset
 
         if (state === 1) {
-          drawIsoWireframe(ctx, x, y, drawZ, isoCfg, isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.25)')
+          drawIsoWireframe(
+            ctx,
+            x,
+            y,
+            drawZ,
+            isoCfg,
+            isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.25)',
+          )
         } else if (state === 2) {
           const color = colorLookup.get(key3) ?? '#999999'
           drawIsoCube(ctx, x, y, drawZ, color, isoCfg)

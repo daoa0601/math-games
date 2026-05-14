@@ -30,7 +30,6 @@ export const Route = createFileRoute('/profile')({
   component: ProfileRoute,
 })
 
-
 function ProfileRoute() {
   const overview = Route.useLoaderData()
   const saveProfile = useServerFn(updatePlayerProfile)
@@ -178,7 +177,9 @@ function ProfileRoute() {
 
             <Separator className="my-8" />
 
-            <h2 className="text-xl font-semibold">{t('profile.achievements')}</h2>
+            <h2 className="text-xl font-semibold">
+              {t('profile.achievements')}
+            </h2>
             {achievements.length === 0 ? (
               <p className="mt-4 text-muted-foreground">
                 {t('profile.noAchievements')}

@@ -206,7 +206,10 @@ function MagicGraphRoute() {
       </header>
 
       <section className="relative grid gap-6 md:grid-cols-[1.15fr_0.85fr]">
-        <Confetti active={solved} colors={['#7c3aed', '#a78bfa', '#c4b5fd', '#8b5cf6', '#6d28d9']} />
+        <Confetti
+          active={solved}
+          colors={['#7c3aed', '#a78bfa', '#c4b5fd', '#8b5cf6', '#6d28d9']}
+        />
         <Card className="relative overflow-hidden">
           <GamePattern pattern="triangles" />
           <CardContent className="relative">
@@ -219,9 +222,7 @@ function MagicGraphRoute() {
                 {lineStatuses.map((line) => {
                   const points = line.nodeIds.flatMap((nodeId) => {
                     const node = nodeLookup.get(nodeId)
-                    return node
-                      ? [`${node.position.x},${node.position.y}`]
-                      : []
+                    return node ? [`${node.position.x},${node.position.y}`] : []
                   })
 
                   return (
@@ -266,7 +267,9 @@ function MagicGraphRoute() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-xl font-semibold leading-none">{t('game.numbers')}</h2>
+            <h2 className="text-xl font-semibold leading-none">
+              {t('game.numbers')}
+            </h2>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-2">
@@ -308,8 +311,15 @@ function MagicGraphRoute() {
             ) : null}
 
             <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
-              <span>{t('stats.filled') + ' '}{filledCount}/{config.nodes.length}</span>
-              <span>{solved ? t('stats.solved') : `${selectedNumber !== null ? `${t('game.selected') + ': '}${selectedNumber}` : t('game.tapNumber')}`}</span>
+              <span>
+                {t('stats.filled') + ' '}
+                {filledCount}/{config.nodes.length}
+              </span>
+              <span>
+                {solved
+                  ? t('stats.solved')
+                  : `${selectedNumber !== null ? `${t('game.selected') + ': '}${selectedNumber}` : t('game.tapNumber')}`}
+              </span>
             </div>
           </CardContent>
         </Card>

@@ -121,8 +121,12 @@ function ShapeArchitectRoute() {
     useState<Rotation3D>(DEFAULT_ROTATION)
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('2d')
-  const [pendingPosition, setPendingPosition] = useState<Position3D | null>(null)
-  const [tapPoint, setTapPoint] = useState<{ x: number; y: number } | null>(null)
+  const [pendingPosition, setPendingPosition] = useState<Position3D | null>(
+    null,
+  )
+  const [tapPoint, setTapPoint] = useState<{ x: number; y: number } | null>(
+    null,
+  )
   const boardRef = useRef<HTMLDivElement>(null)
   const solver = useSolverWorker()
 
@@ -369,7 +373,10 @@ function ShapeArchitectRoute() {
       </header>
 
       <section className="relative">
-        <Confetti active={solved} colors={['#14b8a6', '#2dd4bf', '#5eead4', '#0d9488', '#0f766e']} />
+        <Confetti
+          active={solved}
+          colors={['#14b8a6', '#2dd4bf', '#5eead4', '#0d9488', '#0f766e']}
+        />
         <Card className="relative overflow-hidden">
           <GamePattern pattern="grid" />
           <CardContent className="relative">
@@ -410,24 +417,26 @@ function ShapeArchitectRoute() {
                 viewMode={viewMode}
               />
 
-              {pendingPosition !== null && selectedPiece !== null && tapPoint && (
-                <div
-                  className="absolute z-10"
-                  style={{
-                    left: `clamp(0px, ${tapPoint.x}px - 5rem, calc(100% - 10rem))`,
-                    top: `clamp(0px, ${tapPoint.y + 12}px, calc(100% - 2.5rem))`,
-                  }}
-                >
-                  <PlacementToolbar
-                    pieceName={selectedPiece.name}
-                    rotationDeg={placementRotation.z}
-                    canPlace={pendingCanPlace}
-                    onRotate={rotateSelectedPiece}
-                    onPlace={confirmPlacement}
-                    onCancel={cancelPlacement}
-                  />
-                </div>
-              )}
+              {pendingPosition !== null &&
+                selectedPiece !== null &&
+                tapPoint && (
+                  <div
+                    className="absolute z-10"
+                    style={{
+                      left: `clamp(0px, ${tapPoint.x}px - 5rem, calc(100% - 10rem))`,
+                      top: `clamp(0px, ${tapPoint.y + 12}px, calc(100% - 2.5rem))`,
+                    }}
+                  >
+                    <PlacementToolbar
+                      pieceName={selectedPiece.name}
+                      rotationDeg={placementRotation.z}
+                      canPlace={pendingCanPlace}
+                      onRotate={rotateSelectedPiece}
+                      onPlace={confirmPlacement}
+                      onCancel={cancelPlacement}
+                    />
+                  </div>
+                )}
             </div>
 
             <Separator className="my-4" />
@@ -488,7 +497,11 @@ function ShapeArchitectRoute() {
               <span>
                 {t('stats.placed')} {placedPieces.length}/{config.pieces.length}
               </span>
-              <span>{solved ? t('stats.solved') : `${filledTargets}/${config.targetVoxels.length} ${t('stats.cells')}`}</span>
+              <span>
+                {solved
+                  ? t('stats.solved')
+                  : `${filledTargets}/${config.targetVoxels.length} ${t('stats.cells')}`}
+              </span>
             </div>
           </CardContent>
         </Card>

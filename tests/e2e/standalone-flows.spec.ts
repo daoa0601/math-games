@@ -50,9 +50,7 @@ test('dashboard and daily expose standalone route links', async ({ page }) => {
   await expectHydrated(page)
 
   await expect(page).toHaveTitle('Math Games')
-  await expect(
-    page.getByRole('heading', { name: 'Math Games' }),
-  ).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Math Games' })).toBeVisible()
   await expect(
     page.getByRole('heading', { name: 'Daily Challenge' }),
   ).toBeVisible()

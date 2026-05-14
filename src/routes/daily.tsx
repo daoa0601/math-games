@@ -54,9 +54,7 @@ function DailyRoute() {
               <p className="text-sm font-semibold uppercase text-muted-foreground">
                 {challenge.challengeDate}
               </p>
-              <h2 className="mt-2 text-3xl font-semibold">
-                {challenge.title}
-              </h2>
+              <h2 className="mt-2 text-3xl font-semibold">{challenge.title}</h2>
               <dl className="mt-5 grid gap-3 text-sm">
                 <div className="flex justify-between gap-6 pb-2">
                   <dt className="text-muted-foreground">{t('daily.game')}</dt>
@@ -69,7 +67,9 @@ function DailyRoute() {
                 </div>
                 <Separator />
                 <div className="flex justify-between gap-6 pt-1 pb-2">
-                  <dt className="text-muted-foreground">{t('daily.difficulty')}</dt>
+                  <dt className="text-muted-foreground">
+                    {t('daily.difficulty')}
+                  </dt>
                   <dd className="font-medium capitalize">
                     {challenge.difficulty}
                   </dd>

@@ -50,7 +50,10 @@ export function ResponsiveSection({
         </div>
       </div>
 
-      <CollapsibleContent forceMount className="data-[state=closed]:hidden md:data-[state=closed]:!block">
+      <CollapsibleContent
+        forceMount
+        className="data-[state=closed]:hidden md:data-[state=closed]:!block"
+      >
         {actions ? <div className="mt-4">{actions}</div> : null}
         <div className="mt-4">{children}</div>
       </CollapsibleContent>

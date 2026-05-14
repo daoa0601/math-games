@@ -9,7 +9,9 @@ export function LanguageToggle() {
       variant="ghost"
       size="icon"
       onClick={() => setLocale(locale === 'en' ? 'vi' : 'en')}
-      aria-label={locale === 'en' ? 'Switch to Vietnamese' : 'Switch to English'}
+      aria-label={
+        locale === 'en' ? 'Switch to Vietnamese' : 'Switch to English'
+      }
       type="button"
       className="text-xs font-semibold"
     >
