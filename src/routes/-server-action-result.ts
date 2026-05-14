@@ -16,13 +16,31 @@ interface ProgressStatus {
   readonly unlockedAchievements: readonly string[]
 }
 
+interface ProgressStatusLabels {
+  readonly savedAttempt: string
+  readonly bestScore: string
+  readonly unlocked: string
+  readonly solvedIn: string
+}
+
+const defaultProgressLabels: ProgressStatusLabels = {
+  savedAttempt: 'Saved attempt',
+  bestScore: 'best score',
+  unlocked: 'Unlocked',
+  solvedIn: 'Solved in',
+}
+
 function errorMessage(error: unknown, fallbackMessage: string) {
   return error instanceof Error ? error.message : fallbackMessage
 }
 
-function unlockedMessage(unlockedAchievements: readonly string[]) {
+function unlockedMessage(
+  unlockedAchievements: readonly string[],
+  labels: ProgressStatusLabels,
+  formatAchievement: (id: string) => string,
+) {
   return unlockedAchievements.length > 0
-    ? ` Unlocked ${unlockedAchievements.join(', ')}.`
+    ? ` ${labels.unlocked} ${unlockedAchievements.map(formatAchievement).join(', ')}.`
     : ''
 }
 
@@ -43,16 +61,27 @@ export async function runServerAction<T>(
   }
 }
 
-export function formatSavedProgress(progress: ProgressStatus) {
-  return `Saved attempt ${progress.attempts}; best score ${
+export function formatSavedProgress(
+  progress: ProgressStatus,
+  labels = defaultProgressLabels,
+  formatAchievement: (id: string) => string = (id) => id,
+) {
+  return `${labels.savedAttempt} ${progress.attempts}; ${labels.bestScore} ${
     progress.bestScore
-  }.${unlockedMessage(progress.unlockedAchievements)}`
+  }.${unlockedMessage(progress.unlockedAchievements, labels, formatAchievement)}`
 }
 
-export function formatSolvedProgress(timeMs: number, progress: ProgressStatus) {
-  return `Solved in ${timeMs.toFixed(1)}ms; saved attempt ${
+export function formatSolvedProgress(
+  timeMs: number,
+  progress: ProgressStatus,
+  labels = defaultProgressLabels,
+  formatAchievement: (id: string) => string = (id) => id,
+) {
+  return `${labels.solvedIn} ${timeMs.toFixed(1)}ms; ${labels.savedAttempt} ${
     progress.attempts
-  }; best score ${progress.bestScore}.${unlockedMessage(
+  }; ${labels.bestScore} ${progress.bestScore}.${unlockedMessage(
     progress.unlockedAchievements,
+    labels,
+    formatAchievement,
   )}`
 }

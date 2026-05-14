@@ -1,7 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 
-import { createUpdateProfilePipeline } from '@/games/server-handlers'
+import {
+  createImportAchievementsPipeline,
+  createUpdateProfilePipeline,
+} from '@/games/server-handlers'
 import { runServerEffect } from '@/services'
 
 import { loadPlayerProfileOverview } from './profile.server'
@@ -17,3 +20,9 @@ export const getPlayerProfileOverview = createServerFn({
 export const updatePlayerProfile = createServerFn({ method: 'POST' })
   .inputValidator((data: unknown) => data)
   .handler(({ data }) => runServerEffect(createUpdateProfilePipeline(data)))
+
+export const importPlayerAchievementBackup = createServerFn({ method: 'POST' })
+  .inputValidator((data: unknown) => data)
+  .handler(({ data }) =>
+    runServerEffect(createImportAchievementsPipeline(data)),
+  )

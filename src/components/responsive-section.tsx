@@ -7,6 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import { useT } from '@/components/use-t'
 import { cn } from '@/lib/utils'
 
 interface ResponsiveSectionProps {
@@ -25,6 +26,7 @@ export function ResponsiveSection({
   className,
 }: ResponsiveSectionProps) {
   const [open, setOpen] = useState(false)
+  const t = useT()
 
   return (
     <Collapsible open={open} onOpenChange={setOpen} className={className}>
@@ -34,7 +36,7 @@ export function ResponsiveSection({
             <h2 className="text-xl font-semibold">{title}</h2>
             <CollapsibleTrigger
               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted md:hidden"
-              aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
+              aria-label={`${open ? t('toggle.collapse') : t('toggle.expand')} ${title}`}
             >
               <ChevronDown
                 className={cn(

@@ -16,6 +16,7 @@ export type {
   PlacedPiece,
   LevelConfig,
   GameState,
+  ShapeArchitectGameState,
 } from './types'
 
 export { DEFAULT_ROTATION } from './types'
@@ -49,6 +50,12 @@ export {
   generateRandomLevel,
   runLevelValidation,
 } from './presets'
+export {
+  TETRACUBE,
+  PENTACUBE,
+  TETRACUBE_KEYS,
+  PENTACUBE_KEYS,
+} from './polycubes'
 
 // Seeded Generator
 export {

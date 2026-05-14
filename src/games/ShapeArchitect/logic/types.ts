@@ -84,3 +84,13 @@ export interface GameState {
   /** ID of placed piece being moved (when in 'move' mode) */
   selectedPlacedPieceId: string | null
 }
+
+export interface ShapeArchitectGameState {
+  grid: CellState[][][]
+  placedPieces: PlacedPiece[]
+  remainingPieces: Piece[]
+  isSolved: boolean
+  moveCount: number
+  accepted: boolean
+  error?: string
+}

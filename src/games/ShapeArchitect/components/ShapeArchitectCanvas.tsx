@@ -32,6 +32,7 @@ interface ShapeArchitectCanvasProps {
   viewMode?: ViewMode
   visibleLayers?: Set<number>
   explodedGap?: number
+  label: string
 }
 
 function getThemeColors() {
@@ -219,6 +220,7 @@ export function ShapeArchitectCanvas({
   viewMode = '2d',
   visibleLayers,
   explodedGap = 0,
+  label,
 }: ShapeArchitectCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -512,7 +514,7 @@ export function ShapeArchitectCanvas({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouch}
-        aria-label="Shape Architect grid"
+        aria-label={label}
         role="img"
       />
     </div>

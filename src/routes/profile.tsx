@@ -3,10 +3,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
-import type { FormEvent } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
 
 import { getAchievementById } from '@/achievements/achievements.logic'
+import {
+  formatAchievementName,
+  formatAchievementRarity,
+  formatGameTitle,
+  formatRankName,
+} from '@/components/i18n-format'
 import { LanguageToggle } from '@/components/language-toggle'
+import { useLocale } from '@/components/locale-context'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useT } from '@/components/use-t'
 import { Badge } from '@/components/ui/badge'
@@ -17,6 +24,7 @@ import { Separator } from '@/components/ui/separator'
 import { gameModules } from '@/games/registry'
 import {
   getPlayerProfileOverview,
+  importPlayerAchievementBackup,
   updatePlayerProfile,
 } from '@/player/profile.functions'
 import type { PlayerProgressSummary } from '@/player/profile.server'
@@ -39,6 +47,46 @@ const RANKS = [
   { name: 'Scholar', threshold: 20 },
   { name: 'Grandmaster', threshold: 35 },
 ] as const
+
+interface AchievementBackupFile {
+  app: 'math-games'
+  kind: 'achievement-backup'
+  version: 1
+  exportedAt: string
+  achievementIds: string[]
+}
+
+function createAchievementBackup(
+  achievementIds: readonly string[],
+): AchievementBackupFile {
+  return {
+    app: 'math-games',
+    kind: 'achievement-backup',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    achievementIds: [...achievementIds],
+  }
+}
+
+function parseAchievementBackup(text: string): string[] | null {
+  const parsed = JSON.parse(text) as Partial<AchievementBackupFile>
+
+  if (
+    parsed.app !== 'math-games' ||
+    parsed.kind !== 'achievement-backup' ||
+    parsed.version !== 1 ||
+    !Array.isArray(parsed.achievementIds)
+  ) {
+    return null
+  }
+
+  const achievementIds = parsed.achievementIds.filter(
+    (achievementId): achievementId is string =>
+      typeof achievementId === 'string',
+  )
+
+  return achievementIds.length > 0 ? achievementIds : null
+}
 
 function summarizeProfile(
   progressRows: PlayerProgressSummary[],
@@ -86,11 +134,17 @@ function summarizeGame(progressRows: PlayerProgressSummary[], gameId: string) {
 function ProfileRoute() {
   const overview = Route.useLoaderData()
   const saveProfile = useServerFn(updatePlayerProfile)
+  const importAchievements = useServerFn(importPlayerAchievementBackup)
   const [profile, setProfile] = useState(overview.profile)
   const [status, setStatus] = useState<string | null>(null)
+  const [importStatus, setImportStatus] = useState<string | null>(null)
+  const [achievementIds, setAchievementIds] = useState(
+    overview.achievements as string[],
+  )
   const progressRows = overview.progress as PlayerProgressSummary[]
-  const achievements = overview.achievements as string[]
-  const profileSummary = summarizeProfile(progressRows, achievements)
+  const profileSummary = summarizeProfile(progressRows, achievementIds)
+  const t = useT()
+  const { locale } = useLocale()
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -104,7 +158,7 @@ function ProfileRoute() {
 
     const result = await runServerAction(
       () => saveProfile({ data: payload }),
-      'Profile save failed.',
+      t('status.profileSaveFailed'),
     )
 
     if (!result.ok) {
@@ -116,7 +170,64 @@ function ProfileRoute() {
     setStatus(t('profile.saved'))
   }
 
-  const t = useT()
+  function handleExportAchievements() {
+    const backup = createAchievementBackup(achievementIds)
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {
+      type: 'application/json',
+    })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+
+    link.href = url
+    link.download = `math-games-achievements-${backup.exportedAt.slice(0, 10)}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  async function handleImportAchievements(
+    event: ChangeEvent<HTMLInputElement>,
+  ) {
+    const file = event.currentTarget.files?.[0] ?? null
+    event.currentTarget.value = ''
+
+    if (file === null) {
+      setImportStatus(t('profile.achievementImportEmpty'))
+      return
+    }
+
+    let achievementIdsToImport: string[] | null = null
+
+    try {
+      achievementIdsToImport = parseAchievementBackup(await file.text())
+    } catch {
+      achievementIdsToImport = null
+    }
+
+    if (achievementIdsToImport === null) {
+      setImportStatus(t('profile.achievementImportInvalid'))
+      return
+    }
+
+    const result = await runServerAction(
+      () =>
+        importAchievements({
+          data: { achievementIds: achievementIdsToImport },
+        }),
+      t('status.achievementImportFailed'),
+    )
+
+    if (!result.ok) {
+      setImportStatus(result.message)
+      return
+    }
+
+    setAchievementIds(result.value.achievementIds)
+    setImportStatus(
+      `${t('profile.achievementImportSuccess')} ${t(
+        'status.importedAchievements',
+      )}: ${result.value.achievementIds.length}.`,
+    )
+  }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-5 px-4 py-6 md:gap-8 md:px-6 md:py-8">
@@ -148,7 +259,7 @@ function ProfileRoute() {
           <CardContent>
             <p className="text-sm text-muted-foreground">{t('profile.rank')}</p>
             <p className="mt-2 text-2xl font-semibold">
-              {profileSummary.currentRank.name}
+              {formatRankName(locale, profileSummary.currentRank.name)}
             </p>
             <Progress
               className="mt-4 h-2"
@@ -156,7 +267,10 @@ function ProfileRoute() {
             />
             <p className="mt-2 text-xs text-muted-foreground">
               {profileSummary.nextRank
-                ? `${profileSummary.score}/${profileSummary.nextRank.threshold} ${t('profile.toNextRank')} ${profileSummary.nextRank.name}`
+                ? `${profileSummary.score}/${profileSummary.nextRank.threshold} ${t('profile.toNextRank')} ${formatRankName(
+                    locale,
+                    profileSummary.nextRank.name,
+                  )}`
                 : t('profile.topRank')}
             </p>
           </CardContent>
@@ -186,7 +300,9 @@ function ProfileRoute() {
             <p className="text-sm text-muted-foreground">
               {t('stats.achievements')}
             </p>
-            <p className="mt-2 text-2xl font-semibold">{achievements.length}</p>
+            <p className="mt-2 text-2xl font-semibold">
+              {achievementIds.length}
+            </p>
           </CardContent>
         </Card>
       </section>
@@ -201,7 +317,7 @@ function ProfileRoute() {
               <label className="block text-sm font-semibold text-muted-foreground">
                 {t('profile.displayName')}
                 <input
-                  aria-label="Display name"
+                  aria-label={t('profile.displayName')}
                   className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-base font-normal text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
                   defaultValue={profile.displayName}
                   maxLength={40}
@@ -214,7 +330,7 @@ function ProfileRoute() {
               <label className="mt-4 block text-sm font-semibold text-muted-foreground">
                 {t('profile.language')}
                 <select
-                  aria-label="Language"
+                  aria-label={t('profile.language')}
                   className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-base font-normal text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
                   defaultValue={profile.locale}
                   name="locale"
@@ -227,7 +343,7 @@ function ProfileRoute() {
               <label className="mt-4 block text-sm font-semibold text-muted-foreground">
                 {t('profile.gradeBand')}
                 <select
-                  aria-label="Grade band"
+                  aria-label={t('profile.gradeBand')}
                   className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-base font-normal text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
                   defaultValue={profile.gradeBand}
                   name="gradeBand"
@@ -248,6 +364,35 @@ function ProfileRoute() {
                 </p>
               ) : null}
             </form>
+
+            <Separator className="my-6" />
+
+            <h2 className="text-sm font-semibold text-muted-foreground">
+              {t('profile.portability')}
+            </h2>
+            <div className="mt-3 grid gap-2">
+              <Button
+                variant="outline"
+                onClick={handleExportAchievements}
+                type="button"
+              >
+                {t('profile.exportAchievements')}
+              </Button>
+              <label className="inline-flex h-8 cursor-pointer items-center justify-center rounded-lg border border-border bg-background px-2.5 text-sm font-medium hover:bg-muted">
+                {t('profile.importAchievements')}
+                <input
+                  className="sr-only"
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={(event) => void handleImportAchievements(event)}
+                />
+              </label>
+            </div>
+            {importStatus !== null ? (
+              <p className="mt-4 border-t border-border pt-4 text-sm text-muted-foreground">
+                {importStatus}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
 
@@ -266,11 +411,14 @@ function ProfileRoute() {
                     key={`${row.gameId}-${row.levelId}`}
                   >
                     <span>
-                      <span className="font-semibold">{row.gameId}</span> /{' '}
-                      {row.levelId}
+                      <span className="font-semibold">
+                        {formatGameTitle(locale, row.gameId)}
+                      </span>{' '}
+                      / {row.levelId}
                     </span>
                     <span className="text-muted-foreground">
-                      best {row.bestScore}, attempts {row.attempts}
+                      {t('profile.best')} {row.bestScore},{' '}
+                      {t('profile.attempts')} {row.attempts}
                     </span>
                   </li>
                 ))}
@@ -291,7 +439,9 @@ function ProfileRoute() {
                 return (
                   <div className="border-t border-border pt-3" key={module.id}>
                     <div className="flex items-center justify-between gap-3">
-                      <span className="font-semibold">{module.title}</span>
+                      <span className="font-semibold">
+                        {formatGameTitle(locale, module.id)}
+                      </span>
                       <span className="text-sm text-muted-foreground">
                         {summary.completed}/{module.levelCount}
                       </span>
@@ -327,13 +477,13 @@ function ProfileRoute() {
             <h2 className="text-xl font-semibold">
               {t('profile.achievements')}
             </h2>
-            {achievements.length === 0 ? (
+            {achievementIds.length === 0 ? (
               <p className="mt-4 text-muted-foreground">
                 {t('profile.noAchievements')}
               </p>
             ) : (
               <ul className="mt-4 divide-y divide-border border-y border-border">
-                {achievements.map((achievementId) => {
+                {achievementIds.map((achievementId) => {
                   const achievement = getAchievementById(achievementId)
 
                   return (
@@ -342,10 +492,14 @@ function ProfileRoute() {
                       key={achievementId}
                     >
                       <span className="font-semibold">
-                        {achievement?.name ?? achievementId}
+                        {achievement
+                          ? formatAchievementName(locale, achievement.id)
+                          : achievementId}
                       </span>
                       <Badge variant="secondary">
-                        {achievement?.rarity ?? 'custom'}
+                        {achievement
+                          ? formatAchievementRarity(locale, achievement.rarity)
+                          : t('profile.customAchievement')}
                       </Badge>
                     </li>
                   )

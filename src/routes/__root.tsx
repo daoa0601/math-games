@@ -4,7 +4,9 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
-import { LocaleProvider } from '@/components/locale-context'
+import { formatGameTitle } from '@/components/i18n-format'
+import { LocaleProvider, useLocale } from '@/components/locale-context'
+import { useT } from '@/components/use-t'
 import geistCss from '@fontsource-variable/geist/index.css?url'
 import appCss from '../styles.css?url'
 
@@ -38,41 +40,42 @@ export const Route = createRootRoute({
 })
 
 function StandaloneNotFound() {
+  const t = useT()
+  const { locale } = useLocale()
+
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-16">
       <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Page not found
+        {t('app.notFoundEyebrow')}
       </p>
-      <h1 className="mt-3 text-4xl font-semibold">
-        This page is not available.
-      </h1>
+      <h1 className="mt-3 text-4xl font-semibold">{t('app.notFoundTitle')}</h1>
       <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-        Use the dashboard or game routes.
+        {t('app.notFoundBody')}
       </p>
-      <nav className="mt-8 flex flex-wrap gap-3" aria-label="Game routes">
+      <nav className="mt-8 flex flex-wrap gap-3" aria-label={t('game.levels')}>
         <a
           className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
           href="/"
         >
-          Dashboard
+          {t('app.dashboard')}
         </a>
         <a
           className="rounded-lg border border-border px-4 py-2"
           href="/games/magic-graph"
         >
-          Magic Graph
+          {formatGameTitle(locale, 'magic-graph')}
         </a>
         <a
           className="rounded-lg border border-border px-4 py-2"
           href="/games/sequence-race"
         >
-          Sequence Race
+          {formatGameTitle(locale, 'sequence-race')}
         </a>
         <a
           className="rounded-lg border border-border px-4 py-2"
           href="/games/shape-architect"
         >
-          Shape Architect
+          {formatGameTitle(locale, 'shape-architect')}
         </a>
       </nav>
     </main>

@@ -1,6 +1,7 @@
 import { useLocale } from '@/components/locale-context'
 import { learnContent } from '@/components/learn-content'
 import { ResponsiveSection } from '@/components/responsive-section'
+import { useT } from '@/components/use-t'
 
 interface LearnSectionProps {
   gameId: string
@@ -8,11 +9,12 @@ interface LearnSectionProps {
 
 export function LearnSection({ gameId }: LearnSectionProps) {
   const { locale } = useLocale()
+  const t = useT()
   const content = learnContent[gameId][locale]
 
   return (
     <ResponsiveSection
-      title={locale === 'vi' ? 'Hoc' : 'Learn'}
+      title={t('game.learn')}
       className="border-y border-border py-5"
     >
       <div className="grid gap-6 md:grid-cols-2">

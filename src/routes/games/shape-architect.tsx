@@ -5,6 +5,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Confetti } from '@/components/confetti'
 import { GameSessionPanel } from '@/components/game-session-panel'
 import { GamePattern } from '@/components/game-pattern'
+import {
+  formatAchievementName,
+  formatDifficulty,
+  formatLevelName,
+} from '@/components/i18n-format'
 import { LanguageToggle } from '@/components/language-toggle'
 import { learnContent } from '@/components/learn-content'
 import { useLocale } from '@/components/locale-context'
@@ -19,29 +24,35 @@ import { useGameSession } from '@/components/use-game-session'
 import { validateLevelSearch } from '@/games/level-search'
 import {
   DEFAULT_ROTATION,
-  checkSolved,
+  canPlacePiece,
   findNearestValidPosition,
+  getPieceWorldPositions,
   initializeGrid,
   placePiece,
   rotateBy90OnAxis,
+  VoxelGrid,
 } from '@/games/ShapeArchitect/logic'
 import type {
+  CellState,
   LevelConfig,
   Piece,
   PlacedPiece,
   Position3D,
   Rotation3D,
+  RotationAxis,
+  ShapeArchitectGameState,
   SolutionStep,
 } from '@/games/ShapeArchitect/logic'
 import { PlacementToolbar } from '@/games/ShapeArchitect/components/PlacementToolbar'
+import { ShapeArchitect3D } from '@/games/ShapeArchitect/components/ShapeArchitect3D'
 import { ShapeArchitectCanvas } from '@/games/ShapeArchitect/components/ShapeArchitectCanvas'
-import type { ViewMode } from '@/games/ShapeArchitect/components/ShapeArchitectCanvas'
 import { useSolverWorker } from '@/games/ShapeArchitect/logic/useSolverWorker'
 import { getShapeArchitectPracticeConfig } from '@/games/ShapeArchitect/shape-architect.catalog'
 import type { ShapeArchitectPracticeDifficulty } from '@/games/ShapeArchitect/shape-architect.catalog'
 import {
   getShapeArchitectLevel,
   recordShapeArchitectProgress,
+  validateShapeArchitectMove,
 } from '@/games/ShapeArchitect/shape-architect.functions'
 import {
   formatSavedProgress,
@@ -49,6 +60,10 @@ import {
   runServerAction,
 } from '@/routes/-server-action-result'
 import { useT } from '@/components/use-t'
+
+type ViewMode = '2d' | '3d'
+
+type PendingAction = 'place' | 'undo' | 'reset' | 'solve' | null
 
 export const Route = createFileRoute('/games/shape-architect')({
   validateSearch: validateLevelSearch,
@@ -96,12 +111,45 @@ function pieceIsPlaced(placedPieces: PlacedPiece[], piece: Piece) {
   return placedPieces.some((placedPiece) => placedPiece.pieceId === piece.id)
 }
 
+function createInitialServerState(
+  config: LevelConfig,
+): ShapeArchitectGameState {
+  return {
+    grid: initializeGrid(config).toNestedArray(),
+    placedPieces: [],
+    remainingPieces: [...config.pieces],
+    isSolved: false,
+    moveCount: 0,
+    accepted: true,
+  }
+}
+
+function gridFromState(gridState: CellState[][][]): VoxelGrid {
+  return VoxelGrid.fromNestedArray(gridState)
+}
+
+function buildOptimisticGrid(
+  config: LevelConfig,
+  placements: PlacedPiece[],
+): VoxelGrid {
+  return placements.reduce((grid, placement) => {
+    const piece = config.pieces.find(
+      (candidate) => candidate.id === placement.pieceId,
+    )
+
+    return piece
+      ? placePiece(grid, piece, placement.position, placement.rotation)
+      : grid
+  }, initializeGrid(config))
+}
+
 function ShapeArchitectRoute() {
   const t = useT()
   const { locale } = useLocale()
   const { configs, initialConfigId } = Route.useLoaderData()
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordShapeArchitectProgress)
+  const validateMove = useServerFn(validateShapeArchitectMove)
   const [availableConfigs, setAvailableConfigs] = useState(configs)
   const [practiceSeed, setPracticeSeed] = useState('')
   const [practiceDifficulty, setPracticeDifficulty] =
@@ -119,8 +167,12 @@ function ShapeArchitectRoute() {
       availableConfigs[0],
     [availableConfigs, selectedLevelId],
   )
-  const [grid, setGrid] = useState(() => initializeGrid(config))
-  const [placedPieces, setPlacedPieces] = useState<PlacedPiece[]>([])
+  const [serverState, setServerState] = useState(() =>
+    createInitialServerState(config),
+  )
+  const [placements, setPlacements] = useState<PlacedPiece[]>([])
+  const [optimisticGrid, setOptimisticGrid] = useState<VoxelGrid | null>(null)
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null)
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null)
   const [placementRotation, setPlacementRotation] =
     useState<Rotation3D>(DEFAULT_ROTATION)
@@ -133,7 +185,16 @@ function ShapeArchitectRoute() {
     null,
   )
   const boardRef = useRef<HTMLDivElement>(null)
+  const validationSeqRef = useRef(0)
+  const solvedProgressKeyRef = useRef<string | null>(null)
   const solver = useSolverWorker()
+
+  const serverGrid = useMemo(
+    () => gridFromState(serverState.grid),
+    [serverState.grid],
+  )
+  const grid = optimisticGrid ?? serverGrid
+  const placedPieces = placements
 
   useEffect(() => {
     if (!solver.result) return
@@ -141,9 +202,7 @@ function ShapeArchitectRoute() {
 
     if (!result.solvable || !result.solution) {
       setSaveStatus(
-        result.timedOut
-          ? 'Solver timed out before finding a solution.'
-          : 'No solution found for this level.',
+        result.timedOut ? t('status.solverTimedOut') : t('status.noSolution'),
       )
       return
     }
@@ -151,28 +210,17 @@ function ShapeArchitectRoute() {
     const nextPlacedPieces = buildPlacedPieces(config, result.solution)
     const nextGrid = buildSolvedGrid(config, result.solution)
 
-    setPlacedPieces(nextPlacedPieces)
-    setGrid(nextGrid)
-
-    void (async () => {
-      const progress = await runServerAction(
-        () =>
-          recordProgress({
-            data: {
-              levelId: config.id,
-              completion: { placements: nextPlacedPieces },
-            },
-          }),
-        'Progress save failed.',
-      )
-
-      if (!progress.ok) {
-        setSaveStatus(progress.message)
-        return
-      }
-
-      setSaveStatus(formatSolvedProgress(result.timeMs, progress.value))
-    })()
+    void validatePlacements(nextPlacedPieces, {
+      action: 'solve',
+      optimisticGrid: nextGrid,
+      solvedMessage: (progress) =>
+        formatSolvedProgress(
+          result.timeMs,
+          progress,
+          progressLabels,
+          (achievementId) => formatAchievementName(locale, achievementId),
+        ),
+    })
   }, [solver.result])
 
   useEffect(() => {
@@ -185,14 +233,17 @@ function ShapeArchitectRoute() {
     if (nextConfig.id === selectedLevelId) return
 
     setSelectedLevelId(nextConfig.id)
-    setGrid(initializeGrid(nextConfig))
-    setPlacedPieces([])
+    setServerState(createInitialServerState(nextConfig))
+    setPlacements([])
+    setOptimisticGrid(null)
+    setPendingAction(null)
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
     setSaveStatus(null)
+    solvedProgressKeyRef.current = null
   }, [availableConfigs, requestedLevelId, selectedLevelId])
 
-  const solved = checkSolved(grid, config.targetVoxels)
+  const solved = serverState.isSolved
   const session = useGameSession({ completed: solved, resetKey: config.id })
   const hints = learnContent['shape-architect'][locale].tips.items ?? []
   const filledTargets = config.targetVoxels.filter(
@@ -200,17 +251,28 @@ function ShapeArchitectRoute() {
   ).length
   const selectedPiece =
     config.pieces.find((piece) => piece.id === selectedPieceId) ?? null
+  const progressLabels = {
+    savedAttempt: t('status.savedAttempt'),
+    bestScore: t('status.bestScore'),
+    unlocked: t('status.unlocked'),
+    solvedIn: t('status.solvedIn'),
+  }
 
-  async function recordAttempt(placements: PlacedPiece[]) {
+  async function recordAttempt(
+    confirmedPlacements: PlacedPiece[],
+    messageForSolved?: (
+      progress: Awaited<ReturnType<typeof recordProgress>>,
+    ) => string,
+  ) {
     const result = await runServerAction(
       () =>
         recordProgress({
           data: {
             levelId: config.id,
-            completion: { placements },
+            completion: { placements: confirmedPlacements },
           },
         }),
-      'Progress save failed.',
+      t('status.progressSaveFailed'),
     )
 
     if (!result.ok) {
@@ -218,7 +280,84 @@ function ShapeArchitectRoute() {
       return
     }
 
-    setSaveStatus(formatSavedProgress(result.value))
+    setSaveStatus(
+      messageForSolved
+        ? messageForSolved(result.value)
+        : formatSavedProgress(result.value, progressLabels, (achievementId) =>
+            formatAchievementName(locale, achievementId),
+          ),
+    )
+  }
+
+  async function validatePlacements(
+    nextPlacements: PlacedPiece[],
+    options: {
+      action: PendingAction
+      optimisticGrid: VoxelGrid
+      successMessage?: string
+      solvedMessage?: (
+        progress: Awaited<ReturnType<typeof recordProgress>>,
+      ) => string
+    },
+  ) {
+    const requestSeq = validationSeqRef.current + 1
+    validationSeqRef.current = requestSeq
+
+    setPendingAction(options.action)
+    setPlacements(nextPlacements)
+    setOptimisticGrid(options.optimisticGrid)
+    setSaveStatus(null)
+
+    const result = await runServerAction(
+      () =>
+        validateMove({
+          data: {
+            levelId: config.id,
+            placements: nextPlacements.map(
+              ({ pieceId, position, rotation }) => ({
+                pieceId,
+                position,
+                rotation,
+              }),
+            ),
+          },
+        }),
+      t('status.moveValidationFailed'),
+    )
+
+    if (requestSeq !== validationSeqRef.current) return
+
+    setPendingAction(null)
+
+    if (!result.ok) {
+      setOptimisticGrid(null)
+      setPlacements(serverState.placedPieces)
+      setSaveStatus(result.message)
+      return
+    }
+
+    const nextServerState = result.value
+    setServerState(nextServerState)
+    setPlacements(nextServerState.placedPieces)
+    setOptimisticGrid(null)
+
+    if (!nextServerState.accepted) {
+      setSaveStatus(nextServerState.error ?? t('status.placementRejected'))
+      return
+    }
+
+    if (nextServerState.isSolved) {
+      const solvedKey = `${config.id}:${nextServerState.moveCount}`
+      if (solvedProgressKeyRef.current !== solvedKey) {
+        solvedProgressKeyRef.current = solvedKey
+        await recordAttempt(nextServerState.placedPieces, options.solvedMessage)
+      }
+      return
+    }
+
+    if (options.successMessage) {
+      setSaveStatus(options.successMessage)
+    }
   }
 
   async function checkCurrent() {
@@ -227,25 +366,29 @@ function ShapeArchitectRoute() {
   }
 
   function resetPuzzle() {
-    setGrid(initializeGrid(config))
-    setPlacedPieces([])
+    const emptyGrid = initializeGrid(config)
+    void validatePlacements([], { action: 'reset', optimisticGrid: emptyGrid })
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
     setPendingPosition(null)
     setTapPoint(null)
     setSaveStatus(null)
+    solvedProgressKeyRef.current = null
     session.resetSession()
   }
 
   function selectLevel(nextLevel: LevelConfig) {
     setSelectedLevelId(nextLevel.id)
-    setGrid(initializeGrid(nextLevel))
-    setPlacedPieces([])
+    setServerState(createInitialServerState(nextLevel))
+    setPlacements([])
+    setOptimisticGrid(null)
+    setPendingAction(null)
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
     setPendingPosition(null)
     setTapPoint(null)
     setSaveStatus(null)
+    solvedProgressKeyRef.current = null
     session.resetSession()
   }
 
@@ -259,10 +402,10 @@ function ShapeArchitectRoute() {
     setSaveStatus(null)
   }
 
-  function rotateSelectedPiece() {
+  function rotateSelectedPiece(axis: RotationAxis = 'z') {
     if (selectedPiece === null) return
 
-    setPlacementRotation((rotation) => rotateBy90OnAxis(rotation, 'z'))
+    setPlacementRotation((rotation) => rotateBy90OnAxis(rotation, axis))
     setSaveStatus(null)
   }
 
@@ -297,9 +440,31 @@ function ShapeArchitectRoute() {
           config.gridSize,
         ) !== null
       : false
+  const ghostPiece =
+    selectedPiece !== null && pendingPosition !== null
+      ? (() => {
+          const placementPosition = findNearestValidPosition(
+            grid,
+            selectedPiece,
+            pendingPosition,
+            placementRotation,
+            config.gridSize,
+          )
+
+          return {
+            positions: getPieceWorldPositions(
+              selectedPiece,
+              placementPosition ?? pendingPosition,
+              placementRotation,
+            ),
+            isValid: placementPosition !== null,
+          }
+        })()
+      : null
 
   function confirmPlacement() {
     if (session.timedOut) return
+    if (pendingAction !== null) return
     if (selectedPiece === null || pendingPosition === null) return
 
     const position = findNearestValidPosition(
@@ -315,12 +480,19 @@ function ShapeArchitectRoute() {
       return
     }
 
-    const nextGrid = placePiece(
-      grid,
-      selectedPiece,
-      position,
-      placementRotation,
-    )
+    if (
+      !canPlacePiece(
+        grid,
+        selectedPiece,
+        position,
+        placementRotation,
+        config.gridSize,
+      )
+    ) {
+      setSaveStatus(t('game.doesNotFit'))
+      return
+    }
+
     const nextPlacedPieces = [
       ...placedPieces,
       {
@@ -330,24 +502,50 @@ function ShapeArchitectRoute() {
         color: selectedPiece.color,
       },
     ]
+    const nextGrid = buildOptimisticGrid(config, nextPlacedPieces)
 
-    setGrid(nextGrid)
-    setPlacedPieces(nextPlacedPieces)
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
     setPendingPosition(null)
     setTapPoint(null)
-    setSaveStatus(
-      checkSolved(nextGrid, config.targetVoxels)
-        ? t('game.allFilled')
-        : `${selectedPiece.name} ${t('game.piecePlaced')}`,
-    )
+    void validatePlacements(nextPlacedPieces, {
+      action: 'place',
+      optimisticGrid: nextGrid,
+      successMessage: `${formatLevelName(locale, selectedPiece.name)} ${t(
+        'game.piecePlaced',
+      )}`,
+      solvedMessage: () => t('game.allFilled'),
+    })
   }
 
   function cancelPlacement() {
     setPendingPosition(null)
     setTapPoint(null)
     setSaveStatus(null)
+  }
+
+  function undoPlacement() {
+    if (
+      session.timedOut ||
+      pendingAction !== null ||
+      placedPieces.length === 0
+    ) {
+      return
+    }
+
+    const nextPlacedPieces = placedPieces.slice(0, -1)
+    const nextGrid = buildOptimisticGrid(config, nextPlacedPieces)
+    setSelectedPieceId(null)
+    setPlacementRotation(DEFAULT_ROTATION)
+    setPendingPosition(null)
+    setTapPoint(null)
+    setSaveStatus(null)
+    solvedProgressKeyRef.current = null
+    void validatePlacements(nextPlacedPieces, {
+      action: 'undo',
+      optimisticGrid: nextGrid,
+      successMessage: t('status.lastPlacementUndone'),
+    })
   }
 
   function generatePracticeLevel() {
@@ -373,7 +571,7 @@ function ShapeArchitectRoute() {
           </Link>
           <span className="text-muted-foreground">/</span>
           <h1 className="truncate text-lg font-semibold md:text-2xl">
-            {config.name}
+            {formatLevelName(locale, config.name)}
           </h1>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -406,10 +604,10 @@ function ShapeArchitectRoute() {
                   size="sm"
                 >
                   <ToggleGroupItem value="2d">2D</ToggleGroupItem>
-                  <ToggleGroupItem value="iso">Iso</ToggleGroupItem>
+                  <ToggleGroupItem value="3d">3D</ToggleGroupItem>
                 </ToggleGroup>
                 <span className="text-sm capitalize text-muted-foreground">
-                  {config.difficulty} / {config.type}
+                  {formatDifficulty(locale, config.difficulty)} / {config.type}
                 </span>
               </div>
             </div>
@@ -419,16 +617,32 @@ function ShapeArchitectRoute() {
               className="relative mt-4 overflow-x-auto"
               onClick={handleBoardClick}
             >
-              <ShapeArchitectCanvas
-                grid={grid}
-                config={config}
-                placedPieces={placedPieces}
-                selectedPiece={selectedPiece}
-                placementRotation={placementRotation}
-                onCellClick={handleCellClick}
-                pendingPosition={pendingPosition}
-                viewMode={viewMode}
-              />
+              {viewMode === '3d' ? (
+                <ShapeArchitect3D
+                  gridState={grid.toNestedArray()}
+                  config={config}
+                  placedPieces={placedPieces}
+                  ghostPiece={ghostPiece}
+                  selectedPiece={selectedPiece}
+                  labels={{
+                    loading: t('game.loading3d'),
+                    view: t('game.shapeArchitect3dView'),
+                  }}
+                  onCellClick={handleCellClick}
+                />
+              ) : (
+                <ShapeArchitectCanvas
+                  grid={grid}
+                  config={config}
+                  placedPieces={placedPieces}
+                  selectedPiece={selectedPiece}
+                  placementRotation={placementRotation}
+                  onCellClick={handleCellClick}
+                  pendingPosition={pendingPosition}
+                  viewMode="2d"
+                  label={t('game.shapeArchitectGrid')}
+                />
+              )}
 
               {pendingPosition !== null &&
                 selectedPiece !== null &&
@@ -441,9 +655,16 @@ function ShapeArchitectRoute() {
                     }}
                   >
                     <PlacementToolbar
-                      pieceName={selectedPiece.name}
-                      rotationDeg={placementRotation.z}
+                      pieceName={formatLevelName(locale, selectedPiece.name)}
+                      rotation={placementRotation}
+                      show3DAxes={config.type === '3D' || viewMode === '3d'}
                       canPlace={pendingCanPlace}
+                      labels={{
+                        cancelPlacement: t('game.cancelPlacement'),
+                        placePiece: t('game.placePiece'),
+                        rotatePiece: t('game.rotatePiece'),
+                        rotatePieceAxis: t('game.rotatePieceAxis'),
+                      }}
                       onRotate={rotateSelectedPiece}
                       onPlace={confirmPlacement}
                       onCancel={cancelPlacement}
@@ -478,7 +699,7 @@ function ShapeArchitectRoute() {
                       className="h-3 w-3 rounded-full border border-border"
                       style={{ backgroundColor: piece.color }}
                     />
-                    {piece.name}
+                    {formatLevelName(locale, piece.name)}
                   </button>
                 )
               })}
@@ -492,6 +713,19 @@ function ShapeArchitectRoute() {
                 type="button"
               >
                 {t('game.check')}
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                disabled={
+                  session.timedOut ||
+                  pendingAction !== null ||
+                  placedPieces.length === 0
+                }
+                onClick={undoPlacement}
+                type="button"
+              >
+                {t('game.undo')}
               </Button>
               <Button
                 variant="outline"
@@ -541,19 +775,19 @@ function ShapeArchitectRoute() {
 
       <ResponsiveSection
         title={t('game.levels')}
-        description="Presets and seeded practice levels share the same portable dissection engine."
+        description={t('game.dissectionDescription')}
         className="border-y border-border py-5"
         actions={
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
             <input
-              aria-label="Practice seed"
+              aria-label={t('game.practiceSeed')}
               className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) => setPracticeSeed(event.currentTarget.value)}
-              placeholder="Practice seed"
+              placeholder={t('game.practiceSeed')}
               value={practiceSeed}
             />
             <select
-              aria-label="Practice difficulty"
+              aria-label={t('game.practiceDifficulty')}
               className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) =>
                 setPracticeDifficulty(
@@ -587,11 +821,14 @@ function ShapeArchitectRoute() {
                 onClick={() => selectLevel(optionLevel)}
                 type="button"
               >
-                <span className="block font-semibold">{optionLevel.name}</span>
+                <span className="block font-semibold">
+                  {formatLevelName(locale, optionLevel.name)}
+                </span>
                 <span className="mt-1 block text-sm capitalize opacity-80">
-                  {optionLevel.difficulty} · {optionLevel.type} ·{' '}
-                  {optionLevel.pieces.length} pieces ·{' '}
-                  {optionLevel.targetVoxels.length} cells
+                  {formatDifficulty(locale, optionLevel.difficulty)} ·{' '}
+                  {optionLevel.type} · {optionLevel.pieces.length}{' '}
+                  {t('stats.pieces')} · {optionLevel.targetVoxels.length}{' '}
+                  {t('stats.cells')}
                 </span>
               </button>
             )

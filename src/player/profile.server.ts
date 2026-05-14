@@ -3,6 +3,7 @@
 import { asc, eq, sql } from 'drizzle-orm'
 import { Effect } from 'effect'
 
+import { getAchievementById } from '@/achievements/achievements.logic'
 import { schema } from '@/db'
 import {
   DbService,
@@ -12,7 +13,12 @@ import {
 } from '@/services'
 import { withD1Retry } from '@/services/retry'
 
-import type { GradeBand, Locale, PlayerProfileInput } from './profile.schema'
+import type {
+  AchievementImportInput,
+  GradeBand,
+  Locale,
+  PlayerProfileInput,
+} from './profile.schema'
 
 export interface PlayerProfileRecord {
   id: string
@@ -35,6 +41,11 @@ export interface PlayerProfileOverview {
   profile: PlayerProfileRecord
   progress: PlayerProgressSummary[]
   achievements: string[]
+}
+
+export interface AchievementImportResult {
+  achievementIds: string[]
+  importedCount: number
 }
 
 function toPlayerProfileRecord(
@@ -160,5 +171,74 @@ export function savePlayerProfile(input: PlayerProfileInput) {
     )
 
     return toPlayerProfileRecord(player)
+  })
+}
+
+export function importPlayerAchievements(input: AchievementImportInput) {
+  return Effect.gen(function* () {
+    const { db } = yield* DbService
+    const identity = yield* (yield* PlayerIdentityService).resolve()
+    const achievementIds = Array.from(new Set(input.achievementIds)).filter(
+      (achievementId) => getAchievementById(achievementId) !== undefined,
+    )
+
+    const upsertPlayer = db
+      .insert(schema.players)
+      .values(identity)
+      .onConflictDoUpdate({
+        target: schema.players.id,
+        set: { updatedAt: sql`(unixepoch())` },
+      })
+
+    const selectAchievements = db
+      .select({ achievementId: schema.playerAchievements.achievementId })
+      .from(schema.playerAchievements)
+      .where(eq(schema.playerAchievements.playerId, identity.id))
+      .orderBy(asc(schema.playerAchievements.achievementId))
+
+    const finalRows =
+      achievementIds.length > 0
+        ? yield* withD1Retry(
+            Effect.tryPromise({
+              try: async () => {
+                const [, , rows] = await db.batch([
+                  upsertPlayer,
+                  db
+                    .insert(schema.playerAchievements)
+                    .values(
+                      achievementIds.map((achievementId) => ({
+                        playerId: identity.id,
+                        achievementId,
+                      })),
+                    )
+                    .onConflictDoNothing(),
+                  selectAchievements,
+                ] as const)
+
+                return rows
+              },
+              catch: (cause): PlayerProfileWriteError =>
+                new PlayerProfileWriteError({ cause }),
+            }),
+          )
+        : yield* withD1Retry(
+            Effect.tryPromise({
+              try: async () => {
+                const [, rows] = await db.batch([
+                  upsertPlayer,
+                  selectAchievements,
+                ] as const)
+
+                return rows
+              },
+              catch: (cause): PlayerProfileWriteError =>
+                new PlayerProfileWriteError({ cause }),
+            }),
+          )
+
+    return {
+      achievementIds: finalRows.map((row) => row.achievementId),
+      importedCount: achievementIds.length,
+    }
   })
 }

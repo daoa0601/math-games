@@ -1284,4 +1284,28 @@ describe('findNearestValidPosition', () => {
 
     expect(pos).toBeNull()
   })
+
+  it('searches along the z-axis for 3D levels', () => {
+    const level = createTestLevel({
+      type: '3D',
+      gridSize: [2, 2, 2],
+      targetVoxels: [
+        { x: 0, y: 0, z: 1 },
+        { x: 1, y: 0, z: 1 },
+      ],
+    })
+    const grid = initializeGrid(level)
+    const piece = level.pieces[0]
+
+    const pos = findNearestValidPosition(
+      grid,
+      piece,
+      { x: 0, y: 0, z: 0 },
+      DEFAULT_ROTATION,
+      level.gridSize,
+      1,
+    )
+
+    expect(pos).toEqual({ x: 0, y: 0, z: 1 })
+  })
 })

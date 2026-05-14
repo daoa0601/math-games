@@ -1,8 +1,10 @@
 import { useLocale } from '@/components/locale-context'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/components/use-t'
 
 export function LanguageToggle() {
   const { locale, setLocale } = useLocale()
+  const t = useT()
 
   return (
     <Button
@@ -10,7 +12,9 @@ export function LanguageToggle() {
       size="icon"
       onClick={() => setLocale(locale === 'en' ? 'vi' : 'en')}
       aria-label={
-        locale === 'en' ? 'Switch to Vietnamese' : 'Switch to English'
+        locale === 'en'
+          ? t('toggle.languageToVietnamese')
+          : t('toggle.languageToEnglish')
       }
       type="button"
       className="text-xs font-semibold"

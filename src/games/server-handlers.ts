@@ -2,8 +2,14 @@ import { setResponseHeader } from '@tanstack/react-start/server'
 import { Effect, Schema } from 'effect'
 
 import { recordGameProgress } from '@/games/progress/progress.server'
-import { savePlayerProfile } from '@/player/profile.server'
-import { PlayerProfileInput } from '@/player/profile.schema'
+import {
+  importPlayerAchievements,
+  savePlayerProfile,
+} from '@/player/profile.server'
+import {
+  AchievementImportInput,
+  PlayerProfileInput,
+} from '@/player/profile.schema'
 import {
   GameProgressValidationError,
   HeaderService,
@@ -95,5 +101,27 @@ export function createUpdateProfilePipeline(rawData: unknown) {
     yield* (yield* RateLimitService).assert(`profile:${playerId}`)
 
     return yield* savePlayerProfile(data)
+  })
+}
+
+export function createImportAchievementsPipeline(rawData: unknown) {
+  return Effect.gen(function* () {
+    const data = yield* Effect.try({
+      try: () => Schema.decodeUnknownSync(AchievementImportInput)(rawData),
+      catch: (e) =>
+        new PlayerProfileValidationError({
+          reason: e instanceof Error ? e.message : 'Invalid achievement import',
+        }),
+    })
+
+    yield* (yield* OriginGuardService).assert()
+
+    yield* (yield* HeaderService).setResponse('cache-control', 'no-store')
+
+    const playerId = yield* (yield* PlayerIdentityService).resolveId()
+
+    yield* (yield* RateLimitService).assert(`achievements:${playerId}`)
+
+    return yield* importPlayerAchievements(data)
   })
 }

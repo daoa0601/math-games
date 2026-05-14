@@ -5,6 +5,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Confetti } from '@/components/confetti'
 import { GameSessionPanel } from '@/components/game-session-panel'
 import { GamePattern } from '@/components/game-pattern'
+import {
+  formatAchievementName,
+  formatActor,
+  formatDifficulty,
+  formatLevelName,
+} from '@/components/i18n-format'
 import { LanguageToggle } from '@/components/language-toggle'
 import { learnContent } from '@/components/learn-content'
 import { useLocale } from '@/components/locale-context'
@@ -85,6 +91,12 @@ function SequenceRaceRoute() {
     resetKey: config.id,
   })
   const hints = learnContent['sequence-race'][locale].tips.items ?? []
+  const progressLabels = {
+    savedAttempt: t('status.savedAttempt'),
+    bestScore: t('status.bestScore'),
+    unlocked: t('status.unlocked'),
+    solvedIn: t('status.solvedIn'),
+  }
 
   useEffect(() => {
     if (!requestedLevelId) return
@@ -125,7 +137,7 @@ function SequenceRaceRoute() {
               },
             },
           }),
-        'Progress save failed.',
+        t('status.progressSaveFailed'),
       )
 
       if (!result.ok) {
@@ -133,7 +145,11 @@ function SequenceRaceRoute() {
         return
       }
 
-      setSaveStatus(formatSavedProgress(result.value))
+      setSaveStatus(
+        formatSavedProgress(result.value, progressLabels, (achievementId) =>
+          formatAchievementName(locale, achievementId),
+        ),
+      )
     },
     [config.id, recordProgress],
   )
@@ -206,7 +222,7 @@ function SequenceRaceRoute() {
           </Link>
           <span className="text-muted-foreground">/</span>
           <h1 className="truncate text-lg font-semibold md:text-2xl">
-            {config.name}
+            {formatLevelName(locale, config.name)}
           </h1>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -265,7 +281,9 @@ function SequenceRaceRoute() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Badge variant={aiThinking ? 'secondary' : 'default'}>
-                    {aiThinking ? 'AI thinking' : game.turn}
+                    {aiThinking
+                      ? t('game.aiThinking')
+                      : formatActor(locale, game.turn)}
                   </Badge>
                   {game.winner ? (
                     <Badge
@@ -275,12 +293,13 @@ function SequenceRaceRoute() {
                           : 'secondary'
                       }
                     >
-                      {game.winner} {t('game.wins')}
+                      {formatActor(locale, game.winner)} {t('game.wins')}
                     </Badge>
                   ) : null}
                 </div>
                 <span className="text-sm text-muted-foreground capitalize">
-                  {config.difficulty} · {sequenceInfo.formula}
+                  {formatDifficulty(locale, config.difficulty)} ·{' '}
+                  {sequenceInfo.formula}
                 </span>
               </div>
 
@@ -321,19 +340,19 @@ function SequenceRaceRoute() {
 
       <ResponsiveSection
         title={t('game.levels')}
-        description="Presets and seeded practice levels share the same portable engine."
+        description={t('game.levelsDescription')}
         className="border-y border-border py-5"
         actions={
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
             <input
-              aria-label="Practice seed"
+              aria-label={t('game.practiceSeed')}
               className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) => setPracticeSeed(event.currentTarget.value)}
-              placeholder="Practice seed"
+              placeholder={t('game.practiceSeed')}
               value={practiceSeed}
             />
             <select
-              aria-label="Practice difficulty"
+              aria-label={t('game.practiceDifficulty')}
               className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) =>
                 setPracticeDifficulty(
@@ -369,9 +388,12 @@ function SequenceRaceRoute() {
                 onClick={() => selectLevel(optionLevel)}
                 type="button"
               >
-                <span className="block font-semibold">{optionLevel.name}</span>
+                <span className="block font-semibold">
+                  {formatLevelName(locale, optionLevel.name)}
+                </span>
                 <span className="mt-1 block text-sm capitalize opacity-80">
-                  {optionLevel.difficulty} · {info.name} · target{' '}
+                  {formatDifficulty(locale, optionLevel.difficulty)} ·{' '}
+                  {formatLevelName(locale, info.name)} · {t('game.target')}{' '}
                   {optionLevel.target}
                 </span>
               </button>

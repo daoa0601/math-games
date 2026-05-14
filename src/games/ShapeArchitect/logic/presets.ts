@@ -3,11 +3,12 @@
 // Increased difficulty: Easy requires 4-5 pieces minimum
 // ========================================
 
-import type { LevelConfig, Piece, Difficulty } from './types'
+import type { LevelConfig, Piece, Difficulty, Position3D } from './types'
 import type { LevelValidation } from './engine'
 import { validateAllLevels } from './engine'
 import { createSeededRandom } from '@/shared/utils'
 import { generateGuaranteedSolvableWithRetry } from './seededGenerator'
+import { TETRACUBE } from './polycubes'
 import {
   HEXOMINO,
   HEPTOMINO,
@@ -17,6 +18,7 @@ import {
 
 // Re-export polyominoes for external use
 export { HEXOMINO, HEPTOMINO, HEXOMINO_KEYS, HEPTOMINO_KEYS }
+export { TETRACUBE, PENTACUBE } from './polycubes'
 
 // ========================================
 // All 7 Classic Tetris Pieces (Tetrominoes)
@@ -438,7 +440,50 @@ export const THEMED_SHAPES = {
 // Preset Levels - ALL require 4+ pieces
 // ========================================
 
+function cuboidVoxels(
+  width: number,
+  height: number,
+  depth: number,
+): Position3D[] {
+  const voxels: Position3D[] = []
+
+  for (let z = 0; z < depth; z++) {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        voxels.push({ x, y, z })
+      }
+    }
+  }
+
+  return voxels
+}
+
 export const presetLevels: LevelConfig[] = [
+  {
+    id: 'cube_2x2x2',
+    name: 'Two-Layer Cube',
+    type: '3D',
+    gridSize: [2, 2, 2],
+    targetVoxels: cuboidVoxels(2, 2, 2),
+    pieces: [
+      TETRACUBE.O('cube_layer_1', '#00BCD4'),
+      TETRACUBE.O('cube_layer_2', '#E91E63'),
+    ],
+    difficulty: 'easy',
+  },
+  {
+    id: 'tower_2x2x3',
+    name: 'Layer Tower',
+    type: '3D',
+    gridSize: [2, 2, 3],
+    targetVoxels: cuboidVoxels(2, 2, 3),
+    pieces: [
+      TETRACUBE.O('tower_layer_1', '#00BCD4'),
+      TETRACUBE.O('tower_layer_2', '#FF9800'),
+      TETRACUBE.O('tower_layer_3', '#9C27B0'),
+    ],
+    difficulty: 'medium',
+  },
   // ===== EASY LEVELS (4-5 pieces) =====
   {
     id: 'easy_1',

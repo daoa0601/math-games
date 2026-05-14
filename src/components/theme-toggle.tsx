@@ -2,6 +2,7 @@ import { Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { useT } from '@/components/use-t'
 
 function getStoredTheme(): 'light' | 'dark' {
   if (typeof window === 'undefined') return 'light'
@@ -16,6 +17,7 @@ function applyTheme(theme: 'light' | 'dark') {
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const t = useT()
 
   useEffect(() => {
     const stored = getStoredTheme()
@@ -35,7 +37,7 @@ export function ThemeToggle() {
       size="icon"
       onClick={toggle}
       aria-label={
-        theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'
+        theme === 'light' ? t('toggle.darkMode') : t('toggle.lightMode')
       }
       type="button"
     >

@@ -185,18 +185,20 @@ export function findNearestValidPosition(
   for (let radius = 1; radius <= maxSearchRadius; radius++) {
     for (let dx = -radius; dx <= radius; dx++) {
       for (let dy = -radius; dy <= radius; dy++) {
-        if (Math.abs(dx) !== radius && Math.abs(dy) !== radius) {
-          continue
-        }
+        for (let dz = -radius; dz <= radius; dz++) {
+          if (Math.max(Math.abs(dx), Math.abs(dy), Math.abs(dz)) !== radius) {
+            continue
+          }
 
-        const candidatePos: Position3D = {
-          x: attemptedPosition.x + dx,
-          y: attemptedPosition.y + dy,
-          z: attemptedPosition.z,
-        }
+          const candidatePos: Position3D = {
+            x: attemptedPosition.x + dx,
+            y: attemptedPosition.y + dy,
+            z: attemptedPosition.z + dz,
+          }
 
-        if (canPlacePiece(grid, piece, candidatePos, rotation, gridSize)) {
-          return candidatePos
+          if (canPlacePiece(grid, piece, candidatePos, rotation, gridSize)) {
+            return candidatePos
+          }
         }
       }
     }

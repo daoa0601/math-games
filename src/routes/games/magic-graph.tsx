@@ -5,6 +5,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { Confetti } from '@/components/confetti'
 import { GameSessionPanel } from '@/components/game-session-panel'
 import { GamePattern } from '@/components/game-pattern'
+import {
+  formatAchievementName,
+  formatDifficulty,
+  formatLevelName,
+} from '@/components/i18n-format'
 import { LanguageToggle } from '@/components/language-toggle'
 import { learnContent } from '@/components/learn-content'
 import { useLocale } from '@/components/locale-context'
@@ -115,6 +120,12 @@ function MagicGraphRoute() {
   const filledCount = Object.values(values).filter(
     (value) => value !== null,
   ).length
+  const progressLabels = {
+    savedAttempt: t('status.savedAttempt'),
+    bestScore: t('status.bestScore'),
+    unlocked: t('status.unlocked'),
+    solvedIn: t('status.solvedIn'),
+  }
 
   async function recordAttempt(submission: NodeValues) {
     const result = await runServerAction(
@@ -125,7 +136,7 @@ function MagicGraphRoute() {
             completion: { nodeValues: submission },
           },
         }),
-      'Progress save failed.',
+      t('status.progressSaveFailed'),
     )
 
     if (!result.ok) {
@@ -133,7 +144,11 @@ function MagicGraphRoute() {
       return
     }
 
-    setSaveStatus(formatSavedProgress(result.value))
+    setSaveStatus(
+      formatSavedProgress(result.value, progressLabels, (achievementId) =>
+        formatAchievementName(locale, achievementId),
+      ),
+    )
   }
 
   function placeNumber(node: GraphNode) {
@@ -204,7 +219,7 @@ function MagicGraphRoute() {
           </Link>
           <span className="text-muted-foreground">/</span>
           <h1 className="truncate text-lg font-semibold md:text-2xl">
-            {config.name}
+            {formatLevelName(locale, config.name)}
           </h1>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -359,19 +374,19 @@ function MagicGraphRoute() {
 
       <ResponsiveSection
         title={t('game.puzzles')}
-        description="Templates and seeded practice puzzles share the same solver and progress writer."
+        description={t('game.templatesDescription')}
         className="border-y border-border py-5"
         actions={
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
             <input
-              aria-label="Practice seed"
+              aria-label={t('game.practiceSeed')}
               className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) => setPracticeSeed(event.currentTarget.value)}
-              placeholder="Practice seed"
+              placeholder={t('game.practiceSeed')}
               value={practiceSeed}
             />
             <select
-              aria-label="Practice difficulty"
+              aria-label={t('game.practiceDifficulty')}
               className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) =>
                 setPracticeDifficulty(
@@ -405,9 +420,12 @@ function MagicGraphRoute() {
                 onClick={() => selectPuzzle(puzzle)}
                 type="button"
               >
-                <span className="block font-semibold">{puzzle.name}</span>
+                <span className="block font-semibold">
+                  {formatLevelName(locale, puzzle.name)}
+                </span>
                 <span className="mt-1 block text-sm capitalize opacity-80">
-                  {puzzle.difficulty} · {puzzle.nodes.length} nodes · target{' '}
+                  {formatDifficulty(locale, puzzle.difficulty)} ·{' '}
+                  {puzzle.nodes.length} {t('stats.nodes')} · {t('game.target')}{' '}
                   {puzzle.targetSum}
                 </span>
               </button>

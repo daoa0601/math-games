@@ -24,3 +24,9 @@ export class PlayerProfileInput extends Schema.Class<PlayerProfileInput>(
   locale: Locale,
   gradeBand: GradeBand,
 }) {}
+
+export class AchievementImportInput extends Schema.Class<AchievementImportInput>(
+  'AchievementImportInput',
+)({
+  achievementIds: Schema.Array(Schema.NonEmptyString),
+}) {}

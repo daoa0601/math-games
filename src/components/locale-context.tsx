@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
-type Locale = 'en' | 'vi'
+import type { Locale } from './translations'
 
 const LocaleContext = createContext<{
   locale: Locale
@@ -23,6 +23,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setLocaleState(getStoredLocale())
   }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
 
   function setLocale(next: Locale) {
     setLocaleState(next)

@@ -1,7 +1,14 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 
 import { AnimatedCounter } from '@/components/animated-counter'
+import {
+  formatDifficulty,
+  formatGameDescription,
+  formatGameTitle,
+  formatLevelName,
+} from '@/components/i18n-format'
 import { LanguageToggle } from '@/components/language-toggle'
+import { useLocale } from '@/components/locale-context'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useT } from '@/components/use-t'
 import { TiltCard } from '@/components/tilt-card'
@@ -62,6 +69,7 @@ function summarizeProgress(
 function Home() {
   const { dailyChallenge, games, overview } = Route.useLoaderData()
   const t = useT()
+  const { locale } = useLocale()
   const progressRows = overview.progress as PlayerProgressSummary[]
   const completedCount = progressRows.filter(
     (row) => row.completedAt !== null,
@@ -101,11 +109,12 @@ function Home() {
                   {t('daily.title')}
                 </h2>
                 <p className="mt-2 text-xl font-semibold">
-                  {dailyChallenge.title}
+                  {formatLevelName(locale, dailyChallenge.title)}
                 </p>
                 <p className="mt-2 text-muted-foreground">
-                  {dailyChallenge.challengeDate} · {dailyChallenge.difficulty} ·{' '}
-                  {dailyChallenge.gameId}
+                  {dailyChallenge.challengeDate} ·{' '}
+                  {formatDifficulty(locale, dailyChallenge.difficulty)} ·{' '}
+                  {formatGameTitle(locale, dailyChallenge.gameId)}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -191,9 +200,12 @@ function Home() {
                 className={`${GAME_THEMES[game.gameId] ?? ''} border-l-4 border-l-primary`}
               >
                 <CardHeader>
-                  <CardTitle className="text-2xl">{game.title}</CardTitle>
+                  <CardTitle className="text-2xl">
+                    {formatGameTitle(locale, game.gameId)}
+                  </CardTitle>
                   <p className="mt-1 text-muted-foreground">
-                    {game.description}
+                    {formatGameDescription(locale, game.gameId) ||
+                      game.description}
                   </p>
                 </CardHeader>
                 <CardContent>
