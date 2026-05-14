@@ -9,9 +9,10 @@ describe('Shape Architect catalog', () => {
   it('exposes every preset level to the migrated route', () => {
     const catalog = getShapeArchitectCatalog()
 
-    expect(catalog.configs).toHaveLength(13)
+    expect(catalog.configs.length).toBeGreaterThan(13)
     expect(catalog.configs.map((config) => config.id)).toEqual(
       expect.arrayContaining([
+        'catalog_easy_starter-fitted-blocks',
         'easy_1',
         'easy_4',
         'med_1',
@@ -22,7 +23,9 @@ describe('Shape Architect catalog', () => {
   })
 
   it('uses the 4x4 square as the stable default level', () => {
-    expect(getShapeArchitectCatalog().initialConfigId).toBe('easy_1')
+    expect(getShapeArchitectCatalog().initialConfigId).toBe(
+      'catalog_easy_starter-fitted-blocks',
+    )
   })
 
   it('keeps each level ready for progress persistence and solving', () => {

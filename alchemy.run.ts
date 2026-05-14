@@ -11,15 +11,9 @@ export default Alchemy.Stack(
     state: Cloudflare.state(),
   },
   Effect.gen(function* () {
-    const migrations = yield* Drizzle.Schema('math-games-schema', {
-      schema: './src/db/schema.ts',
-      out: './drizzle/migrations',
-      dialect: 'sqlite',
-    })
-
     const database = yield* Cloudflare.D1Database('DB', {
       name: 'math-games-db',
-      migrationsDir: migrations.out,
+      migrationsDir: './drizzle/migrations',
       migrationsTable: 'drizzle_migrations',
       primaryLocationHint: 'wnam',
     })
@@ -43,12 +37,6 @@ export default Alchemy.Stack(
           enabled: true,
           headSamplingRate: 1,
           persist: true,
-        },
-      },
-      assets: {
-        directory: './dist/client',
-        config: {
-          runWorkerFirst: true,
         },
       },
       bindings: {

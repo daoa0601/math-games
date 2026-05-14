@@ -2,8 +2,16 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useMemo, useState } from 'react'
 
+import { Confetti } from '@/components/confetti'
+import { GamePattern } from '@/components/game-pattern'
+import { LanguageToggle } from '@/components/language-toggle'
+import { LearnSection } from '@/components/learn-section'
+import { ResponsiveSection } from '@/components/responsive-section'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { validateLevelSearch } from '@/games/level-search'
-import { getLineStatus, isPuzzleSolved, solve } from '@/games/MagicGraph/logic'
+import { getLineStatus, isPuzzleSolved } from '@/games/MagicGraph/logic'
 import type { GraphNode, PuzzleConfig } from '@/games/MagicGraph/logic'
 import { getMagicGraphPracticeConfig } from '@/games/MagicGraph/magic-graph.catalog'
 import type { MagicGraphPracticeDifficulty } from '@/games/MagicGraph/magic-graph.catalog'
@@ -11,6 +19,11 @@ import {
   getMagicGraphLevel,
   recordMagicGraphProgress,
 } from '@/games/MagicGraph/magic-graph.functions'
+import {
+  formatSavedProgress,
+  runServerAction,
+} from '@/routes/-server-action-result'
+import { useT } from '@/components/use-t'
 
 export const Route = createFileRoute('/games/magic-graph')({
   validateSearch: validateLevelSearch,
@@ -29,6 +42,7 @@ function createNodeValueMap(values: NodeValues) {
 }
 
 function MagicGraphRoute() {
+  const t = useT()
   const { configs, initialConfigId } = Route.useLoaderData()
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordMagicGraphProgress)
@@ -96,25 +110,23 @@ function MagicGraphRoute() {
   ).length
 
   async function recordAttempt(submission: NodeValues) {
-    try {
-      const progress = await recordProgress({
-        data: {
-          levelId: config.id,
-          completion: { nodeValues: submission },
-        },
-      })
-      const unlocked =
-        progress.unlockedAchievements.length > 0
-          ? ` Unlocked ${progress.unlockedAchievements.join(', ')}.`
-          : ''
-      setSaveStatus(
-        `Saved attempt ${progress.attempts}; best score ${progress.bestScore}.${unlocked}`,
-      )
-    } catch (error) {
-      setSaveStatus(
-        error instanceof Error ? error.message : 'Progress save failed.',
-      )
+    const result = await runServerAction(
+      () =>
+        recordProgress({
+          data: {
+            levelId: config.id,
+            completion: { nodeValues: submission },
+          },
+        }),
+      'Progress save failed.',
+    )
+
+    if (!result.ok) {
+      setSaveStatus(result.message)
+      return
     }
+
+    setSaveStatus(formatSavedProgress(result.value))
   }
 
   function placeNumber(node: GraphNode) {
@@ -139,26 +151,6 @@ function MagicGraphRoute() {
     setValues(nextValues)
     setSelectedNumber(null)
     setSaveStatus(null)
-  }
-
-  async function applySolution() {
-    const [solution] = solve(
-      config.nodes,
-      config.lines,
-      config.availableNumbers,
-      config.targetSum,
-      1,
-    )
-
-    const solvedValues: NodeValues = Object.fromEntries(
-      config.nodes.map((node) => [
-        node.id,
-        node.isFixed ? node.value : (solution.get(node.id) ?? null),
-      ]),
-    )
-
-    setValues(solvedValues)
-    await recordAttempt(solvedValues)
   }
 
   async function checkCurrent() {
@@ -190,164 +182,155 @@ function MagicGraphRoute() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-6 py-8 text-neutral-950">
-      <header className="flex flex-col gap-4 border-b border-neutral-300 pb-6 md:flex-row md:items-end md:justify-between">
-        <div>
+    <main className="theme-magic-graph mx-auto flex min-h-screen max-w-5xl flex-col gap-5 px-4 py-6 md:gap-8 md:px-6 md:py-8">
+      <header className="flex items-center justify-between gap-3 border-b border-border pb-3">
+        <div className="flex items-center gap-3 overflow-hidden">
           <Link
-            className="text-sm text-neutral-600 hover:text-neutral-950"
+            className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
             to="/"
           >
-            Math Games
+            {t('app.title')}
           </Link>
-          <h1 className="mt-3 text-4xl font-semibold">{config.name}</h1>
-          <p className="mt-2 max-w-2xl text-neutral-700">
-            Place each number once so every line totals {config.targetSum}.
-          </p>
+          <span className="text-muted-foreground">/</span>
+          <h1 className="truncate text-lg font-semibold md:text-2xl">
+            {config.name}
+          </h1>
         </div>
-        <div className="border border-neutral-300 px-4 py-3 text-sm">
-          <div className="font-semibold uppercase text-neutral-500">Target</div>
-          <div className="text-3xl font-semibold">{config.targetSum}</div>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="rounded-md bg-primary/10 px-2 py-1 text-sm font-semibold text-primary">
+            {t('game.target')} {config.targetSum}
+          </span>
+          <LanguageToggle />
+          <ThemeToggle />
         </div>
       </header>
 
-      <section className="grid gap-6 md:grid-cols-[1.15fr_0.85fr]">
-        <div className="border border-neutral-300 p-5">
-          <div className="relative mx-auto aspect-[300/220] max-w-[520px]">
-            <svg
-              aria-hidden="true"
-              className="absolute inset-0 h-full w-full"
-              viewBox="0 0 300 220"
-            >
-              {lineStatuses.map((line) => {
-                const points = line.nodeIds.flatMap((nodeId) => {
-                  const node = nodeLookup.get(nodeId)
-                  return node ? [`${node.position.x},${node.position.y}`] : []
-                })
+      <section className="relative grid gap-6 md:grid-cols-[1.15fr_0.85fr]">
+        <Confetti active={solved} colors={['#7c3aed', '#a78bfa', '#c4b5fd', '#8b5cf6', '#6d28d9']} />
+        <Card className="relative overflow-hidden">
+          <GamePattern pattern="triangles" />
+          <CardContent className="relative">
+            <div className="relative mx-auto aspect-[300/220] max-w-[520px]">
+              <svg
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full"
+                viewBox="0 0 300 220"
+              >
+                {lineStatuses.map((line) => {
+                  const points = line.nodeIds.flatMap((nodeId) => {
+                    const node = nodeLookup.get(nodeId)
+                    return node
+                      ? [`${node.position.x},${node.position.y}`]
+                      : []
+                  })
 
-                return (
-                  <polyline
-                    fill="none"
-                    key={line.id}
-                    points={points.join(' ')}
-                    stroke={
-                      line.status === 'correct'
-                        ? '#111827'
-                        : line.status === 'incorrect' ||
-                            line.status === 'overflow'
-                          ? '#991b1b'
-                          : '#a3a3a3'
-                    }
-                    strokeLinecap="round"
-                    strokeWidth="3"
-                  />
-                )
-              })}
-            </svg>
+                  return (
+                    <polyline
+                      fill="none"
+                      key={line.id}
+                      points={points.join(' ')}
+                      stroke={
+                        line.status === 'correct'
+                          ? 'var(--line-correct)'
+                          : line.status === 'incorrect' ||
+                              line.status === 'overflow'
+                            ? 'var(--line-incorrect)'
+                            : 'var(--line-pending)'
+                      }
+                      strokeLinecap="round"
+                      strokeWidth="3"
+                    />
+                  )
+                })}
+              </svg>
 
-            {config.nodes.map((node) => (
-              <button
-                aria-label={`Node ${node.id}`}
-                className="absolute flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center border border-neutral-950 bg-white text-lg font-semibold disabled:border-neutral-400 disabled:text-neutral-500"
-                disabled={node.isFixed}
-                key={node.id}
-                onClick={() => placeNumber(node)}
-                style={{
-                  left: `${(node.position.x / 300) * 100}%`,
-                  top: `${(node.position.y / 220) * 100}%`,
-                }}
+              {config.nodes.map((node) => (
+                <button
+                  aria-label={`Node ${node.id}`}
+                  className={`absolute flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-primary bg-card text-lg font-semibold shadow-sm transition-colors disabled:border-muted disabled:text-muted-foreground ${values[node.id] !== null ? 'animate-node-pop' : ''}`}
+                  disabled={node.isFixed}
+                  key={node.id}
+                  onClick={() => placeNumber(node)}
+                  style={{
+                    left: `${(node.position.x / 300) * 100}%`,
+                    top: `${(node.position.y / 220) * 100}%`,
+                  }}
+                  type="button"
+                >
+                  {values[node.id] ?? ''}
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <h2 className="text-xl font-semibold leading-none">{t('game.numbers')}</h2>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-2">
+              {config.availableNumbers.map((number) => (
+                <Button
+                  variant={selectedNumber === number ? 'default' : 'outline'}
+                  size="lg"
+                  className="py-3"
+                  disabled={usedNumbers.has(number)}
+                  key={number}
+                  onClick={() => setSelectedNumber(number)}
+                  type="button"
+                >
+                  {number}
+                </Button>
+              ))}
+            </div>
+
+            <div className="mt-4 flex gap-2">
+              <Button
+                className="flex-1"
+                onClick={() => void checkCurrent()}
                 type="button"
               >
-                {values[node.id] ?? ''}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <aside className="border border-neutral-300 p-5">
-          <h2 className="text-xl font-semibold">Numbers</h2>
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            {config.availableNumbers.map((number) => (
-              <button
-                className="border border-neutral-950 px-3 py-3 font-semibold disabled:border-neutral-200 disabled:text-neutral-300"
-                disabled={usedNumbers.has(number)}
-                key={number}
-                onClick={() => setSelectedNumber(number)}
+                {t('game.check')}
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={resetPuzzle}
                 type="button"
               >
-                {number}
-              </button>
-            ))}
-          </div>
-
-          <dl className="mt-5 grid gap-3 text-sm">
-            <div className="flex justify-between border-b border-neutral-200 pb-2">
-              <dt className="text-neutral-600">Selected</dt>
-              <dd className="font-medium">{selectedNumber ?? '-'}</dd>
+                {t('game.reset')}
+              </Button>
             </div>
-            <div className="flex justify-between border-b border-neutral-200 pb-2">
-              <dt className="text-neutral-600">Filled</dt>
-              <dd className="font-medium">
-                {filledCount} / {config.nodes.length}
-              </dd>
-            </div>
-            <div className="flex justify-between border-b border-neutral-200 pb-2">
-              <dt className="text-neutral-600">Solved</dt>
-              <dd className="font-medium">{solved ? 'Yes' : 'No'}</dd>
-            </div>
-          </dl>
 
-          <div className="mt-5 grid gap-2">
-            <button
-              className="border border-neutral-950 px-4 py-3 font-semibold"
-              onClick={() => void checkCurrent()}
-              type="button"
-            >
-              Check
-            </button>
-            <button
-              className="border border-neutral-950 px-4 py-3 font-semibold"
-              onClick={() => void applySolution()}
-              type="button"
-            >
-              Apply Solution
-            </button>
-            <button
-              className="border border-neutral-950 px-4 py-3 font-semibold"
-              onClick={resetPuzzle}
-              type="button"
-            >
-              Reset
-            </button>
-          </div>
+            {saveStatus ? (
+              <p className="mt-3 text-sm text-muted-foreground">{saveStatus}</p>
+            ) : null}
 
-          {saveStatus ? (
-            <p className="mt-4 border-t border-neutral-200 pt-4 text-sm text-neutral-700">
-              {saveStatus}
-            </p>
-          ) : null}
-        </aside>
+            <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
+              <span>{t('stats.filled') + ' '}{filledCount}/{config.nodes.length}</span>
+              <span>{solved ? t('stats.solved') : `${selectedNumber !== null ? `${t('game.selected') + ': '}${selectedNumber}` : t('game.tapNumber')}`}</span>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
-      <section className="border-y border-neutral-300 py-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold">Puzzles</h2>
-            <p className="mt-2 text-neutral-700">
-              Templates and seeded practice puzzles share the same solver and
-              progress writer.
-            </p>
-          </div>
+      <ResponsiveSection
+        title={t('game.puzzles')}
+        description="Templates and seeded practice puzzles share the same solver and progress writer."
+        className="border-y border-border py-5"
+        actions={
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
             <input
               aria-label="Practice seed"
-              className="border border-neutral-950 px-3 py-2"
+              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) => setPracticeSeed(event.currentTarget.value)}
               placeholder="Practice seed"
               value={practiceSeed}
             />
             <select
               aria-label="Practice difficulty"
-              className="border border-neutral-950 px-3 py-2"
+              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) =>
                 setPracticeDifficulty(
                   event.currentTarget.value as MagicGraphPracticeDifficulty,
@@ -355,20 +338,17 @@ function MagicGraphRoute() {
               }
               value={practiceDifficulty}
             >
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
+              <option value="easy">{t('diff.easy')}</option>
+              <option value="medium">{t('diff.medium')}</option>
+              <option value="hard">{t('diff.hard')}</option>
             </select>
-            <button
-              className="border border-neutral-950 px-4 py-2 font-semibold"
-              onClick={generatePracticePuzzle}
-              type="button"
-            >
-              Generate
-            </button>
+            <Button onClick={generatePracticePuzzle} type="button">
+              {t('game.generate')}
+            </Button>
           </div>
-        </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        }
+      >
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {availableConfigs.map((puzzle) => {
             const selected = puzzle.id === config.id
 
@@ -376,8 +356,8 @@ function MagicGraphRoute() {
               <button
                 className={
                   selected
-                    ? 'border border-neutral-950 bg-neutral-950 px-4 py-4 text-left text-white'
-                    : 'border border-neutral-300 px-4 py-4 text-left text-neutral-950 hover:border-neutral-950'
+                    ? 'rounded-lg border border-primary bg-primary px-4 py-4 text-left text-primary-foreground'
+                    : 'rounded-lg border border-border px-4 py-4 text-left hover:border-primary'
                 }
                 key={puzzle.id}
                 onClick={() => selectPuzzle(puzzle)}
@@ -392,24 +372,9 @@ function MagicGraphRoute() {
             )
           })}
         </div>
-      </section>
+      </ResponsiveSection>
 
-      <section className="border-y border-neutral-300 py-5">
-        <h2 className="text-xl font-semibold">Lines</h2>
-        <ol className="mt-4 grid gap-2">
-          {lineStatuses.map((line) => (
-            <li
-              className="flex justify-between border-b border-neutral-200 py-2 text-sm"
-              key={line.id}
-            >
-              <span>{line.nodeIds.join(' + ')}</span>
-              <span className="capitalize">
-                {line.currentSum} / {config.targetSum} · {line.status}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <LearnSection gameId="magic-graph" />
     </main>
   )
 }

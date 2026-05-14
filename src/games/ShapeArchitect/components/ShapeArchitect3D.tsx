@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 
-import type { LevelConfig, Piece, PlacedPiece, Position3D, Rotation3D } from '../logic/types'
+import type {
+  LevelConfig,
+  Piece,
+  PlacedPiece,
+  Position3D,
+  Rotation3D,
+} from '../logic/types'
 import type { VoxelGrid } from '../logic/voxel-grid'
 import type { ThreeScene } from '../rendering/three-scene'
 
@@ -102,7 +108,7 @@ export function ShapeArchitect3D({
         raycaster.ray.intersectPlane(groundPlane, hit)
 
         if (hit) {
-          const [gw, , ] = config.gridSize
+          const [gw, ,] = config.gridSize
           const [, gh] = config.gridSize
           const gx = Math.floor(hit.x + gw / 2)
           const gy = Math.floor(hit.z + gh / 2)

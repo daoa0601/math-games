@@ -5,10 +5,7 @@ import { schema } from '@/db'
 import { ClockService, DailyChallengeError, DbService } from '@/services'
 import { withD1Retry } from '@/services/retry'
 
-import {
-  parseDailyChallengeConfig,
-  planDailyChallenge,
-} from './daily.logic'
+import { parseDailyChallengeConfig, planDailyChallenge } from './daily.logic'
 import type { DailyChallengeConfig } from './daily.logic'
 
 export interface DailyChallengeRecord extends DailyChallengeConfig {

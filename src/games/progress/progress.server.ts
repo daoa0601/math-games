@@ -54,14 +54,15 @@ export function recordGameProgress(input: RecordGameProgressInput) {
         try: () =>
           db.batch([
             db
-              .select({ achievementId: schema.playerAchievements.achievementId })
+              .select({
+                achievementId: schema.playerAchievements.achievementId,
+              })
               .from(schema.playerAchievements)
               .where(eq(schema.playerAchievements.playerId, input.playerId)),
             db
               .select({
                 gameId: schema.gameProgress.gameId,
-                totalAttempts:
-                  sql<number>`coalesce(sum(${schema.gameProgress.attempts}), 0)`,
+                totalAttempts: sql<number>`coalesce(sum(${schema.gameProgress.attempts}), 0)`,
               })
               .from(schema.gameProgress)
               .where(eq(schema.gameProgress.playerId, input.playerId))

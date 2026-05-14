@@ -51,7 +51,7 @@ test('dashboard and daily expose standalone route links', async ({ page }) => {
 
   await expect(page).toHaveTitle('Math Games')
   await expect(
-    page.getByRole('heading', { name: 'Practice Dashboard' }),
+    page.getByRole('heading', { name: 'Math Games' }),
   ).toBeVisible()
   await expect(
     page.getByRole('heading', { name: 'Daily Challenge' }),
@@ -105,7 +105,7 @@ test('profile writes through the D1-backed server function', async ({
   await page.getByLabel('Grade band').selectOption('middle')
   await page.getByRole('button', { name: 'Save Profile' }).click()
 
-  await expect(page.getByText('Profile saved to D1.')).toBeVisible()
+  await expect(page.getByText('Profile saved.')).toBeVisible()
   await expect(page.locator('header')).toContainText(displayName)
   await expectPlayerCookie(page)
   expectNoRuntimeErrors(errors)
@@ -127,15 +127,15 @@ test('game routes expose standalone controls and progress writes', async ({
   await page.goto('/games/magic-graph')
   await expectHydrated(page)
   await expect(page.getByRole('heading', { name: 'Numbers' })).toBeVisible()
-  await page.getByRole('button', { name: 'Apply Solution' }).click()
+  await page.getByRole('button', { name: 'Check' }).click()
   await expect(page.getByText(/Saved attempt \d+; best score/)).toBeVisible()
   await expectPlayerCookie(page)
 
   await page.goto('/games/shape-architect')
   await expectHydrated(page)
   await expect(page.getByRole('heading', { name: 'Blueprint' })).toBeVisible()
-  await page.getByRole('button', { name: 'Apply Solution' }).click()
-  await expect(page.getByText(/Solved in .*; saved attempt/)).toBeVisible()
+  await page.getByRole('button', { name: 'Check' }).click()
+  await expect(page.getByText(/Saved attempt \d+; best score/)).toBeVisible()
 
   expectNoRuntimeErrors(errors)
 })
@@ -153,7 +153,7 @@ test('profile round-trip: saved values persist across page reload', async ({
   await page.getByLabel('Language').selectOption('vi')
   await page.getByLabel('Grade band').selectOption('high')
   await page.getByRole('button', { name: 'Save Profile' }).click()
-  await expect(page.getByText('Profile saved to D1.')).toBeVisible()
+  await expect(page.getByText('Profile saved.')).toBeVisible()
 
   await page.reload()
   await expectHydrated(page)
@@ -198,12 +198,12 @@ test('score recording reflects in profile progress', async ({ page }) => {
   const name = `Score ${Date.now()}`
   await page.getByLabel('Display name').fill(name)
   await page.getByRole('button', { name: 'Save Profile' }).click()
-  await expect(page.getByText('Profile saved to D1.')).toBeVisible()
+  await expect(page.getByText('Profile saved.')).toBeVisible()
 
   // Play a game and record progress
   await page.goto('/games/magic-graph')
   await expectHydrated(page)
-  await page.getByRole('button', { name: 'Apply Solution' }).click()
+  await page.getByRole('button', { name: 'Check' }).click()
   await expect(page.getByText(/Saved attempt \d+; best score/)).toBeVisible()
 
   // Check profile shows progress

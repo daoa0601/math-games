@@ -20,8 +20,6 @@ export class ShapeArchitectCompletion extends Schema.Class<ShapeArchitectComplet
       }),
     }),
   ).pipe(
-    Schema.check(
-      Schema.isMaxLength(64, { message: 'Too many placements' }),
-    ),
+    Schema.check(Schema.isMaxLength(64, { message: 'Too many placements' })),
   ),
 }) {}

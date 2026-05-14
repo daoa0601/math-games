@@ -725,10 +725,7 @@ describe('solvePuzzle - constraint propagation', () => {
         { x: 2, y: 1, z: 0 },
         { x: 3, y: 1, z: 0 },
       ],
-      pieces: [
-        createOBlock('o1'),
-        createOBlock('o2'),
-      ],
+      pieces: [createOBlock('o1'), createOBlock('o2')],
     })
 
     const result = solvePuzzle(level, 5000)

@@ -9,6 +9,5 @@ export const ClockService = Context.Service<ClockShape>('ClockService')
 
 export const ClockServiceLive = Layer.succeed(ClockService, {
   now: () => Effect.sync(() => new Date()),
-  dateKey: () =>
-    Effect.sync(() => new Date().toISOString().slice(0, 10)),
+  dateKey: () => Effect.sync(() => new Date().toISOString().slice(0, 10)),
 })

@@ -30,7 +30,7 @@ export default defineConfig({
     command:
       'pnpm exec wrangler d1 migrations apply DB --local && pnpm dev --host 127.0.0.1',
     reuseExistingServer: !isCi,
-    timeout: 120_000,
+    timeout: 180_000,
     url: 'http://127.0.0.1:3000',
   },
 })

@@ -7,12 +7,7 @@ import { Effect } from 'effect'
 
 import { SolverTimeoutError } from '@/services/errors'
 
-import type {
-  LevelConfig,
-  Piece,
-  Position3D,
-  Rotation3D,
-} from './types'
+import type { LevelConfig, Piece, Position3D, Rotation3D } from './types'
 import {
   initializeGrid,
   rotatePieceLayout3D,
@@ -179,9 +174,12 @@ function hasDisconnectedUnsolvableRegion(
   const regionSizes: number[] = []
 
   const directions: Position3D[] = [
-    { x: 1, y: 0, z: 0 }, { x: -1, y: 0, z: 0 },
-    { x: 0, y: 1, z: 0 }, { x: 0, y: -1, z: 0 },
-    { x: 0, y: 0, z: 1 }, { x: 0, y: 0, z: -1 },
+    { x: 1, y: 0, z: 0 },
+    { x: -1, y: 0, z: 0 },
+    { x: 0, y: 1, z: 0 },
+    { x: 0, y: -1, z: 0 },
+    { x: 0, y: 0, z: 1 },
+    { x: 0, y: 0, z: -1 },
   ]
 
   for (const start of unfilled) {
@@ -197,7 +195,11 @@ function hasDisconnectedUnsolvableRegion(
       size++
 
       for (const d of directions) {
-        const next: Position3D = { x: curr.x + d.x, y: curr.y + d.y, z: curr.z + d.z }
+        const next: Position3D = {
+          x: curr.x + d.x,
+          y: curr.y + d.y,
+          z: curr.z + d.z,
+        }
         const nk = keyOf(next)
         if (!visited.has(nk) && unfilledSet.has(nk)) {
           visited.add(nk)
@@ -214,7 +216,9 @@ function hasDisconnectedUnsolvableRegion(
 
   // Check: can each region's volume be formed by summing some subset of
   // remaining piece sizes? Use the smallest region as a quick check.
-  const pieceSizes = remainingPieces.map((p) => p.layout.length).sort((a, b) => a - b)
+  const pieceSizes = remainingPieces
+    .map((p) => p.layout.length)
+    .sort((a, b) => a - b)
   const minPieceSize = pieceSizes.length > 0 ? pieceSizes[0] : 1
 
   for (const regionSize of regionSizes) {
@@ -310,7 +314,12 @@ export function solvePuzzle(
             // Constraint propagation: prune if disconnected unsolvable region
             if (
               newRemaining.length > 0 &&
-              hasDisconnectedUnsolvableRegion(newGrid, level.targetVoxels, newRemaining, level.gridSize)
+              hasDisconnectedUnsolvableRegion(
+                newGrid,
+                level.targetVoxels,
+                newRemaining,
+                level.gridSize,
+              )
             ) {
               continue
             }

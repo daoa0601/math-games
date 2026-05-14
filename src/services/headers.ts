@@ -12,8 +12,7 @@ export interface HeaderShape {
 export const HeaderService = Context.Service<HeaderShape>('HeaderService')
 
 export const HeaderServiceLive = Layer.succeed(HeaderService, {
-  getRequest: (name) =>
-    Effect.sync(() => getRequestHeader(name) ?? null),
+  getRequest: (name) => Effect.sync(() => getRequestHeader(name) ?? null),
   setResponse: (name, value) =>
     Effect.sync(() => setResponseHeader(name, value)),
 })

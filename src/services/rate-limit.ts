@@ -1,4 +1,4 @@
-import { Context, Effect, Layer } from 'effect'
+import { Context, Effect, Layer, SynchronizedRef } from 'effect'
 
 import { ClockService } from './clock'
 import { RateLimitError } from './errors'
@@ -7,7 +7,7 @@ const WINDOW_MS = 250
 const RETENTION_MS = 60_000
 const MAX_ENTRIES = 1024
 
-const lastWriteAt = new Map<string, number>()
+type RateLimitState = ReadonlyMap<string, number>
 
 export interface RateLimitShape {
   readonly assert: (key: string) => Effect.Effect<void, RateLimitError>
@@ -18,25 +18,42 @@ export const RateLimitService =
 
 export const RateLimitServiceLive = Layer.effect(
   RateLimitService,
-  Effect.map(ClockService, (clock) => ({
-    assert: (key: string) =>
-      Effect.gen(function* () {
-        const date = yield* clock.now()
-        const now = date.getTime()
-        const previous = lastWriteAt.get(key)
+  Effect.gen(function* () {
+    const clock = yield* ClockService
+    const lastWriteAt = yield* SynchronizedRef.make<RateLimitState>(new Map())
 
-        if (previous !== undefined && now - previous < WINDOW_MS) {
-          return yield* new RateLimitError({ key })
-        }
+    return {
+      assert: (key: string) =>
+        Effect.gen(function* () {
+          const date = yield* clock.now()
+          const now = date.getTime()
 
-        lastWriteAt.set(key, now)
+          const blocked = yield* SynchronizedRef.modify(
+            lastWriteAt,
+            (entries) => {
+              const previous = entries.get(key)
 
-        if (lastWriteAt.size > MAX_ENTRIES) {
-          const cutoff = now - RETENTION_MS
-          for (const [k, t] of lastWriteAt) {
-            if (t < cutoff) lastWriteAt.delete(k)
-          }
-        }
-      }),
-  })),
+              if (previous !== undefined && now - previous < WINDOW_MS) {
+                return [true, entries] as const
+              }
+
+              const next = new Map(entries)
+              next.set(key, now)
+
+              if (next.size > MAX_ENTRIES) {
+                const cutoff = now - RETENTION_MS
+
+                for (const [k, t] of next) {
+                  if (t < cutoff) next.delete(k)
+                }
+              }
+
+              return [false, next] as const
+            },
+          )
+
+          if (blocked) return yield* new RateLimitError({ key })
+        }),
+    }
+  }),
 )

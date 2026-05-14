@@ -39,7 +39,10 @@ export class VoxelGrid {
     return new VoxelGrid(size[0], size[1], size[2])
   }
 
-  static fromLevel(targetVoxels: Position3D[], size: [number, number, number]): VoxelGrid {
+  static fromLevel(
+    targetVoxels: Position3D[],
+    size: [number, number, number],
+  ): VoxelGrid {
     const grid = VoxelGrid.create(size)
     for (const pos of targetVoxels) {
       if (grid.inBounds(pos.x, pos.y, pos.z)) {

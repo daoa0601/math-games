@@ -5,11 +5,8 @@ export class GameProgressRequest extends Schema.Class<GameProgressRequest>(
 )({
   levelId: Schema.NonEmptyString,
   completion: Schema.Unknown.check(
-    Schema.makeFilter<unknown>(
-      (v) =>
-        v !== null && v !== undefined
-          ? undefined
-          : 'Missing completion payload',
+    Schema.makeFilter<unknown>((v) =>
+      v !== null && v !== undefined ? undefined : 'Missing completion payload',
     ),
   ),
 }) {}

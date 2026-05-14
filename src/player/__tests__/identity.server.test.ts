@@ -1,16 +1,21 @@
+import { Effect, Layer } from 'effect'
 import { describe, expect, it } from 'vitest'
 
 import {
   createPlayerId,
   createPlayerIdentity,
   defaultPlayerIdentity,
-  getCurrentPlayerId,
-  getCurrentPlayerIdentity,
   localPlayerId,
   parsePlayerIdCookie,
   playerCookieName,
   serializePlayerIdCookie,
 } from '../identity.server'
+import {
+  HeaderService,
+  PlayerIdentityService,
+  PlayerIdentityServiceLive,
+  RandomService,
+} from '@/services'
 
 describe('player identity boundary', () => {
   const uuid = '123e4567-e89b-42d3-a456-426614174000'
@@ -51,9 +56,35 @@ describe('player identity boundary', () => {
     )
   })
 
-  it('uses the request cookie identity when present', () => {
-    const identity = getCurrentPlayerIdentity({
-      cookieHeader: `${playerCookieName}=${playerId}`,
+  function runPlayerIdentityService(headers: Record<string, string | null>) {
+    const responseHeaders: Record<string, string> = {}
+    const headerLayer = Layer.succeed(HeaderService, {
+      getRequest: (name) => Effect.succeed(headers[name] ?? null),
+      setResponse: (name, value) =>
+        Effect.sync(() => {
+          responseHeaders[name] = value
+        }),
+    })
+    const randomLayer = Layer.succeed(RandomService, {
+      uuid: () => Effect.succeed(uuid),
+    })
+    const serviceLayer = PlayerIdentityServiceLive.pipe(
+      Layer.provide(Layer.merge(headerLayer, randomLayer)),
+    )
+
+    return Effect.runPromise(
+      Effect.gen(function* () {
+        const service = yield* PlayerIdentityService
+        const identity = yield* service.resolve()
+
+        return { identity, responseHeaders }
+      }).pipe(Effect.provide(serviceLayer)),
+    )
+  }
+
+  it('uses the request cookie identity when present', async () => {
+    const { identity, responseHeaders } = await runPlayerIdentityService({
+      cookie: `${playerCookieName}=${playerId}`,
     })
 
     expect(identity).toEqual({
@@ -61,21 +92,19 @@ describe('player identity boundary', () => {
       id: playerId,
       displayName: 'Guest 123e4567',
     })
-    expect(
-      getCurrentPlayerId({ cookieHeader: `${playerCookieName}=${playerId}` }),
-    ).toBe(playerId)
+    expect(responseHeaders).toEqual({})
   })
 
-  it('creates and persists a player cookie when missing', () => {
-    const persistedCookies: string[] = []
-    const identity = getCurrentPlayerIdentity({
-      cookieHeader: null,
-      createUuid: () => uuid,
-      persistCookie: (cookie) => persistedCookies.push(cookie),
+  it('creates and persists a player cookie when missing', async () => {
+    const { identity, responseHeaders } = await runPlayerIdentityService({
+      cookie: null,
+      host: null,
     })
 
     expect(identity.id).toBe(playerId)
     expect(identity.displayName).toBe('Guest 123e4567')
-    expect(persistedCookies).toEqual([serializePlayerIdCookie(playerId)])
+    expect(responseHeaders).toEqual({
+      'set-cookie': serializePlayerIdCookie(playerId),
+    })
   })
 })

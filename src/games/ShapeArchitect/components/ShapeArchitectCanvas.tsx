@@ -8,7 +8,10 @@ import type {
   Rotation3D,
 } from '../logic/types'
 import type { VoxelGrid } from '../logic/voxel-grid'
-import { canPlacePiece, getPieceWorldPositions } from '../logic/engine'
+import {
+  findNearestValidPosition,
+  getPieceWorldPositions,
+} from '../logic/engine'
 import {
   computeIsoConfig,
   drawIsoCube,
@@ -16,7 +19,7 @@ import {
   screenToIso,
 } from '../rendering/isometric'
 
-export type ViewMode = '2d' | 'iso' | '3d'
+export type ViewMode = '2d' | 'iso'
 
 interface ShapeArchitectCanvasProps {
   grid: VoxelGrid
@@ -25,20 +28,26 @@ interface ShapeArchitectCanvasProps {
   selectedPiece: Piece | null
   placementRotation: Rotation3D
   onCellClick: (position: Position3D) => void
+  pendingPosition?: Position3D | null
   viewMode?: ViewMode
   visibleLayers?: Set<number>
   explodedGap?: number
 }
 
-const CELL_COLORS = {
-  empty: '#ffffff',
-  target: '#f5f5f5',
-  border: '#e5e5e5',
-  targetBorder: '#0a0a0a',
-  filledBorder: '#0a0a0a',
-  ghostValid: 'rgba(59, 130, 246, 0.30)',
-  ghostInvalid: 'rgba(239, 68, 68, 0.20)',
-} as const
+function getThemeColors() {
+  const style = getComputedStyle(document.documentElement)
+  const isDark = document.documentElement.classList.contains('dark')
+  return {
+    empty: style.getPropertyValue('--card').trim() || (isDark ? '#1a1f2e' : '#ffffff'),
+    target: isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb',
+    border: isDark ? 'rgba(255,255,255,0.10)' : '#e5e5e5',
+    targetBorder: isDark ? 'rgba(255,255,255,0.30)' : '#0a0a0a',
+    filledBorder: isDark ? 'rgba(255,255,255,0.40)' : '#0a0a0a',
+    ghostValid: isDark ? 'rgba(59, 130, 246, 0.40)' : 'rgba(59, 130, 246, 0.30)',
+    ghostInvalid: isDark ? 'rgba(239, 68, 68, 0.35)' : 'rgba(239, 68, 68, 0.20)',
+    background: isDark ? '#1a1f2e' : '#fafafa',
+  }
+}
 
 const PADDING = 1
 const MIN_CELL_SIZE = 24
@@ -58,8 +67,8 @@ function screenToGrid(
   const rect = canvas.getBoundingClientRect()
   const cssX = clientX - rect.left - PADDING
   const cssY = clientY - rect.top - PADDING
-  const x = Math.floor(cssX / (cellSize))
-  const y = Math.floor(cssY / (cellSize))
+  const x = Math.floor(cssX / cellSize)
+  const y = Math.floor(cssY / cellSize)
   return x >= 0 && y >= 0 ? { x, y } : null
 }
 
@@ -93,6 +102,7 @@ function drawFlat2D(
   ghostSet: Set<string>,
   ghostIsValid: boolean,
   cellSize: number,
+  colors: ReturnType<typeof getThemeColors>,
 ) {
   const [width, height] = config.gridSize
   const colorLookup = createColorLookup(config, placedPieces, false)
@@ -106,16 +116,26 @@ function drawFlat2D(
       const isTarget = targetSet.has(key)
       const color = colorLookup.get(key)
 
-      ctx.fillStyle = color ?? (isTarget ? CELL_COLORS.target : CELL_COLORS.empty)
+      ctx.fillStyle =
+        color ?? (isTarget ? colors.target : colors.empty)
       ctx.fillRect(px, py, cellSize, cellSize)
 
       ctx.strokeStyle =
-        cellState === 2 || isTarget ? CELL_COLORS.targetBorder : CELL_COLORS.border
-      ctx.lineWidth = 1
-      ctx.strokeRect(px + 0.5, py + 0.5, cellSize - 1, cellSize - 1)
+        cellState === 2 || isTarget
+          ? colors.targetBorder
+          : colors.border
+      ctx.lineWidth = cellState === 2 || isTarget ? 2 : 1
+      ctx.strokeRect(
+        px + ctx.lineWidth / 2,
+        py + ctx.lineWidth / 2,
+        cellSize - ctx.lineWidth,
+        cellSize - ctx.lineWidth,
+      )
 
       if (ghostSet.has(key) && cellState !== 2) {
-        ctx.fillStyle = ghostIsValid ? CELL_COLORS.ghostValid : CELL_COLORS.ghostInvalid
+        ctx.fillStyle = ghostIsValid
+          ? colors.ghostValid
+          : colors.ghostInvalid
         ctx.fillRect(px + 1, py + 1, cellSize - 2, cellSize - 2)
       }
     }
@@ -137,12 +157,12 @@ function drawIsometric(
   explodedGap: number,
   ghostSet: Set<string>,
   ghostIsValid: boolean,
+  isDark: boolean,
 ) {
   const [gw, gh, gd] = config.gridSize
   const isoCfg = computeIsoConfig(gw, gh, gd, canvasWidth, canvasHeight)
   const colorLookup = createColorLookup(config, placedPieces, true)
 
-  // Draw bottom-to-top, back-to-front (painter's algorithm)
   for (let z = 0; z < gd; z++) {
     if (!visibleLayers.has(z)) continue
     const zOffset = z * explodedGap
@@ -154,8 +174,7 @@ function drawIsometric(
         const drawZ = z + zOffset
 
         if (state === 1) {
-          // Target cell — wireframe
-          drawIsoWireframe(ctx, x, y, drawZ, isoCfg, 'rgba(0,0,0,0.25)')
+          drawIsoWireframe(ctx, x, y, drawZ, isoCfg, isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.25)')
         } else if (state === 2) {
           const color = colorLookup.get(key3) ?? '#999999'
           drawIsoCube(ctx, x, y, drawZ, color, isoCfg)
@@ -188,36 +207,41 @@ export function ShapeArchitectCanvas({
   selectedPiece,
   placementRotation,
   onCellClick,
+  pendingPosition = null,
   viewMode = '2d',
   visibleLayers,
   explodedGap = 0,
 }: ShapeArchitectCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [hoveredCell, setHoveredCell] = useState<{ x: number; y: number } | null>(null)
+  const [hoveredCell, setHoveredCell] = useState<{
+    x: number
+    y: number
+  } | null>(null)
   const [containerWidth, setContainerWidth] = useState(520)
+  const [dpr, setDpr] = useState(1)
 
   const [width, height, depth] = config.gridSize
-  const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1
 
   // Compute all visible layers (default: all)
-  const layers = visibleLayers ?? new Set(Array.from({ length: depth }, (_, i) => i))
+  const layers =
+    visibleLayers ?? new Set(Array.from({ length: depth }, (_, i) => i))
 
-  // Canvas sizing depends on view mode
-  const cellSize = getCellSize(containerWidth * dpr, width)
+  // Canvas sizing is computed in CSS pixels, then scaled for high-DPI drawing.
+  const cellSize = getCellSize(containerWidth, width)
   const isIso = viewMode === 'iso'
-  const canvasW = isIso
-    ? Math.max(400, containerWidth * dpr)
+  const canvasCssW = isIso
+    ? Math.max(400, containerWidth)
     : cellSize * width + PADDING * 2
-  const canvasH = isIso
-    ? Math.max(300, Math.round(canvasW * 0.75))
+  const canvasCssH = isIso
+    ? Math.max(300, Math.round(canvasCssW * 0.75))
     : cellSize * height + PADDING * 2
+  const canvasW = Math.round(canvasCssW * dpr)
+  const canvasH = Math.round(canvasCssH * dpr)
 
   const targetSet = useRef(new Set<string>())
   useEffect(() => {
-    targetSet.current = new Set(
-      config.targetVoxels.map((p) => `${p.x},${p.y}`),
-    )
+    targetSet.current = new Set(config.targetVoxels.map((p) => `${p.x},${p.y}`))
   }, [config.targetVoxels])
 
   useEffect(() => {
@@ -232,15 +256,33 @@ export function ShapeArchitectCanvas({
     return () => observer.disconnect()
   }, [])
 
+  useEffect(() => {
+    setDpr(window.devicePixelRatio || 1)
+  }, [])
+
   // Ghost piece positions
   const ghostPositions = useRef<Position3D[] | null>(null)
   const ghostValid = useRef(false)
 
-  if (selectedPiece && hoveredCell) {
-    const pos: Position3D = { x: hoveredCell.x, y: hoveredCell.y, z: 0 }
-    const worldPositions = getPieceWorldPositions(selectedPiece, pos, placementRotation)
+  const ghostSource = hoveredCell
+    ? { x: hoveredCell.x, y: hoveredCell.y, z: 0 }
+    : pendingPosition
+
+  if (selectedPiece && ghostSource) {
+    const placementPosition = findNearestValidPosition(
+      grid,
+      selectedPiece,
+      ghostSource,
+      placementRotation,
+      config.gridSize,
+    )
+    const worldPositions = getPieceWorldPositions(
+      selectedPiece,
+      placementPosition ?? ghostSource,
+      placementRotation,
+    )
     ghostPositions.current = worldPositions
-    ghostValid.current = canPlacePiece(grid, selectedPiece, pos, placementRotation, config.gridSize)
+    ghostValid.current = placementPosition !== null
   } else {
     ghostPositions.current = null
   }
@@ -251,12 +293,14 @@ export function ShapeArchitectCanvas({
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    ctx.clearRect(0, 0, canvasW, canvasH)
+    const colors = getThemeColors()
 
-    // Fill background for iso mode (wireframes invisible on transparent bg)
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.clearRect(0, 0, canvasCssW, canvasCssH)
+
     if (isIso) {
-      ctx.fillStyle = '#fafafa'
-      ctx.fillRect(0, 0, canvasW, canvasH)
+      ctx.fillStyle = colors.background
+      ctx.fillRect(0, 0, canvasCssW, canvasCssH)
     }
 
     const ghostSet = new Set<string>()
@@ -268,17 +312,49 @@ export function ShapeArchitectCanvas({
 
     if (isIso) {
       drawIsometric(
-        ctx, grid, config, placedPieces,
-        canvasW, canvasH, layers, explodedGap,
-        ghostSet, ghostValid.current,
+        ctx,
+        grid,
+        config,
+        placedPieces,
+        canvasCssW,
+        canvasCssH,
+        layers,
+        explodedGap,
+        ghostSet,
+        ghostValid.current,
+        document.documentElement.classList.contains('dark'),
       )
     } else {
       drawFlat2D(
-        ctx, grid, config, placedPieces,
-        targetSet.current, ghostSet, ghostValid.current, cellSize,
+        ctx,
+        grid,
+        config,
+        placedPieces,
+        targetSet.current,
+        ghostSet,
+        ghostValid.current,
+        cellSize,
+        colors,
       )
     }
-  }, [canvasW, canvasH, grid, config, placedPieces, cellSize, hoveredCell, selectedPiece, isIso, layers, explodedGap])
+  }, [
+    canvasW,
+    canvasH,
+    canvasCssW,
+    canvasCssH,
+    dpr,
+    grid,
+    config,
+    placedPieces,
+    cellSize,
+    hoveredCell,
+    pendingPosition,
+    selectedPiece,
+    placementRotation,
+    isIso,
+    layers,
+    explodedGap,
+  ])
 
   useEffect(() => {
     draw()
@@ -291,9 +367,15 @@ export function ShapeArchitectCanvas({
 
       if (isIso) {
         const rect = canvas.getBoundingClientRect()
-        const sx = (e.clientX - rect.left) * dpr
-        const sy = (e.clientY - rect.top) * dpr
-        const isoCfg = computeIsoConfig(width, height, depth, canvasW, canvasH)
+        const sx = e.clientX - rect.left
+        const sy = e.clientY - rect.top
+        const isoCfg = computeIsoConfig(
+          width,
+          height,
+          depth,
+          canvasCssW,
+          canvasCssH,
+        )
         const cell = screenToIso(sx, sy, 0, isoCfg)
         if (cell.x >= 0 && cell.x < width && cell.y >= 0 && cell.y < height) {
           onCellClick({ x: cell.x, y: cell.y, z: 0 })
@@ -305,7 +387,16 @@ export function ShapeArchitectCanvas({
         }
       }
     },
-    [cellSize, width, height, depth, canvasW, canvasH, dpr, isIso, onCellClick],
+    [
+      cellSize,
+      width,
+      height,
+      depth,
+      canvasCssW,
+      canvasCssH,
+      isIso,
+      onCellClick,
+    ],
   )
 
   const handleMouseMove = useCallback(
@@ -317,9 +408,15 @@ export function ShapeArchitectCanvas({
 
       if (isIso) {
         const rect = canvas.getBoundingClientRect()
-        const sx = (e.clientX - rect.left) * dpr
-        const sy = (e.clientY - rect.top) * dpr
-        const isoCfg = computeIsoConfig(width, height, depth, canvasW, canvasH)
+        const sx = e.clientX - rect.left
+        const sy = e.clientY - rect.top
+        const isoCfg = computeIsoConfig(
+          width,
+          height,
+          depth,
+          canvasCssW,
+          canvasCssH,
+        )
         const iso = screenToIso(sx, sy, 0, isoCfg)
         if (iso.x >= 0 && iso.x < width && iso.y >= 0 && iso.y < height) {
           cell = iso
@@ -337,7 +434,7 @@ export function ShapeArchitectCanvas({
         setHoveredCell(null)
       }
     },
-    [cellSize, width, height, depth, canvasW, canvasH, dpr, isIso],
+    [cellSize, width, height, depth, canvasCssW, canvasCssH, isIso],
   )
 
   const handleMouseLeave = useCallback(() => {
@@ -353,27 +450,44 @@ export function ShapeArchitectCanvas({
 
       if (isIso) {
         const rect = canvas.getBoundingClientRect()
-        const sx = (touch.clientX - rect.left) * dpr
-        const sy = (touch.clientY - rect.top) * dpr
-        const isoCfg = computeIsoConfig(width, height, depth, canvasW, canvasH)
+        const sx = touch.clientX - rect.left
+        const sy = touch.clientY - rect.top
+        const isoCfg = computeIsoConfig(
+          width,
+          height,
+          depth,
+          canvasCssW,
+          canvasCssH,
+        )
         const cell = screenToIso(sx, sy, 0, isoCfg)
         if (cell.x >= 0 && cell.x < width && cell.y >= 0 && cell.y < height) {
           e.preventDefault()
           onCellClick({ x: cell.x, y: cell.y, z: 0 })
         }
       } else {
-        const cell = screenToGrid(touch.clientX, touch.clientY, canvas, cellSize)
+        const cell = screenToGrid(
+          touch.clientX,
+          touch.clientY,
+          canvas,
+          cellSize,
+        )
         if (cell && cell.x < width && cell.y < height) {
           e.preventDefault()
           onCellClick({ x: cell.x, y: cell.y, z: 0 })
         }
       }
     },
-    [cellSize, width, height, depth, canvasW, canvasH, dpr, isIso, onCellClick],
+    [
+      cellSize,
+      width,
+      height,
+      depth,
+      canvasCssW,
+      canvasCssH,
+      isIso,
+      onCellClick,
+    ],
   )
-
-  const cssWidth = canvasW / dpr
-  const cssHeight = canvasH / dpr
 
   return (
     <div ref={containerRef} className="max-w-[520px]">
@@ -382,8 +496,8 @@ export function ShapeArchitectCanvas({
         width={canvasW}
         height={canvasH}
         style={{
-          width: cssWidth,
-          height: cssHeight,
+          width: canvasCssW,
+          height: canvasCssH,
           cursor: selectedPiece ? 'crosshair' : 'default',
         }}
         onClick={handleClick}

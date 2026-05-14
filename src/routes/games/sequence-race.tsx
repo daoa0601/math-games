@@ -1,13 +1,24 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { Confetti } from '@/components/confetti'
+import { GamePattern } from '@/components/game-pattern'
+import { LanguageToggle } from '@/components/language-toggle'
+import { LearnSection } from '@/components/learn-section'
+import { ResponsiveSection } from '@/components/responsive-section'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { validateLevelSearch } from '@/games/level-search'
 import {
   applyMove,
   createGameState,
   getAIMove,
   getValidMoves,
+  isHumanTurn,
 } from '@/games/SequenceRace/logic'
 import type {
   GameConfig,
@@ -20,6 +31,11 @@ import {
   getSequenceRaceLevel,
   recordSequenceRaceProgress,
 } from '@/games/SequenceRace/sequence-race.functions'
+import {
+  formatSavedProgress,
+  runServerAction,
+} from '@/routes/-server-action-result'
+import { useT } from '@/components/use-t'
 
 export const Route = createFileRoute('/games/sequence-race')({
   validateSearch: validateLevelSearch,
@@ -27,7 +43,10 @@ export const Route = createFileRoute('/games/sequence-race')({
   component: SequenceRaceRoute,
 })
 
+const AI_MOVE_DELAY_MS = 650
+
 function SequenceRaceRoute() {
+  const t = useT()
   const { configs, initialConfigId, sequenceInfoByType } = Route.useLoaderData()
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordSequenceRaceProgress)
@@ -52,8 +71,10 @@ function SequenceRaceRoute() {
   const sequenceType = config.sequenceType ?? 'arithmetic'
   const sequenceInfo: SequenceInfo = sequenceInfoByType[sequenceType]
   const [game, setGame] = useState(() => createGameState(config))
+  const [aiThinking, setAiThinking] = useState(false)
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
   const validMoves = useMemo(() => getValidMoves(game), [game])
+  const humanTurn = isHumanTurn(game)
 
   useEffect(() => {
     if (!requestedLevelId) return
@@ -66,64 +87,86 @@ function SequenceRaceRoute() {
 
     setSelectedLevelId(nextConfig.id)
     setGame(createGameState(nextConfig))
+    setAiThinking(false)
     setSaveStatus(null)
   }, [availableConfigs, requestedLevelId, selectedLevelId])
 
   const progressPercent = Math.round((game.currentPosition / game.target) * 100)
 
-  async function finishTurn(nextGame: SequenceState) {
-    setGame(nextGame)
+  const finishTurn = useCallback(
+    async function finishTurn(nextGame: SequenceState) {
+      setGame(nextGame)
 
-    if (!nextGame.gameOver) {
-      setSaveStatus(null)
+      if (!nextGame.gameOver) {
+        setSaveStatus(null)
+        return
+      }
+
+      const result = await runServerAction(
+        () =>
+          recordProgress({
+            data: {
+              levelId: config.id,
+              completion: {
+                history: nextGame.history.map((entry) => ({
+                  actor: entry.actor,
+                  step: entry.step,
+                })),
+              },
+            },
+          }),
+        'Progress save failed.',
+      )
+
+      if (!result.ok) {
+        setSaveStatus(result.message)
+        return
+      }
+
+      setSaveStatus(formatSavedProgress(result.value))
+    },
+    [config.id, recordProgress],
+  )
+
+  useEffect(() => {
+    if (game.gameOver || game.turn !== 'ai') {
+      setAiThinking(false)
       return
     }
 
-    try {
-      const progress = await recordProgress({
-        data: {
-          levelId: config.id,
-          completion: {
-            history: nextGame.history.map((entry) => ({
-              actor: entry.actor,
-              step: entry.step,
-            })),
-          },
-        },
-      })
-      const unlocked =
-        progress.unlockedAchievements.length > 0
-          ? ` Unlocked ${progress.unlockedAchievements.join(', ')}.`
-          : ''
-      setSaveStatus(
-        `Saved attempt ${progress.attempts}; best score ${progress.bestScore}.${unlocked}`,
-      )
-    } catch (error) {
-      setSaveStatus(
-        error instanceof Error ? error.message : 'Progress save failed.',
-      )
+    setAiThinking(true)
+
+    const timer = window.setTimeout(() => {
+      const aiMove = getAIMove(game, config.difficulty)
+      const nextGame = applyMove(game, aiMove)
+
+      setAiThinking(false)
+      void finishTurn(nextGame)
+    }, AI_MOVE_DELAY_MS)
+
+    return () => {
+      window.clearTimeout(timer)
     }
-  }
+  }, [config.difficulty, finishTurn, game])
 
   async function playMove(step: number) {
-    let nextGame = applyMove(game, step)
+    if (!humanTurn || aiThinking) return
 
-    if (!nextGame.gameOver && nextGame.turn === 'ai') {
-      const aiMove = getAIMove(nextGame, config.difficulty)
-      nextGame = applyMove(nextGame, aiMove)
-    }
+    const nextGame = applyMove(game, step)
 
     await finishTurn(nextGame)
   }
 
   function resetGame() {
     setGame(createGameState(config))
+    setAiThinking(false)
     setSaveStatus(null)
   }
 
   function selectLevel(nextLevel: GameConfig) {
     setSelectedLevelId(nextLevel.id)
     setGame(createGameState(nextLevel))
+    setAiThinking(false)
     setSaveStatus(null)
   }
 
@@ -139,113 +182,122 @@ function SequenceRaceRoute() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-6 py-8 text-neutral-950">
-      <header className="flex flex-col gap-4 border-b border-neutral-300 pb-6 md:flex-row md:items-end md:justify-between">
-        <div>
+    <main className="theme-sequence-race mx-auto flex min-h-screen max-w-5xl flex-col gap-5 px-4 py-6 md:gap-8 md:px-6 md:py-8">
+      <header className="flex items-center justify-between gap-3 border-b border-border pb-3">
+        <div className="flex items-center gap-3 overflow-hidden">
           <Link
-            className="text-sm text-neutral-600 hover:text-neutral-950"
+            className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
             to="/"
           >
-            Math Games
+            {t('app.title')}
           </Link>
-          <h1 className="mt-3 text-4xl font-semibold">{config.name}</h1>
-          <p className="mt-2 max-w-2xl text-neutral-700">
-            {sequenceInfo.name}: {sequenceInfo.description}
-          </p>
+          <span className="text-muted-foreground">/</span>
+          <h1 className="truncate text-lg font-semibold md:text-2xl">
+            {config.name}
+          </h1>
         </div>
-        <div className="border border-neutral-300 px-4 py-3 text-sm">
-          <div className="font-semibold uppercase text-neutral-500">Target</div>
-          <div className="text-3xl font-semibold">{config.target}</div>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="rounded-md bg-primary/10 px-2 py-1 text-sm font-semibold text-primary">
+            {t('game.target')} {config.target}
+          </span>
+          <LanguageToggle />
+          <ThemeToggle />
         </div>
       </header>
 
-      <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
-        <div className="border border-neutral-300 p-5">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-semibold">Race Line</h2>
-            <span className="text-sm text-neutral-600">
-              {game.currentPosition} / {game.target}
-            </span>
-          </div>
-
-          <div className="mt-5 h-4 border border-neutral-950">
-            <div
-              className="h-full bg-neutral-950 transition-[width]"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {sequence.map((step, index) => (
-              <button
-                className="border border-neutral-950 px-4 py-4 text-left text-lg font-semibold disabled:border-neutral-200 disabled:text-neutral-300"
-                disabled={game.gameOver || !validMoves.includes(step)}
-                key={`${step}-${index}`}
-                onClick={() => void playMove(step)}
-                type="button"
-              >
-                +{step}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <aside className="border border-neutral-300 p-5">
-          <h2 className="text-xl font-semibold">Run</h2>
-          <dl className="mt-4 grid gap-3 text-sm">
-            <div className="flex justify-between border-b border-neutral-200 pb-2">
-              <dt className="text-neutral-600">Difficulty</dt>
-              <dd className="font-medium capitalize">{config.difficulty}</dd>
+      <section className="relative grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
+        <Confetti active={game.winner === 'player'} colors={['#f97316', '#fb923c', '#fdba74', '#ea580c', '#fbbf24']} />
+        <Card className="relative overflow-hidden">
+          <GamePattern pattern="arrows" />
+          <CardContent className="relative">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-xl font-semibold">{t('game.raceLine')}</h2>
+              <span className="text-sm text-muted-foreground">
+                {game.currentPosition} / {game.target}
+              </span>
             </div>
-            <div className="flex justify-between border-b border-neutral-200 pb-2">
-              <dt className="text-neutral-600">Formula</dt>
-              <dd className="font-medium">{sequenceInfo.formula}</dd>
-            </div>
-            <div className="flex justify-between border-b border-neutral-200 pb-2">
-              <dt className="text-neutral-600">Turn</dt>
-              <dd className="font-medium capitalize">{game.turn}</dd>
-            </div>
-            <div className="flex justify-between border-b border-neutral-200 pb-2">
-              <dt className="text-neutral-600">Winner</dt>
-              <dd className="font-medium capitalize">{game.winner ?? '-'}</dd>
-            </div>
-          </dl>
 
-          <button
-            className="mt-5 w-full border border-neutral-950 px-4 py-3 font-semibold"
-            onClick={resetGame}
-            type="button"
-          >
-            Reset
-          </button>
+            <Progress className="mt-5 h-4" value={progressPercent} />
 
-          {saveStatus ? (
-            <p className="mt-4 border-t border-neutral-200 pt-4 text-sm text-neutral-700">
-              {saveStatus}
-            </p>
-          ) : null}
-        </aside>
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {sequence.map((step, index) => (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="py-4 text-lg"
+                  disabled={
+                    game.gameOver ||
+                    aiThinking ||
+                    !humanTurn ||
+                    !validMoves.includes(step)
+                  }
+                  key={`${step}-${index}`}
+                  onClick={() => void playMove(step)}
+                  type="button"
+                >
+                  +{step}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Badge variant={aiThinking ? 'secondary' : 'default'}>
+                  {aiThinking ? 'AI thinking' : game.turn}
+                </Badge>
+                {game.winner ? (
+                  <Badge
+                    variant={
+                      game.winner === 'player' || game.winner === 'player1'
+                        ? 'default'
+                        : 'secondary'
+                    }
+                  >
+                    {game.winner} {t('game.wins')}
+                  </Badge>
+                ) : null}
+              </div>
+              <span className="text-sm text-muted-foreground capitalize">
+                {config.difficulty} · {sequenceInfo.formula}
+              </span>
+            </div>
+
+            <Button
+              variant="outline"
+              className="mt-4 w-full"
+              onClick={resetGame}
+              type="button"
+            >
+              {t('game.reset')}
+            </Button>
+
+            {saveStatus ? (
+              <p className="mt-3 text-sm text-muted-foreground">{saveStatus}</p>
+            ) : null}
+          </CardContent>
+        </Card>
       </section>
 
-      <section className="border-y border-neutral-300 py-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold">Levels</h2>
-            <p className="mt-2 text-neutral-700">
-              Presets and seeded practice levels share the same portable engine.
-            </p>
-          </div>
+      <ResponsiveSection
+        title={t('game.levels')}
+        description="Presets and seeded practice levels share the same portable engine."
+        className="border-y border-border py-5"
+        actions={
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
             <input
               aria-label="Practice seed"
-              className="border border-neutral-950 px-3 py-2"
+              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) => setPracticeSeed(event.currentTarget.value)}
               placeholder="Practice seed"
               value={practiceSeed}
             />
             <select
               aria-label="Practice difficulty"
-              className="border border-neutral-950 px-3 py-2"
+              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) =>
                 setPracticeDifficulty(
                   event.currentTarget.value as SequenceRaceDifficulty,
@@ -253,20 +305,17 @@ function SequenceRaceRoute() {
               }
               value={practiceDifficulty}
             >
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
+              <option value="easy">{t('diff.easy')}</option>
+              <option value="medium">{t('diff.medium')}</option>
+              <option value="hard">{t('diff.hard')}</option>
             </select>
-            <button
-              className="border border-neutral-950 px-4 py-2 font-semibold"
-              onClick={generatePracticeLevel}
-              type="button"
-            >
-              Generate
-            </button>
+            <Button onClick={generatePracticeLevel} type="button">
+              {t('game.generate')}
+            </Button>
           </div>
-        </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        }
+      >
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {availableConfigs.map((optionLevel) => {
             const levelSequenceType = optionLevel.sequenceType ?? 'arithmetic'
             const info = sequenceInfoByType[levelSequenceType]
@@ -276,8 +325,8 @@ function SequenceRaceRoute() {
               <button
                 className={
                   selected
-                    ? 'border border-neutral-950 bg-neutral-950 px-4 py-4 text-left text-white'
-                    : 'border border-neutral-300 px-4 py-4 text-left text-neutral-950 hover:border-neutral-950'
+                    ? 'rounded-lg border border-primary bg-primary px-4 py-4 text-left text-primary-foreground'
+                    : 'rounded-lg border border-border px-4 py-4 text-left hover:border-primary'
                 }
                 key={optionLevel.id}
                 onClick={() => selectLevel(optionLevel)}
@@ -292,28 +341,9 @@ function SequenceRaceRoute() {
             )
           })}
         </div>
-      </section>
+      </ResponsiveSection>
 
-      <section className="border-y border-neutral-300 py-5">
-        <h2 className="text-xl font-semibold">Moves</h2>
-        {game.history.length === 0 ? (
-          <p className="mt-3 text-neutral-600">No moves recorded.</p>
-        ) : (
-          <ol className="mt-4 grid gap-2">
-            {game.history.map((entry, index) => (
-              <li
-                className="flex justify-between border-b border-neutral-200 py-2 text-sm"
-                key={`${entry.actor}-${entry.position}-${index}`}
-              >
-                <span className="capitalize">{entry.actor}</span>
-                <span>
-                  +{entry.step} to {entry.position}
-                </span>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
+      <LearnSection gameId="sequence-race" />
     </main>
   )
 }

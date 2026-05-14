@@ -162,6 +162,8 @@ export function canPlacePiece(
 
     if (cell === 1) {
       hasTargetCell = true
+    } else {
+      return false
     }
   }
 

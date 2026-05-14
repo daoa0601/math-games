@@ -58,6 +58,8 @@ export {
   generateGuaranteedSolvableWithRetry,
 } from './seededGenerator'
 
+export { generateConstructivePuzzle } from './puzzleEngine'
+
 // Solver
 export {
   solvePuzzle,

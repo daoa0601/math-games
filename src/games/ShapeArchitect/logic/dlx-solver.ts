@@ -65,7 +65,8 @@ function getUniqueRotatedLayouts(
 }
 
 function buildRows(level: LevelConfig): PlacementRow[] {
-  const rotations = level.type === '3D' ? generate3DRotations() : generate2DRotations()
+  const rotations =
+    level.type === '3D' ? generate3DRotations() : generate2DRotations()
   const targetIndexMap = new Map<string, number>()
   for (let i = 0; i < level.targetVoxels.length; i++) {
     const t = level.targetVoxels[i]
@@ -114,15 +115,19 @@ function buildRows(level: LevelConfig): PlacementRow[] {
           if (coveredTargets.length !== layout.length) continue
 
           // Deduplicate: same piece+position+rotation from different anchors
-          if (rows.some((r) =>
-            r.pieceIndex === pieceIndex &&
-            r.position.x === position.x &&
-            r.position.y === position.y &&
-            r.position.z === position.z &&
-            r.rotation.x === rotation.x &&
-            r.rotation.y === rotation.y &&
-            r.rotation.z === rotation.z,
-          )) continue
+          if (
+            rows.some(
+              (r) =>
+                r.pieceIndex === pieceIndex &&
+                r.position.x === position.x &&
+                r.position.y === position.y &&
+                r.position.z === position.z &&
+                r.rotation.x === rotation.x &&
+                r.rotation.y === rotation.y &&
+                r.rotation.z === rotation.z,
+            )
+          )
+            continue
 
           rows.push({
             pieceId: piece.id,
@@ -293,22 +298,42 @@ export function solvePuzzleDLX(
 
   // Edge cases
   if (level.targetVoxels.length === 0) {
-    return { solvable: true, solution: [], searchedStates: 0, timeMs: 0, timedOut: false }
+    return {
+      solvable: true,
+      solution: [],
+      searchedStates: 0,
+      timeMs: 0,
+      timedOut: false,
+    }
   }
 
   const targetVolume = level.targetVoxels.length
   const pieceVolume = level.pieces.reduce((sum, p) => sum + p.layout.length, 0)
   if (pieceVolume !== targetVolume) {
-    return { solvable: false, searchedStates: 0, timeMs: performance.now() - startTime, timedOut: false }
+    return {
+      solvable: false,
+      searchedStates: 0,
+      timeMs: performance.now() - startTime,
+      timedOut: false,
+    }
   }
 
   // Build the cover matrix
   const rows = buildRows(level)
   if (rows.length === 0) {
-    return { solvable: false, searchedStates: 0, timeMs: performance.now() - startTime, timedOut: false }
+    return {
+      solvable: false,
+      searchedStates: 0,
+      timeMs: performance.now() - startTime,
+      timedOut: false,
+    }
   }
 
-  const { root } = buildDLX(rows, level.targetVoxels.length, level.pieces.length)
+  const { root } = buildDLX(
+    rows,
+    level.targetVoxels.length,
+    level.pieces.length,
+  )
 
   // Search
   const solutionRowIndices: number[] = []

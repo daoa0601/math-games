@@ -1,15 +1,21 @@
-import type { GameId } from '@/games/game-module'
 import { dailyGameRotation, registry } from '@/games/registry'
+import { Schema } from 'effect'
 
-export type DailyGameId = GameId
+export class DailyChallengeConfig extends Schema.Class<DailyChallengeConfig>(
+  'DailyChallengeConfig',
+)({
+  gameId: Schema.Literals(['magic-graph', 'sequence-race', 'shape-architect']),
+  levelId: Schema.NonEmptyString,
+  title: Schema.NonEmptyString,
+  route: Schema.Literals([
+    '/games/magic-graph',
+    '/games/sequence-race',
+    '/games/shape-architect',
+  ]),
+  difficulty: Schema.NonEmptyString,
+}) {}
 
-export interface DailyChallengeConfig {
-  gameId: DailyGameId
-  levelId: string
-  title: string
-  route: string
-  difficulty: string
-}
+const DailyChallengeConfigJson = Schema.fromJsonString(DailyChallengeConfig)
 
 export interface PlannedDailyChallenge extends DailyChallengeConfig {
   challengeDate: string
@@ -25,10 +31,6 @@ function hashDate(value: string) {
   }
 
   return hash
-}
-
-export function getUtcDateKey(date = new Date()) {
-  return date.toISOString().slice(0, 10)
 }
 
 export function planDailyChallenge(dateKey: string): PlannedDailyChallenge {
@@ -57,7 +59,5 @@ export function planDailyChallenge(dateKey: string): PlannedDailyChallenge {
 export function parseDailyChallengeConfig(
   configJson: string,
 ): DailyChallengeConfig {
-  const parsed = JSON.parse(configJson) as DailyChallengeConfig
-
-  return parsed
+  return Schema.decodeUnknownSync(DailyChallengeConfigJson)(configJson)
 }

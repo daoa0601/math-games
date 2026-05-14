@@ -185,25 +185,44 @@ export const magicGraphModule = {
   getDailyPick,
   computeScore,
   evaluateAchievements,
-  completionSchema: MagicGraphCompletionSchema,
   validateAndComputeScore: (levelId: string, raw: unknown) =>
     Effect.gen(function* () {
       const level = resolveLevelConfig(levelId)
-      if (!level) return yield* new GameProgressValidationError({ reason: `Unknown level: ${levelId}` })
+      if (!level)
+        return yield* new GameProgressValidationError({
+          reason: `Unknown level: ${levelId}`,
+        })
 
       const parsed = yield* Effect.try({
         try: () => Schema.decodeUnknownSync(MagicGraphCompletionSchema)(raw),
-        catch: (e) => new GameProgressValidationError({ reason: e instanceof Error ? e.message : 'Invalid completion' }),
+        catch: (e) =>
+          new GameProgressValidationError({
+            reason: e instanceof Error ? e.message : 'Invalid completion',
+          }),
       })
 
       const validation = validateGameState(level, parsed)
-      if (validation === null) return yield* new GameProgressValidationError({ reason: 'Invalid game state' })
+      if (validation === null)
+        return yield* new GameProgressValidationError({
+          reason: 'Invalid game state',
+        })
 
       const { completed, moves } = validation
       const score = computeScore({ completed, moves })
-      const extras = progressExtras({ levelId, score, completed, difficulty: level.difficulty })
+      const extras = progressExtras({
+        levelId,
+        score,
+        completed,
+        difficulty: level.difficulty,
+      })
 
-      return { completed, moves, score, difficulty: level.difficulty, ...extras }
+      return {
+        completed,
+        moves,
+        score,
+        difficulty: level.difficulty,
+        ...extras,
+      }
     }),
   progressExtras,
   resolveLevelConfig,

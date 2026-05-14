@@ -1,6 +1,3 @@
-import type { CellState } from '../logic/types'
-import type { VoxelGrid } from '../logic/voxel-grid'
-
 export interface IsoConfig {
   tileWidth: number
   tileHeight: number
@@ -34,9 +31,18 @@ export function screenToIso(
 }
 
 function darkenHex(hex: string, amount: number): string {
-  const r = Math.max(0, parseInt(hex.slice(1, 3), 16) - Math.round(255 * amount))
-  const g = Math.max(0, parseInt(hex.slice(3, 5), 16) - Math.round(255 * amount))
-  const b = Math.max(0, parseInt(hex.slice(5, 7), 16) - Math.round(255 * amount))
+  const r = Math.max(
+    0,
+    parseInt(hex.slice(1, 3), 16) - Math.round(255 * amount),
+  )
+  const g = Math.max(
+    0,
+    parseInt(hex.slice(3, 5), 16) - Math.round(255 * amount),
+  )
+  const b = Math.max(
+    0,
+    parseInt(hex.slice(5, 7), 16) - Math.round(255 * amount),
+  )
   return `rgb(${r},${g},${b})`
 }
 
@@ -77,7 +83,7 @@ export function drawIsoCube(
   ctx.stroke()
 
   // Right face
-  ctx.fillStyle = darkenHex(color, 0.30)
+  ctx.fillStyle = darkenHex(color, 0.3)
   ctx.beginPath()
   ctx.moveTo(sx + tw, sy)
   ctx.lineTo(sx, sy + th)
@@ -113,35 +119,6 @@ export function drawIsoWireframe(
   ctx.stroke()
 }
 
-export interface IsoCubeEntry {
-  x: number
-  y: number
-  z: number
-  color: string
-  state: CellState
-}
-
-export function collectVisibleCubes(
-  grid: VoxelGrid,
-  colorLookup: Map<string, string>,
-  visibleLayers: Set<number>,
-): IsoCubeEntry[] {
-  const cubes: IsoCubeEntry[] = []
-  for (let z = 0; z < grid.depth; z++) {
-    if (!visibleLayers.has(z)) continue
-    for (let y = grid.height - 1; y >= 0; y--) {
-      for (let x = 0; x < grid.width; x++) {
-        const state = grid.get(x, y, z)
-        if (state === 0) continue
-        const key = `${x},${y},${z}`
-        const color = colorLookup.get(key) ?? (state === 1 ? '#e5e5e5' : '#cccccc')
-        cubes.push({ x, y, z, color, state })
-      }
-    }
-  }
-  return cubes
-}
-
 export function computeIsoConfig(
   gridWidth: number,
   gridHeight: number,
@@ -153,6 +130,7 @@ export function computeIsoConfig(
   const tileWidth = Math.min(48, Math.floor(canvasWidth / (maxSpan + 1)))
   const tileHeight = tileWidth / 2
   const originX = canvasWidth / 2
-  const originY = tileHeight * maxSpan / 2 + gridDepth * tileHeight + tileHeight
+  const originY =
+    (tileHeight * maxSpan) / 2 + gridDepth * tileHeight + tileHeight
   return { tileWidth, tileHeight, originX, originY }
 }

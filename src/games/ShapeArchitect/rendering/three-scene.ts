@@ -11,7 +11,11 @@ export interface ThreeScene {
   camera: THREE.PerspectiveCamera
   controls: OrbitControls
   dispose: () => void
-  updateGrid: (grid: VoxelGrid, config: LevelConfig, placedPieces: PlacedPiece[]) => void
+  updateGrid: (
+    grid: VoxelGrid,
+    config: LevelConfig,
+    placedPieces: PlacedPiece[],
+  ) => void
   updateGhost: (positions: Position3D[] | null, valid: boolean) => void
   resize: (w: number, h: number) => void
 }
@@ -20,7 +24,11 @@ const CUBE_SIZE = 0.95
 const GHOST_OPACITY = 0.4
 
 export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    alpha: true,
+  })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -77,6 +85,7 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
 
   // Animation loop
   let animId = 0
+  let currentGridSize: [number, number, number] = [10, 10, 1]
   function animate() {
     animId = requestAnimationFrame(animate)
     controls.update()
@@ -84,16 +93,31 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   }
   animate()
 
+  function disposeMaterial(material: THREE.Material | THREE.Material[]) {
+    if (Array.isArray(material)) {
+      for (const item of material) {
+        item.dispose()
+      }
+      return
+    }
+
+    material.dispose()
+  }
+
+  function disposeObjectResources(object: THREE.Object3D) {
+    if (object instanceof THREE.Mesh || object instanceof THREE.LineSegments) {
+      if (object.geometry !== cubeGeo) {
+        object.geometry.dispose()
+      }
+      disposeMaterial(object.material)
+    }
+  }
+
   function clearGroup(group: THREE.Group) {
     while (group.children.length > 0) {
       const child = group.children[0]
       group.remove(child)
-      if (child instanceof THREE.Mesh) {
-        child.geometry?.dispose()
-        if (child.material instanceof THREE.Material) {
-          child.material.dispose()
-        }
-      }
+      disposeObjectResources(child)
     }
   }
 
@@ -105,6 +129,7 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     clearGroup(voxelGroup)
 
     const [gw, gh, gd] = config.gridSize
+    currentGridSize = config.gridSize
     const offsetX = -gw / 2
     const offsetZ = -gh / 2
 
@@ -113,7 +138,11 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     for (const pp of placedPieces) {
       const piece = config.pieces.find((p) => p.id === pp.pieceId)
       if (!piece) continue
-      for (const pos of getPieceWorldPositions(piece, pp.position, pp.rotation)) {
+      for (const pos of getPieceWorldPositions(
+        piece,
+        pp.position,
+        pp.rotation,
+      )) {
         colorLookup.set(`${pos.x},${pos.y},${pos.z}`, pp.color)
       }
     }
@@ -138,7 +167,11 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
             const edges = new THREE.EdgesGeometry(cubeGeo)
             const line = new THREE.LineSegments(
               edges,
-              new THREE.LineBasicMaterial({ color: 0x999999, opacity: 0.5, transparent: true }),
+              new THREE.LineBasicMaterial({
+                color: 0x999999,
+                opacity: 0.5,
+                transparent: true,
+              }),
             )
             line.position.set(worldX, worldY, worldZ)
             voxelGroup.add(line)
@@ -161,8 +194,16 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
 
     // Update grid helper
     const gridHelper = scene.getObjectByName('gridHelper')
-    if (gridHelper) scene.remove(gridHelper)
-    const newHelper = new THREE.GridHelper(Math.max(gw, gh), Math.max(gw, gh), 0xcccccc, 0xe0e0e0)
+    if (gridHelper) {
+      scene.remove(gridHelper)
+      disposeObjectResources(gridHelper)
+    }
+    const newHelper = new THREE.GridHelper(
+      Math.max(gw, gh),
+      Math.max(gw, gh),
+      0xcccccc,
+      0xe0e0e0,
+    )
     newHelper.name = 'gridHelper'
     newHelper.position.y = 0
     scene.add(newHelper)
@@ -172,7 +213,7 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     clearGroup(ghostGroup)
     if (!positions) return
 
-    const [gw, gh] = [10, 10] // Will be overridden by grid context
+    const [gw, gh] = currentGridSize
     const offsetX = -gw / 2
     const offsetZ = -gh / 2
 
@@ -206,6 +247,11 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     controls.dispose()
     clearGroup(voxelGroup)
     clearGroup(ghostGroup)
+    const gridHelper = scene.getObjectByName('gridHelper')
+    if (gridHelper) {
+      scene.remove(gridHelper)
+      disposeObjectResources(gridHelper)
+    }
     cubeGeo.dispose()
     groundGeo.dispose()
     groundMat.dispose()

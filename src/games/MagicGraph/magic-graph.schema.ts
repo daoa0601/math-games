@@ -5,6 +5,9 @@ export class MagicGraphCompletion extends Schema.Class<MagicGraphCompletion>(
 )({
   nodeValues: Schema.Record(
     Schema.String,
-    Schema.Union([Schema.Number.pipe(Schema.check(Schema.isInt())), Schema.Null]),
+    Schema.Union([
+      Schema.Number.pipe(Schema.check(Schema.isInt())),
+      Schema.Null,
+    ]),
   ),
 }) {}

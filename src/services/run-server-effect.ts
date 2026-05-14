@@ -41,14 +41,29 @@ export type ServerError =
   | PlayerProfileWriteError
 
 export const toUserFacingError = Match.type<ServerError>().pipe(
-  Match.tag('RateLimitError', () => new Error('Too many requests. Please wait a moment.')),
+  Match.tag(
+    'RateLimitError',
+    () => new Error('Too many requests. Please wait a moment.'),
+  ),
   Match.tag('CrossOriginError', () => new Error('Request blocked.')),
   Match.tag('GameProgressValidationError', (e) => new Error(e.reason)),
   Match.tag('PlayerProfileValidationError', (e) => new Error(e.reason)),
-  Match.tag('ProgressWriteError', () => new Error('Unable to save game progress.')),
-  Match.tag('DailyChallengeError', () => new Error("Unable to load today's challenge.")),
-  Match.tag('PlayerProfileError', () => new Error('Unable to load your profile.')),
-  Match.tag('PlayerProfileWriteError', () => new Error('Unable to save your profile.')),
+  Match.tag(
+    'ProgressWriteError',
+    () => new Error('Unable to save game progress.'),
+  ),
+  Match.tag(
+    'DailyChallengeError',
+    () => new Error("Unable to load today's challenge."),
+  ),
+  Match.tag(
+    'PlayerProfileError',
+    () => new Error('Unable to load your profile.'),
+  ),
+  Match.tag(
+    'PlayerProfileWriteError',
+    () => new Error('Unable to save your profile.'),
+  ),
   Match.exhaustive,
 )
 

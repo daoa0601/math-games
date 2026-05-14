@@ -172,9 +172,7 @@ describe('error boundaries: DB failures map to domain errors', () => {
           completed: true,
         }).pipe(Effect.provide(TestLayer)),
       ),
-    ).rejects.toSatisfy(
-      (error: unknown) => error instanceof ProgressWriteError,
-    )
+    ).rejects.toSatisfy((error: unknown) => error instanceof ProgressWriteError)
   })
 
   it('loadPlayerProfileOverview → PlayerProfileError', async () => {
@@ -182,9 +180,7 @@ describe('error boundaries: DB failures map to domain errors', () => {
       Effect.runPromise(
         loadPlayerProfileOverview().pipe(Effect.provide(TestLayer)),
       ),
-    ).rejects.toSatisfy(
-      (error: unknown) => error instanceof PlayerProfileError,
-    )
+    ).rejects.toSatisfy((error: unknown) => error instanceof PlayerProfileError)
   })
 
   it('savePlayerProfile → PlayerProfileWriteError', async () => {
@@ -203,11 +199,7 @@ describe('error boundaries: DB failures map to domain errors', () => {
 
   it('loadDailyChallenge → DailyChallengeError', async () => {
     await expect(
-      Effect.runPromise(
-        loadDailyChallenge().pipe(
-          Effect.provide(TestLayer),
-        ),
-      ),
+      Effect.runPromise(loadDailyChallenge().pipe(Effect.provide(TestLayer))),
     ).rejects.toSatisfy(
       (error: unknown) => error instanceof DailyChallengeError,
     )
@@ -247,9 +239,7 @@ describe('guard ordering in pipelines', () => {
           completion: { nodeValues: {} },
         }).pipe(Effect.provide(layer)),
       ),
-    ).rejects.toSatisfy(
-      (error: unknown) => error instanceof CrossOriginError,
-    )
+    ).rejects.toSatisfy((error: unknown) => error instanceof CrossOriginError)
 
     expect(dbSpy).not.toHaveBeenCalled()
   })
@@ -309,9 +299,7 @@ describe('guard ordering in pipelines', () => {
           gradeBand: 'elementary',
         }).pipe(Effect.provide(layer)),
       ),
-    ).rejects.toSatisfy(
-      (error: unknown) => error instanceof CrossOriginError,
-    )
+    ).rejects.toSatisfy((error: unknown) => error instanceof CrossOriginError)
   })
 })
 
@@ -506,9 +494,9 @@ describe('score computation invariants', () => {
     expect(magicGraphModule.computeScore({ completed: true, moves: 0 })).toBe(
       100,
     )
-    expect(
-      magicGraphModule.computeScore({ completed: true, moves: 100 }),
-    ).toBe(20)
+    expect(magicGraphModule.computeScore({ completed: true, moves: 100 })).toBe(
+      20,
+    )
   })
 
   it('SequenceRace: incomplete solution scores exactly 10', () => {
@@ -518,9 +506,9 @@ describe('score computation invariants', () => {
   })
 
   it('SequenceRace: completed score is clamped to [10, 100]', () => {
-    expect(
-      sequenceRaceModule.computeScore({ completed: true, moves: 0 }),
-    ).toBe(100)
+    expect(sequenceRaceModule.computeScore({ completed: true, moves: 0 })).toBe(
+      100,
+    )
     expect(
       sequenceRaceModule.computeScore({ completed: true, moves: 100 }),
     ).toBe(10)
@@ -677,8 +665,7 @@ function createMockDb(resultQueue: unknown[]): DbShape {
       get(_, prop) {
         if (prop === 'then') return lazy().then.bind(lazy())
         if (prop === 'catch') return lazy().catch.bind(lazy())
-        if (prop === 'finally')
-          return (lazy() as any).finally.bind(lazy())
+        if (prop === 'finally') return (lazy() as any).finally.bind(lazy())
         return (..._args: unknown[]) => chain()
       },
     })
@@ -776,10 +763,7 @@ describe('success paths: DB workflows complete end-to-end', () => {
   })
 
   it('loadDailyChallenge inserts when none exists', async () => {
-    const db = createMockDb([
-      [],
-      [mockDailyChallengeRow],
-    ])
+    const db = createMockDb([[], [mockDailyChallengeRow]])
     const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer)
 
     const result = await Effect.runPromise(
@@ -790,11 +774,7 @@ describe('success paths: DB workflows complete end-to-end', () => {
   })
 
   it('loadDailyChallenge handles insert race (conflict then re-select)', async () => {
-    const db = createMockDb([
-      [],
-      [],
-      [mockDailyChallengeRow],
-    ])
+    const db = createMockDb([[], [], [mockDailyChallengeRow]])
     const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer)
 
     const result = await Effect.runPromise(
@@ -805,10 +785,7 @@ describe('success paths: DB workflows complete end-to-end', () => {
   })
 
   it('savePlayerProfile upserts and returns record', async () => {
-    const db = createMockDb([
-      undefined,
-      [mockPlayerRow],
-    ])
+    const db = createMockDb([undefined, [mockPlayerRow]])
     const layer = Layer.mergeAll(
       Layer.succeed(DbService, db),
       IdentityLayer,
@@ -836,13 +813,16 @@ describe('success paths: DB workflows complete end-to-end', () => {
       [
         [mockPlayerRow],
         [mockProgressRow],
-        [{ playerId: PLAYER_ID, achievementId: 'mg_first_solve', unlockedAt: NOW }],
+        [
+          {
+            playerId: PLAYER_ID,
+            achievementId: 'mg_first_solve',
+            unlockedAt: NOW,
+          },
+        ],
       ],
     ])
-    const layer = Layer.mergeAll(
-      Layer.succeed(DbService, db),
-      IdentityLayer,
-    )
+    const layer = Layer.mergeAll(Layer.succeed(DbService, db), IdentityLayer)
 
     const result = await Effect.runPromise(
       loadPlayerProfileOverview().pipe(Effect.provide(layer)),
@@ -860,10 +840,7 @@ describe('success paths: DB workflows complete end-to-end', () => {
 // ---------------------------------------------------------------------------
 
 describe('runServerEffect error mapping', () => {
-  function expectMappedError(
-    error: ServerError,
-    expectedMessage: string,
-  ) {
+  function expectMappedError(error: ServerError, expectedMessage: string) {
     expect(toUserFacingError(error).message).toBe(expectedMessage)
   }
 

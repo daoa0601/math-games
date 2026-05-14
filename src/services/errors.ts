@@ -1,8 +1,6 @@
 import { Data } from 'effect'
 
-export class ProgressWriteError extends Data.TaggedError(
-  'ProgressWriteError',
-)<{
+export class ProgressWriteError extends Data.TaggedError('ProgressWriteError')<{
   readonly cause: unknown
 }> {
   override get message() {
@@ -30,9 +28,7 @@ export class DailyChallengeError extends Data.TaggedError(
   }
 }
 
-export class PlayerProfileError extends Data.TaggedError(
-  'PlayerProfileError',
-)<{
+export class PlayerProfileError extends Data.TaggedError('PlayerProfileError')<{
   readonly cause: unknown
 }> {
   override get message() {
@@ -66,14 +62,6 @@ export class CrossOriginError extends Data.TaggedError('CrossOriginError')<{
   }
 }
 
-export class GenerationError extends Data.TaggedError('GenerationError')<{
-  readonly cause: unknown
-}> {
-  override get message() {
-    return 'Level generation failed'
-  }
-}
-
 export class PlayerProfileValidationError extends Data.TaggedError(
   'PlayerProfileValidationError',
 )<{
@@ -84,9 +72,7 @@ export class PlayerProfileValidationError extends Data.TaggedError(
   }
 }
 
-export class SolverTimeoutError extends Data.TaggedError(
-  'SolverTimeoutError',
-)<{
+export class SolverTimeoutError extends Data.TaggedError('SolverTimeoutError')<{
   readonly searchedStates: number
   readonly timeMs: number
 }> {

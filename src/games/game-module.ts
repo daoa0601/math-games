@@ -1,4 +1,4 @@
-import type { Effect, Schema } from 'effect'
+import type { Effect } from 'effect'
 
 import type { GameProgressValidationError } from '@/services/errors'
 
@@ -90,8 +90,7 @@ export interface GameModule<
     level: TConfig,
     rawCompletion: unknown,
   ) => { completed: boolean; moves: number } | null
-  readonly completionSchema?: Schema.Schema<unknown>
-  readonly validateAndComputeScore?: (
+  readonly validateAndComputeScore: (
     levelId: string,
     completion: unknown,
   ) => Effect.Effect<

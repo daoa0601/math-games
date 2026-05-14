@@ -27,15 +27,15 @@ Each service is a `Context.Tag` with a `make` function and a `Layer` constructor
 
 Current custom errors and their replacements:
 
-| Current class | File | Effect replacement |
-|---|---|---|
-| `ProgressWriteError` | `progress.server.ts` | `Data.TaggedError("ProgressWriteError")` |
-| `GameProgressValidationError` | `server-handlers.ts` | `Data.TaggedError("GameProgressValidationError")` |
-| `DailyChallengeError` | `daily.server.ts` | `Data.TaggedError("DailyChallengeError")` |
-| `PlayerProfileError` | `profile.server.ts` | `Data.TaggedError("PlayerProfileError")` |
-| `PlayerProfileWriteError` | `profile.server.ts` | `Data.TaggedError("PlayerProfileWriteError")` |
-| `RateLimitError` (thrown by assertNotRateLimited) | `rate-limit.ts` | `Data.TaggedError("RateLimitError")` |
-| `OriginError` (thrown by assertSameOriginPost) | `origin-guard.ts` | `Data.TaggedError("OriginError")` |
+| Current class                                     | File                 | Effect replacement                                |
+| ------------------------------------------------- | -------------------- | ------------------------------------------------- |
+| `ProgressWriteError`                              | `progress.server.ts` | `Data.TaggedError("ProgressWriteError")`          |
+| `GameProgressValidationError`                     | `server-handlers.ts` | `Data.TaggedError("GameProgressValidationError")` |
+| `DailyChallengeError`                             | `daily.server.ts`    | `Data.TaggedError("DailyChallengeError")`         |
+| `PlayerProfileError`                              | `profile.server.ts`  | `Data.TaggedError("PlayerProfileError")`          |
+| `PlayerProfileWriteError`                         | `profile.server.ts`  | `Data.TaggedError("PlayerProfileWriteError")`     |
+| `RateLimitError` (thrown by assertNotRateLimited) | `rate-limit.ts`      | `Data.TaggedError("RateLimitError")`              |
+| `OriginError` (thrown by assertSameOriginPost)    | `origin-guard.ts`    | `Data.TaggedError("OriginError")`                 |
 
 Place these in `src/services/errors.ts`.
 
@@ -64,6 +64,7 @@ Convert all server-side pipelines to Effect. This is the highest-value phase.
 File: `src/games/progress/progress.server.ts`
 
 Current flow (try/catch):
+
 ```
 try {
   db = createDb(env.DB)
@@ -77,6 +78,7 @@ try {
 ```
 
 Effect pipeline:
+
 ```
 Effect.gen(function* () {
   const db = yield* DbService
@@ -100,6 +102,7 @@ Error channel: `ProgressWriteError`
 File: `src/games/server-handlers.ts`
 
 Current flow (imperative):
+
 ```
 assertSameOriginPost()
 setResponseHeader(...)
@@ -112,6 +115,7 @@ return recordGameProgress(...)
 ```
 
 Effect pipeline — each step is a composable Effect:
+
 ```
 Effect.gen(function* () {
   yield* OriginGuardService.assert()
@@ -144,7 +148,7 @@ export const recordXxxProgress = createServerFn({ method: 'POST' })
     recordProgressPipeline(xxxModule, data).pipe(
       Effect.provide(AppLayer),
       Effect.runPromise,
-    )
+    ),
   )
 ```
 
@@ -169,6 +173,7 @@ File: `src/games/ShapeArchitect/logic/solver.ts`
 Current: polls `performance.now()` against `maxTimeMs` inside the recursive loop.
 
 Effect approach:
+
 ```
 Effect.gen(function* () {
   // Use Effect.timeout or Effect.raceFirst with a timer
@@ -206,6 +211,7 @@ This makes the `createRecordProgressHandler` pipeline cleaner — the per-game v
 ## File inventory
 
 Files to create:
+
 - `src/services/db.ts`
 - `src/services/player-identity.ts`
 - `src/services/rate-limit.ts`
@@ -215,6 +221,7 @@ Files to create:
 - `src/services/index.ts`
 
 Files to modify:
+
 - `src/games/server-handlers.ts` — Effect pipeline
 - `src/games/progress/progress.server.ts` — Effect pipeline
 - `src/daily/daily.server.ts` — Effect pipeline
@@ -236,6 +243,7 @@ Files to modify:
 - `src/effect/__tests__/server-workflows.test.ts` — update tests
 
 Files to delete (after migration):
+
 - Custom Error class definitions from their original files (replaced by `src/services/errors.ts`)
 
 ---

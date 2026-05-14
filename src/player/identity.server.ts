@@ -1,8 +1,3 @@
-import {
-  getRequestHeader,
-  setResponseHeader,
-} from '@tanstack/react-start/server'
-
 export const playerCookieName = 'mg_player'
 export const playerCookieMaxAge = 60 * 60 * 24 * 365
 export const localPlayerId = 'local-player'
@@ -19,13 +14,6 @@ export const defaultPlayerIdentity: PlayerIdentity = {
   displayName: 'Guest Player',
   locale: 'en',
   gradeBand: 'elementary',
-}
-
-export interface ResolvePlayerIdentityOptions {
-  cookieHeader?: string | null
-  host?: string | null
-  createUuid?: () => string
-  persistCookie?: (cookie: string) => void
 }
 
 const playerIdPattern =
@@ -89,56 +77,4 @@ export function serializePlayerIdCookie(playerId: string, host?: string) {
   const secure = isHttpsRequest(host) ? '; Secure' : ''
 
   return `${playerCookieName}=${playerId}; Path=/; Max-Age=${playerCookieMaxAge}; HttpOnly; SameSite=Lax${secure}`
-}
-
-function readRequestCookieHeader(options: ResolvePlayerIdentityOptions) {
-  return 'cookieHeader' in options
-    ? options.cookieHeader
-    : getRequestHeader('cookie')
-}
-
-function readRequestHostHeader(options: ResolvePlayerIdentityOptions) {
-  if ('host' in options) return options.host
-
-  // Only consult request context when we're not in explicit-injection (test)
-  // mode. Tests pass cookieHeader without host; reading getRequestHeader there
-  // would throw because there's no request context.
-  if ('cookieHeader' in options) return null
-
-  return getRequestHeader('host')
-}
-
-function writePlayerCookie(
-  cookie: string,
-  options: ResolvePlayerIdentityOptions,
-) {
-  const persistCookie =
-    options.persistCookie ??
-    ((value: string) => setResponseHeader('set-cookie', value))
-
-  persistCookie(cookie)
-}
-
-export function getCurrentPlayerIdentity(
-  options: ResolvePlayerIdentityOptions = {},
-): PlayerIdentity {
-  const cookiePlayerId = parsePlayerIdCookie(readRequestCookieHeader(options))
-
-  if (cookiePlayerId !== null) {
-    return createPlayerIdentity(cookiePlayerId)
-  }
-
-  const playerId = createPlayerId(options.createUuid)
-  const host = readRequestHostHeader(options)
-
-  writePlayerCookie(
-    serializePlayerIdCookie(playerId, host ?? undefined),
-    options,
-  )
-
-  return createPlayerIdentity(playerId)
-}
-
-export function getCurrentPlayerId(options: ResolvePlayerIdentityOptions = {}) {
-  return getCurrentPlayerIdentity(options).id
 }

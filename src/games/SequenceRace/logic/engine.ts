@@ -178,19 +178,14 @@ function heuristicEval(state: SequenceState, isMaximizing: boolean): number {
 
 /**
  * Create a canonical memoization key for game state.
- * Uses bitfield encoding for available steps to avoid sorting overhead.
  */
 function createStateKey(
   position: number,
   availableSteps: number[],
   isMaximizing: boolean,
 ): string {
-  // Encode available steps as a bitmask (assumes steps are small integers < 32)
-  let stepMask = 0
-  for (const step of availableSteps) {
-    stepMask |= 1 << step
-  }
-  return `${position}-${stepMask}-${isMaximizing ? 1 : 0}`
+  const remainingSteps = [...availableSteps].sort((a, b) => a - b).join(',')
+  return `${position}-${remainingSteps}-${isMaximizing ? 1 : 0}`
 }
 
 /**

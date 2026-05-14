@@ -21,6 +21,7 @@ Create `src/games/ShapeArchitect/components/ShapeArchitectCanvas.tsx`.
 - Maintain current grid dimensions: `width × height` from `config.gridSize`
 
 Props interface:
+
 ```typescript
 interface ShapeArchitectCanvasProps {
   grid: CellState[][][]
@@ -69,6 +70,7 @@ Before full Three.js, add an isometric projection mode for 3D levels on the same
 ### B1. Isometric projection
 
 Standard isometric transform:
+
 ```
 screenX = (x - y) * tileWidth / 2
 screenY = (x + y) * tileHeight / 2 - z * tileHeight
@@ -105,6 +107,7 @@ Add `three` as a dependency. Create `src/games/ShapeArchitect/components/ShapeAr
 - Use `React.lazy` + `Suspense` with a fallback to the Canvas 2D renderer
 
 Scene setup:
+
 - `PerspectiveCamera` positioned at isometric-like angle (45deg azimuth, 35.264deg elevation)
 - `AmbientLight` (0.6 intensity) + `DirectionalLight` (0.8 intensity, casting shadows)
 - `OrbitControls` for camera rotation (constrained: no flipping below ground plane)
@@ -161,6 +164,7 @@ Scene setup:
 ### D1. Constraint propagation
 
 Before backtracking, apply:
+
 - **Naked singles**: if a target cell can only be reached by one piece in one orientation, that placement is forced
 - **Volume partitioning**: if the target shape splits into disconnected regions, each region must be independently fillable by a subset of pieces
 - Run propagation after each placement in the backtracking tree
@@ -176,6 +180,7 @@ The polyomino packing problem is an exact cover problem. Knuth's Algorithm X wit
 - DLX finds all solutions by covering/uncovering columns
 
 Create `src/games/ShapeArchitect/logic/dlx-solver.ts`:
+
 - Build the cover matrix from `LevelConfig`
 - Implement DLX with column-selection heuristic (smallest column first)
 - Return first solution found
@@ -194,7 +199,7 @@ Create `src/games/ShapeArchitect/logic/solver.worker.ts`:
 - In the route component: `const worker = useMemo(() => new Worker(...), [])`
 - Fallback: if Web Workers unavailable (unlikely), run solver synchronously with a warning
 
-Cloudflare Workers note: Web Workers are a *browser* API used client-side. The solver runs in the browser, not on the server. No conflict with Cloudflare Workers (which is the server runtime).
+Cloudflare Workers note: Web Workers are a _browser_ API used client-side. The solver runs in the browser, not on the server. No conflict with Cloudflare Workers (which is the server runtime).
 
 ### D4. Bitboard grid representation
 
@@ -202,18 +207,18 @@ Replace `CellState[][][]` with a flat bitset for solver-internal use:
 
 ```typescript
 class VoxelBitboard {
-  private data: Uint32Array  // 1 bit per cell, packed into 32-bit words
-  
+  private data: Uint32Array // 1 bit per cell, packed into 32-bit words
+
   constructor(width: number, height: number, depth: number)
   get(x: number, y: number, z: number): boolean
   set(x: number, y: number, z: number): void
   clear(x: number, y: number, z: number): void
-  
+
   // Bulk operations
-  canPlace(pieceMask: VoxelBitboard, offset: number): boolean  // AND == 0
-  place(pieceMask: VoxelBitboard, offset: number): void        // OR
-  isSolved(targetMask: VoxelBitboard): boolean                 // equals
-  clone(): VoxelBitboard                                        // slice
+  canPlace(pieceMask: VoxelBitboard, offset: number): boolean // AND == 0
+  place(pieceMask: VoxelBitboard, offset: number): void // OR
+  isSolved(targetMask: VoxelBitboard): boolean // equals
+  clone(): VoxelBitboard // slice
 }
 ```
 
@@ -236,19 +241,19 @@ class VoxelGrid {
   readonly width: number
   readonly height: number
   readonly depth: number
-  private data: Uint8Array  // length = width * height * depth
-  
+  private data: Uint8Array // length = width * height * depth
+
   get(x: number, y: number, z: number): CellState {
     return this.data[x * this.height * this.depth + y * this.depth + z]
   }
-  
+
   set(x: number, y: number, z: number, value: CellState): void {
     this.data[x * this.height * this.depth + y * this.depth + z] = value
   }
-  
+
   clone(): VoxelGrid {
     const copy = new VoxelGrid(this.width, this.height, this.depth)
-    copy.data.set(this.data)  // single memcpy
+    copy.data.set(this.data) // single memcpy
     return copy
   }
 }
@@ -257,6 +262,7 @@ class VoxelGrid {
 ### E2. Update engine functions
 
 All functions in `engine.ts` that take `CellState[][][]` switch to `VoxelGrid`:
+
 - `createGrid` → `VoxelGrid.create(size)`
 - `initializeGrid` → `VoxelGrid.fromLevel(level)`
 - `placePiece` → `grid.clone()` then `grid.set(...)` per cell
@@ -276,6 +282,7 @@ The `clone()` operation goes from nested `map()` calls to a single `Uint8Array.s
 ## File inventory
 
 Files to create:
+
 - `src/games/ShapeArchitect/components/ShapeArchitectCanvas.tsx` (Phase A)
 - `src/games/ShapeArchitect/components/ShapeArchitect3D.tsx` (Phase C)
 - `src/games/ShapeArchitect/components/PiecePreview3D.tsx` (Phase C5)
@@ -287,6 +294,7 @@ Files to create:
 - `src/games/ShapeArchitect/logic/voxel-bitboard.ts` (Phase D4)
 
 Files to modify:
+
 - `src/routes/games/shape-architect.tsx` — swap DOM grid for Canvas/3D, add view toggle
 - `src/games/ShapeArchitect/logic/engine.ts` — use `VoxelGrid` instead of `CellState[][][]`
 - `src/games/ShapeArchitect/logic/solver.ts` — add constraint propagation, use bitboard internally
@@ -294,6 +302,7 @@ Files to modify:
 - `package.json` — add `three` and `@types/three` dependencies
 
 Files unchanged:
+
 - `src/games/ShapeArchitect/logic/polyominoes.ts` — piece definitions stay the same
 - `src/games/ShapeArchitect/logic/presets.ts` — level configs stay the same
 - `src/games/ShapeArchitect/logic/seededGenerator.ts` — output format unchanged (generates `LevelConfig`)

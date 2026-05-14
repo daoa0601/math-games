@@ -319,7 +319,11 @@ describe('canPlacePiece', () => {
     const piece = createTestPiece()
 
     const canPlace = canPlacePiece(
-      grid, piece, { x: 0, y: 0, z: 0 }, rot(0), level.gridSize,
+      grid,
+      piece,
+      { x: 0, y: 0, z: 0 },
+      rot(0),
+      level.gridSize,
     )
 
     expect(canPlace).toBe(true)
@@ -331,13 +335,17 @@ describe('canPlacePiece', () => {
     const piece = createTestPiece()
 
     const canPlace = canPlacePiece(
-      grid, piece, { x: 2, y: 0, z: 0 }, rot(0), level.gridSize,
+      grid,
+      piece,
+      { x: 2, y: 0, z: 0 },
+      rot(0),
+      level.gridSize,
     )
 
     expect(canPlace).toBe(false)
   })
 
-  it('allows placement when extending into empty cells (flexible placement)', () => {
+  it('rejects placement when extending into empty cells', () => {
     const level = createTestLevel({
       targetVoxels: [{ x: 0, y: 0, z: 0 }],
     })
@@ -345,10 +353,14 @@ describe('canPlacePiece', () => {
     const piece = createTestPiece()
 
     const canPlace = canPlacePiece(
-      grid, piece, { x: 0, y: 0, z: 0 }, rot(0), level.gridSize,
+      grid,
+      piece,
+      { x: 0, y: 0, z: 0 },
+      rot(0),
+      level.gridSize,
     )
 
-    expect(canPlace).toBe(true)
+    expect(canPlace).toBe(false)
   })
 
   it('returns false when no voxels on target cells', () => {
@@ -360,7 +372,11 @@ describe('canPlacePiece', () => {
     const piece = createTestPiece()
 
     const canPlace = canPlacePiece(
-      grid, piece, { x: 2, y: 0, z: 0 }, rot(0), level.gridSize,
+      grid,
+      piece,
+      { x: 2, y: 0, z: 0 },
+      rot(0),
+      level.gridSize,
     )
 
     expect(canPlace).toBe(false)
@@ -375,7 +391,11 @@ describe('canPlacePiece', () => {
     grid = placePiece(grid, piece1, { x: 0, y: 0, z: 0 }, rot(0))
 
     const canPlace = canPlacePiece(
-      grid, piece2, { x: 0, y: 0, z: 0 }, rot(0), level.gridSize,
+      grid,
+      piece2,
+      { x: 0, y: 0, z: 0 },
+      rot(0),
+      level.gridSize,
     )
 
     expect(canPlace).toBe(false)
@@ -394,7 +414,7 @@ describe('canPlacePiece', () => {
 
     expect(
       canPlacePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(0), level.gridSize),
-    ).toBe(true)
+    ).toBe(false)
 
     expect(
       canPlacePiece(grid, piece, { x: 0, y: 0, z: 0 }, rot(90), level.gridSize),
@@ -482,7 +502,12 @@ describe('removePieceFromGrid', () => {
       rotation: rot(0),
       color: piece.color,
     }
-    const newGrid = removePieceFromGrid(grid, piece, placedPiece, level.targetVoxels)
+    const newGrid = removePieceFromGrid(
+      grid,
+      piece,
+      placedPiece,
+      level.targetVoxels,
+    )
 
     expect(newGrid.get(0, 0, 0)).toBe(1)
     expect(newGrid.get(1, 0, 0)).toBe(1)
@@ -504,7 +529,12 @@ describe('removePieceFromGrid', () => {
       rotation: rot(0),
       color: piece.color,
     }
-    const newGrid = removePieceFromGrid(grid, piece, placedPiece, level.targetVoxels)
+    const newGrid = removePieceFromGrid(
+      grid,
+      piece,
+      placedPiece,
+      level.targetVoxels,
+    )
 
     expect(newGrid.get(0, 0, 0)).toBe(1)
     expect(newGrid.get(1, 0, 0)).toBe(0)
@@ -523,7 +553,12 @@ describe('removePieceFromGrid', () => {
       rotation: rot(0),
       color: piece.color,
     }
-    const newGrid = removePieceFromGrid(grid, piece, placedPiece, level.targetVoxels)
+    const newGrid = removePieceFromGrid(
+      grid,
+      piece,
+      placedPiece,
+      level.targetVoxels,
+    )
 
     expect(newGrid).not.toBe(grid)
     expect(grid.get(0, 0, 0)).toBe(2)
@@ -548,7 +583,12 @@ describe('removePieceFromGrid', () => {
       rotation: rot(90),
       color: piece.color,
     }
-    const newGrid = removePieceFromGrid(grid, piece, placedPiece, level.targetVoxels)
+    const newGrid = removePieceFromGrid(
+      grid,
+      piece,
+      placedPiece,
+      level.targetVoxels,
+    )
 
     expect(newGrid.get(0, 0, 0)).toBe(1)
     expect(newGrid.get(0, 1, 0)).toBe(1)
@@ -956,7 +996,12 @@ describe('canMovePlacedPiece', () => {
     state = tryPlacePiece(state, { x: 0, y: 0, z: 0 })!
 
     expect(
-      canMovePlacedPiece(state, piece.id, { x: 2, y: 0, z: 0 }, DEFAULT_ROTATION),
+      canMovePlacedPiece(
+        state,
+        piece.id,
+        { x: 2, y: 0, z: 0 },
+        DEFAULT_ROTATION,
+      ),
     ).toBe(true)
   })
 

@@ -44,13 +44,7 @@ describe('generateCohesivePuzzle', () => {
     const level1 = generateGuaranteedSolvableWithRetry(rng1, 'medium')
     const level2 = generateGuaranteedSolvableWithRetry(rng2, 'medium')
 
-    // Either pieces or target voxels should differ
-    const same =
-      level1.pieces.length === level2.pieces.length &&
-      level1.targetVoxels.length === level2.targetVoxels.length &&
-      level1.name === level2.name
-
-    expect(same).toBe(false)
+    expect(level1).not.toEqual(level2)
   })
 
   it('generates correct piece counts by difficulty using retry', () => {

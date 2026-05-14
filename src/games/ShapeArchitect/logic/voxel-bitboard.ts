@@ -26,7 +26,7 @@ export class VoxelBitboard {
   get(x: number, y: number, z: number): boolean {
     const idx = this.index(x, y, z)
     const word = idx >>> 5 // divide by 32
-    const bit = idx & 31   // mod 32
+    const bit = idx & 31 // mod 32
     return (this.data[word] & (1 << bit)) !== 0
   }
 
@@ -93,8 +93,7 @@ export class VoxelBitboard {
   /** Count of set bits. */
   popcount(): number {
     let count = 0
-    for (let i = 0; i < this.data.length; i++) {
-      let v = this.data[i]
+    for (let v of this.data) {
       // Brian Kernighan's algorithm
       while (v !== 0) {
         v &= v - 1
@@ -104,11 +103,7 @@ export class VoxelBitboard {
     return count
   }
 
-  static create(
-    width: number,
-    height: number,
-    depth: number,
-  ): VoxelBitboard {
+  static create(width: number, height: number, depth: number): VoxelBitboard {
     return new VoxelBitboard(width, height, depth)
   }
 
@@ -124,7 +119,14 @@ export class VoxelBitboard {
   ): VoxelBitboard {
     const bb = new VoxelBitboard(width, height, depth)
     for (const p of positions) {
-      if (p.x >= 0 && p.x < width && p.y >= 0 && p.y < height && p.z >= 0 && p.z < depth) {
+      if (
+        p.x >= 0 &&
+        p.x < width &&
+        p.y >= 0 &&
+        p.y < height &&
+        p.z >= 0 &&
+        p.z < depth
+      ) {
         bb.set(p.x, p.y, p.z)
       }
     }

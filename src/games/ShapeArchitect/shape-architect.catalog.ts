@@ -4,6 +4,12 @@ import { generateGuaranteedSolvableWithRetry, presetLevels } from './logic'
 
 export type ShapeArchitectPracticeDifficulty = 'easy' | 'medium' | 'hard'
 
+const generatedCatalogSeeds = [
+  ['starter-fitted-blocks', 'easy'],
+  ['bridge-and-corners', 'medium'],
+  ['pentomino-yard', 'hard'],
+] as const
+
 function normalizePracticeSeed(seed: string) {
   return seed
     .trim()
@@ -13,12 +19,24 @@ function normalizePracticeSeed(seed: string) {
 }
 
 export function getShapeArchitectCatalog() {
-  const config =
-    presetLevels.find((level) => level.id === 'easy_1') ?? presetLevels[0]
+  const generatedConfigs = generatedCatalogSeeds.map(([seed, difficulty]) => {
+    const config = generateGuaranteedSolvableWithRetry(
+      createSeededRandom(`shape-architect-catalog-${seed}`),
+      difficulty,
+    )
+
+    return {
+      ...config,
+      id: `catalog_${difficulty}_${seed}`,
+      name: `Workshop: ${config.name}`,
+    }
+  })
+  const configs = [...generatedConfigs, ...presetLevels]
+  const config = generatedConfigs[0] ?? presetLevels[0]
 
   return {
     config,
-    configs: presetLevels,
+    configs,
     initialConfigId: config.id,
   }
 }

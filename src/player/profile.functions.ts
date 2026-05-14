@@ -16,6 +16,4 @@ export const getPlayerProfileOverview = createServerFn({
 
 export const updatePlayerProfile = createServerFn({ method: 'POST' })
   .inputValidator((data: unknown) => data)
-  .handler(({ data }) =>
-    runServerEffect(createUpdateProfilePipeline(data)),
-  )
+  .handler(({ data }) => runServerEffect(createUpdateProfilePipeline(data)))

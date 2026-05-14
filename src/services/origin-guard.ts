@@ -35,14 +35,13 @@ export const OriginGuardServiceLive = Layer.effect(
           })
         }
 
-        let parsedOrigin: URL
-        try {
-          parsedOrigin = new URL(origin)
-        } catch {
-          return yield* new CrossOriginError({
-            reason: 'Cross-origin: malformed Origin header',
-          })
-        }
+        const parsedOrigin = yield* Effect.try({
+          try: () => new URL(origin),
+          catch: () =>
+            new CrossOriginError({
+              reason: 'Cross-origin: malformed Origin header',
+            }),
+        })
 
         if (parsedOrigin.host !== host) {
           return yield* new CrossOriginError({

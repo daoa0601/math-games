@@ -211,13 +211,10 @@ function generateWithSeededHints(
     1, // We only need one solution
   )
 
-  // Fallback if no solution found (shouldn't happen with valid templates)
   if (solutions.length === 0) {
-    console.warn('[SeededGenerator] No solution found, using template defaults')
-    return {
-      ...basePuzzle,
-      id: `daily_${rng.seed}`,
-    }
+    throw new Error(
+      `[SeededGenerator] No solution found for generated puzzle ${rng.seed}`,
+    )
   }
 
   const solution = solutions[0]

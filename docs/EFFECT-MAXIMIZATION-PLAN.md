@@ -34,7 +34,7 @@ export function runServerEffect<A, E extends ServerError>(
 ): Promise<A> {
   return effect.pipe(
     Effect.mapError(toUserFacingError),
-    Effect.provide(AppLayer),   // ← rebuilds every call
+    Effect.provide(AppLayer), // ← rebuilds every call
     Effect.runPromise,
   )
 }
@@ -72,14 +72,29 @@ Replace the `switch` in `toUserFacingError` with `Match` — compile-time exhaus
 import { Match } from 'effect'
 
 const toUserFacingError = Match.type<ServerError>().pipe(
-  Match.tag('RateLimitError', () => new Error('Too many requests. Please wait a moment.')),
+  Match.tag(
+    'RateLimitError',
+    () => new Error('Too many requests. Please wait a moment.'),
+  ),
   Match.tag('CrossOriginError', () => new Error('Request blocked.')),
   Match.tag('GameProgressValidationError', (e) => new Error(e.reason)),
   Match.tag('PlayerProfileValidationError', (e) => new Error(e.reason)),
-  Match.tag('ProgressWriteError', () => new Error('Unable to save game progress.')),
-  Match.tag('DailyChallengeError', () => new Error("Unable to load today's challenge.")),
-  Match.tag('PlayerProfileError', () => new Error('Unable to load your profile.')),
-  Match.tag('PlayerProfileWriteError', () => new Error('Unable to save your profile.')),
+  Match.tag(
+    'ProgressWriteError',
+    () => new Error('Unable to save game progress.'),
+  ),
+  Match.tag(
+    'DailyChallengeError',
+    () => new Error("Unable to load today's challenge."),
+  ),
+  Match.tag(
+    'PlayerProfileError',
+    () => new Error('Unable to load your profile.'),
+  ),
+  Match.tag(
+    'PlayerProfileWriteError',
+    () => new Error('Unable to save your profile.'),
+  ),
   Match.exhaustive,
 )
 ```
@@ -131,12 +146,12 @@ yield* withD1Retry(
 
 ### What exists after the current plan
 
-| Service | Implementation | Notes |
-|---------|---------------|-------|
-| `DbService` | `Layer.sync` → `createDb(env.DB)` | Exposes raw `AppDatabase` |
-| `PlayerIdentityService` | `Layer.succeed` → sync wrappers | Wraps `getCurrentPlayerId()` / `getCurrentPlayerIdentity()` |
-| `OriginGuardService` | `Layer.succeed` → `Effect.try` wrappers | Wraps `assertSameOriginPost()` |
-| `RateLimitService` | `Layer.succeed` → `Effect.try` wrappers | Wraps `assertNotRateLimited()` |
+| Service                 | Implementation                          | Notes                                                       |
+| ----------------------- | --------------------------------------- | ----------------------------------------------------------- |
+| `DbService`             | `Layer.sync` → `createDb(env.DB)`       | Exposes raw `AppDatabase`                                   |
+| `PlayerIdentityService` | `Layer.succeed` → sync wrappers         | Wraps `getCurrentPlayerId()` / `getCurrentPlayerIdentity()` |
+| `OriginGuardService`    | `Layer.succeed` → `Effect.try` wrappers | Wraps `assertSameOriginPost()`                              |
+| `RateLimitService`      | `Layer.succeed` → `Effect.try` wrappers | Wraps `assertNotRateLimited()`                              |
 
 ### 1a. Add `ClockService`
 
@@ -161,6 +176,7 @@ export const ClockServiceLive = Layer.succeed(ClockService, {
 ```
 
 **Callers to update**:
+
 - `src/daily/daily.server.ts:29` — `loadDailyChallenge(date = new Date())` → yield `ClockService.dateKey()` instead of accepting a param
 - Add `ClockShape` to `AppServices` union in `run-server-effect.ts`
 - Add `ClockServiceLive` to `AppLayer`
@@ -199,11 +215,13 @@ export const HeaderService = Context.Service<HeaderShape>('HeaderService')
 
 export const HeaderServiceLive = Layer.succeed(HeaderService, {
   getRequest: (name) => Effect.sync(() => getRequestHeader(name) ?? null),
-  setResponse: (name, value) => Effect.sync(() => setResponseHeader(name, value)),
+  setResponse: (name, value) =>
+    Effect.sync(() => setResponseHeader(name, value)),
 })
 ```
 
 **Callers to update**:
+
 - `src/games/server-handlers.ts:82-83` — `Effect.sync(() => setResponseHeader(...))` → `yield* (yield* HeaderService).setResponse(...)`
 - `src/services/origin-guard.ts` — refactor to depend on `HeaderService` instead of importing `assertSameOriginPostImpl`
 - `src/services/player-identity.ts` — refactor to depend on `HeaderService` instead of importing `getRequestHeader`
@@ -220,7 +238,8 @@ export interface WorkerEnvShape {
   readonly getD1: () => D1Database
 }
 
-export const WorkerEnvService = Context.Service<WorkerEnvShape>('WorkerEnvService')
+export const WorkerEnvService =
+  Context.Service<WorkerEnvShape>('WorkerEnvService')
 
 export const WorkerEnvServiceLive = Layer.sync(WorkerEnvService, () => {
   const { env } = require('cloudflare:workers')
@@ -231,8 +250,9 @@ export const WorkerEnvServiceLive = Layer.sync(WorkerEnvService, () => {
 **Then**: `DbServiceLive` becomes a `Layer.effect` that depends on `WorkerEnvService`:
 
 ```typescript
-export const DbServiceLive = Layer.effect(DbService,
-  Effect.map(WorkerEnvService, (env) => ({ db: createDb(env.getD1()) }))
+export const DbServiceLive = Layer.effect(
+  DbService,
+  Effect.map(WorkerEnvService, (env) => ({ db: createDb(env.getD1()) })),
 )
 ```
 
@@ -266,10 +286,12 @@ export type AppConfigShape = Effect.Effect.Success<typeof AppConfig>
 In tests, swap the provider:
 
 ```typescript
-const testConfig = ConfigProvider.fromMap(new Map([
-  ['RATE_LIMIT_WINDOW_MS', '1'],
-  ['SOLVER_TIMEOUT_MS', '100'],
-]))
+const testConfig = ConfigProvider.fromMap(
+  new Map([
+    ['RATE_LIMIT_WINDOW_MS', '1'],
+    ['SOLVER_TIMEOUT_MS', '100'],
+  ]),
+)
 
 const testEffect = myEffect.pipe(Effect.withConfigProvider(testConfig))
 ```
@@ -285,15 +307,15 @@ For Cloudflare Workers, the default `console` logger is fine. No custom `LoggerS
 ```typescript
 export const AppLayer = Layer.mergeAll(
   WorkerEnvServiceLive,
-  DbServiceLive,              // depends on WorkerEnvService via Layer.provide
-  PlayerIdentityServiceLive,  // depends on HeaderService, RandomService
-  RateLimitServiceLive,       // depends on ClockService
-  OriginGuardServiceLive,     // depends on HeaderService
+  DbServiceLive, // depends on WorkerEnvService via Layer.provide
+  PlayerIdentityServiceLive, // depends on HeaderService, RandomService
+  RateLimitServiceLive, // depends on ClockService
+  OriginGuardServiceLive, // depends on HeaderService
   ClockServiceLive,
   RandomServiceLive,
   HeaderServiceLive,
 ).pipe(
-  Layer.provide(WorkerEnvServiceLive),  // satisfy DbServiceLive's dependency
+  Layer.provide(WorkerEnvServiceLive), // satisfy DbServiceLive's dependency
 )
 ```
 
@@ -315,9 +337,11 @@ import { Schema } from 'effect'
 export const PlayerId = Schema.String.pipe(Schema.brand('PlayerId'))
 export type PlayerId = typeof PlayerId.Type
 
-export const GameId = Schema.Literal('magic-graph', 'sequence-race', 'shape-architect').pipe(
-  Schema.brand('GameId'),
-)
+export const GameId = Schema.Literal(
+  'magic-graph',
+  'sequence-race',
+  'shape-architect',
+).pipe(Schema.brand('GameId'))
 export type GameId = typeof GameId.Type
 
 export const LevelId = Schema.String.pipe(
@@ -328,6 +352,7 @@ export type LevelId = typeof LevelId.Type
 ```
 
 **Migration**: Replace `string` with branded types in:
+
 - `RecordGameProgressInput.playerId` → `PlayerId`
 - `RecordGameProgressInput.gameId` → `GameId`
 - `RecordGameProgressInput.levelId` → `LevelId`
@@ -390,7 +415,7 @@ export class PlayerProfileInput extends Schema.Class<PlayerProfileInput>(
 
 ### 2d. Define per-game completion schemas
 
-Lift the *structural* validation from `validateGameState` into schemas. Keep *semantic* validation (puzzle correctness, rule enforcement) as pure functions.
+Lift the _structural_ validation from `validateGameState` into schemas. Keep _semantic_ validation (puzzle correctness, rule enforcement) as pure functions.
 
 **`src/games/MagicGraph/magic-graph.schema.ts`**:
 
@@ -411,10 +436,12 @@ export class MagicGraphCompletion extends Schema.Class<MagicGraphCompletion>(
 export class SequenceRaceCompletion extends Schema.Class<SequenceRaceCompletion>(
   'SequenceRaceCompletion',
 )({
-  history: Schema.Array(Schema.Struct({
-    actor: Schema.Literal('player', 'ai'),
-    move: Schema.Unknown,
-  })),
+  history: Schema.Array(
+    Schema.Struct({
+      actor: Schema.Literal('player', 'ai'),
+      move: Schema.Unknown,
+    }),
+  ),
 }) {}
 ```
 
@@ -426,11 +453,21 @@ const RotationAngle = Schema.Literal(0, 90, 180, 270)
 export class ShapeArchitectCompletion extends Schema.Class<ShapeArchitectCompletion>(
   'ShapeArchitectCompletion',
 )({
-  placements: Schema.Array(Schema.Struct({
-    pieceId: Schema.String,
-    position: Schema.Struct({ x: Schema.Number, y: Schema.Number, z: Schema.Number }),
-    rotation: Schema.Struct({ x: RotationAngle, y: RotationAngle, z: RotationAngle }),
-  })).pipe(
+  placements: Schema.Array(
+    Schema.Struct({
+      pieceId: Schema.String,
+      position: Schema.Struct({
+        x: Schema.Number,
+        y: Schema.Number,
+        z: Schema.Number,
+      }),
+      rotation: Schema.Struct({
+        x: RotationAngle,
+        y: RotationAngle,
+        z: RotationAngle,
+      }),
+    }),
+  ).pipe(
     Schema.filter((arr) => arr.length <= 64, {
       message: () => 'Too many placements',
     }),
@@ -444,7 +481,10 @@ Add `completionSchema` to `GameModule`:
 
 ```typescript
 export interface GameModule<
-  TConfig extends { id: string; difficulty: string } = { id: string; difficulty: string },
+  TConfig extends { id: string; difficulty: string } = {
+    id: string
+    difficulty: string
+  },
   TCompletion = unknown,
 > {
   // ... existing fields ...
@@ -470,12 +510,13 @@ function parseCompletion<TCompletion>(
   if (!module.completionSchema) return Effect.succeed(raw as TCompletion)
 
   return Schema.decodeUnknown(module.completionSchema)(raw).pipe(
-    Effect.mapError((e) =>
-      new GameProgressValidationError({
-        reason: ArrayFormatter.formatErrorSync(e)
-          .map((issue) => issue.message)
-          .join('; '),
-      }),
+    Effect.mapError(
+      (e) =>
+        new GameProgressValidationError({
+          reason: ArrayFormatter.formatErrorSync(e)
+            .map((issue) => issue.message)
+            .join('; '),
+        }),
     ),
   )
 }
@@ -486,6 +527,7 @@ Use `ArrayFormatter` (not `TreeFormatter`) for API responses — it returns stru
 ### 2g. Remove hand-rolled validators
 
 Once schemas are wired in:
+
 - Delete `parseGameProgressRequest` from `server-handlers.ts`
 - Delete `validatePlayerProfileInput` from `profile.validation.ts` (or keep as thin re-export of schema decode)
 - Delete `validateGameProgressRequestEffect` and `validatePlayerProfileInputEffect`
@@ -527,16 +569,28 @@ export interface GameModule<TConfig, TCompletion = unknown> {
 const validateAndComputeScore = (levelId: string, raw: unknown) =>
   Effect.gen(function* () {
     const level = resolveLevelConfig(levelId)
-    if (!level) return yield* new GameProgressValidationError({ reason: `Unknown level: ${levelId}` })
+    if (!level)
+      return yield* new GameProgressValidationError({
+        reason: `Unknown level: ${levelId}`,
+      })
 
-    const parsed = yield* parseCompletion(raw)  // schema decode
+    const parsed = yield* parseCompletion(raw) // schema decode
 
     const validation = validateGameState(level, parsed)
-    if (validation === null) return yield* new GameProgressValidationError({ reason: 'Invalid game state' })
+    if (validation === null)
+      return yield* new GameProgressValidationError({
+        reason: 'Invalid game state',
+      })
 
     const { completed, moves } = validation
     const score = computeScore({ completed, moves })
-    const extras = progressExtras?.({ levelId, score, completed, difficulty: level.difficulty }) ?? {}
+    const extras =
+      progressExtras?.({
+        levelId,
+        score,
+        completed,
+        difficulty: level.difficulty,
+      }) ?? {}
 
     return { completed, moves, score, difficulty: level.difficulty, ...extras }
   })
@@ -545,12 +599,20 @@ const validateAndComputeScore = (levelId: string, raw: unknown) =>
 ### 3b. Simplify `createRecordProgressPipeline`
 
 ```typescript
-export function createRecordProgressPipeline(module: GameModule, rawData: unknown) {
+export function createRecordProgressPipeline(
+  module: GameModule,
+  rawData: unknown,
+) {
   return Effect.gen(function* () {
     const data = yield* Schema.decodeUnknown(GameProgressRequest)(rawData).pipe(
-      Effect.mapError((e) => new GameProgressValidationError({
-        reason: ArrayFormatter.formatErrorSync(e).map((i) => i.message).join('; '),
-      })),
+      Effect.mapError(
+        (e) =>
+          new GameProgressValidationError({
+            reason: ArrayFormatter.formatErrorSync(e)
+              .map((i) => i.message)
+              .join('; '),
+          }),
+      ),
     )
 
     yield* (yield* OriginGuardService).assert()
@@ -559,7 +621,10 @@ export function createRecordProgressPipeline(module: GameModule, rawData: unknow
     const playerId = yield* (yield* PlayerIdentityService).resolveId()
     yield* (yield* RateLimitService).assert(`record:${module.id}:${playerId}`)
 
-    const result = yield* module.validateAndComputeScore(data.levelId, data.completion)
+    const result = yield* module.validateAndComputeScore(
+      data.levelId,
+      data.completion,
+    )
 
     return yield* recordGameProgress({
       playerId,
@@ -673,10 +738,10 @@ import { Layer } from 'effect'
 export interface MockDbResults {
   recordGameProgress?: {
     readBatch: [
-      Array<{ achievementId: string }>,       // existing achievements
-      Array<{ gameId: string; totalAttempts: number }>,  // attempts by game
+      Array<{ achievementId: string }>, // existing achievements
+      Array<{ gameId: string; totalAttempts: number }>, // attempts by game
     ]
-    writeBatch: Array<unknown>  // upsert results (shape varies by achievement count)
+    writeBatch: Array<unknown> // upsert results (shape varies by achievement count)
     finalRows: Array<{
       playerId: string
       gameId: string
@@ -695,8 +760,8 @@ export interface MockDbResults {
       configJson: string
       createdAt: Date
     }>
-    inserted?: Array<typeof existing[0]>     // for insert path
-    raceWinner?: Array<typeof existing[0]>   // for conflict path
+    inserted?: Array<(typeof existing)[0]> // for insert path
+    raceWinner?: Array<(typeof existing)[0]> // for conflict path
   }
   loadProfile?: {
     player: {
@@ -716,10 +781,14 @@ export interface MockDbResults {
       completedAt: Date | null
       updatedAt: Date
     }>
-    achievements: Array<{ playerId: string; achievementId: string; unlockedAt: Date }>
+    achievements: Array<{
+      playerId: string
+      achievementId: string
+      unlockedAt: Date
+    }>
   }
   saveProfile?: {
-    player: typeof loadProfile['player']
+    player: (typeof loadProfile)['player']
   }
 }
 
@@ -736,7 +805,7 @@ export function createTestDbLayer(results: MockDbResults) {
 }
 ```
 
-**Key difference from `createMockDb`**: Results are keyed by *which workflow* they serve, not by queue position. The mock knows that `recordGameProgress` does a read batch first, then a write batch. Adding or removing a query in production code causes a type error in the mock factory, not a silent test pass.
+**Key difference from `createMockDb`**: Results are keyed by _which workflow_ they serve, not by queue position. The mock knows that `recordGameProgress` does a read batch first, then a write batch. Adding or removing a query in production code causes a type error in the mock factory, not a silent test pass.
 
 ### 4d. Replace failing DB mock with typed version
 
@@ -776,9 +845,7 @@ function expectMappedError<E extends ServerError>(
   const effect: Effect.Effect<never, E, never> = Effect.fail(error)
   // The AppServices requirement is never, so we can use runtime directly
   return expect(
-    runtime.runPromise(
-      effect.pipe(Effect.mapError(toUserFacingError)),
-    ),
+    runtime.runPromise(effect.pipe(Effect.mapError(toUserFacingError))),
   ).rejects.toThrow(expectedMessage)
 }
 ```
@@ -814,7 +881,7 @@ import { TestClock } from 'effect'
 it.effect('rate limiter resets after window', () =>
   Effect.gen(function* () {
     const limiter = yield* RateLimitService
-    yield* limiter.assert('key')  // first call OK
+    yield* limiter.assert('key') // first call OK
 
     // Advance past the 250ms window
     yield* TestClock.adjust('300 millis')
@@ -915,7 +982,9 @@ export const SolverServiceLive = Layer.succeed(SolverService, {
       const result = yield* Fiber.join(fiber).pipe(
         Effect.timeout(Duration.millis(maxTimeMs + 500)),
         Effect.catchTag('TimeoutException', () =>
-          Effect.fail(new SolverTimeoutError({ searchedStates: 0, timeMs: maxTimeMs })),
+          Effect.fail(
+            new SolverTimeoutError({ searchedStates: 0, timeMs: maxTimeMs }),
+          ),
         ),
       )
 
@@ -1014,19 +1083,34 @@ export function loadDailyChallenge() {
 Combine the three sequential queries into one `db.batch()`:
 
 ```typescript
-const [player, progress, achievements] = yield* withD1Retry(
-  Effect.tryPromise({
-    try: () =>
-      db.batch([
-        db.select().from(schema.players).where(eq(schema.players.id, identity.id)).limit(1),
-        db.select().from(schema.gameProgress).where(eq(schema.gameProgress.playerId, identity.id))
-          .orderBy(asc(schema.gameProgress.gameId), asc(schema.gameProgress.levelId)),
-        db.select().from(schema.playerAchievements).where(eq(schema.playerAchievements.playerId, identity.id))
-          .orderBy(asc(schema.playerAchievements.achievementId)),
-      ] as const),
-    catch: (cause) => new PlayerProfileError({ cause }),
-  }),
-)
+const [player, progress, achievements] =
+  yield *
+  withD1Retry(
+    Effect.tryPromise({
+      try: () =>
+        db.batch([
+          db
+            .select()
+            .from(schema.players)
+            .where(eq(schema.players.id, identity.id))
+            .limit(1),
+          db
+            .select()
+            .from(schema.gameProgress)
+            .where(eq(schema.gameProgress.playerId, identity.id))
+            .orderBy(
+              asc(schema.gameProgress.gameId),
+              asc(schema.gameProgress.levelId),
+            ),
+          db
+            .select()
+            .from(schema.playerAchievements)
+            .where(eq(schema.playerAchievements.playerId, identity.id))
+            .orderBy(asc(schema.playerAchievements.achievementId)),
+        ] as const),
+      catch: (cause) => new PlayerProfileError({ cause }),
+    }),
+  )
 ```
 
 ### 7c. `planDailyChallenge` stays pure
@@ -1056,16 +1140,24 @@ type DailyChallengeRow = typeof schema.dailyChallenges.$inferSelect
 // Mock row factories
 export function mockPlayer(overrides?: Partial<PlayerRow>): PlayerRow
 export function mockProgress(overrides?: Partial<ProgressRow>): ProgressRow
-export function mockAchievement(overrides?: Partial<AchievementRow>): AchievementRow
-export function mockDailyChallenge(overrides?: Partial<DailyChallengeRow>): DailyChallengeRow
+export function mockAchievement(
+  overrides?: Partial<AchievementRow>,
+): AchievementRow
+export function mockDailyChallenge(
+  overrides?: Partial<DailyChallengeRow>,
+): DailyChallengeRow
 
 // Service test layers
 export function createTestClock(fixed: Date): Layer.Layer<ClockShape>
 export function createTestRandom(uuids: string[]): Layer.Layer<RandomShape>
-export function createTestHeaders(req: Record<string, string>): Layer.Layer<HeaderShape>
+export function createTestHeaders(
+  req: Record<string, string>,
+): Layer.Layer<HeaderShape>
 export function createTestDbLayer(results: MockDbResults): Layer.Layer<DbShape>
 export function createFailingDbLayer(): Layer.Layer<DbShape>
-export function createPassingIdentityLayer(id?: string): Layer.Layer<PlayerIdentityShape>
+export function createPassingIdentityLayer(
+  id?: string,
+): Layer.Layer<PlayerIdentityShape>
 export function createPassingGuardLayer(): Layer.Layer<OriginGuardShape>
 export function createBlockingGuardLayer(): Layer.Layer<OriginGuardShape>
 export function createPassingRateLimitLayer(): Layer.Layer<RateLimitShape>
@@ -1075,6 +1167,7 @@ export function createBlockingRateLimitLayer(): Layer.Layer<RateLimitShape>
 ### 8b. Test categories
 
 **Schema validation tests** (new file: `src/effect/__tests__/schema.test.ts`):
+
 - `GameProgressRequest rejects missing levelId`
 - `GameProgressRequest rejects null completion`
 - `PlayerProfileInput normalizes whitespace in displayName`
@@ -1085,6 +1178,7 @@ export function createBlockingRateLimitLayer(): Layer.Layer<RateLimitShape>
 - `ShapeArchitectCompletion rejects oversized placements`
 
 **Service isolation tests** (new file: `src/effect/__tests__/services.test.ts`):
+
 - `ClockService.dateKey returns UTC date`
 - `HeaderService reads/writes through test layer`
 - `OriginGuardService rejects cross-origin via HeaderService`
@@ -1096,12 +1190,14 @@ export function createBlockingRateLimitLayer(): Layer.Layer<RateLimitShape>
 - `PlayerIdentityService sets cookie on new player via HeaderService`
 
 **Error boundary tests** (in `server-workflows.test.ts`):
+
 - All existing tests, rewritten with `@effect/vitest` and typed mocks
 - New: `runServerEffect maps ParseError from Schema validation`
 - New: `SolverTimeoutError maps to user-facing message`
 - New: `runServerEffect logs error before mapping` (verify log side-effect)
 
 **Full pipeline integration tests** (in `server-workflows.test.ts`):
+
 - All existing success-path tests, rewritten with typed mock row factories
 - New: `recordGameProgress unlocks achievements on first completion`
 - New: `createRecordProgressPipeline rejects when schema parsing fails`
@@ -1130,17 +1226,17 @@ it.effect('rate limiter uses configured window', () =>
 
 ## What stays plain TypeScript (never Effect)
 
-| Code | Why |
-|------|-----|
-| React components, hooks, routes | UI concern, Effect adds nothing |
-| `useSolverWorker.ts` | React state + Web Worker lifecycle |
-| Drizzle schema definitions (`src/db/schema.ts`) | Static declarations |
+| Code                                                                                                                  | Why                                                             |
+| --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| React components, hooks, routes                                                                                       | UI concern, Effect adds nothing                                 |
+| `useSolverWorker.ts`                                                                                                  | React state + Web Worker lifecycle                              |
+| Drizzle schema definitions (`src/db/schema.ts`)                                                                       | Static declarations                                             |
 | `GameModule` sync methods (`validateGameState`, `computeScore`, `getCatalog`, `getDailyPick`, `evaluateAchievements`) | Pure logic, called by Effect programs but not Effect themselves |
-| `checkAchievements` | Pure decision function, no IO |
-| `planDailyChallenge`, `getUtcDateKey`, `parseDailyChallengeConfig` | Pure data transforms |
-| `parsePlayerIdCookie`, `serializePlayerIdCookie`, `createPlayerIdentity` | Pure string/object helpers |
-| All game logic kernels (solvers, generators, engines, validators) | Deterministic math |
-| `alchemy.run.ts` | Already uses Effect independently for IaC |
+| `checkAchievements`                                                                                                   | Pure decision function, no IO                                   |
+| `planDailyChallenge`, `getUtcDateKey`, `parseDailyChallengeConfig`                                                    | Pure data transforms                                            |
+| `parsePlayerIdCookie`, `serializePlayerIdCookie`, `createPlayerIdentity`                                              | Pure string/object helpers                                      |
+| All game logic kernels (solvers, generators, engines, validators)                                                     | Deterministic math                                              |
+| `alchemy.run.ts`                                                                                                      | Already uses Effect independently for IaC                       |
 
 ---
 
@@ -1180,72 +1276,72 @@ Phases 0-4 are the highest value — they establish the runtime, type safety, an
 
 ## Effect features used (with rationale)
 
-| Feature | Where | Why |
-|---------|-------|-----|
-| `ManagedRuntime` | `runServerEffect` | Build layer graph once per isolate, not per request |
-| `Match.exhaustive` | `toUserFacingError` | Compile-time exhaustiveness on error union |
-| `Schedule` + `Effect.retry` | All `Effect.tryPromise` DB calls | D1 transient failure resilience |
-| `Schema.Class` | Request/completion schemas | Validated construction + `decodeUnknown` |
-| `Schema.brand` | `PlayerId`, `GameId`, `LevelId` | Nominal types, zero runtime cost |
-| `Schema.transform` | `DisplayName` | Normalize input during parsing |
-| `Schema.filter` | Completion schemas | Structural constraints |
-| `ArrayFormatter` | Schema error mapping | Structured API error messages |
-| `Config` | `AppConfig` | Typed env vars with defaults |
-| `ConfigProvider.fromMap` | Tests | Override config without env vars |
-| `@effect/vitest` | All tests | `it.effect`, `it.layer`, `it.effect.fails` |
-| `TestClock` | Rate limiter tests | Deterministic time control |
-| `Layer.effect` + `Layer.provide` | Service composition | Inter-service dependencies |
-| `Effect.log` | `runServerEffect` | Structured error logging |
-| `Fiber.join` + `Effect.timeout` | `SolverService` | Interruptible solver |
+| Feature                          | Where                            | Why                                                 |
+| -------------------------------- | -------------------------------- | --------------------------------------------------- |
+| `ManagedRuntime`                 | `runServerEffect`                | Build layer graph once per isolate, not per request |
+| `Match.exhaustive`               | `toUserFacingError`              | Compile-time exhaustiveness on error union          |
+| `Schedule` + `Effect.retry`      | All `Effect.tryPromise` DB calls | D1 transient failure resilience                     |
+| `Schema.Class`                   | Request/completion schemas       | Validated construction + `decodeUnknown`            |
+| `Schema.brand`                   | `PlayerId`, `GameId`, `LevelId`  | Nominal types, zero runtime cost                    |
+| `Schema.transform`               | `DisplayName`                    | Normalize input during parsing                      |
+| `Schema.filter`                  | Completion schemas               | Structural constraints                              |
+| `ArrayFormatter`                 | Schema error mapping             | Structured API error messages                       |
+| `Config`                         | `AppConfig`                      | Typed env vars with defaults                        |
+| `ConfigProvider.fromMap`         | Tests                            | Override config without env vars                    |
+| `@effect/vitest`                 | All tests                        | `it.effect`, `it.layer`, `it.effect.fails`          |
+| `TestClock`                      | Rate limiter tests               | Deterministic time control                          |
+| `Layer.effect` + `Layer.provide` | Service composition              | Inter-service dependencies                          |
+| `Effect.log`                     | `runServerEffect`                | Structured error logging                            |
+| `Fiber.join` + `Effect.timeout`  | `SolverService`                  | Interruptible solver                                |
 
 ### Features evaluated and deferred
 
-| Feature | Why deferred |
-|---------|-------------|
-| `Effect.request` / `RequestResolver` | Current read patterns are simple enough for `db.batch()`. Worth revisiting if read-heavy routes multiply. |
-| `Layer.scoped` | D1 bindings don't need lifecycle management. Revisit if adding pooled resources. |
-| `FiberRef` | Per-request context (request ID, player ID) doesn't need fiber-local storage yet. Revisit for structured logging. |
-| `Schema.TaggedStruct` | No domain events beyond `Data.TaggedError`. Revisit when adding game events. |
+| Feature                              | Why deferred                                                                                                      |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `Effect.request` / `RequestResolver` | Current read patterns are simple enough for `db.batch()`. Worth revisiting if read-heavy routes multiply.         |
+| `Layer.scoped`                       | D1 bindings don't need lifecycle management. Revisit if adding pooled resources.                                  |
+| `FiberRef`                           | Per-request context (request ID, player ID) doesn't need fiber-local storage yet. Revisit for structured logging. |
+| `Schema.TaggedStruct`                | No domain events beyond `Data.TaggedError`. Revisit when adding game events.                                      |
 
 ---
 
 ## File inventory
 
-| File | Action | Phase |
-|------|--------|-------|
-| `src/services/run-server-effect.ts` | UPDATE — ManagedRuntime, Match.exhaustive, logging | 0 |
-| `src/services/retry.ts` | **NEW** — d1RetryPolicy | 0c |
-| `src/services/clock.ts` | **NEW** | 1a |
-| `src/services/random.ts` | **NEW** | 1b |
-| `src/services/headers.ts` | **NEW** | 1c |
-| `src/services/worker-env.ts` | **NEW** | 1d |
-| `src/services/config.ts` | **NEW** | 1e |
-| `src/services/app-layer.ts` | UPDATE — add new services, wire dependencies | 1g |
-| `src/services/index.ts` | UPDATE — re-export new services | 0-1 |
-| `src/services/db.ts` | UPDATE — depend on WorkerEnvService | 1d |
-| `src/services/branded.ts` | **NEW** — PlayerId, GameId, LevelId | 2a |
-| `src/games/game-progress.schema.ts` | **NEW** | 2b |
-| `src/player/profile.schema.ts` | **NEW** | 2c |
-| `src/games/MagicGraph/magic-graph.schema.ts` | **NEW** | 2d |
-| `src/games/SequenceRace/sequence-race.schema.ts` | **NEW** | 2d |
-| `src/games/ShapeArchitect/shape-architect.schema.ts` | **NEW** | 2d |
-| `src/games/game-module.ts` | UPDATE — add completionSchema, validateAndComputeScore | 2e, 3a |
-| `src/games/MagicGraph/module.ts` | UPDATE — add schema + Effect workflow | 2d, 3a |
-| `src/games/SequenceRace/module.ts` | UPDATE — add schema + Effect workflow | 2d, 3a |
-| `src/games/ShapeArchitect/module.ts` | UPDATE — add schema + Effect workflow | 2d, 3a |
-| `src/games/server-handlers.ts` | UPDATE — use schemas, module.validateAndComputeScore, HeaderService | 2f, 3b |
-| `src/player/profile.validation.ts` | DELETE or thin re-export of schema | 2g |
-| `src/test/effect-layers.ts` | **NEW** — typed mock factories, test layers | 4 |
-| `src/effect/__tests__/server-workflows.test.ts` | REWRITE — @effect/vitest, typed mocks, no `as any` | 4 |
-| `src/effect/__tests__/schema.test.ts` | **NEW** | 8b |
-| `src/effect/__tests__/services.test.ts` | **NEW** | 8b |
-| `src/services/solver.ts` | **NEW** | 5a |
-| `src/services/player-identity.ts` | UPDATE — Effect workflow, depend on HeaderService + RandomService | 6a |
-| `src/services/origin-guard.ts` | UPDATE — depend on HeaderService | 6b |
-| `src/services/rate-limit.ts` | UPDATE — depend on ClockService | 6c |
-| `src/daily/daily.server.ts` | UPDATE — use ClockService | 7a |
-| `src/player/profile.server.ts` | UPDATE — batch queries, withD1Retry | 7b |
-| `src/player/profile.functions.ts` | UPDATE — remove bare setResponseHeader | 1c |
-| `src/daily/daily.functions.ts` | UPDATE — remove bare setResponseHeader | 1c |
-| `src/games/progress/progress.server.ts` | UPDATE — withD1Retry | 0c |
-| `src/services/errors.ts` | UNCHANGED after current plan | — |
+| File                                                 | Action                                                              | Phase  |
+| ---------------------------------------------------- | ------------------------------------------------------------------- | ------ |
+| `src/services/run-server-effect.ts`                  | UPDATE — ManagedRuntime, Match.exhaustive, logging                  | 0      |
+| `src/services/retry.ts`                              | **NEW** — d1RetryPolicy                                             | 0c     |
+| `src/services/clock.ts`                              | **NEW**                                                             | 1a     |
+| `src/services/random.ts`                             | **NEW**                                                             | 1b     |
+| `src/services/headers.ts`                            | **NEW**                                                             | 1c     |
+| `src/services/worker-env.ts`                         | **NEW**                                                             | 1d     |
+| `src/services/config.ts`                             | **NEW**                                                             | 1e     |
+| `src/services/app-layer.ts`                          | UPDATE — add new services, wire dependencies                        | 1g     |
+| `src/services/index.ts`                              | UPDATE — re-export new services                                     | 0-1    |
+| `src/services/db.ts`                                 | UPDATE — depend on WorkerEnvService                                 | 1d     |
+| `src/services/branded.ts`                            | **NEW** — PlayerId, GameId, LevelId                                 | 2a     |
+| `src/games/game-progress.schema.ts`                  | **NEW**                                                             | 2b     |
+| `src/player/profile.schema.ts`                       | **NEW**                                                             | 2c     |
+| `src/games/MagicGraph/magic-graph.schema.ts`         | **NEW**                                                             | 2d     |
+| `src/games/SequenceRace/sequence-race.schema.ts`     | **NEW**                                                             | 2d     |
+| `src/games/ShapeArchitect/shape-architect.schema.ts` | **NEW**                                                             | 2d     |
+| `src/games/game-module.ts`                           | UPDATE — add completionSchema, validateAndComputeScore              | 2e, 3a |
+| `src/games/MagicGraph/module.ts`                     | UPDATE — add schema + Effect workflow                               | 2d, 3a |
+| `src/games/SequenceRace/module.ts`                   | UPDATE — add schema + Effect workflow                               | 2d, 3a |
+| `src/games/ShapeArchitect/module.ts`                 | UPDATE — add schema + Effect workflow                               | 2d, 3a |
+| `src/games/server-handlers.ts`                       | UPDATE — use schemas, module.validateAndComputeScore, HeaderService | 2f, 3b |
+| `src/player/profile.validation.ts`                   | DELETE or thin re-export of schema                                  | 2g     |
+| `src/test/effect-layers.ts`                          | **NEW** — typed mock factories, test layers                         | 4      |
+| `src/effect/__tests__/server-workflows.test.ts`      | REWRITE — @effect/vitest, typed mocks, no `as any`                  | 4      |
+| `src/effect/__tests__/schema.test.ts`                | **NEW**                                                             | 8b     |
+| `src/effect/__tests__/services.test.ts`              | **NEW**                                                             | 8b     |
+| `src/services/solver.ts`                             | **NEW**                                                             | 5a     |
+| `src/services/player-identity.ts`                    | UPDATE — Effect workflow, depend on HeaderService + RandomService   | 6a     |
+| `src/services/origin-guard.ts`                       | UPDATE — depend on HeaderService                                    | 6b     |
+| `src/services/rate-limit.ts`                         | UPDATE — depend on ClockService                                     | 6c     |
+| `src/daily/daily.server.ts`                          | UPDATE — use ClockService                                           | 7a     |
+| `src/player/profile.server.ts`                       | UPDATE — batch queries, withD1Retry                                 | 7b     |
+| `src/player/profile.functions.ts`                    | UPDATE — remove bare setResponseHeader                              | 1c     |
+| `src/daily/daily.functions.ts`                       | UPDATE — remove bare setResponseHeader                              | 1c     |
+| `src/games/progress/progress.server.ts`              | UPDATE — withD1Retry                                                | 0c     |
+| `src/services/errors.ts`                             | UNCHANGED after current plan                                        | —      |

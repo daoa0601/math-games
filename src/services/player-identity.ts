@@ -16,8 +16,9 @@ export interface PlayerIdentityShape {
   readonly resolveId: () => Effect.Effect<string>
 }
 
-export const PlayerIdentityService =
-  Context.Service<PlayerIdentityShape>('PlayerIdentityService')
+export const PlayerIdentityService = Context.Service<PlayerIdentityShape>(
+  'PlayerIdentityService',
+)
 
 export const PlayerIdentityServiceLive = Layer.effect(
   PlayerIdentityService,

@@ -2,8 +2,12 @@ import { Schema } from 'effect'
 
 export const DisplayName = Schema.String.pipe(
   Schema.check(
-    Schema.isMinLength(2, { message: 'Display name must be at least 2 characters' }),
-    Schema.isMaxLength(40, { message: 'Display name must be at most 40 characters' }),
+    Schema.isMinLength(2, {
+      message: 'Display name must be at least 2 characters',
+    }),
+    Schema.isMaxLength(40, {
+      message: 'Display name must be at most 40 characters',
+    }),
   ),
 )
 

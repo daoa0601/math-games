@@ -1,7 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { Confetti } from '@/components/confetti'
+import { GamePattern } from '@/components/game-pattern'
+import { LanguageToggle } from '@/components/language-toggle'
+import { LearnSection } from '@/components/learn-section'
+import { ResponsiveSection } from '@/components/responsive-section'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { validateLevelSearch } from '@/games/level-search'
 import {
   DEFAULT_ROTATION,
@@ -19,6 +29,7 @@ import type {
   Rotation3D,
   SolutionStep,
 } from '@/games/ShapeArchitect/logic'
+import { PlacementToolbar } from '@/games/ShapeArchitect/components/PlacementToolbar'
 import { ShapeArchitectCanvas } from '@/games/ShapeArchitect/components/ShapeArchitectCanvas'
 import type { ViewMode } from '@/games/ShapeArchitect/components/ShapeArchitectCanvas'
 import { useSolverWorker } from '@/games/ShapeArchitect/logic/useSolverWorker'
@@ -28,12 +39,12 @@ import {
   getShapeArchitectLevel,
   recordShapeArchitectProgress,
 } from '@/games/ShapeArchitect/shape-architect.functions'
-
-const ShapeArchitect3D = lazy(() =>
-  import('@/games/ShapeArchitect/components/ShapeArchitect3D').then((m) => ({
-    default: m.ShapeArchitect3D,
-  })),
-)
+import {
+  formatSavedProgress,
+  formatSolvedProgress,
+  runServerAction,
+} from '@/routes/-server-action-result'
+import { useT } from '@/components/use-t'
 
 export const Route = createFileRoute('/games/shape-architect')({
   validateSearch: validateLevelSearch,
@@ -82,6 +93,7 @@ function pieceIsPlaced(placedPieces: PlacedPiece[], piece: Piece) {
 }
 
 function ShapeArchitectRoute() {
+  const t = useT()
   const { configs, initialConfigId } = Route.useLoaderData()
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordShapeArchitectProgress)
@@ -109,6 +121,9 @@ function ShapeArchitectRoute() {
     useState<Rotation3D>(DEFAULT_ROTATION)
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('2d')
+  const [pendingPosition, setPendingPosition] = useState<Position3D | null>(null)
+  const [tapPoint, setTapPoint] = useState<{ x: number; y: number } | null>(null)
+  const boardRef = useRef<HTMLDivElement>(null)
   const solver = useSolverWorker()
 
   useEffect(() => {
@@ -131,27 +146,23 @@ function ShapeArchitectRoute() {
     setGrid(nextGrid)
 
     void (async () => {
-      try {
-        const progress = await recordProgress({
-          data: {
-            levelId: config.id,
-            completion: { placements: nextPlacedPieces },
-          },
-        })
-        const unlocked =
-          progress.unlockedAchievements.length > 0
-            ? ` Unlocked ${progress.unlockedAchievements.join(', ')}.`
-            : ''
-        setSaveStatus(
-          `Solved in ${result.timeMs.toFixed(1)}ms; saved attempt ${
-            progress.attempts
-          }; best score ${progress.bestScore}.${unlocked}`,
-        )
-      } catch (error) {
-        setSaveStatus(
-          error instanceof Error ? error.message : 'Progress save failed.',
-        )
+      const progress = await runServerAction(
+        () =>
+          recordProgress({
+            data: {
+              levelId: config.id,
+              completion: { placements: nextPlacedPieces },
+            },
+          }),
+        'Progress save failed.',
+      )
+
+      if (!progress.ok) {
+        setSaveStatus(progress.message)
+        return
       }
+
+      setSaveStatus(formatSolvedProgress(result.timeMs, progress.value))
     })()
   }, [solver.result])
 
@@ -180,30 +191,23 @@ function ShapeArchitectRoute() {
     config.pieces.find((piece) => piece.id === selectedPieceId) ?? null
 
   async function recordAttempt(placements: PlacedPiece[]) {
-    try {
-      const progress = await recordProgress({
-        data: {
-          levelId: config.id,
-          completion: { placements },
-        },
-      })
-      const unlocked =
-        progress.unlockedAchievements.length > 0
-          ? ` Unlocked ${progress.unlockedAchievements.join(', ')}.`
-          : ''
-      setSaveStatus(
-        `Saved attempt ${progress.attempts}; best score ${progress.bestScore}.${unlocked}`,
-      )
-    } catch (error) {
-      setSaveStatus(
-        error instanceof Error ? error.message : 'Progress save failed.',
-      )
-    }
-  }
+    const result = await runServerAction(
+      () =>
+        recordProgress({
+          data: {
+            levelId: config.id,
+            completion: { placements },
+          },
+        }),
+      'Progress save failed.',
+    )
 
-  function applySolution() {
-    setSaveStatus('Solving...')
-    solver.solve(config, 2000)
+    if (!result.ok) {
+      setSaveStatus(result.message)
+      return
+    }
+
+    setSaveStatus(formatSavedProgress(result.value))
   }
 
   async function checkCurrent() {
@@ -215,6 +219,8 @@ function ShapeArchitectRoute() {
     setPlacedPieces([])
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
+    setPendingPosition(null)
+    setTapPoint(null)
     setSaveStatus(null)
   }
 
@@ -224,6 +230,8 @@ function ShapeArchitectRoute() {
     setPlacedPieces([])
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
+    setPendingPosition(null)
+    setTapPoint(null)
     setSaveStatus(null)
   }
 
@@ -231,6 +239,8 @@ function ShapeArchitectRoute() {
     if (pieceIsPlaced(placedPieces, piece)) return
 
     setSelectedPieceId(piece.id)
+    setPendingPosition(null)
+    setTapPoint(null)
     setSaveStatus(null)
   }
 
@@ -241,22 +251,50 @@ function ShapeArchitectRoute() {
     setSaveStatus(null)
   }
 
-  function placeSelectedPiece(attemptedPosition: Position3D) {
+  function handleCellClick(attemptedPosition: Position3D) {
     if (selectedPiece === null) {
-      setSaveStatus('Select a piece before placing it.')
+      setSaveStatus(t('game.selectPiece'))
       return
     }
+
+    setPendingPosition(attemptedPosition)
+    setSaveStatus(null)
+  }
+
+  function handleBoardClick(e: React.MouseEvent) {
+    const board = boardRef.current
+    if (!board) return
+    const rect = board.getBoundingClientRect()
+    setTapPoint({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    })
+  }
+
+  const pendingCanPlace =
+    selectedPiece !== null && pendingPosition !== null
+      ? findNearestValidPosition(
+          grid,
+          selectedPiece,
+          pendingPosition,
+          placementRotation,
+          config.gridSize,
+        ) !== null
+      : false
+
+  function confirmPlacement() {
+    if (selectedPiece === null || pendingPosition === null) return
 
     const position = findNearestValidPosition(
       grid,
       selectedPiece,
-      attemptedPosition,
+      pendingPosition,
       placementRotation,
       config.gridSize,
     )
 
     if (position === null) {
-      setSaveStatus('That piece does not fit there.')
+      setSaveStatus(t('game.doesNotFit'))
       return
     }
 
@@ -280,11 +318,19 @@ function ShapeArchitectRoute() {
     setPlacedPieces(nextPlacedPieces)
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
+    setPendingPosition(null)
+    setTapPoint(null)
     setSaveStatus(
       checkSolved(nextGrid, config.targetVoxels)
-        ? 'All target cells are filled. Press Check to save the result.'
-        : `${selectedPiece.name} placed.`,
+        ? t('game.allFilled')
+        : `${selectedPiece.name} ${t('game.piecePlaced')}`,
     )
+  }
+
+  function cancelPlacement() {
+    setPendingPosition(null)
+    setTapPoint(null)
+    setSaveStatus(null)
   }
 
   function generatePracticeLevel() {
@@ -299,206 +345,171 @@ function ShapeArchitectRoute() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-6 py-8 text-neutral-950">
-      <header className="flex flex-col gap-4 border-b border-neutral-300 pb-6 md:flex-row md:items-end md:justify-between">
-        <div>
+    <main className="theme-shape-architect mx-auto flex min-h-screen max-w-5xl flex-col gap-5 overflow-x-hidden px-4 py-6 md:gap-8 md:px-6 md:py-8">
+      <header className="flex items-center justify-between gap-3 border-b border-border pb-3">
+        <div className="flex items-center gap-3 overflow-hidden">
           <Link
-            className="text-sm text-neutral-600 hover:text-neutral-950"
+            className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
             to="/"
           >
-            Math Games
+            {t('app.title')}
           </Link>
-          <h1 className="mt-3 text-4xl font-semibold">{config.name}</h1>
-          <p className="mt-2 max-w-2xl text-neutral-700">
-            Fill every target cell with the available pieces. Each preset and
-            practice level is deterministic, so the same seed always builds the
-            same puzzle.
-          </p>
+          <span className="text-muted-foreground">/</span>
+          <h1 className="truncate text-lg font-semibold md:text-2xl">
+            {config.name}
+          </h1>
         </div>
-        <div className="border border-neutral-300 px-4 py-3 text-sm">
-          <div className="font-semibold uppercase text-neutral-500">Cells</div>
-          <div className="text-3xl font-semibold">
-            {filledTargets} / {config.targetVoxels.length}
-          </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="rounded-md bg-primary/10 px-2 py-1 text-sm font-semibold text-primary">
+            {filledTargets}/{config.targetVoxels.length}
+          </span>
+          <LanguageToggle />
+          <ThemeToggle />
         </div>
       </header>
 
-      <section className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
-        <div className="border border-neutral-300 p-5">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-semibold">Blueprint</h2>
-            <div className="flex items-center gap-3">
-              <div className="flex border border-neutral-300 text-sm">
-                {(['2d', 'iso', '3d'] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    className={viewMode === mode ? 'bg-neutral-950 px-3 py-1 text-white' : 'px-3 py-1 hover:bg-neutral-100'}
-                    onClick={() => setViewMode(mode)}
-                    type="button"
-                  >
-                    {mode === '2d' ? '2D' : mode === 'iso' ? 'Iso' : '3D'}
-                  </button>
-                ))}
+      <section className="relative">
+        <Confetti active={solved} colors={['#14b8a6', '#2dd4bf', '#5eead4', '#0d9488', '#0f766e']} />
+        <Card className="relative overflow-hidden">
+          <GamePattern pattern="grid" />
+          <CardContent className="relative">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-xl font-semibold">{t('game.blueprint')}</h2>
+              <div className="flex items-center gap-3">
+                <ToggleGroup
+                  type="single"
+                  value={viewMode}
+                  onValueChange={(value) => {
+                    if (value) setViewMode(value as ViewMode)
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  <ToggleGroupItem value="2d">2D</ToggleGroupItem>
+                  <ToggleGroupItem value="iso">Iso</ToggleGroupItem>
+                </ToggleGroup>
+                <span className="text-sm capitalize text-muted-foreground">
+                  {config.difficulty} / {config.type}
+                </span>
               </div>
-              <span className="text-sm capitalize text-neutral-600">
-                {config.difficulty} / {config.type}
-              </span>
             </div>
-          </div>
 
-          <div className="mt-5">
-            {viewMode === '3d' ? (
-              <Suspense
-                fallback={
-                  <div className="flex h-[300px] items-center justify-center text-sm text-neutral-500">
-                    Loading 3D…
-                  </div>
-                }
-              >
-                <ShapeArchitect3D
-                  grid={grid}
-                  config={config}
-                  placedPieces={placedPieces}
-                  selectedPiece={selectedPiece}
-                  placementRotation={placementRotation}
-                  onCellClick={placeSelectedPiece}
-                />
-              </Suspense>
-            ) : (
+            <div
+              ref={boardRef}
+              className="relative mt-4 overflow-x-auto"
+              onClick={handleBoardClick}
+            >
               <ShapeArchitectCanvas
                 grid={grid}
                 config={config}
                 placedPieces={placedPieces}
                 selectedPiece={selectedPiece}
                 placementRotation={placementRotation}
-                onCellClick={placeSelectedPiece}
+                onCellClick={handleCellClick}
+                pendingPosition={pendingPosition}
                 viewMode={viewMode}
               />
-            )}
-          </div>
-        </div>
 
-        <aside className="border border-neutral-300 p-5">
-          <h2 className="text-xl font-semibold">Pieces</h2>
-          <ol className="mt-4 grid gap-2">
-            {config.pieces.map((piece) => {
-              const placed = pieceIsPlaced(placedPieces, piece)
-              const selected = piece.id === selectedPieceId
-
-              return (
-                <li
-                  className="border-b border-neutral-200 py-2 text-sm"
-                  key={piece.id}
+              {pendingPosition !== null && selectedPiece !== null && tapPoint && (
+                <div
+                  className="absolute z-10"
+                  style={{
+                    left: `clamp(0px, ${tapPoint.x}px - 5rem, calc(100% - 10rem))`,
+                    top: `clamp(0px, ${tapPoint.y + 12}px, calc(100% - 2.5rem))`,
+                  }}
                 >
+                  <PlacementToolbar
+                    pieceName={selectedPiece.name}
+                    rotationDeg={placementRotation.z}
+                    canPlace={pendingCanPlace}
+                    onRotate={rotateSelectedPiece}
+                    onPlace={confirmPlacement}
+                    onCancel={cancelPlacement}
+                  />
+                </div>
+              )}
+            </div>
+
+            <Separator className="my-4" />
+
+            <div className="flex flex-wrap gap-2">
+              {config.pieces.map((piece) => {
+                const placed = pieceIsPlaced(placedPieces, piece)
+                const selected = piece.id === selectedPieceId
+
+                return (
                   <button
+                    key={piece.id}
                     aria-pressed={selected}
-                    className={
-                      selected
-                        ? 'flex w-full items-center justify-between border border-neutral-950 bg-neutral-950 px-3 py-2 text-left text-white'
-                        : 'flex w-full items-center justify-between px-3 py-2 text-left hover:bg-neutral-100 disabled:text-neutral-400'
-                    }
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                      placed
+                        ? 'bg-muted text-muted-foreground line-through'
+                        : selected
+                          ? 'bg-primary text-primary-foreground'
+                          : 'border border-border bg-card hover:bg-muted'
+                    }${placed ? ' animate-piece-snap' : ''}`}
                     disabled={placed}
                     onClick={() => selectPiece(piece)}
                     type="button"
                   >
-                    <span className="flex items-center gap-2">
-                      <span
-                        className="h-4 w-4 border border-neutral-950"
-                        style={{ backgroundColor: piece.color }}
-                      />
-                      {piece.name}
-                    </span>
-                    <span className="text-sm">
-                      {placed ? 'Placed' : `${piece.layout.length} cells`}
-                    </span>
+                    <span
+                      className="h-3 w-3 rounded-full border border-border"
+                      style={{ backgroundColor: piece.color }}
+                    />
+                    {piece.name}
                   </button>
-                </li>
-              )
-            })}
-          </ol>
+                )
+              })}
+            </div>
 
-          <dl className="mt-5 grid gap-3 text-sm">
-            <div className="flex justify-between border-b border-neutral-200 pb-2">
-              <dt className="text-neutral-600">Selected</dt>
-              <dd className="font-medium">{selectedPiece?.name ?? '-'}</dd>
+            <div className="mt-4 flex gap-2">
+              <Button
+                className="flex-1"
+                onClick={() => void checkCurrent()}
+                type="button"
+              >
+                {t('game.check')}
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={resetPuzzle}
+                type="button"
+              >
+                {t('game.reset')}
+              </Button>
             </div>
-            <div className="flex justify-between border-b border-neutral-200 pb-2">
-              <dt className="text-neutral-600">Rotation</dt>
-              <dd className="font-medium">{placementRotation.z}deg</dd>
-            </div>
-            <div className="flex justify-between border-b border-neutral-200 pb-2">
-              <dt className="text-neutral-600">Placed</dt>
-              <dd className="font-medium">
-                {placedPieces.length} / {config.pieces.length}
-              </dd>
-            </div>
-            <div className="flex justify-between border-b border-neutral-200 pb-2">
-              <dt className="text-neutral-600">Solved</dt>
-              <dd className="font-medium">{solved ? 'Yes' : 'No'}</dd>
-            </div>
-          </dl>
 
-          <div className="mt-5 grid gap-2">
-            <button
-              className="border border-neutral-950 px-4 py-3 font-semibold disabled:border-neutral-200 disabled:text-neutral-300"
-              disabled={selectedPiece === null}
-              onClick={rotateSelectedPiece}
-              type="button"
-            >
-              Rotate
-            </button>
-            <button
-              className="border border-neutral-950 px-4 py-3 font-semibold"
-              onClick={() => void checkCurrent()}
-              type="button"
-            >
-              Check
-            </button>
-            <button
-              className="border border-neutral-950 px-4 py-3 font-semibold disabled:border-neutral-200 disabled:text-neutral-300"
-              disabled={solver.solving}
-              onClick={applySolution}
-              type="button"
-            >
-              {solver.solving ? 'Solving…' : 'Apply Solution'}
-            </button>
-            <button
-              className="border border-neutral-950 px-4 py-3 font-semibold"
-              onClick={resetPuzzle}
-              type="button"
-            >
-              Reset
-            </button>
-          </div>
+            {saveStatus ? (
+              <p className="mt-3 text-sm text-muted-foreground">{saveStatus}</p>
+            ) : null}
 
-          {saveStatus ? (
-            <p className="mt-4 border-t border-neutral-200 pt-4 text-sm text-neutral-700">
-              {saveStatus}
-            </p>
-          ) : null}
-        </aside>
+            <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                {t('stats.placed')} {placedPieces.length}/{config.pieces.length}
+              </span>
+              <span>{solved ? t('stats.solved') : `${filledTargets}/${config.targetVoxels.length} ${t('stats.cells')}`}</span>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
-      <section className="border-y border-neutral-300 py-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold">Levels</h2>
-            <p className="mt-2 text-neutral-700">
-              Presets and seeded practice levels share the same portable
-              dissection engine.
-            </p>
-          </div>
+      <ResponsiveSection
+        title={t('game.levels')}
+        description="Presets and seeded practice levels share the same portable dissection engine."
+        className="border-y border-border py-5"
+        actions={
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
             <input
               aria-label="Practice seed"
-              className="border border-neutral-950 px-3 py-2"
+              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) => setPracticeSeed(event.currentTarget.value)}
               placeholder="Practice seed"
               value={practiceSeed}
             />
             <select
               aria-label="Practice difficulty"
-              className="border border-neutral-950 px-3 py-2"
+              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
               onChange={(event) =>
                 setPracticeDifficulty(
                   event.currentTarget.value as ShapeArchitectPracticeDifficulty,
@@ -506,20 +517,17 @@ function ShapeArchitectRoute() {
               }
               value={practiceDifficulty}
             >
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
+              <option value="easy">{t('diff.easy')}</option>
+              <option value="medium">{t('diff.medium')}</option>
+              <option value="hard">{t('diff.hard')}</option>
             </select>
-            <button
-              className="border border-neutral-950 px-4 py-2 font-semibold"
-              onClick={generatePracticeLevel}
-              type="button"
-            >
-              Generate
-            </button>
+            <Button onClick={generatePracticeLevel} type="button">
+              {t('game.generate')}
+            </Button>
           </div>
-        </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        }
+      >
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {availableConfigs.map((optionLevel) => {
             const selected = optionLevel.id === config.id
 
@@ -527,8 +535,8 @@ function ShapeArchitectRoute() {
               <button
                 className={
                   selected
-                    ? 'border border-neutral-950 bg-neutral-950 px-4 py-4 text-left text-white'
-                    : 'border border-neutral-300 px-4 py-4 text-left text-neutral-950 hover:border-neutral-950'
+                    ? 'rounded-lg border border-primary bg-primary px-4 py-4 text-left text-primary-foreground'
+                    : 'rounded-lg border border-border px-4 py-4 text-left hover:border-primary'
                 }
                 key={optionLevel.id}
                 onClick={() => selectLevel(optionLevel)}
@@ -544,28 +552,9 @@ function ShapeArchitectRoute() {
             )
           })}
         </div>
-      </section>
+      </ResponsiveSection>
 
-      <section className="border-y border-neutral-300 py-5">
-        <h2 className="text-xl font-semibold">Placements</h2>
-        {placedPieces.length === 0 ? (
-          <p className="mt-3 text-neutral-600">No pieces placed.</p>
-        ) : (
-          <ol className="mt-4 grid gap-2">
-            {placedPieces.map((piece) => (
-              <li
-                className="flex justify-between border-b border-neutral-200 py-2 text-sm"
-                key={piece.pieceId}
-              >
-                <span>{piece.pieceId}</span>
-                <span>
-                  ({piece.position.x}, {piece.position.y}, {piece.position.z})
-                </span>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
+      <LearnSection gameId="shape-architect" />
     </main>
   )
 }

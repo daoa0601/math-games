@@ -1,29 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { getUtcDateKey, planDailyChallenge } from '../daily.logic'
+import { parseDailyChallengeConfig, planDailyChallenge } from '../daily.logic'
 import { registry } from '@/games/registry'
-
-describe('getUtcDateKey', () => {
-  it('formats UTC date as YYYY-MM-DD', () => {
-    expect(getUtcDateKey(new Date('2026-05-13T23:30:00.000Z'))).toBe(
-      '2026-05-13',
-    )
-  })
-
-  it('handles midnight boundary correctly', () => {
-    expect(getUtcDateKey(new Date('2026-05-13T23:59:59.999Z'))).toBe(
-      '2026-05-13',
-    )
-    expect(getUtcDateKey(new Date('2026-05-14T00:00:00.000Z'))).toBe(
-      '2026-05-14',
-    )
-  })
-
-  it('defaults to current date when no argument', () => {
-    const key = getUtcDateKey()
-    expect(key).toMatch(/^\d{4}-\d{2}-\d{2}$/)
-  })
-})
 
 describe('planDailyChallenge', () => {
   it('is deterministic for a date', () => {
@@ -71,11 +49,25 @@ describe('planDailyChallenge', () => {
   it('stores a serializable config payload', () => {
     const challenge = planDailyChallenge('2026-05-13')
 
-    expect(JSON.parse(challenge.configJson)).toMatchObject({
+    expect(parseDailyChallengeConfig(challenge.configJson)).toMatchObject({
       gameId: challenge.gameId,
       levelId: challenge.levelId,
       route: challenge.route,
     })
+  })
+
+  it('rejects invalid config payloads', () => {
+    expect(() =>
+      parseDailyChallengeConfig(
+        JSON.stringify({
+          gameId: 'unknown',
+          levelId: 'level',
+          title: 'Title',
+          route: '/games/magic-graph',
+          difficulty: 'medium',
+        }),
+      ),
+    ).toThrow()
   })
 
   it('includes challengeDate in the result', () => {

@@ -67,7 +67,7 @@ function mulberry32(seed: number): () => number {
  *
  * @example
  * const rng = createSeededRandom('2025-01-01-magic-graph');
- * const puzzle = generatePuzzle(rng);  // Same puzzle every time for this seed
+ * const option = rng.pick(['line', 'cross', 'triangle']);  // Same choice every time for this seed
  */
 export function createSeededRandom(seed: string): SeededRandom {
   const numericSeed = hashString(seed)
@@ -104,18 +104,6 @@ export function createSeededRandom(seed: string): SeededRandom {
 }
 
 /**
- * Get today's date as a seed string in YYYY-MM-DD format.
- * Uses local timezone to match user's perception of "today".
- */
-export function getTodaySeed(): string {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-/**
  * Create a seeded RNG for a specific game on a specific date.
  * Combines date and game ID to ensure each game gets a unique puzzle per day.
  *
@@ -129,32 +117,4 @@ export function getTodaySeed(): string {
  */
 export function createDailyRandom(date: string, gameId: string): SeededRandom {
   return createSeededRandom(`${date}-${gameId}`)
-}
-
-/**
- * Get milliseconds until the next day (midnight local time).
- * Useful for countdown timers showing when daily challenges reset.
- */
-export function getMillisecondsUntilTomorrow(): number {
-  const now = new Date()
-  const tomorrow = new Date(now)
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  tomorrow.setHours(0, 0, 0, 0)
-  return tomorrow.getTime() - now.getTime()
-}
-
-/**
- * Format milliseconds as HH:MM:SS for countdown display.
- */
-export function formatCountdown(ms: number): string {
-  const totalSeconds = Math.floor(ms / 1000)
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-
-  return [
-    String(hours).padStart(2, '0'),
-    String(minutes).padStart(2, '0'),
-    String(seconds).padStart(2, '0'),
-  ].join(':')
 }
