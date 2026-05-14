@@ -1,6 +1,9 @@
 name: TanStack Start Cloudflare
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       action:
@@ -31,6 +34,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: cloudflare-dev
     env:
+      ALCHEMY_ACTION: ${{ github.event_name == 'workflow_dispatch' && inputs.action || 'deploy' }}
+      START_REMOTE_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.remote_url || '' }}
       CI: 'true'
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -56,18 +61,16 @@ jobs:
 
       - name: Run guarded Alchemy action
         run: |
-          if [ "${{ inputs.action }}" = "bootstrap" ]; then
+          if [ "$ALCHEMY_ACTION" = "bootstrap" ]; then
             pnpm check
             pnpm infra:bootstrap
             pnpm infra:check
-          elif [ "${{ inputs.action }}" = "deploy" ]; then
+          elif [ "$ALCHEMY_ACTION" = "deploy" ]; then
             pnpm deploy
           else
             pnpm infra:plan
           fi
 
       - name: Remote smoke
-        if: ${{ inputs.action == 'deploy' }}
-        env:
-          START_REMOTE_URL: ${{ inputs.remote_url }}
+        if: ${{ env.ALCHEMY_ACTION == 'deploy' }}
         run: pnpm infra:check && pnpm smoke:remote
