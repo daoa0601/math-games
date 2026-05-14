@@ -1,103 +1,46 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
-import { defineConfig, globalIgnores } from 'eslint/config'
+//  @ts-check
 
-export default defineConfig([
-  globalIgnores(['dist', 'coverage']),
+import { tanstackConfig } from '@tanstack/eslint-config'
+
+export default [
+  ...tanstackConfig,
   {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+    rules: {
+      'import/no-cycle': 'off',
+      'import/order': 'off',
+      'sort-imports': 'off',
+      '@typescript-eslint/array-type': 'off',
+      '@typescript-eslint/require-await': 'off',
+      'pnpm/json-enforce-catalog': 'off',
+    },
+  },
+  {
+    files: [
+      'src/games/**/*.ts',
+      'src/games/**/*.tsx',
+      'src/routes/__root.tsx',
+      'src/routes/daily.tsx',
+      'src/routes/index.tsx',
+      'src/routes/games/**/*.tsx',
+      'src/shared/utils/**/*.ts',
+      'playwright.config.ts',
+      'tests/e2e/**/*.ts',
     ],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-    },
-  },
-
-  // ═══════════════════════════════════════════════════════════════════
-  // Module Boundary Rules - Prevent cross-game imports
-  // ═══════════════════════════════════════════════════════════════════
-  {
-    files: ['src/games/MagicGraph/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/games/SequenceRace/**', '@/games/SequenceRace/**'],
-              message: 'MagicGraph cannot import from SequenceRace. Use shared/ instead.',
-            },
-            {
-              group: ['**/games/ShapeArchitect/**', '@/games/ShapeArchitect/**'],
-              message: 'MagicGraph cannot import from ShapeArchitect. Use shared/ instead.',
-            },
-          ],
-        },
-      ],
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
     },
   },
   {
-    files: ['src/games/SequenceRace/**/*.{ts,tsx}'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/games/MagicGraph/**', '@/games/MagicGraph/**'],
-              message: 'SequenceRace cannot import from MagicGraph. Use shared/ instead.',
-            },
-            {
-              group: ['**/games/ShapeArchitect/**', '@/games/ShapeArchitect/**'],
-              message: 'SequenceRace cannot import from ShapeArchitect. Use shared/ instead.',
-            },
-          ],
-        },
-      ],
-    },
+    ignores: [
+      '.alchemy/**',
+      '.wrangler/**',
+      'dist/**',
+      'eslint.config.js',
+      'playwright-report/**',
+      'prettier.config.js',
+      'test-results/**',
+      'worker-configuration.d.ts',
+    ],
   },
-  {
-    files: ['src/games/ShapeArchitect/**/*.{ts,tsx}'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/games/MagicGraph/**', '@/games/MagicGraph/**'],
-              message: 'ShapeArchitect cannot import from MagicGraph. Use shared/ instead.',
-            },
-            {
-              group: ['**/games/SequenceRace/**', '@/games/SequenceRace/**'],
-              message: 'ShapeArchitect cannot import from SequenceRace. Use shared/ instead.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['src/shared/**/*.{ts,tsx}'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/games/**', '@/games/**'],
-              message: 'Shared modules cannot import from games. Move shared code to shared/.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-])
+]

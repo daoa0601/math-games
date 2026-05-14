@@ -11,11 +11,12 @@
  * // Always returns the same config for Jan 1, 2025
  */
 
-import type { GameConfig } from './types';
-import type { SeededRandom } from '@/shared/utils';
-import { createDailyRandom } from '@/shared/utils';
-import { generateSequence, SEQUENCE_INFO, type SequenceType } from './presets';
-import { validateGameFairness } from './engine';
+import type { GameConfig } from './types'
+import type { SeededRandom } from '@/shared/utils'
+import type { SequenceType } from './presets'
+import { createDailyRandom } from '@/shared/utils'
+import { generateSequence, SEQUENCE_INFO } from './presets'
+import { validateGameFairness } from './engine'
 
 // ============================================================================
 // Constants
@@ -25,11 +26,14 @@ import { validateGameFairness } from './engine';
  * Sequence types available per difficulty level.
  * Easy uses simpler sequences, hard uses more complex ones.
  */
-const SEQUENCES_BY_DIFFICULTY: Record<'easy' | 'medium' | 'hard', SequenceType[]> = {
+const SEQUENCES_BY_DIFFICULTY: Record<
+  'easy' | 'medium' | 'hard',
+  SequenceType[]
+> = {
   easy: ['arithmetic', 'triangular'],
   medium: ['geometric', 'fibonacci', 'arithmetic', 'triangular', 'powers3'],
   hard: ['prime', 'square', 'fibonacci', 'geometric', 'triangular', 'powers3'],
-};
+}
 
 /**
  * Step pool size ranges by difficulty.
@@ -39,7 +43,7 @@ const POOL_SIZE_RANGE: Record<'easy' | 'medium' | 'hard', [number, number]> = {
   easy: [3, 4],
   medium: [4, 5],
   hard: [4, 6],
-};
+}
 
 // ============================================================================
 // Seeded Generator Functions
@@ -55,25 +59,25 @@ const POOL_SIZE_RANGE: Record<'easy' | 'medium' | 'hard', [number, number]> = {
  */
 export function generateSeededConfig(
   rng: SeededRandom,
-  difficulty: 'easy' | 'medium' | 'hard' = 'medium'
+  difficulty: 'easy' | 'medium' | 'hard' = 'medium',
 ): GameConfig {
   // 1. Select sequence type using seeded RNG
-  const sequenceTypes = SEQUENCES_BY_DIFFICULTY[difficulty];
-  const sequenceType = rng.pick(sequenceTypes);
+  const sequenceTypes = SEQUENCES_BY_DIFFICULTY[difficulty]
+  const sequenceType = rng.pick(sequenceTypes)
 
   // 2. Determine pool size using seeded RNG
-  const [minPool, maxPool] = POOL_SIZE_RANGE[difficulty];
-  const poolSize = rng.nextInt(minPool, maxPool);
+  const [minPool, maxPool] = POOL_SIZE_RANGE[difficulty]
+  const poolSize = rng.nextInt(minPool, maxPool)
 
   // 3. Generate step pool from sequence
-  const stepPool = generateSequence(sequenceType, poolSize);
+  const stepPool = generateSequence(sequenceType, poolSize)
 
   // 4. Calculate target using seeded RNG
-  const maxStep = Math.max(...stepPool);
-  const totalSum = stepPool.reduce((a, b) => a + b, 0);
-  const minTarget = maxStep * 2;
-  const maxTarget = totalSum;
-  const target = rng.nextInt(minTarget, maxTarget);
+  const maxStep = Math.max(...stepPool)
+  const totalSum = stepPool.reduce((a, b) => a + b, 0)
+  const minTarget = maxStep * 2
+  const maxTarget = totalSum
+  const target = rng.nextInt(minTarget, maxTarget)
 
   // 5. Create base config
   const baseConfig: GameConfig = {
@@ -83,18 +87,18 @@ export function generateSeededConfig(
     stepPool,
     difficulty,
     sequenceType,
-  };
+  }
 
   // 6. Validate fairness - ensure player can win
-  const fairness = validateGameFairness(baseConfig);
+  const fairness = validateGameFairness(baseConfig)
 
   // If player can't win going first, check if they can win going second
   if (!fairness.isPlayerWinnable && fairness.isAIWinnable) {
     // Player gets second-mover advantage (AI moves first)
-    return { ...baseConfig, aiMovesFirst: true };
+    return { ...baseConfig, aiMovesFirst: true }
   }
 
-  return baseConfig;
+  return baseConfig
 }
 
 // ============================================================================
@@ -109,11 +113,11 @@ export function generateSeededConfig(
  * @returns Game config for daily challenge
  */
 export function getDailySequenceRaceConfig(date?: string): GameConfig {
-  const dateStr = date ?? new Date().toISOString().split('T')[0];
-  const rng = createDailyRandom(dateStr, 'sequence-race');
+  const dateStr = date ?? new Date().toISOString().split('T')[0]
+  const rng = createDailyRandom(dateStr, 'sequence-race')
 
   // Daily challenges are always medium difficulty
-  return generateSeededConfig(rng, 'medium');
+  return generateSeededConfig(rng, 'medium')
 }
 
 /**
@@ -123,8 +127,8 @@ export function getDailySequenceRaceConfig(date?: string): GameConfig {
  * @returns Game config for that date
  */
 export function previewDailyConfig(daysFromNow: number = 0): GameConfig {
-  const date = new Date();
-  date.setDate(date.getDate() + daysFromNow);
-  const dateStr = date.toISOString().split('T')[0];
-  return getDailySequenceRaceConfig(dateStr);
+  const date = new Date()
+  date.setDate(date.getDate() + daysFromNow)
+  const dateStr = date.toISOString().split('T')[0]
+  return getDailySequenceRaceConfig(dateStr)
 }

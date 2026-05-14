@@ -2,65 +2,75 @@
 // Shape Architect Logic - Barrel Export
 // ========================================
 
+// VoxelGrid
+export { VoxelGrid } from './voxel-grid'
+
 // Types
 export type {
-    CellState,
-    Position3D,
-    Rotation3D,
-    RotationAxis,
-    Difficulty,
-    Piece,
-    PlacedPiece,
-    LevelConfig,
-    GameState,
-} from './types';
+  CellState,
+  Position3D,
+  Rotation3D,
+  RotationAxis,
+  Difficulty,
+  Piece,
+  PlacedPiece,
+  LevelConfig,
+  GameState,
+} from './types'
 
-export { DEFAULT_ROTATION } from './types';
+export { DEFAULT_ROTATION } from './types'
 
 // Engine functions
 export {
-    createGrid,
-    initializeGrid,
-    isInBounds,
-    normalizeAngle,
-    rotateBy90OnAxis,
-    rotatePieceLayout,
-    rotatePieceLayout3D,
-    getPieceWorldPositions,
-    canPlacePiece,
-    findNearestValidPosition,
-    placePiece,
-    removePieceFromGrid,
-    checkSolved,
-    createGameState,
-    tryPlacePiece,
-    calculatePieceVolume,
-    validateLevelVolume,
-    validateAllLevels,
-    type LevelValidation,
-} from './engine';
+  createGrid,
+  initializeGrid,
+  isInBounds,
+  normalizeAngle,
+  rotateBy90OnAxis,
+  rotatePieceLayout,
+  rotatePieceLayout3D,
+  getPieceWorldPositions,
+  canPlacePiece,
+  findNearestValidPosition,
+  placePiece,
+  removePieceFromGrid,
+  checkSolved,
+  createGameState,
+  tryPlacePiece,
+  calculatePieceVolume,
+  validateLevelVolume,
+  validateAllLevels,
+  type LevelValidation,
+} from './engine'
 
 // Presets
 export {
-    presetLevels,
-    generateRandomLevel,
-    runLevelValidation,
-} from './presets';
+  presetLevels,
+  generateRandomLevel,
+  runLevelValidation,
+} from './presets'
 
 // Seeded Generator
 export {
-    getDailyShapeArchitectLevel,
-    previewDailyLevel,
-    generateCohesivePuzzle,
-    generateGuaranteedSolvableWithRetry,
-} from './seededGenerator';
+  getDailyShapeArchitectLevel,
+  previewDailyLevel,
+  generateCohesivePuzzle,
+  generateGuaranteedSolvableWithRetry,
+} from './seededGenerator'
 
 // Solver
 export {
-    solvePuzzle,
-    isSolvable,
-    generate2DRotations,
-    generate3DRotations,
-    type SolverResult,
-    type SolutionStep,
-} from './solver';
+  solvePuzzle,
+  solvePuzzleEffect,
+  isSolvable,
+  generate2DRotations,
+  generate3DRotations,
+  type SolverResult,
+  type SolutionStep,
+} from './solver'
+
+// DLX Solver
+export { solvePuzzleDLX } from './dlx-solver'
+
+// Bitboard
+export { VoxelBitboard } from './voxel-bitboard'

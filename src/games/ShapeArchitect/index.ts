@@ -1,1 +1,0 @@
-export { ShapeArchitectGame } from './ShapeArchitectGame';

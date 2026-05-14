@@ -1,77 +1,43 @@
 English | [Tieng Viet](README.vi.md)
 
-# Math Gymnasium
+# Math Games
 
-A collection of interactive math games for primary to middle school students, built with React and TypeScript.
+Math Games is a TanStack Start app for educational math practice. The app runs
+on Cloudflare Workers, stores player progress in Cloudflare D1 through Drizzle,
+uses Effect at server workflow boundaries, and manages Cloudflare resources
+with Alchemy v2.
 
-## Games
-
-### Magic Graph
-Fill nodes in a graph so that every line sums to the target value. Features:
-- Multiple puzzle shapes (Triangle, Square, Star, H-A-N-O-I letters, M-Diamond, Hexagon)
-- Four difficulty levels (Easy, Medium, Hard, Master)
-- Master mode: Hidden target sum that players must deduce
-- Advanced hints: Auditor, Starter, Algebraist
-- 60-second timer challenge
-- Undo/redo with keyboard shortcuts (Ctrl+Z/Y)
-- 🎉 Confetti celebration on win
-
-### Sequence Sprinter
-A "Race to N" strategy game against an AI opponent. Features:
-- **7 sequence types**: Arithmetic, Geometric, Fibonacci, Prime, Square, Triangular, Powers of 3
-- Minimax AI with three difficulty levels
-- Teacher mode hints showing optimal moves
-- 🎉 Confetti celebration on player win
-
-### Shape Architect
-A voxel-based geometry puzzle. Fill a "ghost shape" target zone by placing inventory pieces. Features:
-- **7 Tetrominoes** + **12 Pentominoes** (full sets)
-- Drag-and-drop or click-to-place
-- Piece rotation (90-degree increments)
-- ↩️ Undo last piece placement
-- 🎉 Confetti celebration on completion
-
-## Getting Started
+## Commands
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
+pnpm check
+pnpm deploy
 ```
 
-Open http://localhost:5173 to play.
+Focused checks:
 
-## Scripts
+```bash
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:e2e
+```
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run lint` | Run ESLint |
-| `npm test` | Run tests with Vitest |
-| `npm run test:coverage` | Run tests with coverage report |
+Database and infrastructure:
 
-## Tech Stack
+```bash
+pnpm db:generate
+pnpm wrangler d1 execute DB --local --file drizzle/migrations/20260513164755_gray_iron_patriot/migration.sql
+pnpm infra:login
+pnpm infra:plan
+pnpm infra:deploy
+pnpm smoke:remote
+```
 
-- React 19 + TypeScript
-- Vite 7
-- Firebase (Authentication + Firestore)
-- Vitest (testing)
-- Playwright (E2E testing)
-- react-router-dom (navigation)
-- @dnd-kit (drag-and-drop)
-- react-i18next (English/Vietnamese)
-- canvas-confetti (win animations)
-- howler.js (sound effects - placeholder ready)
-
-## Cloud Features
-
-The app supports optional cloud sync via Firebase:
-
-- **Anonymous Auth**: Play immediately, no sign-up required
-- **Google Sign-In**: Optional account linking for cross-device sync
-- **Offline-First**: All progress saved locally, syncs when online
-- **Data Persistence**: Progress survives browser clears when signed in
-
-## Internationalization
-
-The app supports English and Vietnamese. Switch languages using the 🌐 button in the header.
+Canonical game routes are `/games/magic-graph`, `/games/sequence-race`, and
+`/games/shape-architect`. Old root game paths such as `/magic-graph` are
+rejected instead of redirected.

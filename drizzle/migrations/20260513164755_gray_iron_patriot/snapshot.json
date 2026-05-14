@@ -1,0 +1,313 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "8e2c54ca-4a01-4581-9fad-09e3c3f13421",
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
+  "ddl": [
+    {
+      "name": "daily_challenges",
+      "entityType": "tables"
+    },
+    {
+      "name": "game_progress",
+      "entityType": "tables"
+    },
+    {
+      "name": "player_achievements",
+      "entityType": "tables"
+    },
+    {
+      "name": "players",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "challenge_date",
+      "entityType": "columns",
+      "table": "daily_challenges"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "game_id",
+      "entityType": "columns",
+      "table": "daily_challenges"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "seed",
+      "entityType": "columns",
+      "table": "daily_challenges"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "config_json",
+      "entityType": "columns",
+      "table": "daily_challenges"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "(unixepoch())",
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "daily_challenges"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "player_id",
+      "entityType": "columns",
+      "table": "game_progress"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "game_id",
+      "entityType": "columns",
+      "table": "game_progress"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "level_id",
+      "entityType": "columns",
+      "table": "game_progress"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "best_score",
+      "entityType": "columns",
+      "table": "game_progress"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "attempts",
+      "entityType": "columns",
+      "table": "game_progress"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "completed_at",
+      "entityType": "columns",
+      "table": "game_progress"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "(unixepoch())",
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "game_progress"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "player_id",
+      "entityType": "columns",
+      "table": "player_achievements"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "achievement_id",
+      "entityType": "columns",
+      "table": "player_achievements"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "(unixepoch())",
+      "generated": null,
+      "name": "unlocked_at",
+      "entityType": "columns",
+      "table": "player_achievements"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "players"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "display_name",
+      "entityType": "columns",
+      "table": "players"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'en'",
+      "generated": null,
+      "name": "locale",
+      "entityType": "columns",
+      "table": "players"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "grade_band",
+      "entityType": "columns",
+      "table": "players"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "(unixepoch())",
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "players"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "(unixepoch())",
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "players"
+    },
+    {
+      "columns": ["player_id"],
+      "tableTo": "players",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_game_progress_player_id_players_id_fk",
+      "entityType": "fks",
+      "table": "game_progress"
+    },
+    {
+      "columns": ["player_id"],
+      "tableTo": "players",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_player_achievements_player_id_players_id_fk",
+      "entityType": "fks",
+      "table": "player_achievements"
+    },
+    {
+      "columns": ["player_id", "game_id", "level_id"],
+      "nameExplicit": false,
+      "name": "game_progress_pk",
+      "entityType": "pks",
+      "table": "game_progress"
+    },
+    {
+      "columns": ["player_id", "achievement_id"],
+      "nameExplicit": false,
+      "name": "player_achievements_pk",
+      "entityType": "pks",
+      "table": "player_achievements"
+    },
+    {
+      "columns": ["challenge_date"],
+      "nameExplicit": false,
+      "name": "daily_challenges_pk",
+      "table": "daily_challenges",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "players_pk",
+      "table": "players",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "seed",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "daily_challenges_seed_idx",
+      "entityType": "indexes",
+      "table": "daily_challenges"
+    },
+    {
+      "columns": [
+        {
+          "value": "display_name",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "players_display_name_idx",
+      "entityType": "indexes",
+      "table": "players"
+    }
+  ],
+  "renames": []
+}

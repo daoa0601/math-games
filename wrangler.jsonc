@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "math-games",
+  "compatibility_date": "2026-05-13",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "math-games-db",
+      // Local development placeholder. Remote D1 and Worker resources are
+      // managed by alchemy.run.ts; do not use `wrangler deploy` until this is
+      // replaced with the real D1 id from Cloudflare or Alchemy output.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "drizzle/migrations",
+    },
+  ],
+}

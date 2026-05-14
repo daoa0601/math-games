@@ -1,0 +1,6 @@
+dist
+test-results
+playwright-report
+.wrangler
+.alchemy
+worker-configuration.d.ts
