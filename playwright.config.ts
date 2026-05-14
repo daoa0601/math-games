@@ -28,7 +28,7 @@ export default defineConfig({
   ],
   webServer: {
     command:
-      'pnpm exec wrangler d1 migrations apply DB --local && pnpm exec vite dev --port 3000 --host 127.0.0.1 --strictPort',
+      'pnpm exec tsx scripts/ensureLocalD1.ts && pnpm exec vite dev --port 3000 --host 127.0.0.1 --strictPort',
     reuseExistingServer: !isCi,
     stdout: 'pipe',
     stderr: 'pipe',
