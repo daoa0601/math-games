@@ -25,16 +25,21 @@ export const TurnstileServiceLive = Layer.effect(
         const secretKey = env.getTurnstileSecret()
         if (!secretKey) return
 
-        const response: { success: boolean } = yield* Effect.tryPromise({
-          try: () =>
-            fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-              method: 'POST',
-              headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({
-                secret: secretKey,
-                response: token,
-              }),
-            }).then((r) => r.json()),
+        const response = yield* Effect.tryPromise({
+          try: async (): Promise<{ success: boolean }> => {
+            const r = await fetch(
+              'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+              {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                  secret: secretKey,
+                  response: token,
+                }),
+              },
+            )
+            return r.json()
+          },
           catch: () =>
             new TurnstileError({ reason: 'Turnstile verification failed' }),
         })
