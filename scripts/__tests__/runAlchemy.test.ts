@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
   createAlchemyEnvironment,
+  normalizeAlchemyArgs,
   runAlchemyCommand,
   usesScopedTokenAuth,
 } from '../runAlchemy'
@@ -64,5 +65,23 @@ describe('Alchemy command runner', () => {
       }) as Record<string, string | undefined>,
       stdio: 'inherit',
     })
+  })
+
+  it('auto-approves deploys when using scoped-token auth', () => {
+    expect(
+      normalizeAlchemyArgs(['deploy', '--stage', 'dev', 'alchemy.run.ts'], {
+        CLOUDFLARE_ACCOUNT_ID: 'account',
+        CLOUDFLARE_API_TOKEN: 'token',
+      }),
+    ).toEqual(['deploy', '--yes', '--stage', 'dev', 'alchemy.run.ts'])
+  })
+
+  it('preserves explicit deploy approval flags', () => {
+    expect(
+      normalizeAlchemyArgs(['deploy', '--yes', '--stage', 'dev'], {
+        CLOUDFLARE_ACCOUNT_ID: 'account',
+        CLOUDFLARE_API_TOKEN: 'token',
+      }),
+    ).toEqual(['deploy', '--yes', '--stage', 'dev'])
   })
 })

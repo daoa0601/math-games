@@ -50,6 +50,22 @@ export function createAlchemyEnvironment(env: AlchemyRunnerEnv) {
   }
 }
 
+function includesYesFlag(args: string[]) {
+  return args.includes('--yes') || args.includes('-y')
+}
+
+export function normalizeAlchemyArgs(args: string[], env: AlchemyRunnerEnv) {
+  if (
+    args[0] !== 'deploy' ||
+    !usesScopedTokenAuth(env) ||
+    includesYesFlag(args)
+  ) {
+    return args
+  }
+
+  return ['deploy', '--yes', ...args.slice(1)]
+}
+
 function defaultSpawnAlchemy(
   command: string,
   args: string[],
@@ -73,8 +89,11 @@ export function runAlchemyCommand(
     return 1
   }
 
-  const result = spawn('alchemy', args, {
-    env: createAlchemyEnvironment(env),
+  const alchemyEnv = createAlchemyEnvironment(env)
+  const normalizedArgs = normalizeAlchemyArgs(args, env)
+
+  const result = spawn('alchemy', normalizedArgs, {
+    env: alchemyEnv,
     stdio: 'inherit',
   })
 
