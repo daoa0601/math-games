@@ -25,7 +25,7 @@ export const TurnstileServiceLive = Layer.effect(
         const secretKey = env.getTurnstileSecret()
         if (!secretKey) return
 
-        const response = yield* Effect.tryPromise({
+        const response: { success: boolean } = yield* Effect.tryPromise({
           try: () =>
             fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
               method: 'POST',
