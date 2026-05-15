@@ -26,7 +26,7 @@ export default Alchemy.Stack(
       dataset: 'math-games-events',
     })
 
-    const assets = yield* Cloudflare.R2Bucket('ASSETS', {
+    const assets = yield* Cloudflare.R2Bucket('R2_ASSETS', {
       name: 'math-games-assets',
     })
 
@@ -55,7 +55,7 @@ export default Alchemy.Stack(
         DB: database,
         CACHE: cache,
         ANALYTICS: analytics,
-        ASSETS: assets,
+        R2_ASSETS: assets,
       },
     })
 

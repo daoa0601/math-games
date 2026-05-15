@@ -17,7 +17,7 @@ export const WorkerEnvServiceLive = Layer.sync(WorkerEnvService, () => {
     DB: D1Database
     CACHE: KVNamespace
     ANALYTICS: AnalyticsEngineDataset
-    ASSETS: R2Bucket
+    R2_ASSETS: R2Bucket
     TURNSTILE_SECRET_KEY?: string
   }
 
@@ -25,7 +25,7 @@ export const WorkerEnvServiceLive = Layer.sync(WorkerEnvService, () => {
     getD1: () => e.DB,
     getKV: () => e.CACHE,
     getAnalytics: () => e.ANALYTICS,
-    getR2: () => e.ASSETS,
+    getR2: () => e.R2_ASSETS,
     getTurnstileSecret: () => e.TURNSTILE_SECRET_KEY,
   }
 })

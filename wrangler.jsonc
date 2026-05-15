@@ -34,7 +34,7 @@
   ],
   "r2_buckets": [
     {
-      "binding": "ASSETS",
+      "binding": "R2_ASSETS",
       "bucket_name": "math-games-assets",
     },
   ],
