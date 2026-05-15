@@ -48,7 +48,8 @@ const translations = {
     'game.selectPiece': 'Select a piece before placing it.',
     'game.doesNotFit': 'Rotate or pick a different cell.',
     'game.allFilled': 'All target cells filled.',
-    'game.incorrectSolution': 'Not quite right — some lines don’t match the target.',
+    'game.incorrectSolution':
+      'Not quite right — some lines don’t match the target.',
     'game.tryAgain': 'Try Again',
     'game.dismiss': 'Dismiss',
     'game.piecePlaced': 'placed.',
@@ -375,15 +376,15 @@ const translations = {
     'achievement.global_grandmaster.name': 'Đại Kiện Tướng',
     'achievement.global_grandmaster.description': 'Đạt hạng đại kiện tướng.',
     'achievement.mg_first_solve.name': 'Lần Giải Đầu',
-    'achievement.mg_first_solve.description': 'Giải một câu đố Đồ Thị Ma Thuật.',
+    'achievement.mg_first_solve.description':
+      'Giải một câu đố Đồ Thị Ma Thuật.',
     'achievement.mg_grandmaster.name': 'Bậc Thầy Đồ Thị Ma Thuật',
     'achievement.mg_grandmaster.description':
       'Giải tối ưu một câu đố Đồ Thị Ma Thuật cấp đại kiện tướng.',
     'achievement.sr_first_victory.name': 'Chiến Thắng Đầu',
     'achievement.sr_first_victory.description': 'Thắng một màn Đua Dãy Số.',
     'achievement.sr_hard_winner.name': 'Thắng Màn Khó',
-    'achievement.sr_hard_winner.description':
-      'Thắng một màn Đua Dãy Số khó.',
+    'achievement.sr_hard_winner.description': 'Thắng một màn Đua Dãy Số khó.',
     'achievement.sa_first_build.name': 'Công Trình Đầu',
     'achievement.sa_first_build.description':
       'Hoàn thành một câu đố Kiến Trúc Hình Khối.',

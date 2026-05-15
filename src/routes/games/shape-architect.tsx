@@ -616,18 +616,14 @@ function ShapeArchitectRoute() {
                   </Button>
                   <Button
                     size="sm"
-                    variant={
-                      session.mode === 'timed' ? 'default' : 'outline'
-                    }
+                    variant={session.mode === 'timed' ? 'default' : 'outline'}
                     onClick={() => session.setMode('timed')}
                     type="button"
                   >
                     {t('game.timed')}
                   </Button>
                 </div>
-                <Badge
-                  variant={session.timedOut ? 'destructive' : 'secondary'}
-                >
+                <Badge variant={session.timedOut ? 'destructive' : 'secondary'}>
                   {session.mode === 'timed'
                     ? `${Math.floor(session.remainingSeconds / 60)}:${(session.remainingSeconds % 60).toString().padStart(2, '0')}`
                     : `${Math.floor(session.elapsedSeconds / 60)}:${(session.elapsedSeconds % 60).toString().padStart(2, '0')}`}

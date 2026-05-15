@@ -326,9 +326,7 @@ function MagicGraphRoute() {
                     </Button>
                     <Button
                       size="sm"
-                      variant={
-                        session.mode === 'timed' ? 'default' : 'outline'
-                      }
+                      variant={session.mode === 'timed' ? 'default' : 'outline'}
                       onClick={() => session.setMode('timed')}
                       type="button"
                     >

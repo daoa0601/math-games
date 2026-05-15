@@ -58,11 +58,13 @@ export function formatSavedProgress(
   labels = defaultProgressLabels,
   formatAchievement: (id: string) => string = (id) => id,
 ) {
-  return unlockedMessage(
-    progress.unlockedAchievements,
-    labels,
-    formatAchievement,
-  ).trim() || null
+  return (
+    unlockedMessage(
+      progress.unlockedAchievements,
+      labels,
+      formatAchievement,
+    ).trim() || null
+  )
 }
 
 export function formatSolvedProgress(
@@ -71,9 +73,11 @@ export function formatSolvedProgress(
   labels = defaultProgressLabels,
   formatAchievement: (id: string) => string = (id) => id,
 ) {
-  return unlockedMessage(
-    progress.unlockedAchievements,
-    labels,
-    formatAchievement,
-  ).trim() || null
+  return (
+    unlockedMessage(
+      progress.unlockedAchievements,
+      labels,
+      formatAchievement,
+    ).trim() || null
+  )
 }
