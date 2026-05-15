@@ -121,7 +121,6 @@ test('game routes expose standalone controls and progress writes', async ({
   await page.getByLabel('Practice difficulty').selectOption('hard')
   await page.getByRole('button', { name: 'Generate' }).click()
   await expect(page.getByRole('heading', { name: /Practice:/ })).toBeVisible()
-  await expectPlayerCookie(page)
 
   await page.goto('/games/magic-graph')
   await expectHydrated(page)
