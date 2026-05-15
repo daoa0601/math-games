@@ -154,40 +154,42 @@ function Home() {
           </CardContent>
         </Card>
 
-        <Card className="py-0">
-          <div className="grid h-full grid-cols-3 text-center">
-            <div className="flex flex-col items-center justify-center p-5">
-              <AnimatedCounter
-                value={completedCount}
-                className="text-3xl font-semibold"
-              />
-              <div className="mt-2 text-sm text-muted-foreground">
-                {t('stats.completed')}
+        <div className="grid content-start gap-4">
+          <Card className="py-0">
+            <div className="grid grid-cols-2 text-center">
+              <div className="flex flex-col items-center justify-center p-4">
+                <AnimatedCounter
+                  value={completedCount}
+                  className="text-2xl font-semibold"
+                />
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {t('stats.completed')}
+                </div>
+              </div>
+              <div className="flex flex-col items-center justify-center border-l border-border p-4">
+                <AnimatedCounter
+                  value={progressRows.length}
+                  className="text-2xl font-semibold"
+                />
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {t('stats.progress')}
+                </div>
               </div>
             </div>
-            <div className="flex flex-col items-center justify-center border-x border-border p-5">
-              <AnimatedCounter
-                value={progressRows.length}
-                className="text-3xl font-semibold"
-              />
-              <div className="mt-2 text-sm text-muted-foreground">
-                {t('stats.progress')}
-              </div>
-            </div>
-            <Link
-              className="flex flex-col items-center justify-center p-5 transition-colors hover:bg-muted/50"
-              to="/profile"
-            >
-              <AnimatedCounter
-                value={overview.achievements.length}
-                className="text-3xl font-semibold"
-              />
-              <div className="mt-2 text-sm text-muted-foreground">
-                {t('stats.achievements')}
-              </div>
-            </Link>
-          </div>
-        </Card>
+          </Card>
+          <Link to="/achievements">
+            <Card className="transition-colors hover:bg-muted/50">
+              <CardContent className="flex items-center justify-between">
+                <span className="text-sm font-medium">
+                  {t('stats.achievements')}
+                </span>
+                <span className="text-2xl font-semibold">
+                  {overview.achievements.length}
+                </span>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
       </main>
 
       <section className="grid gap-5 md:grid-cols-3">

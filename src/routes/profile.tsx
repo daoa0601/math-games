@@ -5,8 +5,9 @@ import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 
-import { getAchievementById } from '@/achievements/achievements.logic'
+import { ACHIEVEMENTS } from '@/achievements/achievements.logic'
 import {
+  formatAchievementDescription,
   formatAchievementName,
   formatAchievementRarity,
   formatGameTitle,
@@ -121,11 +122,9 @@ function summarizeGame(progressRows: PlayerProgressSummary[], gameId: string) {
   const rows = progressRows.filter((row) => row.gameId === gameId)
   const completed = rows.filter((row) => row.completedAt !== null).length
   const attempts = rows.reduce((sum, row) => sum + row.attempts, 0)
-  const bestScore = rows.reduce((best, row) => Math.max(best, row.bestScore), 0)
 
   return {
     attempts,
-    bestScore,
     completed,
     rows: rows.length,
   }
@@ -254,58 +253,58 @@ function ProfileRoute() {
         </div>
       </header>
 
-      <section className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">{t('profile.rank')}</p>
-            <p className="mt-2 text-2xl font-semibold">
-              {formatRankName(locale, profileSummary.currentRank.name)}
-            </p>
-            <Progress
-              className="mt-4 h-2"
-              value={profileSummary.rankProgress}
-            />
-            <p className="mt-2 text-xs text-muted-foreground">
-              {profileSummary.nextRank
-                ? `${profileSummary.score}/${profileSummary.nextRank.threshold} ${t('profile.toNextRank')} ${formatRankName(
-                    locale,
-                    profileSummary.nextRank.name,
-                  )}`
-                : t('profile.topRank')}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {t('stats.completed')}
-            </p>
-            <p className="mt-2 text-2xl font-semibold">
-              {profileSummary.completedCount}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {t('profile.totalAttempts')}
-            </p>
-            <p className="mt-2 text-2xl font-semibold">
-              {profileSummary.totalAttempts}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {t('stats.achievements')}
-            </p>
-            <p className="mt-2 text-2xl font-semibold">
-              {achievementIds.length}
-            </p>
-          </CardContent>
-        </Card>
-      </section>
+      <Card>
+        <CardContent>
+          <div className="flex items-start gap-6">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-muted-foreground">
+                {t('profile.rank')}
+              </p>
+              <p className="mt-1 text-xl font-semibold">
+                {formatRankName(locale, profileSummary.currentRank.name)}
+              </p>
+              <Progress
+                className="mt-2 h-1.5"
+                value={profileSummary.rankProgress}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                {profileSummary.nextRank
+                  ? `${profileSummary.score}/${profileSummary.nextRank.threshold} ${t('profile.toNextRank')} ${formatRankName(
+                      locale,
+                      profileSummary.nextRank.name,
+                    )}`
+                  : t('profile.topRank')}
+              </p>
+            </div>
+            <div className="grid shrink-0 grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-xs text-muted-foreground">
+                  {t('stats.completed')}
+                </p>
+                <p className="mt-1 text-xl font-semibold">
+                  {profileSummary.completedCount}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">
+                  {t('profile.totalAttempts')}
+                </p>
+                <p className="mt-1 text-xl font-semibold">
+                  {profileSummary.totalAttempts}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">
+                  {t('stats.achievements')}
+                </p>
+                <p className="mt-1 text-xl font-semibold">
+                  {achievementIds.length}
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <section className="grid gap-6 md:grid-cols-[0.9fr_1.1fr]">
         <Card>
@@ -417,7 +416,6 @@ function ProfileRoute() {
                       / {row.levelId}
                     </span>
                     <span className="text-muted-foreground">
-                      {t('profile.best')} {row.bestScore},{' '}
                       {t('profile.attempts')} {row.attempts}
                     </span>
                   </li>
@@ -447,7 +445,7 @@ function ProfileRoute() {
                       </span>
                     </div>
                     <Progress className="mt-2 h-2" value={completedPercent} />
-                    <dl className="mt-2 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+                    <dl className="mt-2 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                       <div>
                         <dt>{t('stats.progress')}</dt>
                         <dd className="mt-1 font-medium text-foreground">
@@ -460,12 +458,6 @@ function ProfileRoute() {
                           {summary.attempts}
                         </dd>
                       </div>
-                      <div>
-                        <dt>{t('profile.bestScore')}</dt>
-                        <dd className="mt-1 font-medium text-foreground">
-                          {summary.bestScore}
-                        </dd>
-                      </div>
                     </dl>
                   </div>
                 )
@@ -475,37 +467,33 @@ function ProfileRoute() {
             <Separator className="my-8" />
 
             <h2 className="text-xl font-semibold">
-              {t('profile.achievements')}
+              {t('profile.achievements')} ({achievementIds.length}/
+              {ACHIEVEMENTS.length})
             </h2>
-            {achievementIds.length === 0 ? (
-              <p className="mt-4 text-muted-foreground">
-                {t('profile.noAchievements')}
-              </p>
-            ) : (
-              <ul className="mt-4 divide-y divide-border border-y border-border">
-                {achievementIds.map((achievementId) => {
-                  const achievement = getAchievementById(achievementId)
+            <ul className="mt-4 divide-y divide-border border-y border-border">
+              {ACHIEVEMENTS.map((achievement) => {
+                const unlocked = achievementIds.includes(achievement.id)
 
-                  return (
-                    <li
-                      className="flex items-center gap-2 py-3 text-sm"
-                      key={achievementId}
-                    >
+                return (
+                  <li
+                    className={`py-3 text-sm${unlocked ? '' : ' opacity-40'}`}
+                    key={achievement.id}
+                  >
+                    <div className="flex items-center gap-2">
                       <span className="font-semibold">
-                        {achievement
-                          ? formatAchievementName(locale, achievement.id)
-                          : achievementId}
+                        {formatAchievementName(locale, achievement.id)}
                       </span>
                       <Badge variant="secondary">
-                        {achievement
-                          ? formatAchievementRarity(locale, achievement.rarity)
-                          : t('profile.customAchievement')}
+                        {formatAchievementRarity(locale, achievement.rarity)}
                       </Badge>
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {formatAchievementDescription(locale, achievement.id)}
+                    </p>
+                  </li>
+                )
+              })}
+            </ul>
           </CardContent>
         </Card>
       </section>

@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { Badge } from '@/components/ui/badge'
 import { Confetti } from '@/components/confetti'
-import { GameSessionPanel } from '@/components/game-session-panel'
 import { GamePattern } from '@/components/game-pattern'
 import {
   formatAchievementName,
@@ -76,6 +76,15 @@ function MagicGraphRoute() {
   const [values, setValues] = useState(() => createInitialValues(config))
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null)
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
+  const [errorPopup, setErrorPopup] = useState<string | null>(null)
+  const [levelAttempts, setLevelAttempts] = useState(0)
+  const prevAllFilledRef = useRef(false)
+
+  useEffect(() => {
+    if (!saveStatus) return
+    const timer = setTimeout(() => setSaveStatus(null), 5000)
+    return () => clearTimeout(timer)
+  }, [saveStatus])
 
   useEffect(() => {
     if (!requestedPuzzleId) return
@@ -120,12 +129,20 @@ function MagicGraphRoute() {
   const filledCount = Object.values(values).filter(
     (value) => value !== null,
   ).length
-  const progressLabels = {
-    savedAttempt: t('status.savedAttempt'),
-    bestScore: t('status.bestScore'),
-    unlocked: t('status.unlocked'),
-    solvedIn: t('status.solvedIn'),
-  }
+  const allFilled = filledCount === config.nodes.length
+
+  useEffect(() => {
+    const justFilled = allFilled && !prevAllFilledRef.current
+    prevAllFilledRef.current = allFilled
+    if (!justFilled || session.timedOut) return
+
+    if (solved) {
+      void recordAttempt(values)
+    } else {
+      setErrorPopup(t('game.incorrectSolution'))
+    }
+  }, [allFilled])
+  const progressLabels = { unlocked: t('status.unlocked') }
 
   async function recordAttempt(submission: NodeValues) {
     const result = await runServerAction(
@@ -144,6 +161,7 @@ function MagicGraphRoute() {
       return
     }
 
+    setLevelAttempts(result.value.attempts)
     setSaveStatus(
       formatSavedProgress(result.value, progressLabels, (achievementId) =>
         formatAchievementName(locale, achievementId),
@@ -176,11 +194,6 @@ function MagicGraphRoute() {
     setSaveStatus(null)
   }
 
-  async function checkCurrent() {
-    if (session.timedOut) return
-    await recordAttempt(values)
-  }
-
   function resetPuzzle() {
     setValues(createInitialValues(config))
     setSelectedNumber(null)
@@ -193,6 +206,7 @@ function MagicGraphRoute() {
     setValues(createInitialValues(puzzle))
     setSelectedNumber(null)
     setSaveStatus(null)
+    setLevelAttempts(0)
     session.resetSession()
   }
 
@@ -294,9 +308,42 @@ function MagicGraphRoute() {
         <div className="grid gap-4">
           <Card>
             <CardHeader>
-              <h2 className="text-xl font-semibold leading-none">
-                {t('game.numbers')}
-              </h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-xl font-semibold leading-none">
+                  {t('game.numbers')}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant={
+                        session.mode === 'practice' ? 'default' : 'outline'
+                      }
+                      onClick={() => session.setMode('practice')}
+                      type="button"
+                    >
+                      {t('game.practice')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={
+                        session.mode === 'timed' ? 'default' : 'outline'
+                      }
+                      onClick={() => session.setMode('timed')}
+                      type="button"
+                    >
+                      {t('game.timed')}
+                    </Button>
+                  </div>
+                  <Badge
+                    variant={session.timedOut ? 'destructive' : 'secondary'}
+                  >
+                    {session.mode === 'timed'
+                      ? `${Math.floor(session.remainingSeconds / 60)}:${(session.remainingSeconds % 60).toString().padStart(2, '0')}`
+                      : `${Math.floor(session.elapsedSeconds / 60)}:${(session.elapsedSeconds % 60).toString().padStart(2, '0')}`}
+                  </Badge>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-2">
@@ -315,15 +362,7 @@ function MagicGraphRoute() {
                 ))}
               </div>
 
-              <div className="mt-4 flex gap-2">
-                <Button
-                  className="flex-1"
-                  disabled={session.timedOut}
-                  onClick={() => void checkCurrent()}
-                  type="button"
-                >
-                  {t('game.check')}
-                </Button>
+              <div className="mt-4 flex items-center gap-2">
                 <Button
                   variant="outline"
                   className="flex-1"
@@ -332,6 +371,14 @@ function MagicGraphRoute() {
                 >
                   {t('game.reset')}
                 </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => session.setPaused(!session.paused)}
+                  type="button"
+                >
+                  {session.paused ? t('game.resume') : t('game.pause')}
+                </Button>
               </div>
 
               <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
@@ -339,36 +386,70 @@ function MagicGraphRoute() {
                   {t('stats.filled') + ' '}
                   {filledCount}/{config.nodes.length}
                 </span>
+                {levelAttempts > 0 ? (
+                  <span>
+                    {t('profile.attempts')} {levelAttempts}
+                  </span>
+                ) : null}
                 <span>
                   {solved
                     ? t('stats.solved')
                     : `${selectedNumber !== null ? `${t('game.selected') + ': '}${selectedNumber}` : t('game.tapNumber')}`}
                 </span>
               </div>
+
+              {saveStatus ? (
+                <p className="mt-3 border-t border-border pt-3 text-sm text-muted-foreground">
+                  {saveStatus}
+                </p>
+              ) : null}
+
+              {session.timedOut ? (
+                <p className="mt-3 border-t border-border pt-3 text-sm font-medium text-destructive">
+                  {t('game.timedOut')}
+                </p>
+              ) : null}
             </CardContent>
           </Card>
 
-          <GameSessionPanel
-            elapsedSeconds={session.elapsedSeconds}
-            hints={hints}
-            labels={{
-              hints: t('game.hints'),
-              pause: t('game.pause'),
-              practice: t('game.practice'),
-              resume: t('game.resume'),
-              timed: t('game.timed'),
-              timedOut: t('game.timedOut'),
-            }}
-            metricLabel={t('stats.filled')}
-            metricValue={`${filledCount}/${config.nodes.length}`}
-            mode={session.mode}
-            paused={session.paused}
-            remainingSeconds={session.remainingSeconds}
-            status={saveStatus}
-            timedOut={session.timedOut}
-            onModeChange={session.setMode}
-            onPausedChange={session.setPaused}
-          />
+          {hints.length > 0 ? (
+            <Card>
+              <CardContent>
+                <h3 className="text-sm font-semibold">{t('game.hints')}</h3>
+                <ul className="mt-2 grid gap-1.5 text-sm text-muted-foreground">
+                  {hints.map((hint) => (
+                    <li key={hint}>- {hint}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {errorPopup ? (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+              onClick={() => setErrorPopup(null)}
+            >
+              <Card
+                className="mx-4 max-w-sm"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <CardContent className="text-center">
+                  <p className="text-sm font-medium text-destructive">
+                    {errorPopup}
+                  </p>
+                  <Button
+                    className="mt-4 w-full"
+                    variant="outline"
+                    onClick={() => setErrorPopup(null)}
+                    type="button"
+                  >
+                    {t('game.tryAgain')}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          ) : null}
         </div>
       </section>
 

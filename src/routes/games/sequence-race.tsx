@@ -3,7 +3,6 @@ import { useServerFn } from '@tanstack/react-start'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Confetti } from '@/components/confetti'
-import { GameSessionPanel } from '@/components/game-session-panel'
 import { GamePattern } from '@/components/game-pattern'
 import {
   formatAchievementName,
@@ -84,6 +83,14 @@ function SequenceRaceRoute() {
   const [game, setGame] = useState(() => createGameState(config))
   const [aiThinking, setAiThinking] = useState(false)
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
+  const [levelAttempts, setLevelAttempts] = useState(0)
+
+  useEffect(() => {
+    if (!saveStatus) return
+    const timer = setTimeout(() => setSaveStatus(null), 5000)
+    return () => clearTimeout(timer)
+  }, [saveStatus])
+
   const validMoves = useMemo(() => getValidMoves(game), [game])
   const humanTurn = isHumanTurn(game)
   const session = useGameSession({
@@ -91,12 +98,7 @@ function SequenceRaceRoute() {
     resetKey: config.id,
   })
   const hints = learnContent['sequence-race'][locale].tips.items ?? []
-  const progressLabels = {
-    savedAttempt: t('status.savedAttempt'),
-    bestScore: t('status.bestScore'),
-    unlocked: t('status.unlocked'),
-    solvedIn: t('status.solvedIn'),
-  }
+  const progressLabels = { unlocked: t('status.unlocked') }
 
   useEffect(() => {
     if (!requestedLevelId) return
@@ -145,6 +147,7 @@ function SequenceRaceRoute() {
         return
       }
 
+      setLevelAttempts(result.value.attempts)
       setSaveStatus(
         formatSavedProgress(result.value, progressLabels, (achievementId) =>
           formatAchievementName(locale, achievementId),
@@ -196,6 +199,7 @@ function SequenceRaceRoute() {
     setGame(createGameState(nextLevel))
     setAiThinking(false)
     setSaveStatus(null)
+    setLevelAttempts(0)
     session.resetSession()
   }
 
@@ -242,11 +246,39 @@ function SequenceRaceRoute() {
         <Card className="relative overflow-hidden">
           <GamePattern pattern="arrows" />
           <CardContent className="relative">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xl font-semibold">{t('game.raceLine')}</h2>
-              <span className="text-sm text-muted-foreground">
-                {game.currentPosition} / {game.target}
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    variant={
+                      session.mode === 'practice' ? 'default' : 'outline'
+                    }
+                    onClick={() => session.setMode('practice')}
+                    type="button"
+                  >
+                    {t('game.practice')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={
+                      session.mode === 'timed' ? 'default' : 'outline'
+                    }
+                    onClick={() => session.setMode('timed')}
+                    type="button"
+                  >
+                    {t('game.timed')}
+                  </Button>
+                </div>
+                <Badge
+                  variant={session.timedOut ? 'destructive' : 'secondary'}
+                >
+                  {session.mode === 'timed'
+                    ? `${Math.floor(session.remainingSeconds / 60)}:${(session.remainingSeconds % 60).toString().padStart(2, '0')}`
+                    : `${Math.floor(session.elapsedSeconds / 60)}:${(session.elapsedSeconds % 60).toString().padStart(2, '0')}`}
+                </Badge>
+              </div>
             </div>
 
             <Progress className="mt-5 h-4" value={progressPercent} />
@@ -300,41 +332,57 @@ function SequenceRaceRoute() {
                 <span className="text-sm text-muted-foreground capitalize">
                   {formatDifficulty(locale, config.difficulty)} ·{' '}
                   {sequenceInfo.formula}
+                  {levelAttempts > 0
+                    ? ` · ${t('profile.attempts')} ${levelAttempts}`
+                    : ''}
                 </span>
               </div>
 
-              <Button
-                variant="outline"
-                className="mt-4 w-full"
-                onClick={resetGame}
-                type="button"
-              >
-                {t('game.reset')}
-              </Button>
+              <div className="mt-4 flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={resetGame}
+                  type="button"
+                >
+                  {t('game.reset')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => session.setPaused(!session.paused)}
+                  type="button"
+                >
+                  {session.paused ? t('game.resume') : t('game.pause')}
+                </Button>
+              </div>
+
+              {saveStatus ? (
+                <p className="mt-3 border-t border-border pt-3 text-sm text-muted-foreground">
+                  {saveStatus}
+                </p>
+              ) : null}
+
+              {session.timedOut ? (
+                <p className="mt-3 border-t border-border pt-3 text-sm font-medium text-destructive">
+                  {t('game.timedOut')}
+                </p>
+              ) : null}
             </CardContent>
           </Card>
 
-          <GameSessionPanel
-            elapsedSeconds={session.elapsedSeconds}
-            hints={hints}
-            labels={{
-              hints: t('game.hints'),
-              pause: t('game.pause'),
-              practice: t('game.practice'),
-              resume: t('game.resume'),
-              timed: t('game.timed'),
-              timedOut: t('game.timedOut'),
-            }}
-            metricLabel={t('game.target')}
-            metricValue={`${game.currentPosition}/${game.target}`}
-            mode={session.mode}
-            paused={session.paused}
-            remainingSeconds={session.remainingSeconds}
-            status={saveStatus}
-            timedOut={session.timedOut}
-            onModeChange={session.setMode}
-            onPausedChange={session.setPaused}
-          />
+          {hints.length > 0 ? (
+            <Card>
+              <CardContent>
+                <h3 className="text-sm font-semibold">{t('game.hints')}</h3>
+                <ul className="mt-2 grid gap-1.5 text-sm text-muted-foreground">
+                  {hints.map((hint) => (
+                    <li key={hint}>- {hint}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
       </section>
 

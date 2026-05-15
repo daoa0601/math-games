@@ -11,23 +11,15 @@ interface ServerActionFailure {
 export type ServerActionResult<T> = ServerActionSuccess<T> | ServerActionFailure
 
 interface ProgressStatus {
-  readonly attempts: number
-  readonly bestScore: number
   readonly unlockedAchievements: readonly string[]
 }
 
 interface ProgressStatusLabels {
-  readonly savedAttempt: string
-  readonly bestScore: string
   readonly unlocked: string
-  readonly solvedIn: string
 }
 
 const defaultProgressLabels: ProgressStatusLabels = {
-  savedAttempt: 'Saved attempt',
-  bestScore: 'best score',
   unlocked: 'Unlocked',
-  solvedIn: 'Solved in',
 }
 
 function errorMessage(error: unknown, fallbackMessage: string) {
@@ -66,22 +58,22 @@ export function formatSavedProgress(
   labels = defaultProgressLabels,
   formatAchievement: (id: string) => string = (id) => id,
 ) {
-  return `${labels.savedAttempt} ${progress.attempts}; ${labels.bestScore} ${
-    progress.bestScore
-  }.${unlockedMessage(progress.unlockedAchievements, labels, formatAchievement)}`
+  return unlockedMessage(
+    progress.unlockedAchievements,
+    labels,
+    formatAchievement,
+  ).trim() || null
 }
 
 export function formatSolvedProgress(
-  timeMs: number,
+  _timeMs: number,
   progress: ProgressStatus,
   labels = defaultProgressLabels,
   formatAchievement: (id: string) => string = (id) => id,
 ) {
-  return `${labels.solvedIn} ${timeMs.toFixed(1)}ms; ${labels.savedAttempt} ${
-    progress.attempts
-  }; ${labels.bestScore} ${progress.bestScore}.${unlockedMessage(
+  return unlockedMessage(
     progress.unlockedAchievements,
     labels,
     formatAchievement,
-  )}`
+  ).trim() || null
 }

@@ -2,8 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { Badge } from '@/components/ui/badge'
 import { Confetti } from '@/components/confetti'
-import { GameSessionPanel } from '@/components/game-session-panel'
 import { GamePattern } from '@/components/game-pattern'
 import {
   formatAchievementName,
@@ -177,6 +177,8 @@ function ShapeArchitectRoute() {
   const [placementRotation, setPlacementRotation] =
     useState<Rotation3D>(DEFAULT_ROTATION)
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
+  const [errorPopup, setErrorPopup] = useState<string | null>(null)
+  const [levelAttempts, setLevelAttempts] = useState(0)
   const [viewMode, setViewMode] = useState<ViewMode>('2d')
   const [pendingPosition, setPendingPosition] = useState<Position3D | null>(
     null,
@@ -184,6 +186,7 @@ function ShapeArchitectRoute() {
   const [tapPoint, setTapPoint] = useState<{ x: number; y: number } | null>(
     null,
   )
+  const [hoveredCell3D, setHoveredCell3D] = useState<Position3D | null>(null)
   const boardRef = useRef<HTMLDivElement>(null)
   const validationSeqRef = useRef(0)
   const solvedProgressKeyRef = useRef<string | null>(null)
@@ -195,6 +198,12 @@ function ShapeArchitectRoute() {
   )
   const grid = optimisticGrid ?? serverGrid
   const placedPieces = placements
+
+  useEffect(() => {
+    if (!saveStatus) return
+    const timer = setTimeout(() => setSaveStatus(null), 5000)
+    return () => clearTimeout(timer)
+  }, [saveStatus])
 
   useEffect(() => {
     if (!solver.result) return
@@ -251,18 +260,13 @@ function ShapeArchitectRoute() {
   ).length
   const selectedPiece =
     config.pieces.find((piece) => piece.id === selectedPieceId) ?? null
-  const progressLabels = {
-    savedAttempt: t('status.savedAttempt'),
-    bestScore: t('status.bestScore'),
-    unlocked: t('status.unlocked'),
-    solvedIn: t('status.solvedIn'),
-  }
+  const progressLabels = { unlocked: t('status.unlocked') }
 
   async function recordAttempt(
     confirmedPlacements: PlacedPiece[],
     messageForSolved?: (
       progress: Awaited<ReturnType<typeof recordProgress>>,
-    ) => string,
+    ) => string | null,
   ) {
     const result = await runServerAction(
       () =>
@@ -280,6 +284,7 @@ function ShapeArchitectRoute() {
       return
     }
 
+    setLevelAttempts(result.value.attempts)
     setSaveStatus(
       messageForSolved
         ? messageForSolved(result.value)
@@ -297,7 +302,7 @@ function ShapeArchitectRoute() {
       successMessage?: string
       solvedMessage?: (
         progress: Awaited<ReturnType<typeof recordProgress>>,
-      ) => string
+      ) => string | null
     },
   ) {
     const requestSeq = validationSeqRef.current + 1
@@ -342,7 +347,7 @@ function ShapeArchitectRoute() {
     setOptimisticGrid(null)
 
     if (!nextServerState.accepted) {
-      setSaveStatus(nextServerState.error ?? t('status.placementRejected'))
+      setErrorPopup(nextServerState.error ?? t('status.placementRejected'))
       return
     }
 
@@ -358,11 +363,6 @@ function ShapeArchitectRoute() {
     if (options.successMessage) {
       setSaveStatus(options.successMessage)
     }
-  }
-
-  async function checkCurrent() {
-    if (session.timedOut) return
-    await recordAttempt(placedPieces)
   }
 
   function resetPuzzle() {
@@ -388,6 +388,7 @@ function ShapeArchitectRoute() {
     setPendingPosition(null)
     setTapPoint(null)
     setSaveStatus(null)
+    setLevelAttempts(0)
     solvedProgressKeyRef.current = null
     session.resetSession()
   }
@@ -440,27 +441,35 @@ function ShapeArchitectRoute() {
           config.gridSize,
         ) !== null
       : false
-  const ghostPiece =
-    selectedPiece !== null && pendingPosition !== null
-      ? (() => {
-          const placementPosition = findNearestValidPosition(
-            grid,
-            selectedPiece,
-            pendingPosition,
-            placementRotation,
-            config.gridSize,
-          )
 
-          return {
-            positions: getPieceWorldPositions(
-              selectedPiece,
-              placementPosition ?? pendingPosition,
-              placementRotation,
-            ),
-            isValid: placementPosition !== null,
-          }
-        })()
-      : null
+  const ghostPiece3D = useMemo(() => {
+    const source = hoveredCell3D ?? pendingPosition
+    if (!selectedPiece || !source) return null
+
+    const position = findNearestValidPosition(
+      grid,
+      selectedPiece,
+      source,
+      placementRotation,
+      config.gridSize,
+    )
+
+    return {
+      positions: getPieceWorldPositions(
+        selectedPiece,
+        position ?? source,
+        placementRotation,
+      ),
+      isValid: position !== null,
+    }
+  }, [
+    selectedPiece,
+    hoveredCell3D,
+    pendingPosition,
+    grid,
+    placementRotation,
+    config.gridSize,
+  ])
 
   function confirmPlacement() {
     if (session.timedOut) return
@@ -591,14 +600,50 @@ function ShapeArchitectRoute() {
         <Card className="relative overflow-hidden">
           <GamePattern pattern="grid" />
           <CardContent className="relative">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xl font-semibold">{t('game.blueprint')}</h2>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    variant={
+                      session.mode === 'practice' ? 'default' : 'outline'
+                    }
+                    onClick={() => session.setMode('practice')}
+                    type="button"
+                  >
+                    {t('game.practice')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={
+                      session.mode === 'timed' ? 'default' : 'outline'
+                    }
+                    onClick={() => session.setMode('timed')}
+                    type="button"
+                  >
+                    {t('game.timed')}
+                  </Button>
+                </div>
+                <Badge
+                  variant={session.timedOut ? 'destructive' : 'secondary'}
+                >
+                  {session.mode === 'timed'
+                    ? `${Math.floor(session.remainingSeconds / 60)}:${(session.remainingSeconds % 60).toString().padStart(2, '0')}`
+                    : `${Math.floor(session.elapsedSeconds / 60)}:${(session.elapsedSeconds % 60).toString().padStart(2, '0')}`}
+                </Badge>
                 <ToggleGroup
                   type="single"
                   value={viewMode}
                   onValueChange={(value) => {
-                    if (value) setViewMode(value as ViewMode)
+                    if (!value) return
+                    setViewMode(value as ViewMode)
+                    setSelectedPieceId(null)
+                    setPlacementRotation(DEFAULT_ROTATION)
+                    setPendingPosition(null)
+                    setTapPoint(null)
+                    setHoveredCell3D(null)
+                    setSaveStatus(null)
                   }}
                   variant="outline"
                   size="sm"
@@ -606,29 +651,27 @@ function ShapeArchitectRoute() {
                   <ToggleGroupItem value="2d">2D</ToggleGroupItem>
                   <ToggleGroupItem value="3d">3D</ToggleGroupItem>
                 </ToggleGroup>
-                <span className="text-sm capitalize text-muted-foreground">
-                  {formatDifficulty(locale, config.difficulty)} / {config.type}
-                </span>
               </div>
             </div>
 
             <div
               ref={boardRef}
               className="relative mt-4 overflow-x-auto"
-              onClick={handleBoardClick}
+              onClick={viewMode === '2d' ? handleBoardClick : undefined}
             >
               {viewMode === '3d' ? (
                 <ShapeArchitect3D
                   gridState={grid.toNestedArray()}
                   config={config}
                   placedPieces={placedPieces}
-                  ghostPiece={ghostPiece}
+                  ghostPiece={ghostPiece3D}
                   selectedPiece={selectedPiece}
                   labels={{
                     loading: t('game.loading3d'),
                     view: t('game.shapeArchitect3dView'),
                   }}
                   onCellClick={handleCellClick}
+                  onCellHover={setHoveredCell3D}
                 />
               ) : (
                 <ShapeArchitectCanvas
@@ -644,7 +687,8 @@ function ShapeArchitectRoute() {
                 />
               )}
 
-              {pendingPosition !== null &&
+              {viewMode === '2d' &&
+                pendingPosition !== null &&
                 selectedPiece !== null &&
                 tapPoint && (
                   <div
@@ -657,7 +701,7 @@ function ShapeArchitectRoute() {
                     <PlacementToolbar
                       pieceName={formatLevelName(locale, selectedPiece.name)}
                       rotation={placementRotation}
-                      show3DAxes={config.type === '3D' || viewMode === '3d'}
+                      show3DAxes={config.type === '3D'}
                       canPlace={pendingCanPlace}
                       labels={{
                         cancelPlacement: t('game.cancelPlacement'),
@@ -672,6 +716,28 @@ function ShapeArchitectRoute() {
                   </div>
                 )}
             </div>
+
+            {viewMode === '3d' &&
+              pendingPosition !== null &&
+              selectedPiece !== null && (
+                <div className="mt-3">
+                  <PlacementToolbar
+                    pieceName={formatLevelName(locale, selectedPiece.name)}
+                    rotation={placementRotation}
+                    show3DAxes
+                    canPlace={pendingCanPlace}
+                    labels={{
+                      cancelPlacement: t('game.cancelPlacement'),
+                      placePiece: t('game.placePiece'),
+                      rotatePiece: t('game.rotatePiece'),
+                      rotatePieceAxis: t('game.rotatePieceAxis'),
+                    }}
+                    onRotate={rotateSelectedPiece}
+                    onPlace={confirmPlacement}
+                    onCancel={cancelPlacement}
+                  />
+                </div>
+              )}
 
             <Separator className="my-4" />
 
@@ -707,14 +773,6 @@ function ShapeArchitectRoute() {
 
             <div className="mt-4 flex gap-2">
               <Button
-                className="flex-1"
-                disabled={session.timedOut}
-                onClick={() => void checkCurrent()}
-                type="button"
-              >
-                {t('game.check')}
-              </Button>
-              <Button
                 variant="outline"
                 className="flex-1"
                 disabled={
@@ -735,42 +793,84 @@ function ShapeArchitectRoute() {
               >
                 {t('game.reset')}
               </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => session.setPaused(!session.paused)}
+                type="button"
+              >
+                {session.paused ? t('game.resume') : t('game.pause')}
+              </Button>
             </div>
 
             <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
               <span>
                 {t('stats.placed')} {placedPieces.length}/{config.pieces.length}
               </span>
+              {levelAttempts > 0 ? (
+                <span>
+                  {t('profile.attempts')} {levelAttempts}
+                </span>
+              ) : null}
               <span>
                 {solved
                   ? t('stats.solved')
                   : `${filledTargets}/${config.targetVoxels.length} ${t('stats.cells')}`}
               </span>
             </div>
+
+            {saveStatus ? (
+              <p className="mt-3 border-t border-border pt-3 text-sm text-muted-foreground">
+                {saveStatus}
+              </p>
+            ) : null}
+
+            {session.timedOut ? (
+              <p className="mt-3 border-t border-border pt-3 text-sm font-medium text-destructive">
+                {t('game.timedOut')}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
 
-        <GameSessionPanel
-          elapsedSeconds={session.elapsedSeconds}
-          hints={hints}
-          labels={{
-            hints: t('game.hints'),
-            pause: t('game.pause'),
-            practice: t('game.practice'),
-            resume: t('game.resume'),
-            timed: t('game.timed'),
-            timedOut: t('game.timedOut'),
-          }}
-          metricLabel={t('stats.filled')}
-          metricValue={`${filledTargets}/${config.targetVoxels.length}`}
-          mode={session.mode}
-          paused={session.paused}
-          remainingSeconds={session.remainingSeconds}
-          status={saveStatus}
-          timedOut={session.timedOut}
-          onModeChange={session.setMode}
-          onPausedChange={session.setPaused}
-        />
+        {hints.length > 0 ? (
+          <Card>
+            <CardContent>
+              <h3 className="text-sm font-semibold">{t('game.hints')}</h3>
+              <ul className="mt-2 grid gap-1.5 text-sm text-muted-foreground">
+                {hints.map((hint) => (
+                  <li key={hint}>- {hint}</li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {errorPopup ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            onClick={() => setErrorPopup(null)}
+          >
+            <Card
+              className="mx-4 max-w-sm"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <CardContent className="text-center">
+                <p className="text-sm font-medium text-destructive">
+                  {errorPopup}
+                </p>
+                <Button
+                  className="mt-4 w-full"
+                  variant="outline"
+                  onClick={() => setErrorPopup(null)}
+                  type="button"
+                >
+                  {t('game.tryAgain')}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        ) : null}
       </section>
 
       <ResponsiveSection

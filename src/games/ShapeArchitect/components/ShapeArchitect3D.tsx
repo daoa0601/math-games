@@ -24,7 +24,8 @@ interface ShapeArchitect3DProps {
     loading: string
     view: string
   }
-  onCellClick: (position: Position3D) => void
+  onCellClick?: (position: Position3D) => void
+  onCellHover?: (position: Position3D | null) => void
 }
 
 export function ShapeArchitect3D({
@@ -35,6 +36,7 @@ export function ShapeArchitect3D({
   selectedPiece,
   labels,
   onCellClick,
+  onCellHover,
 }: ShapeArchitect3DProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -98,20 +100,50 @@ export function ShapeArchitect3D({
   }, [config.gridSize, ready])
 
   useEffect(() => {
+    if (!onCellClick) return
+
     const canvas = canvasRef.current
     if (!canvas) return
 
+    const handler = onCellClick
     function handleClick(event: MouseEvent) {
       const position = sceneRef.current?.pickGridCell(
         event.clientX,
         event.clientY,
       )
-      if (position) onCellClick(position)
+      if (position) handler(position)
     }
 
     canvas.addEventListener('click', handleClick)
     return () => canvas.removeEventListener('click', handleClick)
   }, [onCellClick])
+
+  useEffect(() => {
+    if (!onCellHover) return
+
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const hover = onCellHover
+    function handleMove(event: MouseEvent) {
+      const position = sceneRef.current?.pickGridCell(
+        event.clientX,
+        event.clientY,
+      )
+      hover(position ?? null)
+    }
+
+    function handleLeave() {
+      hover(null)
+    }
+
+    canvas.addEventListener('mousemove', handleMove)
+    canvas.addEventListener('mouseleave', handleLeave)
+    return () => {
+      canvas.removeEventListener('mousemove', handleMove)
+      canvas.removeEventListener('mouseleave', handleLeave)
+    }
+  }, [onCellHover])
 
   return (
     <div ref={containerRef} className="max-w-[640px]">
