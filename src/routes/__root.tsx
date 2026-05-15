@@ -1,8 +1,8 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import { useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
+import { Component, useEffect, useState } from 'react'
+import type { ErrorInfo, ReactNode } from 'react'
 
 import { formatGameTitle } from '@/components/i18n-format'
 import { LocaleProvider, useLocale } from '@/components/locale-context'
@@ -82,6 +82,45 @@ function StandaloneNotFound() {
   )
 }
 
+interface ErrorBoundaryState {
+  error: Error | null
+}
+
+class RootErrorBoundary extends Component<
+  { children: ReactNode },
+  ErrorBoundaryState
+> {
+  override state: ErrorBoundaryState = { error: null }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { error }
+  }
+
+  override componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('Uncaught error:', error, info.componentStack)
+  }
+
+  override render() {
+    if (this.state.error) {
+      return (
+        <main className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-16">
+          <h1 className="text-4xl font-semibold">Something went wrong</h1>
+          <p className="mt-4 text-lg text-muted-foreground">
+            An unexpected error occurred. Try reloading the page.
+          </p>
+          <button
+            className="mt-8 w-fit rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+            onClick={() => window.location.reload()}
+          >
+            Reload
+          </button>
+        </main>
+      )
+    }
+    return this.props.children
+  }
+}
+
 function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
@@ -95,8 +134,10 @@ function RootDocument({ children }: { children: ReactNode }) {
       </head>
       <body>
         <LocaleProvider>
-          <HydrationMarker />
-          {children}
+          <RootErrorBoundary>
+            <HydrationMarker />
+            {children}
+          </RootErrorBoundary>
           <TanStackDevtools
             config={{
               position: 'bottom-right',

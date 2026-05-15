@@ -2,6 +2,9 @@ import { Context, Data, Effect, Layer } from 'effect'
 
 import { WorkerEnvService } from './worker-env'
 
+const TURNSTILE_VERIFY_URL =
+  'https://challenges.cloudflare.com/turnstile/v0/siteverify'
+
 export class TurnstileError extends Data.TaggedError('TurnstileError')<{
   readonly reason: string
 }> {
@@ -27,17 +30,14 @@ export const TurnstileServiceLive = Layer.effect(
 
         const response = yield* Effect.tryPromise({
           try: async (): Promise<{ success: boolean }> => {
-            const r = await fetch(
-              'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-              {
-                method: 'POST',
-                headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({
-                  secret: secretKey,
-                  response: token,
-                }),
-              },
-            )
+            const r = await fetch(TURNSTILE_VERIFY_URL, {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({
+                secret: secretKey,
+                response: token,
+              }),
+            })
             return r.json()
           },
           catch: () =>

@@ -1,5 +1,5 @@
 import { Effect, Layer, Schema } from 'effect'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { loadDailyChallenge } from '@/daily/daily.server'
 import type { GameModule } from '@/games/game-module'
@@ -49,11 +49,6 @@ import type {
   RateLimitShape,
   TurnstileShape,
 } from '@/services'
-
-vi.mock('@tanstack/react-start/server', () => ({
-  getRequestHeader: vi.fn(),
-  setResponseHeader: vi.fn(),
-}))
 
 // ---------------------------------------------------------------------------
 // Shared mock factories
@@ -251,17 +246,13 @@ describe('error boundaries: DB failures map to domain errors', () => {
 
 describe('guard ordering in pipelines', () => {
   it('origin guard rejects before any DB access', async () => {
-    const dbSpy = vi.fn(() => Promise.reject(new Error('should not reach DB')))
-    const spyDbLayer = Layer.succeed(DbService, {
-      db: { batch: dbSpy } as unknown as DbShape['db'],
-    })
     const blockedGuardLayer = Layer.succeed(
       OriginGuardService,
       createBlockingOriginGuard(),
     )
 
     const layer = Layer.mergeAll(
-      spyDbLayer,
+      FailingDbLayer,
       IdentityLayer,
       blockedGuardLayer,
       PassingRateLimitLayer,
@@ -281,22 +272,16 @@ describe('guard ordering in pipelines', () => {
         }).pipe(Effect.provide(layer)),
       ),
     ).rejects.toSatisfy((error: unknown) => error instanceof CrossOriginError)
-
-    expect(dbSpy).not.toHaveBeenCalled()
   })
 
   it('rate limit rejects before DB writes', async () => {
-    const dbSpy = vi.fn(() => Promise.reject(new Error('should not reach DB')))
-    const spyDbLayer = Layer.succeed(DbService, {
-      db: { batch: dbSpy } as unknown as DbShape['db'],
-    })
     const blockedRateLimitLayer = Layer.succeed(
       RateLimitService,
       createBlockingRateLimit(),
     )
 
     const layer = Layer.mergeAll(
-      spyDbLayer,
+      FailingDbLayer,
       IdentityLayer,
       PassingGuardLayer,
       blockedRateLimitLayer,
@@ -316,8 +301,6 @@ describe('guard ordering in pipelines', () => {
         }).pipe(Effect.provide(layer)),
       ),
     ).rejects.toSatisfy((error: unknown) => error instanceof RateLimitError)
-
-    expect(dbSpy).not.toHaveBeenCalled()
   })
 
   it('profile update pipeline respects guard ordering', async () => {

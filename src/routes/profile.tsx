@@ -36,6 +36,17 @@ import type {
 } from '@/player/profile.schema'
 import { runServerAction } from '@/routes/-server-action-result'
 
+const LOCALES: readonly Locale[] = ['en', 'vi']
+const GRADE_BANDS: readonly GradeBand[] = ['elementary', 'middle', 'high']
+
+function isLocale(value: string): value is Locale {
+  return (LOCALES as readonly string[]).includes(value)
+}
+
+function isGradeBand(value: string): value is GradeBand {
+  return (GRADE_BANDS as readonly string[]).includes(value)
+}
+
 export const Route = createFileRoute('/profile')({
   loader: () => getPlayerProfileOverview(),
   component: ProfileRoute,
@@ -70,20 +81,23 @@ function createAchievementBackup(
 }
 
 function parseAchievementBackup(text: string): string[] | null {
-  const parsed = JSON.parse(text) as Partial<AchievementBackupFile>
+  const parsed: unknown = JSON.parse(text)
+
+  if (parsed === null || typeof parsed !== 'object') return null
+
+  const record = parsed as Record<string, unknown>
 
   if (
-    parsed.app !== 'math-games' ||
-    parsed.kind !== 'achievement-backup' ||
-    parsed.version !== 1 ||
-    !Array.isArray(parsed.achievementIds)
+    record.app !== 'math-games' ||
+    record.kind !== 'achievement-backup' ||
+    record.version !== 1 ||
+    !Array.isArray(record.achievementIds)
   ) {
     return null
   }
 
-  const achievementIds = parsed.achievementIds.filter(
-    (achievementId): achievementId is string =>
-      typeof achievementId === 'string',
+  const achievementIds = record.achievementIds.filter(
+    (id): id is string => typeof id === 'string',
   )
 
   return achievementIds.length > 0 ? achievementIds : null
@@ -149,10 +163,13 @@ function ProfileRoute() {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
 
+    const rawLocale = String(formData.get('locale'))
+    const rawGradeBand = String(formData.get('gradeBand'))
+
     const payload: PlayerProfileInput = {
       displayName: String(formData.get('displayName')),
-      locale: String(formData.get('locale')) as Locale,
-      gradeBand: String(formData.get('gradeBand')) as GradeBand,
+      locale: isLocale(rawLocale) ? rawLocale : 'en',
+      gradeBand: isGradeBand(rawGradeBand) ? rawGradeBand : 'elementary',
     }
 
     const result = await runServerAction(

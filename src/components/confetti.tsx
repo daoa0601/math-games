@@ -57,8 +57,8 @@ export function Confetti({
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const maybeCtx = canvas.getContext('2d')
+    if (!maybeCtx) return
 
     const rect = canvas.parentElement?.getBoundingClientRect()
     if (!rect) return
@@ -66,18 +66,22 @@ export function Confetti({
     canvas.width = rect.width
     canvas.height = rect.height
 
+    const g = maybeCtx
     const particles = createParticles(canvas.width, canvas.height, colors)
     const startTime = performance.now()
     let frameId: number
 
+    const w = canvas.width
+    const h = canvas.height
+
     function draw(now: number) {
       const elapsed = now - startTime
       if (elapsed > DURATION_MS) {
-        ctx!.clearRect(0, 0, canvas!.width, canvas!.height)
+        g.clearRect(0, 0, w, h)
         return
       }
 
-      ctx!.clearRect(0, 0, canvas!.width, canvas!.height)
+      g.clearRect(0, 0, w, h)
       const progress = elapsed / DURATION_MS
 
       for (const p of particles) {
@@ -87,13 +91,13 @@ export function Confetti({
         p.rotation += p.rotationSpeed
         p.life = 1 - progress
 
-        ctx!.save()
-        ctx!.translate(p.x, p.y)
-        ctx!.rotate((p.rotation * Math.PI) / 180)
-        ctx!.globalAlpha = Math.max(0, p.life)
-        ctx!.fillStyle = p.color
-        ctx!.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2)
-        ctx!.restore()
+        g.save()
+        g.translate(p.x, p.y)
+        g.rotate((p.rotation * Math.PI) / 180)
+        g.globalAlpha = Math.max(0, p.life)
+        g.fillStyle = p.color
+        g.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2)
+        g.restore()
       }
 
       frameId = requestAnimationFrame(draw)

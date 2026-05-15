@@ -1,4 +1,3 @@
-import { setResponseHeader } from '@tanstack/react-start/server'
 import { Effect } from 'effect'
 
 import { recordGameProgress } from '@/games/progress/progress.server'
@@ -31,24 +30,26 @@ export function createGetCatalogHandler<TModule extends GameModule<any>>(
 ) {
   type Catalog = ReturnType<TModule['getCatalog']>
 
-  return () => {
-    setResponseHeader('cache-control', 'public, max-age=300')
-
-    return runServerEffect(
+  return () =>
+    runServerEffect(
       Effect.gen(function* () {
+        yield* (yield* HeaderService).setResponse(
+          'cache-control',
+          'public, max-age=300',
+        )
+
         const kvCache = yield* KvCacheService
 
         const cached = yield* kvCache.get<Catalog>(`catalog:${module.id}`)
         if (cached) return cached
 
-        const catalog = module.getCatalog() as Catalog
+        const catalog: Catalog = module.getCatalog() as Catalog
 
         yield* kvCache.put(`catalog:${module.id}`, catalog, CATALOG_CACHE_TTL)
 
         return catalog
       }),
     )
-  }
 }
 
 export function createRecordProgressPipeline<TModule extends GameModule<any>>(

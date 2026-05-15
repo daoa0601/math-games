@@ -155,29 +155,15 @@ function buildDLX(
 ): { root: DLXColumnHeader; columns: DLXColumnHeader[]; allRows: DLXNode[][] } {
   const numCols = numTargets + numPieces
 
-  // Create root header
-  const root: DLXColumnHeader = {
-    size: 0,
-    name: 'root',
-    rowIndex: -1,
-  } as any
-  root.left = root
-  root.right = root
-  root.up = root
-  root.down = root
-  root.column = root
+  // Create root header (self-linked circular sentinel)
+  const root = makeSelfLinkedHeader('root')
 
   // Create column headers
   const columns: DLXColumnHeader[] = []
   for (let i = 0; i < numCols; i++) {
-    const col: DLXColumnHeader = {
-      size: 0,
-      name: i < numTargets ? `t${i}` : `p${i - numTargets}`,
-      rowIndex: -1,
-    } as any
-    col.up = col
-    col.down = col
-    col.column = col
+    const col = makeSelfLinkedHeader(
+      i < numTargets ? `t${i}` : `p${i - numTargets}`,
+    )
 
     // Link horizontally
     col.left = root.left
@@ -213,11 +199,20 @@ function buildDLX(
   return { root, columns, allRows }
 }
 
+function makeSelfLinkedHeader(name: string): DLXColumnHeader {
+  const h = { size: 0, name, rowIndex: -1 } as Partial<DLXColumnHeader>
+  const header = h as DLXColumnHeader
+  header.left = header
+  header.right = header
+  header.up = header
+  header.down = header
+  header.column = header
+  return header
+}
+
 function createNode(column: DLXColumnHeader, rowIndex: number): DLXNode {
-  const node: DLXNode = {
-    rowIndex,
-    column,
-  } as any
+  const n = { rowIndex, column } as Partial<DLXNode>
+  const node = n as DLXNode
   node.left = node
   node.right = node
 

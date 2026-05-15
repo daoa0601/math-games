@@ -19,6 +19,8 @@ declare global {
   }
 }
 
+const TURNSTILE_SCRIPT_URL =
+  'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
 const TURNSTILE_SCRIPT_ID = 'cf-turnstile-script'
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''
 
@@ -57,8 +59,7 @@ export function TurnstileWidget({ onToken }: TurnstileWidgetProps) {
     if (!document.getElementById(TURNSTILE_SCRIPT_ID)) {
       const script = document.createElement('script')
       script.id = TURNSTILE_SCRIPT_ID
-      script.src =
-        'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+      script.src = TURNSTILE_SCRIPT_URL
       script.async = true
       script.onload = renderWidget
       document.head.appendChild(script)
