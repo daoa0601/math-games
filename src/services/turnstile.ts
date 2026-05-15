@@ -34,7 +34,7 @@ export const TurnstileServiceLive = Layer.effect(
                 secret: secretKey,
                 response: token,
               }),
-            }).then((r) => r.json()),
+            }).then((r) => r.json() as Promise<{ success: boolean }>),
           catch: () =>
             new TurnstileError({ reason: 'Turnstile verification failed' }),
         })
