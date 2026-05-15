@@ -10,6 +10,7 @@ const hasValue = (value: string | undefined) =>
 
 export interface AlchemyRunnerEnv {
   [key: string]: string | undefined
+  ALCHEMY_DEPLOY?: string
   CI?: string
   CLOUDFLARE_ACCOUNT_ID?: string
   CLOUDFLARE_API_TOKEN?: string
@@ -44,6 +45,7 @@ export function usesScopedTokenAuth(env: AlchemyRunnerEnv) {
 export function createAlchemyEnvironment(env: AlchemyRunnerEnv) {
   return {
     ...env,
+    ALCHEMY_DEPLOY: '1',
     CI: usesScopedTokenAuth(env) ? 'true' : env.CI,
   }
 }
