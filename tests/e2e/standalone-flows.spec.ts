@@ -215,7 +215,9 @@ test('non-firebase parity surfaces are available', async ({ page }) => {
   await page.goto('/profile')
   await expectHydrated(page)
   await expect(page.getByText('Rank', { exact: true })).toBeVisible()
-  await expect(page.getByText('Achievements', { exact: true }).first()).toBeVisible()
+  await expect(
+    page.getByText('Achievements', { exact: true }).first(),
+  ).toBeVisible()
 
   await page.goto('/games/magic-graph')
   await expectHydrated(page)
