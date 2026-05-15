@@ -71,10 +71,7 @@ export const toUserFacingError = Match.type<ServerError>().pipe(
     'PlayerProfileWriteError',
     () => new Error('Unable to save your profile.'),
   ),
-  Match.tag(
-    'TurnstileError',
-    (e) => new Error(e.reason),
-  ),
+  Match.tag('TurnstileError', (e) => new Error(e.reason)),
   Match.exhaustive,
 )
 

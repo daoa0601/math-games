@@ -795,7 +795,11 @@ describe('success paths: DB workflows complete end-to-end', () => {
 
   it('loadDailyChallenge returns existing challenge', async () => {
     const db = createMockDb([[mockDailyChallengeRow]])
-    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer, KvCacheLayer)
+    const layer = Layer.mergeAll(
+      Layer.succeed(DbService, db),
+      ClockLayer,
+      KvCacheLayer,
+    )
 
     const result = await Effect.runPromise(
       loadDailyChallenge().pipe(Effect.provide(layer)),
@@ -808,7 +812,11 @@ describe('success paths: DB workflows complete end-to-end', () => {
 
   it('loadDailyChallenge inserts when none exists', async () => {
     const db = createMockDb([[], [mockDailyChallengeRow]])
-    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer, KvCacheLayer)
+    const layer = Layer.mergeAll(
+      Layer.succeed(DbService, db),
+      ClockLayer,
+      KvCacheLayer,
+    )
 
     const result = await Effect.runPromise(
       loadDailyChallenge().pipe(Effect.provide(layer)),
@@ -819,7 +827,11 @@ describe('success paths: DB workflows complete end-to-end', () => {
 
   it('loadDailyChallenge handles insert race (conflict then re-select)', async () => {
     const db = createMockDb([[], [], [mockDailyChallengeRow]])
-    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer, KvCacheLayer)
+    const layer = Layer.mergeAll(
+      Layer.succeed(DbService, db),
+      ClockLayer,
+      KvCacheLayer,
+    )
 
     const result = await Effect.runPromise(
       loadDailyChallenge().pipe(Effect.provide(layer)),

@@ -23,7 +23,9 @@ function createRateLimitHarness(now: number) {
     delete: () => Effect.void,
   })
   const runtime = ManagedRuntime.make(
-    RateLimitServiceLive.pipe(Layer.provide(Layer.mergeAll(clockLayer, kvLayer))),
+    RateLimitServiceLive.pipe(
+      Layer.provide(Layer.mergeAll(clockLayer, kvLayer)),
+    ),
   )
 
   return {

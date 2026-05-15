@@ -4,7 +4,11 @@ import { WorkerEnvService } from './worker-env'
 
 export interface KvCacheShape {
   readonly get: <T>(key: string) => Effect.Effect<T | null>
-  readonly put: <T>(key: string, value: T, ttlSeconds: number) => Effect.Effect<void>
+  readonly put: <T>(
+    key: string,
+    value: T,
+    ttlSeconds: number,
+  ) => Effect.Effect<void>
   readonly delete: (key: string) => Effect.Effect<void>
 }
 
@@ -27,7 +31,11 @@ export const KvCacheServiceLive = Layer.effect(
           }
         }),
 
-      put: <T>(key: string, value: T, ttlSeconds: number): Effect.Effect<void> =>
+      put: <T>(
+        key: string,
+        value: T,
+        ttlSeconds: number,
+      ): Effect.Effect<void> =>
         Effect.promise(async () => {
           try {
             await kv.put(key, JSON.stringify(value), {
