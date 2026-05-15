@@ -18,6 +18,18 @@ export default Alchemy.Stack(
       primaryLocationHint: 'wnam',
     })
 
+    const cache = yield* Cloudflare.KVNamespace('CACHE', {
+      title: 'math-games-cache',
+    })
+
+    const analytics = yield* Cloudflare.AnalyticsEngineDataset('ANALYTICS', {
+      dataset: 'math-games-events',
+    })
+
+    const assets = yield* Cloudflare.R2Bucket('ASSETS', {
+      name: 'math-games-assets',
+    })
+
     const worker = yield* Cloudflare.Vite('web', {
       name: 'math-games',
       compatibility: {
@@ -41,12 +53,33 @@ export default Alchemy.Stack(
       },
       bindings: {
         DB: database,
+        CACHE: cache,
+        ANALYTICS: analytics,
+        ASSETS: assets,
+      },
+    })
+
+    const cronWorker = yield* Cloudflare.Worker('daily-cron', {
+      name: 'math-games-daily-cron',
+      main: './src/workers/daily-cron.ts',
+      compatibility: {
+        date: '2026-05-13',
+        flags: ['nodejs_compat'],
+      },
+      crons: ['0 0 * * *'],
+      bindings: {
+        DB: database,
+        CACHE: cache,
       },
     })
 
     return {
       databaseId: database.databaseId,
+      cacheNamespaceId: cache.namespaceId,
+      analyticsDataset: analytics.dataset,
+      assetsBucketName: assets.bucketName,
       workerUrl: worker.url,
+      cronWorkerName: cronWorker.workerName,
     }
   }),
 )

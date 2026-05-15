@@ -1,6 +1,7 @@
 import { Effect, ManagedRuntime, Match } from 'effect'
 
 import { AppLayer } from './app-layer'
+import type { AnalyticsShape } from './analytics'
 import type { ClockShape } from './clock'
 import type { DbShape } from './db'
 import type {
@@ -14,17 +15,22 @@ import type {
   RateLimitError,
 } from './errors'
 import type { HeaderShape } from './headers'
+import type { KvCacheShape } from './kv-cache'
 import type { OriginGuardShape } from './origin-guard'
 import type { PlayerIdentityShape } from './player-identity'
 import type { RandomShape } from './random'
 import type { RateLimitShape } from './rate-limit'
+import type { TurnstileError, TurnstileShape } from './turnstile'
 import type { WorkerEnvShape } from './worker-env'
 
 export type AppServices =
+  | AnalyticsShape
   | DbShape
   | OriginGuardShape
   | PlayerIdentityShape
   | RateLimitShape
+  | KvCacheShape
+  | TurnstileShape
   | ClockShape
   | RandomShape
   | HeaderShape
@@ -39,6 +45,7 @@ export type ServerError =
   | DailyChallengeError
   | PlayerProfileError
   | PlayerProfileWriteError
+  | TurnstileError
 
 export const toUserFacingError = Match.type<ServerError>().pipe(
   Match.tag(
@@ -63,6 +70,10 @@ export const toUserFacingError = Match.type<ServerError>().pipe(
   Match.tag(
     'PlayerProfileWriteError',
     () => new Error('Unable to save your profile.'),
+  ),
+  Match.tag(
+    'TurnstileError',
+    (e) => new Error(e.reason),
   ),
   Match.exhaustive,
 )

@@ -19,12 +19,14 @@ import {
 import { toUserFacingError } from '@/services/run-server-effect'
 import type { ServerError } from '@/services/run-server-effect'
 import {
+  AnalyticsService,
   ClockService,
   CrossOriginError,
   DailyChallengeError,
   DbService,
   GameProgressValidationError,
   HeaderService,
+  KvCacheService,
   OriginGuardService,
   PlayerIdentityService,
   PlayerProfileError,
@@ -33,14 +35,18 @@ import {
   RateLimitError,
   RateLimitService,
   SolverTimeoutError,
+  TurnstileService,
 } from '@/services'
 import type {
+  AnalyticsShape,
   ClockShape,
   DbShape,
   HeaderShape,
+  KvCacheShape,
   OriginGuardShape,
   PlayerIdentityShape,
   RateLimitShape,
+  TurnstileShape,
 } from '@/services'
 
 vi.mock('@tanstack/react-start/server', () => ({
@@ -122,12 +128,38 @@ function createBlockingOriginGuard(): OriginGuardShape {
 }
 
 function createPassingRateLimit(): RateLimitShape {
-  return { assert: () => Effect.void }
+  return {
+    assert: () => Effect.void,
+    assertHourlyLimit: () => Effect.void,
+  }
 }
 
 function createBlockingRateLimit(): RateLimitShape {
   return {
     assert: (key: string) => Effect.fail(new RateLimitError({ key })),
+    assertHourlyLimit: () => Effect.void,
+  }
+}
+
+function createNoopKvCache(): KvCacheShape {
+  return {
+    get: () => Effect.succeed(null),
+    put: () => Effect.void,
+    delete: () => Effect.void,
+  }
+}
+
+function createNoopAnalytics(): AnalyticsShape {
+  return {
+    trackGameComplete: () => Effect.void,
+    trackDailyAttempt: () => Effect.void,
+    trackAchievement: () => Effect.void,
+  }
+}
+
+function createNoopTurnstile(): TurnstileShape {
+  return {
+    verify: () => Effect.void,
   }
 }
 
@@ -146,6 +178,9 @@ const PassingRateLimitLayer = Layer.succeed(
 )
 const HeaderLayer = Layer.succeed(HeaderService, createPassingHeaders())
 const ClockLayer = Layer.succeed(ClockService, createTestClock())
+const KvCacheLayer = Layer.succeed(KvCacheService, createNoopKvCache())
+const AnalyticsLayer = Layer.succeed(AnalyticsService, createNoopAnalytics())
+const TurnstileLayer = Layer.succeed(TurnstileService, createNoopTurnstile())
 
 const TestLayer = Layer.mergeAll(
   FailingDbLayer,
@@ -154,6 +189,9 @@ const TestLayer = Layer.mergeAll(
   PassingRateLimitLayer,
   HeaderLayer,
   ClockLayer,
+  KvCacheLayer,
+  AnalyticsLayer,
+  TurnstileLayer,
 )
 
 // ---------------------------------------------------------------------------
@@ -227,6 +265,8 @@ describe('guard ordering in pipelines', () => {
       blockedGuardLayer,
       PassingRateLimitLayer,
       HeaderLayer,
+      AnalyticsLayer,
+      TurnstileLayer,
     )
 
     const catalog = magicGraphModule.getCatalog()
@@ -260,6 +300,8 @@ describe('guard ordering in pipelines', () => {
       PassingGuardLayer,
       blockedRateLimitLayer,
       HeaderLayer,
+      AnalyticsLayer,
+      TurnstileLayer,
     )
 
     const catalog = magicGraphModule.getCatalog()
@@ -289,6 +331,8 @@ describe('guard ordering in pipelines', () => {
       blockedGuardLayer,
       PassingRateLimitLayer,
       HeaderLayer,
+      AnalyticsLayer,
+      TurnstileLayer,
     )
 
     await expect(
@@ -751,7 +795,7 @@ describe('success paths: DB workflows complete end-to-end', () => {
 
   it('loadDailyChallenge returns existing challenge', async () => {
     const db = createMockDb([[mockDailyChallengeRow]])
-    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer)
+    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer, KvCacheLayer)
 
     const result = await Effect.runPromise(
       loadDailyChallenge().pipe(Effect.provide(layer)),
@@ -764,7 +808,7 @@ describe('success paths: DB workflows complete end-to-end', () => {
 
   it('loadDailyChallenge inserts when none exists', async () => {
     const db = createMockDb([[], [mockDailyChallengeRow]])
-    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer)
+    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer, KvCacheLayer)
 
     const result = await Effect.runPromise(
       loadDailyChallenge().pipe(Effect.provide(layer)),
@@ -775,7 +819,7 @@ describe('success paths: DB workflows complete end-to-end', () => {
 
   it('loadDailyChallenge handles insert race (conflict then re-select)', async () => {
     const db = createMockDb([[], [], [mockDailyChallengeRow]])
-    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer)
+    const layer = Layer.mergeAll(Layer.succeed(DbService, db), ClockLayer, KvCacheLayer)
 
     const result = await Effect.runPromise(
       loadDailyChallenge().pipe(Effect.provide(layer)),

@@ -9,4 +9,5 @@ export class GameProgressRequest extends Schema.Class<GameProgressRequest>(
       v !== null && v !== undefined ? undefined : 'Missing completion payload',
     ),
   ),
+  turnstileToken: Schema.optional(Schema.String),
 }) {}

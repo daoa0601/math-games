@@ -11,12 +11,16 @@ import {
   PlayerProfileInput,
 } from '@/player/profile.schema'
 import {
+  AnalyticsService,
   GameProgressValidationError,
   HeaderService,
+  KvCacheService,
   OriginGuardService,
   PlayerIdentityService,
   PlayerProfileValidationError,
   RateLimitService,
+  TurnstileService,
+  runServerEffect,
 } from '@/services'
 
 import { GameProgressRequest } from './game-progress.schema'
@@ -38,13 +42,30 @@ function decodeOrFail<TSchema extends Schema.Decoder<unknown>>(
   })
 }
 
+const CATALOG_CACHE_TTL = 3600
+
 export function createGetCatalogHandler<TModule extends GameModule<any>>(
   module: TModule,
 ) {
-  return (): ReturnType<TModule['getCatalog']> => {
+  type Catalog = ReturnType<TModule['getCatalog']>
+
+  return () => {
     setResponseHeader('cache-control', 'public, max-age=300')
 
-    return module.getCatalog() as ReturnType<TModule['getCatalog']>
+    return runServerEffect(
+      Effect.gen(function* () {
+        const kvCache = yield* KvCacheService
+
+        const cached = yield* kvCache.get<Catalog>(`catalog:${module.id}`)
+        if (cached) return cached
+
+        const catalog = module.getCatalog() as Catalog
+
+        yield* kvCache.put(`catalog:${module.id}`, catalog, CATALOG_CACHE_TTL)
+
+        return catalog
+      }),
+    )
   }
 }
 
@@ -63,21 +84,41 @@ export function createRecordProgressPipeline<TModule extends GameModule<any>>(
 
     yield* (yield* HeaderService).setResponse('cache-control', 'no-store')
 
+    if (data.turnstileToken !== undefined && data.turnstileToken !== '') {
+      yield* (yield* TurnstileService).verify(data.turnstileToken)
+    }
+
     const playerId = yield* (yield* PlayerIdentityService).resolveId()
 
-    yield* (yield* RateLimitService).assert(`record:${module.id}:${playerId}`)
+    const rateLimiter = yield* RateLimitService
+    yield* rateLimiter.assert(`record:${module.id}:${playerId}`)
+    yield* rateLimiter.assertHourlyLimit(`progress:${playerId}`, 200)
 
     const result = yield* module.validateAndComputeScore(
       data.levelId,
       data.completion,
     )
 
-    return yield* recordGameProgress({
+    const progress = yield* recordGameProgress({
       playerId,
       gameId: module.id,
       levelId: data.levelId,
       ...result,
     })
+
+    const analytics = yield* AnalyticsService
+    yield* analytics.trackGameComplete({
+      gameId: module.id,
+      levelId: data.levelId,
+      score: result.score,
+      completed: result.completed,
+    })
+
+    for (const achievementId of progress.unlockedAchievements) {
+      yield* analytics.trackAchievement({ gameId: module.id, achievementId })
+    }
+
+    return progress
   })
 }
 

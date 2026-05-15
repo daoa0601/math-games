@@ -2,6 +2,7 @@ import { Context, Effect, Layer, SynchronizedRef } from 'effect'
 
 import { ClockService } from './clock'
 import { RateLimitError } from './errors'
+import { KvCacheService } from './kv-cache'
 
 const WINDOW_MS = 250
 const RETENTION_MS = 60_000
@@ -11,6 +12,10 @@ type RateLimitState = ReadonlyMap<string, number>
 
 export interface RateLimitShape {
   readonly assert: (key: string) => Effect.Effect<void, RateLimitError>
+  readonly assertHourlyLimit: (
+    key: string,
+    max: number,
+  ) => Effect.Effect<void, RateLimitError>
 }
 
 export const RateLimitService =
@@ -20,6 +25,7 @@ export const RateLimitServiceLive = Layer.effect(
   RateLimitService,
   Effect.gen(function* () {
     const clock = yield* ClockService
+    const kvCache = yield* KvCacheService
     const lastWriteAt = yield* SynchronizedRef.make<RateLimitState>(new Map())
 
     return {
@@ -53,6 +59,20 @@ export const RateLimitServiceLive = Layer.effect(
           )
 
           if (blocked) return yield* new RateLimitError({ key })
+        }),
+
+      assertHourlyLimit: (key: string, max: number) =>
+        Effect.gen(function* () {
+          const date = yield* clock.now()
+          const hourBucket = Math.floor(date.getTime() / 3_600_000)
+          const kvKey = `ratelimit:${key}:${hourBucket}`
+
+          const current = yield* kvCache.get<number>(kvKey)
+          const count = (current ?? 0) + 1
+
+          if (count > max) return yield* new RateLimitError({ key })
+
+          yield* kvCache.put(kvKey, count, 3600)
         }),
     }
   }),

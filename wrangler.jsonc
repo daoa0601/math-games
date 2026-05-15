@@ -3,7 +3,7 @@
   "name": "math-games",
   "compatibility_date": "2026-05-13",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry",
+  "main": "./src/server-entry.ts",
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,
@@ -19,4 +19,26 @@
       "migrations_dir": "drizzle/migrations",
     },
   ],
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      // Local dev placeholder; remote managed by alchemy.run.ts.
+      "id": "00000000-0000-0000-0000-000000000001",
+    },
+  ],
+  "analytics_engine_datasets": [
+    {
+      "binding": "ANALYTICS",
+      "dataset": "math-games-events",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "ASSETS",
+      "bucket_name": "math-games-assets",
+    },
+  ],
+  "triggers": {
+    "crons": ["0 0 * * *"],
+  },
 }

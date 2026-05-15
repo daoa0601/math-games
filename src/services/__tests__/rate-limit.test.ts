@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   ClockService,
+  KvCacheService,
   RateLimitError,
   RateLimitService,
   RateLimitServiceLive,
@@ -16,8 +17,13 @@ function createRateLimitHarness(now: number) {
     dateKey: () =>
       Effect.succeed(new Date(currentTime).toISOString().slice(0, 10)),
   })
+  const kvLayer = Layer.succeed(KvCacheService, {
+    get: () => Effect.succeed(null),
+    put: () => Effect.void,
+    delete: () => Effect.void,
+  })
   const runtime = ManagedRuntime.make(
-    RateLimitServiceLive.pipe(Layer.provide(clockLayer)),
+    RateLimitServiceLive.pipe(Layer.provide(Layer.mergeAll(clockLayer, kvLayer))),
   )
 
   return {

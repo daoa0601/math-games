@@ -2,7 +2,12 @@ import { eq } from 'drizzle-orm'
 import { Effect } from 'effect'
 
 import { schema } from '@/db'
-import { ClockService, DailyChallengeError, DbService } from '@/services'
+import {
+  ClockService,
+  DailyChallengeError,
+  DbService,
+  KvCacheService,
+} from '@/services'
 import { withD1Retry } from '@/services/retry'
 
 import { parseDailyChallengeConfig, planDailyChallenge } from './daily.logic'
@@ -23,7 +28,7 @@ function toDailyChallengeRecord(
   }
 }
 
-export function loadDailyChallenge() {
+function loadDailyChallengeFromD1() {
   return Effect.gen(function* () {
     const { db } = yield* DbService
     const dateKey = yield* (yield* ClockService).dateKey()
@@ -90,5 +95,24 @@ export function loadDailyChallenge() {
     }
 
     return toDailyChallengeRecord(winnerRow)
+  })
+}
+
+const DAILY_CACHE_TTL = 86400
+
+export function loadDailyChallenge() {
+  return Effect.gen(function* () {
+    const kvCache = yield* KvCacheService
+    const dateKey = yield* (yield* ClockService).dateKey()
+    const cacheKey = `daily:${dateKey}`
+
+    const cached = yield* kvCache.get<DailyChallengeRecord>(cacheKey)
+    if (cached) return cached
+
+    const record = yield* loadDailyChallengeFromD1()
+
+    yield* kvCache.put(cacheKey, record, DAILY_CACHE_TTL)
+
+    return record
   })
 }
