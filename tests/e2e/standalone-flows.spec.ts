@@ -121,12 +121,12 @@ test('game routes expose standalone controls and progress writes', async ({
   await page.getByLabel('Practice difficulty').selectOption('hard')
   await page.getByRole('button', { name: 'Generate' }).click()
   await expect(page.getByRole('heading', { name: /Practice:/ })).toBeVisible()
+  await expectPlayerCookie(page)
 
   await page.goto('/games/magic-graph')
   await expectHydrated(page)
   await expect(page.getByRole('heading', { name: 'Numbers' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Reset' })).toBeVisible()
-  await expectPlayerCookie(page)
 
   await page.goto('/games/shape-architect')
   await expectHydrated(page)
@@ -214,8 +214,8 @@ test('non-firebase parity surfaces are available', async ({ page }) => {
 
   await page.goto('/profile')
   await expectHydrated(page)
-  await expect(page.getByText('Rank')).toBeVisible()
-  await expect(page.getByText('Achievements')).toBeVisible()
+  await expect(page.getByText('Rank', { exact: true })).toBeVisible()
+  await expect(page.getByText('Achievements', { exact: true }).first()).toBeVisible()
 
   await page.goto('/games/magic-graph')
   await expectHydrated(page)
