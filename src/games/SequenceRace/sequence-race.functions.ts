@@ -1,5 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
+import { Schema } from 'effect'
 
+import { GameProgressRequest } from '@/games/game-progress.schema'
 import {
   createGetCatalogHandler,
   createRecordProgressPipeline,
@@ -13,7 +15,7 @@ export const getSequenceRaceLevel = createServerFn({ method: 'GET' }).handler(
 )
 
 export const recordSequenceRaceProgress = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => data)
+  .inputValidator(Schema.decodeUnknownSync(GameProgressRequest))
   .handler(({ data }) =>
     runServerEffect(createRecordProgressPipeline(sequenceRaceModule, data)),
   )

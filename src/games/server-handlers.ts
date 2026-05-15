@@ -1,46 +1,28 @@
 import { setResponseHeader } from '@tanstack/react-start/server'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 
 import { recordGameProgress } from '@/games/progress/progress.server'
 import {
   importPlayerAchievements,
   savePlayerProfile,
 } from '@/player/profile.server'
-import {
+import type {
   AchievementImportInput,
   PlayerProfileInput,
 } from '@/player/profile.schema'
 import {
   AnalyticsService,
-  GameProgressValidationError,
   HeaderService,
   KvCacheService,
   OriginGuardService,
   PlayerIdentityService,
-  PlayerProfileValidationError,
   RateLimitService,
   TurnstileService,
   runServerEffect,
 } from '@/services'
 
-import { GameProgressRequest } from './game-progress.schema'
+import type { GameProgressRequest } from './game-progress.schema'
 import type { GameModule } from './game-module'
-
-function decodeOrFail<TSchema extends Schema.Decoder<unknown>>(
-  schema: TSchema,
-  raw: unknown,
-  toError: (
-    message: string,
-  ) => GameProgressValidationError | PlayerProfileValidationError,
-): Effect.Effect<
-  TSchema['Type'],
-  GameProgressValidationError | PlayerProfileValidationError
-> {
-  return Effect.try({
-    try: () => Schema.decodeUnknownSync(schema)(raw),
-    catch: (e) => toError(e instanceof Error ? e.message : 'Validation failed'),
-  })
-}
 
 const CATALOG_CACHE_TTL = 3600
 
@@ -71,15 +53,9 @@ export function createGetCatalogHandler<TModule extends GameModule<any>>(
 
 export function createRecordProgressPipeline<TModule extends GameModule<any>>(
   module: TModule,
-  rawData: unknown,
+  data: GameProgressRequest,
 ) {
   return Effect.gen(function* () {
-    const data = yield* decodeOrFail(
-      GameProgressRequest,
-      rawData,
-      (msg) => new GameProgressValidationError({ reason: msg }),
-    )
-
     yield* (yield* OriginGuardService).assert()
 
     yield* (yield* HeaderService).setResponse('cache-control', 'no-store')
@@ -122,17 +98,8 @@ export function createRecordProgressPipeline<TModule extends GameModule<any>>(
   })
 }
 
-export function createUpdateProfilePipeline(rawData: unknown) {
+export function createUpdateProfilePipeline(data: PlayerProfileInput) {
   return Effect.gen(function* () {
-    const data = yield* Effect.try({
-      try: () => Schema.decodeUnknownSync(PlayerProfileInput)(rawData),
-      catch: (e) =>
-        new PlayerProfileValidationError({
-          reason:
-            e instanceof Error ? e.message : 'Invalid player profile payload',
-        }),
-    })
-
     yield* (yield* OriginGuardService).assert()
 
     yield* (yield* HeaderService).setResponse('cache-control', 'no-store')
@@ -145,16 +112,8 @@ export function createUpdateProfilePipeline(rawData: unknown) {
   })
 }
 
-export function createImportAchievementsPipeline(rawData: unknown) {
+export function createImportAchievementsPipeline(data: AchievementImportInput) {
   return Effect.gen(function* () {
-    const data = yield* Effect.try({
-      try: () => Schema.decodeUnknownSync(AchievementImportInput)(rawData),
-      catch: (e) =>
-        new PlayerProfileValidationError({
-          reason: e instanceof Error ? e.message : 'Invalid achievement import',
-        }),
-    })
-
     yield* (yield* OriginGuardService).assert()
 
     yield* (yield* HeaderService).setResponse('cache-control', 'no-store')

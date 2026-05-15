@@ -1,4 +1,4 @@
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 
 import {
   GameProgressValidationError,
@@ -11,19 +11,7 @@ import {
 import { canPlacePiece, checkSolved, initializeGrid, placePiece } from './logic'
 import type { LevelConfig, PlacedPiece, ShapeArchitectGameState } from './logic'
 import { shapeArchitectModule } from './module'
-import { ShapeArchitectMoveRequest } from './shape-architect.schema'
-
-type MoveRequest = typeof ShapeArchitectMoveRequest.Type
-
-function decodeMoveRequest(rawData: unknown) {
-  return Effect.try({
-    try: () => Schema.decodeUnknownSync(ShapeArchitectMoveRequest)(rawData),
-    catch: (e) =>
-      new GameProgressValidationError({
-        reason: e instanceof Error ? e.message : 'Invalid move request',
-      }),
-  })
-}
+import type { ShapeArchitectMoveRequest } from './shape-architect.schema'
 
 function createGameState(
   level: LevelConfig,
@@ -63,7 +51,7 @@ function createGameState(
 
 function replayPlacements(
   level: LevelConfig,
-  requestedPlacements: MoveRequest['placements'],
+  requestedPlacements: ShapeArchitectMoveRequest['placements'],
 ): ShapeArchitectGameState {
   let grid = initializeGrid(level)
   const placedPieces: PlacedPiece[] = []
@@ -133,10 +121,8 @@ function replayPlacements(
   }
 }
 
-export function createValidateMoveEffect(rawData: unknown) {
+export function createValidateMoveEffect(data: ShapeArchitectMoveRequest) {
   return Effect.gen(function* () {
-    const data = yield* decodeMoveRequest(rawData)
-
     yield* (yield* OriginGuardService).assert()
     yield* (yield* HeaderService).setResponse('cache-control', 'no-store')
 

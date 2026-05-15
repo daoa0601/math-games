@@ -49,7 +49,7 @@ function loadDailyChallengeFromD1() {
 
     if (existingRow) return toDailyChallengeRecord(existingRow)
 
-    const planned = planDailyChallenge(dateKey)
+    const planned = yield* Effect.promise(() => planDailyChallenge(dateKey))
 
     const inserted = yield* withD1Retry(
       Effect.tryPromise({

@@ -1,5 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
+import { Schema } from 'effect'
 
+import { GameProgressRequest } from '@/games/game-progress.schema'
 import {
   createGetCatalogHandler,
   createRecordProgressPipeline,
@@ -7,6 +9,7 @@ import {
 import { runServerEffect } from '@/services'
 
 import { shapeArchitectModule } from './module'
+import { ShapeArchitectMoveRequest } from './shape-architect.schema'
 import { createValidateMoveEffect } from './shape-architect.server'
 
 export const getShapeArchitectLevel = createServerFn({ method: 'GET' }).handler(
@@ -14,11 +17,11 @@ export const getShapeArchitectLevel = createServerFn({ method: 'GET' }).handler(
 )
 
 export const recordShapeArchitectProgress = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => data)
+  .inputValidator(Schema.decodeUnknownSync(GameProgressRequest))
   .handler(({ data }) =>
     runServerEffect(createRecordProgressPipeline(shapeArchitectModule, data)),
   )
 
 export const validateShapeArchitectMove = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => data)
+  .inputValidator(Schema.decodeUnknownSync(ShapeArchitectMoveRequest))
   .handler(({ data }) => runServerEffect(createValidateMoveEffect(data)))

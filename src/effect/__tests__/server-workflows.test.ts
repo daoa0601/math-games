@@ -1,8 +1,9 @@
-import { Effect, Layer } from 'effect'
+import { Effect, Layer, Schema } from 'effect'
 import { describe, expect, it, vi } from 'vitest'
 
 import { loadDailyChallenge } from '@/daily/daily.server'
 import type { GameModule } from '@/games/game-module'
+import { GameProgressRequest } from '@/games/game-progress.schema'
 import { magicGraphModule } from '@/games/MagicGraph/module'
 import { recordGameProgress } from '@/games/progress/progress.server'
 import { solvePuzzleEffect } from '@/games/ShapeArchitect/logic/solver'
@@ -379,14 +380,14 @@ describe('validation through real game modules', () => {
         'Unknown level',
       ))
 
-    it('rejects null completion', () => {
+    it('rejects null completion at schema boundary', () => {
       const catalog = magicGraphModule.getCatalog()
-      return expectValidationError(
-        magicGraphModule,
-        catalog.configs[0].id,
-        null,
-        'Missing completion payload',
-      )
+      expect(() =>
+        Schema.decodeUnknownSync(GameProgressRequest)({
+          levelId: catalog.configs[0].id,
+          completion: null,
+        }),
+      ).toThrow(/Missing completion payload/)
     })
 
     it('rejects completion with non-object nodeValues', () => {

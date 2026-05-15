@@ -55,7 +55,7 @@ async function pregenerate(env: Env) {
       continue
     }
 
-    const planned = planDailyChallenge(dk)
+    const planned = await planDailyChallenge(dk)
 
     await db
       .insert(dbSchema.dailyChallenges)

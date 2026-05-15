@@ -23,18 +23,16 @@ export interface PlannedDailyChallenge extends DailyChallengeConfig {
   configJson: string
 }
 
-function hashDate(value: string) {
-  let hash = 0
-
-  for (const char of value) {
-    hash = (hash * 31 + char.charCodeAt(0)) >>> 0
-  }
-
-  return hash
+async function hashDate(value: string): Promise<number> {
+  const encoded = new TextEncoder().encode(value)
+  const digest = await crypto.subtle.digest('SHA-256', encoded)
+  return new DataView(digest).getUint32(0)
 }
 
-export function planDailyChallenge(dateKey: string): PlannedDailyChallenge {
-  const hash = hashDate(dateKey)
+export async function planDailyChallenge(
+  dateKey: string,
+): Promise<PlannedDailyChallenge> {
+  const hash = await hashDate(dateKey)
   const gameId = dailyGameRotation[hash % dailyGameRotation.length]
   const module = registry[gameId]
   const pick = module.getDailyPick(hash)
