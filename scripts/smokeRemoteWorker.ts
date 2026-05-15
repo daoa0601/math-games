@@ -30,7 +30,7 @@ export interface RemoteWorkerSmokeCliOptions extends RemoteWorkerSmokeOptions {
 export const requiredRoutes: readonly RequiredRoute[] = [
   {
     path: '/',
-    expectedText: 'Practice Dashboard',
+    expectedText: 'Math Games',
     expectedAdditionalText: ['D1-backed profile state'],
   },
   {
