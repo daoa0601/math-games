@@ -92,7 +92,7 @@ importers:
         version: 2.1.1
       drizzle-orm:
         specifier: 1.0.0-rc.2
-        version: 1.0.0-rc.2(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76)
+        version: 1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76)
       effect:
         specifier: 4.0.0-beta.66
         version: 4.0.0-beta.66
@@ -181,9 +181,18 @@ importers:
       '@effect/platform-node':
         specifier: 4.0.0-beta.66
         version: 4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1)
+      '@effect/sql-pg':
+        specifier: 4.0.0-beta.66
+        version: 4.0.0-beta.66(effect@4.0.0-beta.66)
       alchemy:
         specifier: 2.0.0-beta.38
-        version: 2.0.0-beta.38(@effect/platform-node@4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1))(@types/react@19.2.14)(drizzle-kit@1.0.0-rc.2)(drizzle-orm@1.0.0-rc.2(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76))(effect@4.0.0-beta.66)(typescript@6.0.3)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@4.1.6(@types/node@22.19.19)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@6.0.3))(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)))(workerd@1.20260516.1)(ws@8.20.1)
+        version: 2.0.0-beta.38(@effect/platform-node@4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1))(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@types/react@19.2.14)(drizzle-kit@1.0.0-rc.2)(drizzle-orm@1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76))(effect@4.0.0-beta.66)(typescript@6.0.3)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@4.1.6(@types/node@22.19.19)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@6.0.3))(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)))(workerd@1.20260516.1)(ws@8.20.1)
+      drizzle-kit:
+        specifier: 1.0.0-rc.2
+        version: 1.0.0-rc.2
+      drizzle-orm:
+        specifier: 1.0.0-rc.2
+        version: 1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76)
       effect:
         specifier: 4.0.0-beta.66
         version: 4.0.0-beta.66
@@ -221,7 +230,7 @@ importers:
     dependencies:
       drizzle-orm:
         specifier: 1.0.0-rc.2
-        version: 1.0.0-rc.2(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76)
+        version: 1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76)
     devDependencies:
       drizzle-kit:
         specifier: 1.0.0-rc.2
@@ -246,7 +255,7 @@ importers:
         version: link:../effect-infra
       drizzle-orm:
         specifier: 1.0.0-rc.2
-        version: 1.0.0-rc.2(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76)
+        version: 1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76)
       effect:
         specifier: 4.0.0-beta.66
         version: 4.0.0-beta.66
@@ -277,7 +286,7 @@ importers:
         version: link:../effect-infra
       drizzle-orm:
         specifier: 1.0.0-rc.2
-        version: 1.0.0-rc.2(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76)
+        version: 1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76)
       effect:
         specifier: 4.0.0-beta.66
         version: 4.0.0-beta.66
@@ -947,6 +956,11 @@ packages:
     peerDependencies:
       effect: 4.0.0-beta.66
       ioredis: ^5.7.0
+
+  '@effect/sql-pg@4.0.0-beta.66':
+    resolution: {integrity: sha512-Ih1gpkowMsUnZ2ljn3F4af4lCCcJGiQPvKfQnPC3Dmwhw+8GOglEV57Y4RdeXw/kCd68YVrG4GXsna7Dx4NRSA==}
+    peerDependencies:
+      effect: 4.0.0-beta.66
 
   '@effect/vitest@4.0.0-beta.66':
     resolution: {integrity: sha512-UHPNtU0xXkKtNgyRQEh2c8jh4nIIm8Mzp3xc4j2ZdFU4nq5ZSySnpovjPMdoWbVClg1ki8UbpNGEZUfxEJo+6Q==}
@@ -5556,6 +5570,9 @@ packages:
     resolution: {integrity: sha512-EFVjAYfzWqWsBMRHPMAXLCDIJnpMhdWAqR7xG6M6a2cs6PMFpl/+Z20w9zDW4vkxOFfddegBKq9Rehd0bxWE7A==}
     engines: {node: '>= 10'}
 
+  obuf@1.1.2:
+    resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
+
   obug@2.1.1:
     resolution: {integrity: sha512-uTqF9MuPraAQ+IsnPf366RG4cP9RtUi7MLO1N3KEc+wb0a6yKpeL0lmk2IB1jY5KHPAlTc6T/JRdC/YqxHNwkQ==}
 
@@ -5670,9 +5687,18 @@ packages:
   pg-connection-string@2.12.0:
     resolution: {integrity: sha512-U7qg+bpswf3Cs5xLzRqbXbQl85ng0mfSV/J0nnA31MCLgvEaAo7CIhmeyrmJpOr7o+zm0rXK+hNnT5l9RHkCkQ==}
 
+  pg-cursor@2.19.0:
+    resolution: {integrity: sha512-J5cF1MUz7LRJ9emOqF/06QjabMHMZy587rSPF0UuA8rCwKeeYl2co8Pp+6k5UU9YrAYHMzWkLxilfZB0hqsWWw==}
+    peerDependencies:
+      pg: ^8
+
   pg-int8@1.0.1:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
     engines: {node: '>=4.0.0'}
+
+  pg-numeric@1.0.2:
+    resolution: {integrity: sha512-BM/Thnrw5jm2kKLE5uJkXqqExRUY/toLHda65XgFTBTFYZyopbKjBe29Ii3RbkvlsMoFwD+tHeGaCjjv0gHlyw==}
+    engines: {node: '>=4'}
 
   pg-pool@3.13.0:
     resolution: {integrity: sha512-gB+R+Xud1gLFuRD/QgOIgGOBE2KCQPaPwkzBBGC9oG69pHTkhQeIuejVIk3/cnDyX39av2AxomQiyPT13WKHQA==}
@@ -5685,6 +5711,10 @@ packages:
   pg-types@2.2.0:
     resolution: {integrity: sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==}
     engines: {node: '>=4'}
+
+  pg-types@4.1.0:
+    resolution: {integrity: sha512-o2XFanIMy/3+mThw69O8d4n1E5zsLhdO+OPqswezu7Z5ekP4hYDqlDjlmOpYMbzY2Br0ufCwJLdDIXeNVwcWFg==}
+    engines: {node: '>=10'}
 
   pg@8.20.0:
     resolution: {integrity: sha512-ldhMxz2r8fl/6QkXnBD3CR9/xg694oT6DZQ2s6c/RI28OjtSOpxnPrUCGOBJ46RCUxcWdx3p6kw/xnDHjKvaRA==}
@@ -5760,17 +5790,36 @@ packages:
     resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
     engines: {node: '>=4'}
 
+  postgres-array@3.0.4:
+    resolution: {integrity: sha512-nAUSGfSDGOaOAEGwqsRY27GPOea7CNipJPOA7lPbdEpx5Kg3qzdP0AaWC5MlhTWV9s4hFX39nomVZ+C4tnGOJQ==}
+    engines: {node: '>=12'}
+
   postgres-bytea@1.0.1:
     resolution: {integrity: sha512-5+5HqXnsZPE65IJZSMkZtURARZelel2oXUEO8rH83VS/hxH5vv1uHquPg5wZs8yMAfdv971IU+kcPUczi7NVBQ==}
     engines: {node: '>=0.10.0'}
+
+  postgres-bytea@3.0.0:
+    resolution: {integrity: sha512-CNd4jim9RFPkObHSjVHlVrxoVQXz7quwNFpz7RY1okNNme49+sVyiTvTRobiLV548Hx/hb1BG+iE7h9493WzFw==}
+    engines: {node: '>= 6'}
 
   postgres-date@1.0.7:
     resolution: {integrity: sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q==}
     engines: {node: '>=0.10.0'}
 
+  postgres-date@2.1.0:
+    resolution: {integrity: sha512-K7Juri8gtgXVcDfZttFKVmhglp7epKb1K4pgrkLxehjqkrgPhfG6OO8LHLkfaqkbpjNRnra018XwAr1yQFWGcA==}
+    engines: {node: '>=12'}
+
   postgres-interval@1.2.0:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
+
+  postgres-interval@3.0.0:
+    resolution: {integrity: sha512-BSNDnbyZCXSxgA+1f5UU2GmwhoI0aU5yMxRGO8CdFEcY2BQF9xm/7MqKnYoM1nJDk8nONNWDk9WeSmePFhQdlw==}
+    engines: {node: '>=12'}
+
+  postgres-range@1.1.4:
+    resolution: {integrity: sha512-i/hbxIE9803Alj/6ytL7UHQxRvZkI9O4Sy+J3HGc4F4oo/2eQAjTSNJ0bfxyse3bH0nuVesCk+3IRLaMtG3H6w==}
 
   powershell-utils@0.1.0:
     resolution: {integrity: sha512-dM0jVuXJPsDN6DvRpea484tCUaMiXWjuCn++HGTqUWzGDjv5tZkEZldAJ/UMlqRYGFrD/etByo4/xOuC/snX2A==}
@@ -7465,6 +7514,17 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+
+  '@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66)':
+    dependencies:
+      effect: 4.0.0-beta.66
+      pg: 8.20.0
+      pg-connection-string: 2.12.0
+      pg-cursor: 2.19.0(pg@8.20.0)
+      pg-pool: 3.13.0(pg@8.20.0)
+      pg-types: 4.1.0
+    transitivePeerDependencies:
+      - pg-native
 
   '@effect/vitest@4.0.0-beta.66(effect@4.0.0-beta.66)(vitest@4.1.6(@types/node@22.19.19)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@6.0.3))(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)))':
     dependencies:
@@ -10049,7 +10109,7 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alchemy@2.0.0-beta.38(@effect/platform-node@4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1))(@types/react@19.2.14)(drizzle-kit@1.0.0-rc.2)(drizzle-orm@1.0.0-rc.2(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76))(effect@4.0.0-beta.66)(typescript@6.0.3)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@4.1.6(@types/node@22.19.19)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@6.0.3))(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)))(workerd@1.20260516.1)(ws@8.20.1):
+  alchemy@2.0.0-beta.38(@effect/platform-node@4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1))(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@types/react@19.2.14)(drizzle-kit@1.0.0-rc.2)(drizzle-orm@1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76))(effect@4.0.0-beta.66)(typescript@6.0.3)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@4.1.6(@types/node@22.19.19)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@6.0.3))(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)))(workerd@1.20260516.1)(ws@8.20.1):
     dependencies:
       '@aws-sdk/credential-providers': 3.1048.0
       '@clack/prompts': 0.11.0
@@ -10089,8 +10149,9 @@ snapshots:
       yaml: 2.9.0
     optionalDependencies:
       '@effect/platform-node': 4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1)
+      '@effect/sql-pg': 4.0.0-beta.66(effect@4.0.0-beta.66)
       drizzle-kit: 1.0.0-rc.2
-      drizzle-orm: 1.0.0-rc.2(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76)
+      drizzle-orm: 1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76)
       vite: 8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)
       ws: 8.20.1
     transitivePeerDependencies:
@@ -10500,8 +10561,9 @@ snapshots:
       get-tsconfig: 4.14.0
       jiti: 2.7.0
 
-  drizzle-orm@1.0.0-rc.2(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76):
+  drizzle-orm@1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76):
     optionalDependencies:
+      '@effect/sql-pg': 4.0.0-beta.66(effect@4.0.0-beta.66)
       '@libsql/client': 0.17.3
       effect: 4.0.0-beta.66
       pg: 8.20.0
@@ -11671,6 +11733,8 @@ snapshots:
 
   object-treeify@1.1.33: {}
 
+  obuf@1.1.2: {}
+
   obug@2.1.1: {}
 
   on-finished@2.4.1:
@@ -11814,7 +11878,13 @@ snapshots:
 
   pg-connection-string@2.12.0: {}
 
+  pg-cursor@2.19.0(pg@8.20.0):
+    dependencies:
+      pg: 8.20.0
+
   pg-int8@1.0.1: {}
+
+  pg-numeric@1.0.2: {}
 
   pg-pool@3.13.0(pg@8.20.0):
     dependencies:
@@ -11829,6 +11899,16 @@ snapshots:
       postgres-bytea: 1.0.1
       postgres-date: 1.0.7
       postgres-interval: 1.2.0
+
+  pg-types@4.1.0:
+    dependencies:
+      pg-int8: 1.0.1
+      pg-numeric: 1.0.2
+      postgres-array: 3.0.4
+      postgres-bytea: 3.0.0
+      postgres-date: 2.1.0
+      postgres-interval: 3.0.0
+      postgres-range: 1.1.4
 
   pg@8.20.0:
     dependencies:
@@ -11890,13 +11970,25 @@ snapshots:
 
   postgres-array@2.0.0: {}
 
+  postgres-array@3.0.4: {}
+
   postgres-bytea@1.0.1: {}
 
+  postgres-bytea@3.0.0:
+    dependencies:
+      obuf: 1.1.2
+
   postgres-date@1.0.7: {}
+
+  postgres-date@2.1.0: {}
 
   postgres-interval@1.2.0:
     dependencies:
       xtend: 4.0.2
+
+  postgres-interval@3.0.0: {}
+
+  postgres-range@1.1.4: {}
 
   powershell-utils@0.1.0: {}
 
