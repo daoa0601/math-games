@@ -11,23 +11,9 @@ import type {
   AchievementImportInput,
   PlayerProfileInput,
 } from '@/player/profile.schema'
-import {
-  AnalyticsService,
-  DailyStreakService,
-  DbService,
-  GameAttemptsService,
-  HeaderService,
-  LeaderboardService,
-  KvCacheService,
-  OriginGuardService,
-  PlayerIdentityService,
-  ProgressWriteError,
-  RankService,
-  RateLimitService,
-  TurnstileService,
-  runServerEffect,
-} from '@math-games/services'
-import { withD1Retry } from '@math-games/services'
+import { HeaderService, KvCacheService, OriginGuardService, ProgressWriteError, RateLimitService, TurnstileService, withD1Retry } from '@math-games/effect-infra'
+import { AnalyticsService, DailyStreakService, DbService, GameAttemptsService, LeaderboardService, PlayerIdentityService, RankService } from '@math-games/effect-game'
+import { runServerEffect } from '@/services/run-server-effect'
 
 import type { GameProgressRequest } from './game-progress.schema'
 import type { GameModule } from './game-module'

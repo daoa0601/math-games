@@ -36,6 +36,8 @@ import type {
   PlayerProfileInput,
 } from '@/player/profile.schema'
 import { runServerAction } from '@/routes/-server-action-result'
+import { RouteErrorFallback } from '@/routes/-route-error'
+import { RoutePending } from '@/routes/-route-pending'
 
 const LOCALES: readonly Locale[] = ['en', 'vi']
 const GRADE_BANDS: readonly GradeBand[] = ['elementary', 'middle', 'high']
@@ -51,6 +53,8 @@ function isGradeBand(value: string): value is GradeBand {
 export const Route = createFileRoute('/profile')({
   loader: () => getPlayerProfileOverview(),
   component: ProfileRoute,
+  errorComponent: RouteErrorFallback,
+  pendingComponent: RoutePending,
 })
 
 interface AchievementBackupFile {

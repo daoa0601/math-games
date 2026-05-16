@@ -14,7 +14,7 @@ import { LanguageToggle } from '@math-games/ui'
 import { getHints } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { LearnSection } from '@math-games/ui'
-import { ResponsiveSection } from '@math-games/ui'
+import { PracticeGeneratorSection } from '@/games/practice-generator-section'
 import { ThemeToggle } from '@math-games/ui'
 import { Button } from '@math-games/ui'
 import { Card, CardContent, CardHeader } from '@math-games/ui'
@@ -32,12 +32,16 @@ import {
   formatSavedProgress,
   runServerAction,
 } from '@/routes/-server-action-result'
+import { RouteErrorFallback } from '@/routes/-route-error'
+import { GameRoutePending } from '@/routes/-route-pending'
 import { useT } from '@math-games/ui'
 
 export const Route = createFileRoute('/games/magic-graph')({
   validateSearch: validateLevelSearch,
   loader: () => getMagicGraphLevel(),
   component: MagicGraphRoute,
+  errorComponent: RouteErrorFallback,
+  pendingComponent: GameRoutePending,
 })
 
 type NodeValues = Record<string, number | null>
@@ -57,9 +61,6 @@ function MagicGraphRoute() {
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordMagicGraphProgress)
   const [availableConfigs, setAvailableConfigs] = useState(configs)
-  const [practiceSeed, setPracticeSeed] = useState('')
-  const [practiceDifficulty, setPracticeDifficulty] =
-    useState<MagicGraphPracticeDifficulty>('medium')
   const requestedPuzzleId = searchLevel
     ? (availableConfigs.find((candidate) => candidate.id === searchLevel)?.id ??
       initialConfigId)
@@ -210,9 +211,11 @@ function MagicGraphRoute() {
     session.resetSession()
   }
 
-  function generatePracticePuzzle() {
-    const seed = practiceSeed.trim() || `practice-${Date.now()}`
-    const nextConfig = getMagicGraphPracticeConfig(seed, practiceDifficulty)
+  function generatePracticePuzzle(seed: string, difficulty: string) {
+    const nextConfig = getMagicGraphPracticeConfig(
+      seed,
+      difficulty as MagicGraphPracticeDifficulty,
+    )
 
     setAvailableConfigs((currentConfigs) => [
       nextConfig,
@@ -470,38 +473,16 @@ function MagicGraphRoute() {
         </div>
       </section>
 
-      <ResponsiveSection
+      <PracticeGeneratorSection
         title={t('game.puzzles')}
         description={t('game.templatesDescription')}
-        className="border-y border-border py-5"
-        actions={
-          <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
-            <input
-              aria-label={t('game.practiceSeed')}
-              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
-              onChange={(event) => setPracticeSeed(event.currentTarget.value)}
-              placeholder={t('game.practiceSeed')}
-              value={practiceSeed}
-            />
-            <select
-              aria-label={t('game.practiceDifficulty')}
-              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
-              onChange={(event) =>
-                setPracticeDifficulty(
-                  event.currentTarget.value as MagicGraphPracticeDifficulty,
-                )
-              }
-              value={practiceDifficulty}
-            >
-              <option value="easy">{t('diff.easy')}</option>
-              <option value="medium">{t('diff.medium')}</option>
-              <option value="hard">{t('diff.hard')}</option>
-            </select>
-            <Button onClick={generatePracticePuzzle} type="button">
-              {t('game.generate')}
-            </Button>
-          </div>
-        }
+        difficulties={[
+          { value: 'easy', label: t('diff.easy') },
+          { value: 'medium', label: t('diff.medium') },
+          { value: 'hard', label: t('diff.hard') },
+        ]}
+        defaultDifficulty="medium"
+        onGenerate={generatePracticePuzzle}
       >
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {availableConfigs.map((puzzle) => {
@@ -530,7 +511,7 @@ function MagicGraphRoute() {
             )
           })}
         </div>
-      </ResponsiveSection>
+      </PracticeGeneratorSection>
 
       <LearnSection gameId="magic-graph" />
     </main>

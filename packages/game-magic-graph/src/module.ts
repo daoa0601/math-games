@@ -128,14 +128,15 @@ function validateGameState(
 
   const completion = raw as Partial<MagicGraphCompletion>
 
+  const rawNodeValues: unknown = completion.nodeValues
   if (
-    completion.nodeValues === null ||
-    typeof completion.nodeValues !== 'object'
+    rawNodeValues === null ||
+    typeof rawNodeValues !== 'object'
   ) {
     return null
   }
 
-  const nodeValues = completion.nodeValues
+  const nodeValues = rawNodeValues as Record<string, number>
   const allowedNumbers = new Set(level.availableNumbers)
   const valueMap = new Map<string, number | null>()
   const usedNumbers = new Set<number>()

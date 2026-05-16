@@ -1,7 +1,7 @@
 ## 2026-05-16 - Turborepo Monorepo Conversion + Effect Maximization
 **Status**: active
-**Branch**: main (191 uncommitted files — full monorepo restructure)
-**Next**: Services domain split → `packages/effect-infra`, `packages/effect-game`, `packages/effect-classroom`
+**Branch**: main (uncommitted — full monorepo restructure + domain split)
+**Next**: Commit all changes
 
 ### Done This Session
 - [x] Converted single-package math-games into Turborepo monorepo (8 packages + 1 app)
@@ -9,25 +9,34 @@
 - [x] Created 4 source game packages: `@math-games/game-{magic-graph,sequence-race,shape-architect,pattern-detective}`
 - [x] Created `@math-games/ui` source package (React components)
 - [x] Moved infra (alchemy.run.ts + scripts) to `infra/` workspace package
-- [x] `turbo build` — 4/4 tasks passing
-- [x] `typecheck` — 0 errors (fixed drizzle-orm duplication via re-exports from @math-games/db)
-- [x] 534 unit tests pass across all packages (vitest workspace mode)
+- [x] `turbo build` — 7/7 tasks passing
+- [x] `typecheck` — 0 errors across all domain packages + services barrel
+- [x] 534 unit tests pass across all packages (vitest, run individually via --filter)
 - [x] Dev server starts (Vite resolves all 2283 modules from workspace packages)
 - [x] Broke UI ↔ game cycle: translations now injected via React context from apps/web
 - [x] Removed old `src/` directory from root
-
-### In Progress
-- [ ] Services domain split: split 24 services into 3 domain packages
-  - `packages/effect-infra` — WorkerEnv, Header, Clock, Random, KvCache, OriginGuard, RateLimit, Turnstile
+- [x] **Services domain split complete**: split 24 services into 3 domain packages
+  - `packages/effect-infra` — WorkerEnv, Header, Clock, Random, KvCache, OriginGuard, RateLimit, Turnstile, errors, retry
   - `packages/effect-game` — Db, PlayerIdentity, GameAttempts, Leaderboard, Rank, DailyStreak, Analytics
   - `packages/effect-classroom` — Classroom, Assignment, AccountLink, AnalyticsDashboard
-  - Each exports a domain Layer; app composes: `InfraLayer → GameLayer → ClassroomLayer`
+  - Each exports a domain Layer; app composes `InfraLayer → GameLayer → ClassroomLayer`
+- [x] **Removed `@math-games/services` barrel** — apps/web imports directly from domain packages
+  - Moved `app-layer.ts` + `run-server-effect.ts` to `apps/web/src/services/`
+  - All 16 import sites updated to use `@math-games/effect-{infra,game,classroom}` directly
+- [x] Implemented `recommendations.ts` (was stub) — suggests next levels per game based on completion progress
+- [x] Fixed `@math-games/ui` typecheck: added `ImportMeta.env` declaration for Vite env vars
+- [x] Restored E2E tests (lost during monorepo conversion) to `apps/web/tests/e2e/`
+- [x] Fixed playwright config: updated `ensureLocalD1.ts` path for monorepo layout
+
+### Verification
+- **`turbo build typecheck test lint` — 32/32 tasks pass**
+- `turbo typecheck` — 16 packages clean
+- `turbo build` — 6 packages (3 domain + core + db + web)
+- `turbo test` — 14 packages, 655 tests in parallel
+- `turbo lint` — 6 packages, eslint 9 flat config at root + web-specific overrides
 
 ### Blockers/Issues
-- [ ] `recommendations.ts` in `apps/web/src/games/progress/` is a stub — restore from git
-- [ ] `pnpm install` hits iconv-lite `.idea` permission issue — run `chmod -R u+w node_modules/.pnpm/iconv-lite@0.6.3 && rm -rf node_modules/.pnpm/iconv-lite@0.6.3/node_modules/iconv-lite/.idea` before install
-- [ ] E2E tests (Playwright) not yet updated for new paths
-- [ ] `turbo test` in parallel hits `/tmp` sandbox restriction (tests pass individually via `pnpm --filter`)
+- [ ] `pnpm install` hits iconv-lite `.idea` permission issue — workaround: `rm -rf node_modules && pnpm install --no-frozen-lockfile`
 
 ### Context to Remember
 - **Hybrid build model**: core/db/services built with tsup (ESM + DTS externalized); games/ui are source packages Vite resolves directly
@@ -36,7 +45,7 @@
 - **drizzle-orm dedup**: `@math-games/db` re-exports `eq`, `sql`, `and`, etc. — apps/web imports operators from db, not drizzle-orm directly
 - **Effect already mature**: ManagedRuntime, Match.exhaustive, Layer composition, Schema, retry+Schedule. `@effect/platform` is still `unstable/` in Effect 4.0 beta — skip for now
 - **Translations architecture**: `LocaleProvider` accepts `translations: TranslationDict` prop. Format functions live in `apps/web/src/i18n-format.ts`
-- **Dependency graph (no cycles)**: `core → db → services → app`; games → core only; UI → core only
+- **Dependency graph (no cycles)**: `core → db → effect-infra → effect-game → effect-classroom → app`; games → core only; UI → core only
 
 ### Monorepo Structure
 ```

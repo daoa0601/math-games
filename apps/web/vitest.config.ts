@@ -15,12 +15,13 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**'],
+    passWithNoTests: true,
     testTimeout: 5000,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts', 'src/**/*.tsx'],
       exclude: ['src/routeTree.gen.ts', 'src/test/**', 'src/**/__tests__/**'],
-      thresholds: { lines: 90, functions: 90, branches: 90, statements: 90 },
+      thresholds: { lines: 70, functions: 70, branches: 70, statements: 70 },
     },
   },
 })

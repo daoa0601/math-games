@@ -1,12 +1,7 @@
 import { Effect } from 'effect'
 
-import {
-  GameProgressValidationError,
-  HeaderService,
-  OriginGuardService,
-  PlayerIdentityService,
-  RateLimitService,
-} from '@math-games/services'
+import { GameProgressValidationError, HeaderService, OriginGuardService, RateLimitService } from '@math-games/effect-infra'
+import { PlayerIdentityService } from '@math-games/effect-game'
 
 import { canPlacePiece, checkSolved, initializeGrid, placePiece } from '@math-games/game-shape-architect'
 import type { LevelConfig, PlacedPiece, ShapeArchitectGameState } from '@math-games/game-shape-architect'

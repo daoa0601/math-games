@@ -14,7 +14,7 @@ import { LanguageToggle } from '@math-games/ui'
 import { getHints } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { LearnSection } from '@math-games/ui'
-import { ResponsiveSection } from '@math-games/ui'
+import { PracticeGeneratorSection } from '@/games/practice-generator-section'
 import { ThemeToggle } from '@math-games/ui'
 import { Button } from '@math-games/ui'
 import { Card, CardContent } from '@math-games/ui'
@@ -26,7 +26,6 @@ import {
   DEFAULT_ROTATION,
   canPlacePiece,
   findNearestValidPosition,
-  getPieceWorldPositions,
   initializeGrid,
   placePiece,
   rotateBy90OnAxis,
@@ -43,7 +42,10 @@ import type {
   ShapeArchitectGameState,
   SolutionStep,
 } from '@math-games/game-shape-architect'
-import { PlacementToolbar } from '@/games/shape-architect-components/PlacementToolbar'
+import {
+  PlacementToolbar,
+  PositionedPlacementToolbar,
+} from '@/games/shape-architect-components/PlacementToolbar'
 import { ShapeArchitect3D } from '@/games/shape-architect-components/ShapeArchitect3D'
 import { ShapeArchitectCanvas } from '@/games/shape-architect-components/ShapeArchitectCanvas'
 import { useSolverWorker } from '@math-games/game-shape-architect'
@@ -59,6 +61,8 @@ import {
   formatSolvedProgress,
   runServerAction,
 } from '@/routes/-server-action-result'
+import { RouteErrorFallback } from '@/routes/-route-error'
+import { GameRoutePending } from '@/routes/-route-pending'
 import { useT } from '@math-games/ui'
 
 type ViewMode = '2d' | '3d'
@@ -69,6 +73,8 @@ export const Route = createFileRoute('/games/shape-architect')({
   validateSearch: validateLevelSearch,
   loader: () => getShapeArchitectLevel(),
   component: ShapeArchitectRoute,
+  errorComponent: RouteErrorFallback,
+  pendingComponent: GameRoutePending,
 })
 
 function buildSolvedGrid(config: LevelConfig, solution: SolutionStep[]) {
@@ -151,9 +157,6 @@ function ShapeArchitectRoute() {
   const recordProgress = useServerFn(recordShapeArchitectProgress)
   const validateMove = useServerFn(validateShapeArchitectMove)
   const [availableConfigs, setAvailableConfigs] = useState(configs)
-  const [practiceSeed, setPracticeSeed] = useState('')
-  const [practiceDifficulty, setPracticeDifficulty] =
-    useState<ShapeArchitectPracticeDifficulty>('medium')
   const requestedLevelId = searchLevel
     ? (availableConfigs.find((candidate) => candidate.id === searchLevel)?.id ??
       initialConfigId)
@@ -183,11 +186,6 @@ function ShapeArchitectRoute() {
   const [pendingPosition, setPendingPosition] = useState<Position3D | null>(
     null,
   )
-  const [tapPoint, setTapPoint] = useState<{ x: number; y: number } | null>(
-    null,
-  )
-  const [hoveredCell3D, setHoveredCell3D] = useState<Position3D | null>(null)
-  const boardRef = useRef<HTMLDivElement>(null)
   const validationSeqRef = useRef(0)
   const solvedProgressKeyRef = useRef<string | null>(null)
   const solver = useSolverWorker()
@@ -371,7 +369,6 @@ function ShapeArchitectRoute() {
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
     setPendingPosition(null)
-    setTapPoint(null)
     setSaveStatus(null)
     solvedProgressKeyRef.current = null
     session.resetSession()
@@ -386,7 +383,7 @@ function ShapeArchitectRoute() {
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
     setPendingPosition(null)
-    setTapPoint(null)
+
     setSaveStatus(null)
     setLevelAttempts(0)
     solvedProgressKeyRef.current = null
@@ -399,7 +396,7 @@ function ShapeArchitectRoute() {
 
     setSelectedPieceId(piece.id)
     setPendingPosition(null)
-    setTapPoint(null)
+
     setSaveStatus(null)
   }
 
@@ -421,16 +418,6 @@ function ShapeArchitectRoute() {
     setSaveStatus(null)
   }
 
-  function handleBoardClick(e: React.MouseEvent) {
-    const board = boardRef.current
-    if (!board) return
-    const rect = board.getBoundingClientRect()
-    setTapPoint({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    })
-  }
-
   const pendingCanPlace =
     selectedPiece !== null && pendingPosition !== null
       ? findNearestValidPosition(
@@ -441,35 +428,6 @@ function ShapeArchitectRoute() {
           config.gridSize,
         ) !== null
       : false
-
-  const ghostPiece3D = useMemo(() => {
-    const source = hoveredCell3D ?? pendingPosition
-    if (!selectedPiece || !source) return null
-
-    const position = findNearestValidPosition(
-      grid,
-      selectedPiece,
-      source,
-      placementRotation,
-      config.gridSize,
-    )
-
-    return {
-      positions: getPieceWorldPositions(
-        selectedPiece,
-        position ?? source,
-        placementRotation,
-      ),
-      isValid: position !== null,
-    }
-  }, [
-    selectedPiece,
-    hoveredCell3D,
-    pendingPosition,
-    grid,
-    placementRotation,
-    config.gridSize,
-  ])
 
   function confirmPlacement() {
     if (session.timedOut) return
@@ -516,7 +474,7 @@ function ShapeArchitectRoute() {
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
     setPendingPosition(null)
-    setTapPoint(null)
+
     void validatePlacements(nextPlacedPieces, {
       action: 'place',
       optimisticGrid: nextGrid,
@@ -529,7 +487,7 @@ function ShapeArchitectRoute() {
 
   function cancelPlacement() {
     setPendingPosition(null)
-    setTapPoint(null)
+
     setSaveStatus(null)
   }
 
@@ -547,7 +505,7 @@ function ShapeArchitectRoute() {
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
     setPendingPosition(null)
-    setTapPoint(null)
+
     setSaveStatus(null)
     solvedProgressKeyRef.current = null
     void validatePlacements(nextPlacedPieces, {
@@ -557,9 +515,11 @@ function ShapeArchitectRoute() {
     })
   }
 
-  function generatePracticeLevel() {
-    const seed = practiceSeed.trim() || `practice-${Date.now()}`
-    const nextConfig = getShapeArchitectPracticeConfig(seed, practiceDifficulty)
+  function generatePracticeLevel(seed: string, difficulty: string) {
+    const nextConfig = getShapeArchitectPracticeConfig(
+      seed,
+      difficulty as ShapeArchitectPracticeDifficulty,
+    )
 
     setAvailableConfigs((currentConfigs) => [
       nextConfig,
@@ -637,8 +597,6 @@ function ShapeArchitectRoute() {
                     setSelectedPieceId(null)
                     setPlacementRotation(DEFAULT_ROTATION)
                     setPendingPosition(null)
-                    setTapPoint(null)
-                    setHoveredCell3D(null)
                     setSaveStatus(null)
                   }}
                   variant="outline"
@@ -650,26 +608,46 @@ function ShapeArchitectRoute() {
               </div>
             </div>
 
-            <div
-              ref={boardRef}
-              className="relative mt-4 overflow-x-auto"
-              onClick={viewMode === '2d' ? handleBoardClick : undefined}
-            >
-              {viewMode === '3d' ? (
+            {viewMode === '3d' ? (
+              <div className="relative mt-4 overflow-x-auto">
                 <ShapeArchitect3D
                   gridState={grid.toNestedArray()}
                   config={config}
                   placedPieces={placedPieces}
-                  ghostPiece={ghostPiece3D}
                   selectedPiece={selectedPiece}
+                  pendingPosition={pendingPosition}
+                  placementRotation={placementRotation}
+                  gridSize={config.gridSize}
                   labels={{
                     loading: t('game.loading3d'),
                     view: t('game.shapeArchitect3dView'),
                   }}
                   onCellClick={handleCellClick}
-                  onCellHover={setHoveredCell3D}
                 />
-              ) : (
+              </div>
+            ) : (
+              <PositionedPlacementToolbar
+                visible={
+                  pendingPosition !== null && selectedPiece !== null
+                }
+                toolbarProps={{
+                  pieceName: selectedPiece
+                    ? formatLevelName(locale, selectedPiece.name)
+                    : '',
+                  rotation: placementRotation,
+                  show3DAxes: config.type === '3D',
+                  canPlace: pendingCanPlace,
+                  labels: {
+                    cancelPlacement: t('game.cancelPlacement'),
+                    placePiece: t('game.placePiece'),
+                    rotatePiece: t('game.rotatePiece'),
+                    rotatePieceAxis: t('game.rotatePieceAxis'),
+                  },
+                  onRotate: rotateSelectedPiece,
+                  onPlace: confirmPlacement,
+                  onCancel: cancelPlacement,
+                }}
+              >
                 <ShapeArchitectCanvas
                   grid={grid}
                   config={config}
@@ -681,37 +659,8 @@ function ShapeArchitectRoute() {
                   viewMode="2d"
                   label={t('game.shapeArchitectGrid')}
                 />
-              )}
-
-              {viewMode === '2d' &&
-                pendingPosition !== null &&
-                selectedPiece !== null &&
-                tapPoint && (
-                  <div
-                    className="absolute z-10"
-                    style={{
-                      left: `clamp(0px, ${tapPoint.x}px - 5rem, calc(100% - 10rem))`,
-                      top: `clamp(0px, ${tapPoint.y + 12}px, calc(100% - 2.5rem))`,
-                    }}
-                  >
-                    <PlacementToolbar
-                      pieceName={formatLevelName(locale, selectedPiece.name)}
-                      rotation={placementRotation}
-                      show3DAxes={config.type === '3D'}
-                      canPlace={pendingCanPlace}
-                      labels={{
-                        cancelPlacement: t('game.cancelPlacement'),
-                        placePiece: t('game.placePiece'),
-                        rotatePiece: t('game.rotatePiece'),
-                        rotatePieceAxis: t('game.rotatePieceAxis'),
-                      }}
-                      onRotate={rotateSelectedPiece}
-                      onPlace={confirmPlacement}
-                      onCancel={cancelPlacement}
-                    />
-                  </div>
-                )}
-            </div>
+              </PositionedPlacementToolbar>
+            )}
 
             {viewMode === '3d' &&
               pendingPosition !== null &&
@@ -869,38 +818,16 @@ function ShapeArchitectRoute() {
         ) : null}
       </section>
 
-      <ResponsiveSection
+      <PracticeGeneratorSection
         title={t('game.levels')}
         description={t('game.dissectionDescription')}
-        className="border-y border-border py-5"
-        actions={
-          <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
-            <input
-              aria-label={t('game.practiceSeed')}
-              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
-              onChange={(event) => setPracticeSeed(event.currentTarget.value)}
-              placeholder={t('game.practiceSeed')}
-              value={practiceSeed}
-            />
-            <select
-              aria-label={t('game.practiceDifficulty')}
-              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
-              onChange={(event) =>
-                setPracticeDifficulty(
-                  event.currentTarget.value as ShapeArchitectPracticeDifficulty,
-                )
-              }
-              value={practiceDifficulty}
-            >
-              <option value="easy">{t('diff.easy')}</option>
-              <option value="medium">{t('diff.medium')}</option>
-              <option value="hard">{t('diff.hard')}</option>
-            </select>
-            <Button onClick={generatePracticeLevel} type="button">
-              {t('game.generate')}
-            </Button>
-          </div>
-        }
+        difficulties={[
+          { value: 'easy', label: t('diff.easy') },
+          { value: 'medium', label: t('diff.medium') },
+          { value: 'hard', label: t('diff.hard') },
+        ]}
+        defaultDifficulty="medium"
+        onGenerate={generatePracticeLevel}
       >
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {availableConfigs.map((optionLevel) => {
@@ -930,7 +857,7 @@ function ShapeArchitectRoute() {
             )
           })}
         </div>
-      </ResponsiveSection>
+      </PracticeGeneratorSection>
 
       <LearnSection gameId="shape-architect" />
     </main>

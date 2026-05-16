@@ -5,13 +5,8 @@ import { Effect } from 'effect'
 
 import { getAchievementById } from '@/achievements/achievements.logic'
 import { schema } from '@math-games/db'
-import {
-  DbService,
-  PlayerIdentityService,
-  PlayerProfileError,
-  PlayerProfileWriteError,
-} from '@math-games/services'
-import { withD1Retry } from '@math-games/services'
+import { PlayerProfileError, PlayerProfileWriteError, withD1Retry } from '@math-games/effect-infra'
+import { DbService, PlayerIdentityService } from '@math-games/effect-game'
 
 import type {
   AchievementImportInput,

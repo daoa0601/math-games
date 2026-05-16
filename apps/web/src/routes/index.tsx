@@ -26,6 +26,8 @@ import { getDailyChallenge } from '@/daily/daily.functions'
 import { gameModules, registry } from '@/games/registry'
 import { getPlayerProfileOverview } from '@/player/profile.functions'
 import type { PlayerProgressSummary } from '@/player/profile.server'
+import { RouteErrorFallback } from '@/routes/-route-error'
+import { RoutePending } from '@/routes/-route-pending'
 
 const GAME_THEMES: Record<string, string> = Object.fromEntries(
   gameModules.map((m) => [m.id, `theme-${m.id}`]),
@@ -60,6 +62,8 @@ export const Route = createFileRoute('/')({
     }
   },
   component: Home,
+  errorComponent: RouteErrorFallback,
+  pendingComponent: RoutePending,
 })
 
 function summarizeProgress(

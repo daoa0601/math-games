@@ -14,7 +14,7 @@ import { LanguageToggle } from '@math-games/ui'
 import { getHints } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { LearnSection } from '@math-games/ui'
-import { ResponsiveSection } from '@math-games/ui'
+import { PracticeGeneratorSection } from '@/games/practice-generator-section'
 import { ThemeToggle } from '@math-games/ui'
 import { Badge } from '@math-games/ui'
 import { Button } from '@math-games/ui'
@@ -44,12 +44,16 @@ import {
   formatSavedProgress,
   runServerAction,
 } from '@/routes/-server-action-result'
+import { RouteErrorFallback } from '@/routes/-route-error'
+import { GameRoutePending } from '@/routes/-route-pending'
 import { useT } from '@math-games/ui'
 
 export const Route = createFileRoute('/games/sequence-race')({
   validateSearch: validateLevelSearch,
   loader: () => getSequenceRaceLevel(),
   component: SequenceRaceRoute,
+  errorComponent: RouteErrorFallback,
+  pendingComponent: GameRoutePending,
 })
 
 const AI_MOVE_DELAY_MS = 650
@@ -61,9 +65,6 @@ function SequenceRaceRoute() {
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordSequenceRaceProgress)
   const [availableConfigs, setAvailableConfigs] = useState(configs)
-  const [practiceSeed, setPracticeSeed] = useState('')
-  const [practiceDifficulty, setPracticeDifficulty] =
-    useState<SequenceRaceDifficulty>('medium')
   const requestedLevelId = searchLevel
     ? (availableConfigs.find((candidate) => candidate.id === searchLevel)?.id ??
       initialConfigId)
@@ -203,9 +204,11 @@ function SequenceRaceRoute() {
     session.resetSession()
   }
 
-  function generatePracticeLevel() {
-    const seed = practiceSeed.trim() || `practice-${Date.now()}`
-    const nextConfig = getSequenceRacePracticeConfig(seed, practiceDifficulty)
+  function generatePracticeLevel(seed: string, difficulty: string) {
+    const nextConfig = getSequenceRacePracticeConfig(
+      seed,
+      difficulty as SequenceRaceDifficulty,
+    )
 
     setAvailableConfigs((currentConfigs) => [
       nextConfig,
@@ -382,38 +385,16 @@ function SequenceRaceRoute() {
         </div>
       </section>
 
-      <ResponsiveSection
+      <PracticeGeneratorSection
         title={t('game.levels')}
         description={t('game.levelsDescription')}
-        className="border-y border-border py-5"
-        actions={
-          <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
-            <input
-              aria-label={t('game.practiceSeed')}
-              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
-              onChange={(event) => setPracticeSeed(event.currentTarget.value)}
-              placeholder={t('game.practiceSeed')}
-              value={practiceSeed}
-            />
-            <select
-              aria-label={t('game.practiceDifficulty')}
-              className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
-              onChange={(event) =>
-                setPracticeDifficulty(
-                  event.currentTarget.value as SequenceRaceDifficulty,
-                )
-              }
-              value={practiceDifficulty}
-            >
-              <option value="easy">{t('diff.easy')}</option>
-              <option value="medium">{t('diff.medium')}</option>
-              <option value="hard">{t('diff.hard')}</option>
-            </select>
-            <Button onClick={generatePracticeLevel} type="button">
-              {t('game.generate')}
-            </Button>
-          </div>
-        }
+        difficulties={[
+          { value: 'easy', label: t('diff.easy') },
+          { value: 'medium', label: t('diff.medium') },
+          { value: 'hard', label: t('diff.hard') },
+        ]}
+        defaultDifficulty="medium"
+        onGenerate={generatePracticeLevel}
       >
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {availableConfigs.map((optionLevel) => {
@@ -444,7 +425,7 @@ function SequenceRaceRoute() {
             )
           })}
         </div>
-      </ResponsiveSection>
+      </PracticeGeneratorSection>
 
       <LearnSection gameId="sequence-race" />
     </main>

@@ -6,7 +6,7 @@ import {
   createGetCatalogHandler,
   createRecordProgressPipeline,
 } from '@/games/server-handlers'
-import { runServerEffect } from '@math-games/services'
+import { runServerEffect } from '@/services/run-server-effect'
 
 import { shapeArchitectModule } from '@math-games/game-shape-architect'
 import { ShapeArchitectMoveRequest } from './shape-architect.schema'

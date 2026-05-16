@@ -155,7 +155,7 @@ function validateGameState(
   let grid = initializeGrid(level)
   const usedPieceIds = new Set<string>()
 
-  for (const placement of completion.placements) {
+  for (const placement of completion.placements as unknown[]) {
     if (placement === null || typeof placement !== 'object') return null
 
     const pieceId = (placement as { pieceId?: unknown }).pieceId

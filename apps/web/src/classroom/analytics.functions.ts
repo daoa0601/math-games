@@ -1,10 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
 import { Effect, Schema } from 'effect'
 
-import {
-  AnalyticsDashboardService,
-  runServerEffect,
-} from '@math-games/services'
+import { AnalyticsDashboardService } from '@math-games/effect-classroom'
+import { runServerEffect } from '@/services/run-server-effect'
 
 const DateRangeInput = Schema.Struct({
   from: Schema.NonEmptyString,

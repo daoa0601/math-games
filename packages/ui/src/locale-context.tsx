@@ -48,7 +48,7 @@ export function LocaleProvider({
   }
 
   const value = useMemo<LocaleContextValue>(() => {
-    const dict = (translations[locale] ?? translations['en'] ?? {}) as Record<string, string>
+    const dict = translations[locale] ?? translations['en']
     return {
       locale,
       setLocale,

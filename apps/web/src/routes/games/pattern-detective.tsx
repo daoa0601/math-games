@@ -25,11 +25,15 @@ import {
   formatSavedProgress,
   runServerAction,
 } from '@/routes/-server-action-result'
+import { RouteErrorFallback } from '@/routes/-route-error'
+import { GameRoutePending } from '@/routes/-route-pending'
 
 export const Route = createFileRoute('/games/pattern-detective')({
   validateSearch: validateLevelSearch,
   loader: () => getPatternDetectiveCatalog(),
   component: PatternDetectiveRoute,
+  errorComponent: RouteErrorFallback,
+  pendingComponent: GameRoutePending,
 })
 
 function PatternDetectiveRoute() {

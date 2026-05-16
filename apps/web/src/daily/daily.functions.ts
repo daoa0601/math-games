@@ -2,7 +2,8 @@ import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { Effect } from 'effect'
 
-import { AnalyticsService, runServerEffect } from '@math-games/services'
+import { AnalyticsService } from '@math-games/effect-game'
+import { runServerEffect } from '@/services/run-server-effect'
 
 import { loadDailyChallenge } from './daily.server'
 

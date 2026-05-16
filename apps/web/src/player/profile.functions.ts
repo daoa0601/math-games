@@ -6,7 +6,7 @@ import {
   createImportAchievementsPipeline,
   createUpdateProfilePipeline,
 } from '@/games/server-handlers'
-import { runServerEffect } from '@math-games/services'
+import { runServerEffect } from '@/services/run-server-effect'
 
 import { AchievementImportInput, PlayerProfileInput } from './profile.schema'
 import { loadPlayerProfileOverview } from './profile.server'

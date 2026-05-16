@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type {
   CellState,
@@ -6,6 +6,12 @@ import type {
   Piece,
   PlacedPiece,
   Position3D,
+  Rotation3D,
+} from '@math-games/game-shape-architect'
+import {
+  findNearestValidPosition,
+  getPieceWorldPositions,
+  VoxelGrid,
 } from '@math-games/game-shape-architect'
 import type { ThreeScene } from '@math-games/game-shape-architect'
 
@@ -18,30 +24,60 @@ interface ShapeArchitect3DProps {
   gridState: CellState[][][]
   config: LevelConfig
   placedPieces: PlacedPiece[]
-  ghostPiece: GhostPiece | null
   selectedPiece: Piece | null
+  pendingPosition: Position3D | null
+  placementRotation: Rotation3D
+  gridSize: [number, number, number]
   labels: {
     loading: string
     view: string
   }
   onCellClick?: (position: Position3D) => void
-  onCellHover?: (position: Position3D | null) => void
 }
 
 export function ShapeArchitect3D({
   gridState,
   config,
   placedPieces,
-  ghostPiece,
   selectedPiece,
+  pendingPosition,
+  placementRotation,
+  gridSize,
   labels,
   onCellClick,
-  onCellHover,
 }: ShapeArchitect3DProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<ThreeScene | null>(null)
   const [ready, setReady] = useState(false)
+  const [hoveredCell3D, setHoveredCell3D] = useState<Position3D | null>(null)
+
+  const grid = useMemo(
+    () => VoxelGrid.fromNestedArray(gridState),
+    [gridState],
+  )
+
+  const ghostPiece = useMemo((): GhostPiece | null => {
+    const source = hoveredCell3D ?? pendingPosition
+    if (!selectedPiece || !source) return null
+
+    const position = findNearestValidPosition(
+      grid,
+      selectedPiece,
+      source,
+      placementRotation,
+      gridSize,
+    )
+
+    return {
+      positions: getPieceWorldPositions(
+        selectedPiece,
+        position ?? source,
+        placementRotation,
+      ),
+      isValid: position !== null,
+    }
+  }, [selectedPiece, hoveredCell3D, pendingPosition, grid, placementRotation, gridSize])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -119,22 +155,19 @@ export function ShapeArchitect3D({
   }, [onCellClick])
 
   useEffect(() => {
-    if (!onCellHover) return
-
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const hover = onCellHover
     function handleMove(event: MouseEvent) {
       const position = sceneRef.current?.pickGridCell(
         event.clientX,
         event.clientY,
       )
-      hover(position ?? null)
+      setHoveredCell3D(position ?? null)
     }
 
     function handleLeave() {
-      hover(null)
+      setHoveredCell3D(null)
     }
 
     canvas.addEventListener('mousemove', handleMove)
@@ -143,7 +176,7 @@ export function ShapeArchitect3D({
       canvas.removeEventListener('mousemove', handleMove)
       canvas.removeEventListener('mouseleave', handleLeave)
     }
-  }, [onCellHover])
+  }, [])
 
   return (
     <div ref={containerRef} className="max-w-[640px]">

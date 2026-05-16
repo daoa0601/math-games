@@ -3,8 +3,9 @@ import { eq } from '@math-games/db'
 import { Effect } from 'effect'
 
 import { schema } from '@math-games/db'
-import { DbService, PlayerIdentityService, runServerEffect } from '@math-games/services'
-import { withD1Retry } from '@math-games/services'
+import { withD1Retry } from '@math-games/effect-infra'
+import { DbService, PlayerIdentityService } from '@math-games/effect-game'
+import { runServerEffect } from '@/services/run-server-effect'
 import { ProgressWriteError } from '@math-games/core'
 
 import { computeRecommendations } from './recommendations'

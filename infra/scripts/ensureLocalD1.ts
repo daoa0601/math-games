@@ -72,7 +72,14 @@ function localSchemaExists() {
 }
 
 function migrationFiles() {
-  const migrationsRoot = join(process.cwd(), 'drizzle', 'migrations')
+  const fromCwd = join(process.cwd(), 'drizzle', 'migrations')
+  const fromPackagesDb = join(process.cwd(), 'packages', 'db', 'drizzle', 'migrations')
+  const fromRelative = join(process.cwd(), '..', '..', 'packages', 'db', 'drizzle', 'migrations')
+  const migrationsRoot = existsSync(fromCwd)
+    ? fromCwd
+    : existsSync(fromPackagesDb)
+      ? fromPackagesDb
+      : fromRelative
 
   return readdirSync(migrationsRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())

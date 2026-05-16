@@ -14,6 +14,8 @@ import { Card, CardContent } from '@math-games/ui'
 import { Separator } from '@math-games/ui'
 import { getDailyChallenge } from '@/daily/daily.functions'
 import { gameModules, registry } from '@/games/registry'
+import { RouteErrorFallback } from '@/routes/-route-error'
+import { RoutePending } from '@/routes/-route-pending'
 
 const GAME_THEMES: Record<string, string> = Object.fromEntries(
   gameModules.map((m) => [m.id, `theme-${m.id}`]),
@@ -22,6 +24,8 @@ const GAME_THEMES: Record<string, string> = Object.fromEntries(
 export const Route = createFileRoute('/daily')({
   loader: () => getDailyChallenge(),
   component: DailyRoute,
+  errorComponent: RouteErrorFallback,
+  pendingComponent: RoutePending,
 })
 
 function DailyRoute() {

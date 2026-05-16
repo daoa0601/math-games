@@ -7,6 +7,7 @@ import { ThemeToggle } from '@math-games/ui'
 import { Badge } from '@math-games/ui'
 import { Button } from '@math-games/ui'
 import { Card, CardContent, CardHeader, CardTitle } from '@math-games/ui'
+import { Skeleton } from '@math-games/ui'
 import { useT } from '@math-games/ui'
 import { GAME_MODULES } from '@/games/registry'
 import {
@@ -15,10 +16,12 @@ import {
   getRetention,
 } from '@/classroom/analytics.functions'
 import { runServerAction } from '@/routes/-server-action-result'
-import type { CompletionRateReport, RetentionReport, LevelDifficultyReport } from '@math-games/services'
+import { RouteErrorFallback } from '@/routes/-route-error'
+import type { CompletionRateReport, RetentionReport, LevelDifficultyReport } from '@math-games/effect-classroom'
 
 export const Route = createFileRoute('/admin/analytics')({
   component: AnalyticsDashboard,
+  errorComponent: RouteErrorFallback,
 })
 
 function todayRange() {
@@ -102,11 +105,19 @@ function AnalyticsDashboard() {
           ))}
         </select>
         <Button onClick={loadAll} disabled={loading}>
-          {loading ? 'Loading...' : 'Load Analytics'}
+          Load Analytics
         </Button>
       </div>
 
-      {completionData && (
+      {loading && (
+        <div className="grid gap-6">
+          <Card><CardHeader><Skeleton className="h-6 w-48" /></CardHeader><CardContent><div className="grid gap-4 md:grid-cols-2"><Skeleton className="h-16 rounded-md" /><Skeleton className="h-16 rounded-md" /></div></CardContent></Card>
+          <Card><CardHeader><Skeleton className="h-6 w-40" /></CardHeader><CardContent><Skeleton className="h-20 rounded-md" /></CardContent></Card>
+          <Card><CardHeader><Skeleton className="h-6 w-52" /></CardHeader><CardContent><div className="space-y-2"><Skeleton className="h-10 rounded-md" /><Skeleton className="h-10 rounded-md" /><Skeleton className="h-10 rounded-md" /></div></CardContent></Card>
+        </div>
+      )}
+
+      {!loading && completionData && (
         <Card>
           <CardHeader>
             <CardTitle>Completion Rates (30 days)</CardTitle>
@@ -134,7 +145,7 @@ function AnalyticsDashboard() {
         </Card>
       )}
 
-      {retentionData && (
+      {!loading && retentionData && (
         <Card>
           <CardHeader>
             <CardTitle>Daily Active Players</CardTitle>
@@ -155,7 +166,7 @@ function AnalyticsDashboard() {
         </Card>
       )}
 
-      {difficultyData && (
+      {!loading && difficultyData && (
         <Card>
           <CardHeader>
             <CardTitle>Level Difficulty — {selectedGame}</CardTitle>

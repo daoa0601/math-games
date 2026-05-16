@@ -7,9 +7,12 @@ export default [
   {
     rules: {
       'import/no-cycle': 'off',
+      'import/no-duplicates': 'off',
       'import/order': 'off',
       'sort-imports': 'off',
       '@typescript-eslint/array-type': 'off',
+      '@typescript-eslint/method-signature-style': 'off',
+      '@typescript-eslint/naming-convention': 'off',
       '@typescript-eslint/require-await': 'off',
       'pnpm/json-enforce-catalog': 'off',
     },
@@ -32,6 +35,12 @@ export default [
     },
   },
   {
+    rules: {
+      'import/first': 'off',
+      'import/consistent-type-specifier-style': 'off',
+    },
+  },
+  {
     ignores: [
       '.alchemy/**',
       '.wrangler/**',
@@ -40,6 +49,7 @@ export default [
       'playwright-report/**',
       'prettier.config.js',
       'test-results/**',
+      'tests/e2e/**',
       'worker-configuration.d.ts',
     ],
   },

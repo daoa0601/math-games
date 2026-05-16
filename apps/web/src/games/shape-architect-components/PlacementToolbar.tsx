@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react'
 import { RotateCw, Check, X } from 'lucide-react'
 
 import { Button } from '@math-games/ui'
@@ -17,6 +18,55 @@ interface PlacementToolbarProps {
   onRotate: (axis?: RotationAxis) => void
   onPlace: () => void
   onCancel: () => void
+}
+
+interface PositionedPlacementToolbarProps {
+  visible: boolean
+  toolbarProps: Omit<PlacementToolbarProps, never>
+  children: React.ReactNode
+}
+
+export function PositionedPlacementToolbar({
+  visible,
+  toolbarProps,
+  children,
+}: PositionedPlacementToolbarProps) {
+  const boardRef = useRef<HTMLDivElement>(null)
+  const [tapPoint, setTapPoint] = useState<{ x: number; y: number } | null>(
+    null,
+  )
+
+  function handleBoardClick(e: React.MouseEvent) {
+    const board = boardRef.current
+    if (!board) return
+    const rect = board.getBoundingClientRect()
+    setTapPoint({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    })
+  }
+
+  return (
+    <div
+      ref={boardRef}
+      className="relative mt-4 overflow-x-auto"
+      onClick={handleBoardClick}
+    >
+      {children}
+
+      {visible && tapPoint && (
+        <div
+          className="absolute z-10"
+          style={{
+            left: `clamp(0px, ${tapPoint.x}px - 5rem, calc(100% - 10rem))`,
+            top: `clamp(0px, ${tapPoint.y + 12}px, calc(100% - 2.5rem))`,
+          }}
+        >
+          <PlacementToolbar {...toolbarProps} />
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function PlacementToolbar({

@@ -26,6 +26,14 @@ function todayDateKey(): string {
 const DAILY_CACHE_TTL = 86400
 const RETENTION_DAYS = 30
 
+function parseConfigJson(json: string): Record<string, unknown> {
+  const parsed: unknown = JSON.parse(json)
+  if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+    return parsed as Record<string, unknown>
+  }
+  throw new Error('configJson is not a valid object')
+}
+
 async function pregenerate(env: Env) {
   const db = drizzle(env.DB)
   const keys = [todayDateKey(), tomorrowDateKey()]
@@ -45,7 +53,7 @@ async function pregenerate(env: Env) {
     if (existing.length > 0) {
       const row = existing[0]
       const record = {
-        ...JSON.parse(row.configJson),
+        ...parseConfigJson(row.configJson),
         challengeDate: row.challengeDate,
         seed: row.seed,
       }
@@ -68,7 +76,7 @@ async function pregenerate(env: Env) {
       .onConflictDoNothing()
 
     const record = {
-      ...JSON.parse(planned.configJson),
+      ...parseConfigJson(planned.configJson),
       challengeDate: planned.challengeDate,
       seed: planned.seed,
     }

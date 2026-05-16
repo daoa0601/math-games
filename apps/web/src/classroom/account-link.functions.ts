@@ -1,13 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
 import { Effect, Schema } from 'effect'
 
-import {
-  AccountLinkService,
-  OriginGuardService,
-  PlayerIdentityService,
-  RateLimitService,
-  runServerEffect,
-} from '@math-games/services'
+import { OriginGuardService, RateLimitService } from '@math-games/effect-infra'
+import { PlayerIdentityService } from '@math-games/effect-game'
+import { AccountLinkService } from '@math-games/effect-classroom'
+import { runServerEffect } from '@/services/run-server-effect'
 
 const RequestLinkInput = Schema.Struct({
   email: Schema.NonEmptyString,

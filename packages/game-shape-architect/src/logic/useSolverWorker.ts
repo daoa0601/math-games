@@ -23,10 +23,8 @@ export function useSolverWorker(): UseSolverWorkerReturn {
     })
 
     worker.onmessage = (e: MessageEvent<SolverResponse>) => {
-      if (e.data.type === 'result') {
-        setResult(e.data.result)
-        setSolving(false)
-      }
+      setResult(e.data.result)
+      setSolving(false)
     }
 
     worker.onerror = () => {

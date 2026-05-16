@@ -154,6 +154,9 @@ export const coreTranslations = {
     'level.workshopPrefix': 'Workshop',
     'level.dailyChallenge': 'Daily Challenge',
     'level.constructive': 'Constructive',
+    'error.title': 'Something went wrong',
+    'error.body': 'An unexpected error occurred. Try again or return to the dashboard.',
+    'error.retry': 'Try Again',
   },
   vi: {
     'app.title': 'Trò Chơi Toán',
@@ -314,5 +317,8 @@ export const coreTranslations = {
     'level.workshopPrefix': 'Xưởng',
     'level.dailyChallenge': 'Thử thách hằng ngày',
     'level.constructive': 'Dựng hình',
+    'error.title': 'Đã xảy ra lỗi',
+    'error.body': 'Đã xảy ra lỗi không mong muốn. Hãy thử lại hoặc quay lại bảng điều khiển.',
+    'error.retry': 'Thử Lại',
   },
 } as const

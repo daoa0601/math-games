@@ -5,8 +5,8 @@ import { checkAchievements } from '@/achievements/achievements.logic'
 import { schema } from '@math-games/db'
 import { GAME_IDS } from '@/games/registry'
 import { createPlayerIdentity } from '@/player/identity.server'
-import { DbService, ProgressWriteError } from '@math-games/services'
-import { withD1Retry } from '@math-games/services'
+import { ProgressWriteError, withD1Retry } from '@math-games/effect-infra'
+import { DbService } from '@math-games/effect-game'
 
 export interface RecordGameProgressInput {
   playerId: string

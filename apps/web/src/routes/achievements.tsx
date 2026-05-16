@@ -13,6 +13,8 @@ import { Badge } from '@math-games/ui'
 import { Card, CardContent } from '@math-games/ui'
 import { getPlayerProfileOverview } from '@/player/profile.functions'
 import type { AchievementRarity } from '@/games/game-module'
+import { RouteErrorFallback } from '@/routes/-route-error'
+import { RoutePending } from '@/routes/-route-pending'
 
 const RARITY_STYLES: Record<AchievementRarity, string> = {
   common: 'border-l-muted-foreground/50',
@@ -24,6 +26,8 @@ const RARITY_STYLES: Record<AchievementRarity, string> = {
 export const Route = createFileRoute('/achievements')({
   loader: () => getPlayerProfileOverview(),
   component: AchievementsRoute,
+  errorComponent: RouteErrorFallback,
+  pendingComponent: RoutePending,
 })
 
 function AchievementsRoute() {

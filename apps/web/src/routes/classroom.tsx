@@ -15,10 +15,14 @@ import {
   joinClassroom,
 } from '@/classroom/classroom.functions'
 import { runServerAction } from '@/routes/-server-action-result'
+import { RouteErrorFallback } from '@/routes/-route-error'
+import { RoutePending } from '@/routes/-route-pending'
 
 export const Route = createFileRoute('/classroom')({
   loader: () => getMyClassrooms(),
   component: ClassroomRoute,
+  errorComponent: RouteErrorFallback,
+  pendingComponent: RoutePending,
 })
 
 function ClassroomRoute() {

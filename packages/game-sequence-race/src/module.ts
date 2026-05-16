@@ -123,7 +123,7 @@ function validateGameState(
 
   let state = createGameState(level)
 
-  for (const entry of completion.history) {
+  for (const entry of completion.history as unknown[]) {
     if (state.gameOver) return null
     if (entry === null || typeof entry !== 'object') return null
 
