@@ -13,7 +13,7 @@
     "check": "turbo build && turbo typecheck && turbo test && turbo lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "deploy": "pnpm --filter infra deploy"
+    "deploy": "pnpm --filter infra run deploy"
   },
   "devDependencies": {
     "@tanstack/eslint-config": "0.4.0",
