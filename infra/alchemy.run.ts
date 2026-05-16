@@ -13,7 +13,7 @@ export default Alchemy.Stack(
   Effect.gen(function* () {
     const database = yield* Cloudflare.D1Database('DB', {
       name: 'math-games-db',
-      migrationsDir: './drizzle/migrations',
+      migrationsDir: '../packages/db/drizzle/migrations',
       migrationsTable: 'drizzle_migrations',
       primaryLocationHint: 'wnam',
     })
