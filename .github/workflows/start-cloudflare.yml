@@ -57,7 +57,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install standalone Playwright browser
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter @math-games/web exec playwright install --with-deps chromium
 
       - name: Run guarded Alchemy action
         run: |
