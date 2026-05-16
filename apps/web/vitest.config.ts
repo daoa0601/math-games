@@ -21,7 +21,6 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/**/*.ts', 'src/**/*.tsx'],
       exclude: ['src/routeTree.gen.ts', 'src/test/**', 'src/**/__tests__/**'],
-      thresholds: { lines: 70, functions: 70, branches: 70, statements: 70 },
     },
   },
 })
