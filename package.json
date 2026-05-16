@@ -13,7 +13,11 @@
     "check": "turbo build && turbo typecheck && turbo test && turbo lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "deploy": "pnpm --filter infra run deploy"
+    "deploy": "pnpm --filter infra run deploy",
+    "infra:check": "pnpm --filter @math-games/infra run check",
+    "infra:bootstrap": "pnpm --filter @math-games/infra run bootstrap",
+    "infra:plan": "pnpm --filter @math-games/infra run plan",
+    "smoke:remote": "pnpm --filter @math-games/infra exec tsx scripts/smokeRemoteWorker.ts"
   },
   "devDependencies": {
     "@tanstack/eslint-config": "0.4.0",
