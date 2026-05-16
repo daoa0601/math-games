@@ -32,6 +32,7 @@ export default Alchemy.Stack(
 
     const worker = yield* Cloudflare.Vite('web', {
       name: 'math-games',
+      rootDir: '../apps/web',
       compatibility: {
         date: '2026-05-13',
         flags: ['nodejs_compat'],
@@ -61,7 +62,7 @@ export default Alchemy.Stack(
 
     const cronWorker = yield* Cloudflare.Worker('daily-cron', {
       name: 'math-games-daily-cron',
-      main: './src/workers/daily-cron.ts',
+      main: '../apps/web/src/workers/daily-cron.ts',
       compatibility: {
         date: '2026-05-13',
         flags: ['nodejs_compat'],
