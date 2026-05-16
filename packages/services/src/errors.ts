@@ -1,0 +1,15 @@
+export {
+  AuthorizationError,
+  ClassroomError,
+  CrossOriginError,
+  DailyChallengeError,
+  DailyStreakError,
+  GameAttemptsError,
+  GameProgressValidationError,
+  PlayerProfileError,
+  PlayerProfileValidationError,
+  PlayerProfileWriteError,
+  ProgressWriteError,
+  RateLimitError,
+  SolverTimeoutError,
+} from '@math-games/core'

@@ -1,0 +1,26 @@
+{
+  "name": "@math-games/infra",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "login": "alchemy login --configure --stage dev alchemy.run.ts",
+    "profile": "alchemy profile show",
+    "bootstrap": "pnpm auth:check && tsx scripts/runAlchemy.ts cloudflare bootstrap",
+    "auth:check": "tsx scripts/checkCloudflareAuth.ts --auth-only",
+    "check": "tsx scripts/checkCloudflareAuth.ts",
+    "plan": "pnpm auth:check && pnpm bootstrap && pnpm check && tsx scripts/runAlchemy.ts plan --stage dev alchemy.run.ts",
+    "deploy": "pnpm auth:check && turbo build --filter=@math-games/web && pnpm bootstrap && pnpm check && tsx scripts/runAlchemy.ts deploy --stage dev alchemy.run.ts",
+    "destroy": "pnpm auth:check && pnpm bootstrap && pnpm check && tsx scripts/runAlchemy.ts destroy --stage dev alchemy.run.ts"
+  },
+  "dependencies": {
+    "alchemy": "2.0.0-beta.38",
+    "effect": "4.0.0-beta.66"
+  },
+  "devDependencies": {
+    "dotenv": "17.4.2",
+    "tsx": "4.21.0",
+    "typescript": "6.0.3",
+    "wrangler": "4.90.1"
+  }
+}
