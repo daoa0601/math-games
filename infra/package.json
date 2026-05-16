@@ -14,7 +14,7 @@
     "destroy": "pnpm auth:check && pnpm bootstrap && pnpm check && tsx scripts/runAlchemy.ts destroy --stage dev alchemy.run.ts"
   },
   "dependencies": {
-    "@effect/platform-node": "0.106.0",
+    "@effect/platform-node": "4.0.0-beta.66",
     "alchemy": "2.0.0-beta.38",
     "effect": "4.0.0-beta.66"
   },
