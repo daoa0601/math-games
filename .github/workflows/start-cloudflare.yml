@@ -31,7 +31,7 @@ concurrency:
 
 jobs:
   cloudflare:
-    runs-on: blacksmith-2
+    runs-on: ubuntu-latest
     environment: cloudflare-dev
     env:
       ALCHEMY_ACTION: ${{ github.event_name == 'workflow_dispatch' && inputs.action || 'deploy' }}
