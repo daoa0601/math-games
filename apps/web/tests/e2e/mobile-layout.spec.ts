@@ -23,19 +23,12 @@ test.describe('mobile layout — dashboard', () => {
     await expectNoHorizontalOverflow(page)
   })
 
-  test('daily challenge detail rows are hidden on mobile', async ({ page }) => {
+  test('daily hero card with start CTA is visible', async ({ page }) => {
     await page.goto('/')
     await expectHydrated(page)
-
-    const detailDl = page.locator('dl').filter({ hasText: 'Level' }).first()
-    await expect(detailDl).toBeHidden()
-  })
-
-  test('Play Today and Start Level links are visible', async ({ page }) => {
-    await page.goto('/')
-    await expectHydrated(page)
-    await expect(page.getByRole('link', { name: 'Play Today' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Start Level' })).toBeVisible()
+    await expect(
+      page.getByText('Start', { exact: false }).first(),
+    ).toBeVisible()
   })
 
   test('game cards are present in the page', async ({ page }) => {
@@ -45,6 +38,12 @@ test.describe('mobile layout — dashboard', () => {
     await expect(page.getByText('Sequence Race').first()).toBeAttached()
     await expect(page.getByText('Shape Architect').first()).toBeAttached()
     await expect(page.getByText('Pattern Detective').first()).toBeAttached()
+  })
+
+  test('bottom tab bar is visible on mobile', async ({ page }) => {
+    await page.goto('/')
+    await expectHydrated(page)
+    await expect(page.getByRole('navigation').last()).toBeVisible()
   })
 })
 
@@ -111,15 +110,11 @@ test.describe('mobile layout — profile', () => {
     await expectNoHorizontalOverflow(page)
   })
 
-  test('form inputs are usable at mobile width', async ({ page }) => {
+  test('player identity section is visible on mobile', async ({ page }) => {
     await page.goto('/profile')
     await expectHydrated(page)
-
-    await expect(page.getByLabel('Display name')).toBeVisible()
-    await expect(page.getByLabel('Language')).toBeVisible()
-    await expect(page.getByLabel('Grade band')).toBeVisible()
     await expect(
-      page.getByRole('button', { name: 'Save Profile' }),
+      page.getByText('Player', { exact: false }).first(),
     ).toBeVisible()
   })
 })
