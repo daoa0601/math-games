@@ -40,33 +40,20 @@ describe('MagicGraph Preset Validation', () => {
     })
   })
 
-  describe('solvability report', () => {
-    it('should log solvability details for all templates', () => {
-      const report: Array<{
-        name: string
-        targetSum: number
-        nodeCount: number
-        lineCount: number
-        solvable: boolean
-        hasSolvableFlag: boolean
-      }> = []
+  describe('solvability consistency', () => {
+    it('every template with isSolvable: true should actually be solvable by the solver', () => {
+      const mismatched: string[] = []
 
       for (const template of puzzleTemplates) {
         const puzzle = { ...template, id: `test_${template.name}` }
         const result = checkSolvability(puzzle)
 
-        report.push({
-          name: template.name,
-          targetSum: template.targetSum,
-          nodeCount: template.nodes.length,
-          lineCount: template.lines.length,
-          solvable: result.solvable,
-          hasSolvableFlag: template.isSolvable === true,
-        })
+        if (template.isSolvable && !result.solvable) {
+          mismatched.push(template.name)
+        }
       }
 
-      console.table(report)
-      expect(true).toBe(true)
+      expect(mismatched).toEqual([])
     })
   })
 })

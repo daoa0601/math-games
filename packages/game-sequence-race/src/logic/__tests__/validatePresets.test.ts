@@ -44,53 +44,35 @@ describe('SequenceRace Preset Validation', () => {
     })
   })
 
-  describe('fairness analysis report', () => {
-    it('should log fairness details for all presets', () => {
-      const report: Array<{
-        id: string
-        name: string
-        playerWinsFirst: boolean
-        playerWinsSecond: boolean
-        needsAiMovesFirst: boolean
-        hasAiMovesFirst: boolean
-        status: string
-      }> = []
+  describe('fairness consistency', () => {
+    it('no preset should require an aiMovesFirst fix', () => {
+      const needsFix: string[] = []
 
       for (const preset of presetGames) {
         const fairness = validateGameFairness(preset)
         const canWinFirst = fairness.isPlayerWinnable
         const canWinSecond = !fairness.isAIWinnable
         const hasIt = preset.aiMovesFirst === true
-        const needsFix = !canWinFirst && canWinSecond && !hasIt
 
-        let status: string
-        if (canWinFirst && !hasIt) {
-          status = '✓ Fair (player first)'
-        } else if (canWinSecond && hasIt) {
-          status = '✓ Fixed (AI first)'
-        } else if (needsFix) {
-          status = '✗ Needs aiMovesFirst'
-        } else if (!canWinFirst && !canWinSecond) {
-          status = '✗ Truly unwinnable'
-        } else {
-          status = '⚠ Misconfigured'
+        if (!canWinFirst && canWinSecond && !hasIt) {
+          needsFix.push(`${preset.id}: ${preset.name}`)
         }
-
-        report.push({
-          id: preset.id,
-          name: preset.name,
-          playerWinsFirst: canWinFirst,
-          playerWinsSecond: canWinSecond,
-          needsAiMovesFirst: needsFix,
-          hasAiMovesFirst: hasIt,
-          status,
-        })
       }
 
-      console.table(report)
+      expect(needsFix).toEqual([])
+    })
 
-      // This test just logs - always passes
-      expect(true).toBe(true)
+    it('no preset should be truly unwinnable', () => {
+      const unwinnable: string[] = []
+
+      for (const preset of presetGames) {
+        const fairness = validateGameFairness(preset)
+        if (!fairness.isPlayerWinnable && fairness.isAIWinnable) {
+          unwinnable.push(`${preset.id}: ${preset.name}`)
+        }
+      }
+
+      expect(unwinnable).toEqual([])
     })
   })
 })

@@ -11,8 +11,10 @@ import { createValidateAndComputeScore } from '@math-games/core'
 import { catalog, difficulties } from './catalog'
 import type { PatternConfig } from './catalog'
 import { PatternDetectiveCompletionSchema } from './schema'
+import type { PatternDetectiveCompletion } from './schema'
 import { patternDetectiveTranslations } from './translations'
 import { validate } from './logic'
+import { Schema } from 'effect'
 
 const achievements: readonly Achievement[] = [
   {
@@ -70,11 +72,21 @@ function evaluateAchievements(
   return newly
 }
 
+function decodeCompletion(raw: unknown): PatternDetectiveCompletion | null {
+  try {
+    return Schema.decodeUnknownSync(PatternDetectiveCompletionSchema)(raw)
+  } catch {
+    return null
+  }
+}
+
 function validateGameState(
   level: PatternConfig,
   parsed: unknown,
 ): { completed: boolean; moves: number; feedback?: GameFeedback } | null {
-  return validate(level, parsed as Parameters<typeof validate>[1])
+  const completion = decodeCompletion(parsed)
+  if (completion === null) return null
+  return validate(level, completion)
 }
 
 export const patternDetectiveModule = {

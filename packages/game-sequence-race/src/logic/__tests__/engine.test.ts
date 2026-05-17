@@ -13,14 +13,19 @@ import {
 } from '../engine'
 import type { GameConfig, SequenceState } from '../types'
 
-describe('SequenceRace Engine', () => {
-  const testConfig: GameConfig = {
+function createTestConfig(overrides?: Partial<GameConfig>): GameConfig {
+  return {
     id: 'test',
     name: 'Test Game',
     target: 10,
     stepPool: [1, 2, 3, 4],
     difficulty: 'medium',
+    ...overrides,
   }
+}
+
+describe('SequenceRace Engine', () => {
+  const testConfig = createTestConfig()
 
   describe('createGameState', () => {
     it('creates initial state from config', () => {

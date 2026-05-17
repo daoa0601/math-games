@@ -74,6 +74,10 @@ function normalizedKey(value: string) {
     .replace(/^-|-$/g, '')
 }
 
+export function formatGameTag(locale: Locale, gameId: string) {
+  return tx(locale, `gameTag.${toCamel(gameId)}`, '')
+}
+
 export function formatDifficulty(locale: Locale, difficulty: string) {
   return tx(locale, `diff.${difficulty}`, difficulty)
 }

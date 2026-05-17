@@ -294,6 +294,27 @@
   }
 }
 
+/* ── Editorial typography ───────────────────────────────────────── */
+
+.eyebrow {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* ── Tab bar glass backdrop ────────────────────────────────────── */
+
+.tab-bar-glass {
+  background: oklch(from var(--card) l c h / 0.92);
+  backdrop-filter: saturate(180%) blur(6px);
+}
+
+.dark .tab-bar-glass {
+  background: oklch(from var(--card) l c h / 0.88);
+}
+
 /* ── Base resets ────────────────────────────────────────────────── */
 
 * { box-sizing: border-box; }

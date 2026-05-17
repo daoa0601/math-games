@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": ["TURBO_TELEMETRY_DISABLED"],
   "globalPassThroughEnv": ["TMPDIR", "TEMP", "TMP"],
   "tasks": {
     "build": {

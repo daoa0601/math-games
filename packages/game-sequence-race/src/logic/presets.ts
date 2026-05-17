@@ -53,8 +53,6 @@ export function generateSequence(type: SequenceType, length: number): number[] {
     case 'powers3':
       // 1, 3, 9, 27, 81... (powers of 3)
       return Array.from({ length }, (_, i) => Math.pow(3, i))
-    default:
-      return Array.from({ length }, (_, i) => i + 1)
   }
 }
 
