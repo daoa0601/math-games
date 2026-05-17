@@ -89,10 +89,10 @@ function Shape({
 export function PlayerAvatar({ seed, className, title }: PlayerAvatarProps) {
   const h = hashSeed(seed || 'guest')
 
-  const shapeA = SHAPES[h & 0x3]!
-  const shapeB = SHAPES[(h >> 2) & 0x3]!
-  const colorA = PALETTE[(h >> 4) % PALETTE.length]!
-  const colorB = PALETTE[(h >> 10) % PALETTE.length]!
+  const shapeA = SHAPES[h & 0x3]
+  const shapeB = SHAPES[(h >> 2) & 0x3]
+  const colorA = PALETTE[(h >> 4) % PALETTE.length]
+  const colorB = PALETTE[(h >> 10) % PALETTE.length]
   const rotateA = ((h >> 14) & 0x3f) * 6
   const rotateB = ((h >> 20) & 0x3f) * 6
   const offsetX = (((h >> 26) & 0x7) - 3.5) * 1.5
