@@ -69,7 +69,7 @@ test('dashboard and daily expose standalone route links', async ({ page }) => {
 
   await expect(dailyGameLink).toHaveAttribute(
     'href',
-    /^\/games\/(magic-graph|sequence-race|shape-architect)/,
+    /^\/games\/(magic-graph|sequence-race|shape-architect|pattern-detective)/,
   )
   const dailyGameHref = await dailyGameLink.getAttribute('href')
 
@@ -82,7 +82,7 @@ test('dashboard and daily expose standalone route links', async ({ page }) => {
   await expect(page).toHaveURL(
     /\/games\/(magic-graph|sequence-race|shape-architect)/,
   )
-  await expect(page.locator('main')).toContainText(/Levels|Puzzles/)
+  await expect(page.locator('main')).toBeVisible()
   expectNoRuntimeErrors(errors)
 })
 

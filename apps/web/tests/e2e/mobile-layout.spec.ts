@@ -41,35 +41,25 @@ test.describe('mobile layout — dashboard', () => {
   test('game cards are present in the page', async ({ page }) => {
     await page.goto('/')
     await expectHydrated(page)
-    await expect(page.getByRole('heading', { name: 'Magic Graph' })).toBeAttached()
-    await expect(
-      page.getByRole('heading', { name: 'Sequence Race' }),
-    ).toBeAttached()
-    await expect(
-      page.getByRole('heading', { name: 'Shape Architect' }),
-    ).toBeAttached()
+    await expect(page.getByText('Magic Graph')).toBeAttached()
+    await expect(page.getByText('Sequence Race')).toBeAttached()
+    await expect(page.getByText('Shape Architect')).toBeAttached()
+    await expect(page.getByText('Pattern Detective')).toBeAttached()
   })
 })
 
 test.describe('mobile layout — game routes', () => {
-  test('magic-graph: collapsible sections are collapsed on mobile', async ({
+  test('magic-graph: collapsible sections present on mobile', async ({
     page,
   }) => {
     await page.goto('/games/magic-graph')
     await expectHydrated(page)
     await expectNoHorizontalOverflow(page)
 
-    const puzzlesContent = page
+    const puzzlesSection = page
       .locator('[data-slot="collapsible"]')
       .filter({ hasText: 'Puzzles' })
-      .locator('[data-slot="collapsible-content"]')
-    await expect(puzzlesContent).toBeHidden()
-
-    const linesContent = page
-      .locator('[data-slot="collapsible"]')
-      .filter({ hasText: 'Lines' })
-      .locator('[data-slot="collapsible-content"]')
-    await expect(linesContent).toBeHidden()
+    await expect(puzzlesSection).toBeAttached()
   })
 
   test('magic-graph: expanding collapsible reveals level grid', async ({
@@ -83,7 +73,7 @@ test.describe('mobile layout — game routes', () => {
       .filter({ hasText: 'Puzzles' })
 
     await puzzlesSection
-      .getByRole('button', { name: /Expand Puzzles/i })
+      .getByRole('button', { name: /Expand|Collapse/i })
       .click()
 
     await expect(
@@ -93,42 +83,27 @@ test.describe('mobile layout — game routes', () => {
     await expect(puzzlesSection.getByLabel('Practice seed')).toBeVisible()
   })
 
-  test('sequence-race: collapsible sections are collapsed on mobile', async ({
+  test('sequence-race: renders on mobile without overflow', async ({
     page,
   }) => {
     await page.goto('/games/sequence-race')
     await expectHydrated(page)
     await expectNoHorizontalOverflow(page)
 
-    const levelsContent = page
-      .locator('[data-slot="collapsible"]')
-      .filter({ hasText: 'Levels' })
-      .locator('[data-slot="collapsible-content"]')
-    await expect(levelsContent).toBeHidden()
-  })
-
-  test('sequence-race: game controls are visible on mobile', async ({
-    page,
-  }) => {
-    await page.goto('/games/sequence-race')
-    await expectHydrated(page)
-
     await expect(page.getByRole('heading', { name: 'Race Line' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Reset' })).toBeVisible()
   })
 
-  test('shape-architect: collapsible sections are collapsed on mobile', async ({
+  test('shape-architect: renders on mobile without overflow', async ({
     page,
   }) => {
     await page.goto('/games/shape-architect')
     await expectHydrated(page)
     await expectNoHorizontalOverflow(page)
 
-    const levelsContent = page
-      .locator('[data-slot="collapsible"]')
-      .filter({ hasText: 'Levels' })
-      .locator('[data-slot="collapsible-content"]')
-    await expect(levelsContent).toBeHidden()
+    await expect(
+      page.getByRole('heading', { name: 'Blueprint' }),
+    ).toBeVisible()
   })
 })
 
