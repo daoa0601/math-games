@@ -13,48 +13,73 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
+  lint:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [format, typecheck, lint]
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "pnpm"
-
       - run: pnpm install --frozen-lockfile
 
-      - name: Format check
+      - name: format
+        if: matrix.check == 'format'
         run: pnpm format:check
 
-      - name: Typecheck
+      - name: typecheck
+        if: matrix.check == 'typecheck'
         run: pnpm typecheck
 
-      - name: Lint
+      - name: lint
+        if: matrix.check == 'lint'
         run: pnpm lint
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
 
       - name: Unit tests with coverage
         run: pnpm test -- --coverage
+
+  build:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm build
 
   e2e:
     runs-on: ubuntu-latest
-    needs: quality
+    needs: build
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "pnpm"
-
       - run: pnpm install --frozen-lockfile
 
       - name: Install Playwright
