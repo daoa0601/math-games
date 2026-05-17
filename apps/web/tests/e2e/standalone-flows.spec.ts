@@ -202,7 +202,7 @@ test('score recording reflects in profile progress', async ({ page }) => {
 
   await page.goto('/profile')
   await expectHydrated(page)
-  await expect(desktopLayout(page).locator('main')).toContainText(name)
+  await expect(page.locator('main').first()).toContainText(name)
 
   expectNoRuntimeErrors(errors)
 })
@@ -213,7 +213,7 @@ test('non-firebase parity surfaces are available', async ({ page }) => {
   await page.goto('/profile')
   await expectHydrated(page)
   await expect(
-    desktopLayout(page).getByText('Rank', { exact: true }),
+    page.locator('main').first().getByText('Rank', { exact: true }),
   ).toBeVisible()
   await expect(
     page.getByRole('heading', { name: /Achievements/ }).first(),
