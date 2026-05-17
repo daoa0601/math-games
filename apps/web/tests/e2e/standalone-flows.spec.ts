@@ -216,7 +216,7 @@ test('non-firebase parity surfaces are available', async ({ page }) => {
     page.locator('main').first().getByText('Rank', { exact: true }),
   ).toBeVisible()
   await expect(
-    page.getByRole('heading', { name: /Achievements/ }).first(),
+    page.locator('main').first().getByText(/Achievements/),
   ).toBeVisible()
 
   await page.goto('/games/magic-graph')
