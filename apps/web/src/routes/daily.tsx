@@ -37,17 +37,17 @@ function DailyRoute() {
   const playRoute = module?.route ?? `/games/${challenge.gameId}`
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-6 px-4 py-6 md:gap-10 md:px-6 md:py-10">
-      <header className="sticky top-0 z-40 -mx-4 flex items-center justify-between gap-3 border-b border-border/50 bg-background/95 px-4 py-3 backdrop-blur-sm md:-mx-6 md:px-6">
-        <div className="flex items-center gap-3">
+    <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 px-5 py-8 md:gap-10 md:px-8 md:py-12">
+      <header className="flex items-center justify-between gap-3">
+        <div className="flex items-baseline gap-3">
           <Link
-            className="text-sm text-muted-foreground transition-colors hover:text-primary"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             to="/"
           >
             {t('app.title')}
           </Link>
-          <span className="text-muted-foreground/50">/</span>
-          <h1 className="font-display text-xl font-semibold tracking-tight md:text-2xl">
+          <span className="text-muted-foreground/40">/</span>
+          <h1 className="font-display text-xl font-medium tracking-tight md:text-2xl">
             {t('daily.title')}
           </h1>
         </div>
@@ -57,14 +57,14 @@ function DailyRoute() {
         </div>
       </header>
 
-      <Card className={`${GAME_THEMES[challenge.gameId]}`}>
+      <Card className={`${GAME_THEMES[challenge.gameId]} border-l-4 border-l-primary`}>
         <CardContent>
           <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
             <div>
               <p className="text-sm text-muted-foreground">
                 {challenge.challengeDate}
               </p>
-              <h2 className="font-display mt-2 text-3xl font-semibold tracking-tight">
+              <h2 className="font-display mt-2 text-3xl font-medium tracking-tight">
                 {formatLevelName(locale, challenge.title)}
               </h2>
               <dl className="mt-5 grid gap-3 text-sm">
