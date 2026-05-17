@@ -83,123 +83,6 @@ function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* ── MOBILE LAYOUT (< md) ─────────────────────────────── */}
-      <div className="flex min-h-screen flex-col md:hidden">
-        <MobileAppHeader playerName={displayName} />
-
-        <main className="flex-1 overflow-auto px-4 pb-4 pt-1">
-          {/* Greeting */}
-          <div className="px-1 pb-3.5 pt-1.5">
-            <p
-              className="eyebrow tabular-nums"
-              style={{ fontSize: '0.625rem' }}
-            >
-              {new Date()
-                .toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                })
-                .toUpperCase()}
-            </p>
-            <h1 className="font-display mt-2 text-[1.875rem] font-medium leading-[1.05] tracking-tight">
-              {t('home.greeting').replace('{name}', displayName.split(' ')[0])}{' '}
-              <span className="text-muted-foreground">
-                {t('home.greetingCta')}
-              </span>
-            </h1>
-          </div>
-
-          {/* Daily Hero */}
-          <DailyHeroCard
-            gameId={dailyGameId}
-            title={formatLevelName(locale, dailyChallenge.title)}
-            to={dailyTo}
-            levelId={dailyChallenge.levelId}
-          />
-
-          {/* Quick Stats */}
-          <div className="mt-4 grid grid-cols-3 overflow-hidden rounded-[0.875rem] border border-border bg-card">
-            {[
-              {
-                label: t('home.solved'),
-                value: String(completedCount).padStart(2, '0'),
-                sub: t('home.levels'),
-              },
-              {
-                label: t('home.badges'),
-                value: String(overview.achievements.length).padStart(2, '0'),
-                sub: `/ ${games.reduce((sum, g) => sum + g.levelCount, 0)}`,
-              },
-              {
-                label: t('home.record'),
-                value: '—',
-                sub: t('home.streak'),
-              },
-            ].map((stat, i) => (
-              <div
-                key={stat.label}
-                className="py-3.5 text-center"
-                style={{
-                  borderLeft: i > 0 ? '1px solid var(--border)' : 'none',
-                  padding: '0.875rem 0.75rem',
-                }}
-              >
-                <p className="eyebrow" style={{ fontSize: '0.5625rem' }}>
-                  {stat.label}
-                </p>
-                <p className="font-display mt-1.5 text-[1.375rem] font-medium leading-none tracking-tight tabular-nums">
-                  {stat.value}
-                </p>
-                <p className="mt-0.5 text-[0.625rem] text-muted-foreground">
-                  {stat.sub}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Game Index */}
-          <div className="mt-6 flex items-baseline justify-between px-1 pb-3">
-            <h3 className="font-display text-[1.0625rem] font-medium tracking-tight">
-              {t('home.fourGames')}
-            </h3>
-            <span className="eyebrow" style={{ fontSize: '0.5625rem' }}>
-              {t('home.selectPractice')}
-            </span>
-          </div>
-          <div className="flex flex-col gap-3">
-            {games.map((game) => {
-              const progress = summarizeProgress(progressRows, game.gameId)
-              const pct =
-                game.levelCount > 0
-                  ? Math.round((progress.completed / game.levelCount) * 100)
-                  : 0
-
-              return (
-                <GameIndexCard
-                  key={game.gameId}
-                  gameId={game.gameId as GameGlyphId}
-                  index={game.index}
-                  completed={progress.completed}
-                  total={game.levelCount}
-                  pct={pct}
-                  to={game.to}
-                />
-              )
-            })}
-          </div>
-        </main>
-
-        <MobileTabBar
-          active="home"
-          onNavigate={(tab) => {
-            if (tab === 'daily') void navigate({ to: '/daily' })
-            else if (tab === 'profile') void navigate({ to: '/profile' })
-          }}
-        />
-      </div>
-
       {/* ── DESKTOP LAYOUT (≥ md) ────────────────────────────── */}
       <div className="mx-auto hidden min-h-screen w-full max-w-4xl flex-col px-5 py-8 md:flex md:px-8 md:py-12">
         <header className="flex items-center justify-between gap-4">
@@ -317,6 +200,124 @@ function Home() {
           })}
         </section>
       </div>
+
+      {/* ── MOBILE LAYOUT (< md) ─────────────────────────────── */}
+      <div className="flex min-h-screen flex-col md:hidden">
+        <MobileAppHeader playerName={displayName} />
+
+        <main className="flex-1 overflow-auto px-4 pb-4 pt-1">
+          {/* Greeting */}
+          <div className="px-1 pb-3.5 pt-1.5">
+            <p
+              className="eyebrow tabular-nums"
+              style={{ fontSize: '0.625rem' }}
+            >
+              {new Date()
+                .toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
+                  weekday: 'long',
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                })
+                .toUpperCase()}
+            </p>
+            <h1 className="font-display mt-2 text-[1.875rem] font-medium leading-[1.05] tracking-tight">
+              {t('home.greeting').replace('{name}', displayName.split(' ')[0])}{' '}
+              <span className="text-muted-foreground">
+                {t('home.greetingCta')}
+              </span>
+            </h1>
+          </div>
+
+          {/* Daily Hero */}
+          <DailyHeroCard
+            gameId={dailyGameId}
+            title={formatLevelName(locale, dailyChallenge.title)}
+            to={dailyTo}
+            levelId={dailyChallenge.levelId}
+          />
+
+          {/* Quick Stats */}
+          <div className="mt-4 grid grid-cols-3 overflow-hidden rounded-[0.875rem] border border-border bg-card">
+            {[
+              {
+                label: t('home.solved'),
+                value: String(completedCount).padStart(2, '0'),
+                sub: t('home.levels'),
+              },
+              {
+                label: t('home.badges'),
+                value: String(overview.achievements.length).padStart(2, '0'),
+                sub: `/ ${games.reduce((sum, g) => sum + g.levelCount, 0)}`,
+              },
+              {
+                label: t('home.record'),
+                value: '—',
+                sub: t('home.streak'),
+              },
+            ].map((stat, i) => (
+              <div
+                key={stat.label}
+                className="py-3.5 text-center"
+                style={{
+                  borderLeft: i > 0 ? '1px solid var(--border)' : 'none',
+                  padding: '0.875rem 0.75rem',
+                }}
+              >
+                <p className="eyebrow" style={{ fontSize: '0.5625rem' }}>
+                  {stat.label}
+                </p>
+                <p className="font-display mt-1.5 text-[1.375rem] font-medium leading-none tracking-tight tabular-nums">
+                  {stat.value}
+                </p>
+                <p className="mt-0.5 text-[0.625rem] text-muted-foreground">
+                  {stat.sub}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Game Index */}
+          <div className="mt-6 flex items-baseline justify-between px-1 pb-3">
+            <h3 className="font-display text-[1.0625rem] font-medium tracking-tight">
+              {t('home.fourGames')}
+            </h3>
+            <span className="eyebrow" style={{ fontSize: '0.5625rem' }}>
+              {t('home.selectPractice')}
+            </span>
+          </div>
+          <div className="flex flex-col gap-3">
+            {games.map((game) => {
+              const progress = summarizeProgress(progressRows, game.gameId)
+              const pct =
+                game.levelCount > 0
+                  ? Math.round((progress.completed / game.levelCount) * 100)
+                  : 0
+
+              return (
+                <GameIndexCard
+                  key={game.gameId}
+                  gameId={game.gameId as GameGlyphId}
+                  index={game.index}
+                  completed={progress.completed}
+                  total={game.levelCount}
+                  pct={pct}
+                  to={game.to}
+                />
+              )
+            })}
+          </div>
+        </main>
+
+        <MobileTabBar
+          active="home"
+          onNavigate={(tab) => {
+            if (tab === 'daily') void navigate({ to: '/daily' })
+            else if (tab === 'profile') void navigate({ to: '/profile' })
+          }}
+        />
+      </div>
+
       <span hidden>D1-backed profile state</span>
     </div>
   )
