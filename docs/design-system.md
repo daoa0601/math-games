@@ -58,13 +58,13 @@ When adding a new game (or new UI):
 These have specific reasons. Don't relitigate.
 
 - **No `GamePattern` watermark inside a playfield card.** The pattern competes with the puzzle's own geometric primitives. (User feedback, May 2026.)
-- **No glassmorphism / `backdrop-blur`.** Solid `bg-background` only.
+- **No glassmorphism / `backdrop-blur`** except the mobile tab bar (`tab-bar-glass`). Solid `bg-background` everywhere else.
 - **No Lucide / Heroicons / icon-pack imports** for game or rank glyphs. Hand-draw SVGs. (`lucide-react` is in deps for non-glyph chrome only.)
 - **No scale-up hover** on cards or chrome (`hover:scale-105` etc.). Use `hover:-translate-y-0.5` over 200ms ease.
 - **No 3D tilt on chrome.** `TiltCard` is reserved for in-game pieces.
 - **No gradients on buttons or body backgrounds.** Only game cards / Daily hero get gradients.
 - **No emoji-as-icon, no AI illustrations, no mascots.**
-- **No "Welcome back, [name]!" copy.** Wordmark + Daily card carry the welcome.
+- **No "Welcome back, [name]!" copy on desktop.** Mobile uses a brief greeting (`home.greeting` + `home.greetingCta`); desktop relies on Wordmark + Daily card.
 - **No big multi-layer drop shadows** (`shadow-xl shadow-primary/5`, `shadow-2xl`). Use `shadow-(--card-shadow-long)`.
 - **No `opacity-40 grayscale` for locked/disabled states.** Use outline vs filled (see `RaritySigil`), or dim text via `text-muted-foreground`.
 - **No new fonts.** Rubik (display) + Geist (sans). That's it.
@@ -87,6 +87,82 @@ Where each visual layer is allowed:
 | Profile identity card  |     inherits |                 — |                                       — |                              — |
 | Profile per-game cards |     inherits |               YES |                                     YES |                            YES |
 | Achievement cards      |     inherits |                 — |                                       — | — (uses `RaritySigil` instead) |
+
+## Mobile-First Layout (`packages/ui/`)
+
+The app targets Vietnamese kids on phones/tablets. Mobile is the primary layout; desktop is a reference fallback.
+
+### Layout Architecture
+
+Each route renders **two layout blocks** — desktop first in the DOM (for E2E locator ordering), mobile second:
+
+```tsx
+<div>
+  {/* Desktop — hidden below md (768px) */}
+  <div className="hidden md:flex ...">...</div>
+
+  {/* Mobile — hidden at md and above */}
+  <div className="md:hidden ...">...</div>
+</div>
+```
+
+Both exist in the DOM simultaneously; CSS breakpoints toggle visibility. Tests use `mobileLayout()` / `desktopLayout()` helpers to scope Playwright locators to the correct block.
+
+### Mobile Components
+
+| Component                                          | Purpose                                                                       | Source                                                                            |
+| -------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `<MobileTabBar active onNavigate />`               | Bottom nav with 3 tabs (Home / Daily / Profile). Glass backdrop, `md:hidden`. | [packages/ui/src/mobile-tab-bar.tsx](../packages/ui/src/mobile-tab-bar.tsx)       |
+| `<MobileAppHeader playerName? subtitle? right? />` | Compact top header with Wordmark + avatar.                                    | [packages/ui/src/mobile-app-header.tsx](../packages/ui/src/mobile-app-header.tsx) |
+
+### Mobile Design Patterns
+
+- **Touch targets**: 44px minimum height on all interactive elements (buttons, cards, tab bar items).
+- **Bottom tab bar**: Sticky bottom nav with `tab-bar-glass` backdrop blur. 3 tabs — icons from SVG, labels from i18n keys `nav.home`, `nav.daily`, `nav.profile`.
+- **Eyebrow labels**: `.eyebrow` class — `0.68rem`, `font-weight: 600`, `letter-spacing: 0.14em`, uppercase, `text-muted-foreground`. Used for category markers, stat labels, dates.
+- **Daily hero card**: Oversized `GameGlyph` (size-56) anchored bottom-right, gradient background at 95% opacity, streak counter, "Start →" CTA.
+- **Game index cards**: Each card shows `№ {index}`, game tag (via `formatGameTag()`), game title, progress bar, and "Continue →" / "Play →" CTA.
+- **Stats strip**: 3-column grid with `1px solid var(--border)` dividers. Each cell: eyebrow label, tabular-nums value, subtitle.
+- **Profile identity**: 88px `PlayerAvatar`, rank title, 2×2 stats grid, per-game progress cards with `GameGlyph`, 3-wide achievement grid with `RaritySigil`.
+
+### Responsive Breakpoints
+
+| Viewport                 | Layout                               | Header                        | Navigation              |
+| ------------------------ | ------------------------------------ | ----------------------------- | ----------------------- |
+| < 768px (phone)          | Single column, stacked cards         | `MobileAppHeader`             | `MobileTabBar` (bottom) |
+| ≥ 768px (tablet/desktop) | Max-width container, 2-col game grid | `Wordmark` + avatar + toggles | Inline links            |
+
+## Internationalization (`packages/core/src/i18n/`)
+
+The app is Vietnamese-first. All UI text goes through the `useT()` hook.
+
+### Adding New Translation Keys
+
+1. Add the key to **both** `en` and `vi` objects in [`packages/core/src/i18n/core.ts`](../packages/core/src/i18n/core.ts).
+2. Per-game translations go in `packages/game-{name}/src/translations.ts`.
+3. Format helpers in [`apps/web/src/i18n-format.ts`](../apps/web/src/i18n-format.ts): `formatGameTitle()`, `formatGameTag()`, `formatDifficulty()`, `formatLevelName()`, `formatAchievementName()`, `formatRankName()`.
+4. In components, use `const t = useT()` then `t('key.name')`.
+
+### Key Conventions
+
+- Navigation: `nav.home`, `nav.daily`, `nav.profile`
+- Home page: `home.greeting`, `home.todayChallenge`, `home.streak`, `home.start`, `home.continue`
+- Game tags: `gameTag.magicGraph`, `gameTag.sequenceRace`, etc. (short category labels like "Logic · Graph")
+- Stats: `stats.completed`, `stats.achievements`, `stats.progress`
+
+## Adding a New Game — Complete Recipe
+
+1. **Create package**: `packages/game-{name}/` with `module.ts`, `translations.ts`, `schema.ts`, `catalog.ts`, `logic.ts`.
+2. **Register**: Add to `apps/web/src/games/registry.ts` and `apps/web/src/i18n-translations.ts`.
+3. **Game glyph**: Add SVG to `GameGlyphId` union in `packages/ui/src/game-glyph.tsx`. 3–5 primitives, `currentColor`, hand-drawn feel.
+4. **Theme**: Add `.theme-{name}` + `.dark .theme-{name}` blocks in `apps/web/src/styles.css`. Needs: `--primary`, `--primary-foreground`, `--accent`, `--ring`, `--glow`, `--chart-1/2/3`, `--game-gradient`, `--game-gradient-soft`.
+5. **Pattern**: Add pattern mapping in `MechanicCard` and `GamePattern`.
+6. **Route**: Create `apps/web/src/routes/games/{name}.tsx`. Use `<GameChrome>`, apply `theme-{name}` to `<main>`.
+7. **Home card**: Appears automatically via `registry` — `formatGameTitle()` and `formatGameTag()` need translations.
+8. **i18n**: Add `gameTitle.{camelName}`, `gameTag.{camelName}`, `gameDescription.{camelName}` to both locales.
+9. **Achievements**: Add to game module's `achievements` array + translation keys.
+10. **Smoke test**: Add route to `requiredRoutes` in `infra/scripts/smokeRemoteWorker.ts` and `blockedRoutes` for old root paths.
+11. **Verify**: Run `pnpm check` (format + typecheck + lint + test + build). Check the verification checklist below.
 
 ## Workspace / Build Gotchas
 
