@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 const MOBILE_VIEWPORT = { width: 375, height: 667 }
 
@@ -16,6 +16,10 @@ async function expectNoHorizontalOverflow(page: Page) {
   expect(overflow).toBe(false)
 }
 
+function mobileLayout(page: Page): Locator {
+  return page.locator('[class*="md\\:hidden"]').first()
+}
+
 test.describe('mobile layout — dashboard', () => {
   test('renders without horizontal overflow', async ({ page }) => {
     await page.goto('/')
@@ -27,23 +31,24 @@ test.describe('mobile layout — dashboard', () => {
     await page.goto('/')
     await expectHydrated(page)
     await expect(
-      page.getByText('Start', { exact: false }).first(),
+      mobileLayout(page).getByText('Start', { exact: false }).first(),
     ).toBeVisible()
   })
 
   test('game cards are present in the page', async ({ page }) => {
     await page.goto('/')
     await expectHydrated(page)
-    await expect(page.getByText('Magic Graph').first()).toBeAttached()
-    await expect(page.getByText('Sequence Race').first()).toBeAttached()
-    await expect(page.getByText('Shape Architect').first()).toBeAttached()
-    await expect(page.getByText('Pattern Detective').first()).toBeAttached()
+    const mobile = mobileLayout(page)
+    await expect(mobile.getByText('Magic Graph').first()).toBeAttached()
+    await expect(mobile.getByText('Sequence Race').first()).toBeAttached()
+    await expect(mobile.getByText('Shape Architect').first()).toBeAttached()
+    await expect(mobile.getByText('Pattern Detective').first()).toBeAttached()
   })
 
   test('bottom tab bar is visible on mobile', async ({ page }) => {
     await page.goto('/')
     await expectHydrated(page)
-    await expect(page.getByRole('navigation').last()).toBeVisible()
+    await expect(mobileLayout(page).getByRole('navigation')).toBeVisible()
   })
 })
 
@@ -114,7 +119,7 @@ test.describe('mobile layout — profile', () => {
     await page.goto('/profile')
     await expectHydrated(page)
     await expect(
-      page.getByText('Player', { exact: false }).first(),
+      mobileLayout(page).getByText('Player', { exact: false }).first(),
     ).toBeVisible()
   })
 })

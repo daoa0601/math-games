@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 function collectRuntimeErrors(page: Page) {
   const errors: string[] = []
@@ -35,6 +35,10 @@ async function expectPlayerCookie(page: Page) {
   expect(playerCookie?.httpOnly).toBe(true)
 }
 
+function desktopLayout(page: Page): Locator {
+  return page.locator('[class*="md\\:flex"]').first()
+}
+
 test('old root game routes are rejected', async ({ page }) => {
   for (const path of ['/magic-graph', '/sequence-race', '/shape-architect']) {
     const response = await page.goto(path)
@@ -50,9 +54,11 @@ test('dashboard and daily expose standalone route links', async ({ page }) => {
   await expectHydrated(page)
 
   await expect(page).toHaveTitle('Math Games')
-  await expect(page.getByText('Math Games').first()).toBeVisible()
+  await expect(
+    desktopLayout(page).getByText('Math Games').first(),
+  ).toBeVisible()
 
-  const dailyLink = page.locator('a[href="/daily"]')
+  const dailyLink = desktopLayout(page).locator('a[href="/daily"]')
   await expect(dailyLink.first()).toBeVisible()
 
   await page.goto('/daily')
@@ -61,7 +67,7 @@ test('dashboard and daily expose standalone route links', async ({ page }) => {
     page.getByRole('heading', { name: 'Daily Challenge' }),
   ).toBeVisible()
 
-  const dailyGameLink = page.locator('a[href^="/games/"]')
+  const dailyGameLink = desktopLayout(page).locator('a[href^="/games/"]')
 
   await expect(dailyGameLink).toHaveAttribute(
     'href',
@@ -78,7 +84,7 @@ test('dashboard and daily expose standalone route links', async ({ page }) => {
   await expect(page).toHaveURL(
     /\/games\/(magic-graph|sequence-race|shape-architect)/,
   )
-  await expect(page.locator('main')).toBeVisible()
+  await expect(page.locator('main').first()).toBeVisible()
   expectNoRuntimeErrors(errors)
 })
 
@@ -166,13 +172,15 @@ test('daily challenge shows consistent puzzle for same date', async ({
   const heading = page.getByRole('heading', { name: 'Daily Challenge' })
   await expect(heading).toBeVisible()
 
-  const gameLink = page.locator('a[href^="/games/"]')
+  const gameLink = desktopLayout(page).locator('a[href^="/games/"]')
   const firstHref = await gameLink.getAttribute('href')
 
   await page.reload()
   await expectHydrated(page)
 
-  const secondHref = await gameLink.getAttribute('href')
+  const secondHref = await desktopLayout(page)
+    .locator('a[href^="/games/"]')
+    .getAttribute('href')
   expect(firstHref).toBe(secondHref)
 
   expectNoRuntimeErrors(errors)
@@ -194,7 +202,7 @@ test('score recording reflects in profile progress', async ({ page }) => {
 
   await page.goto('/profile')
   await expectHydrated(page)
-  await expect(page.locator('main')).toContainText(name)
+  await expect(desktopLayout(page).locator('main')).toContainText(name)
 
   expectNoRuntimeErrors(errors)
 })
@@ -204,7 +212,9 @@ test('non-firebase parity surfaces are available', async ({ page }) => {
 
   await page.goto('/profile')
   await expectHydrated(page)
-  await expect(page.getByText('Rank', { exact: true })).toBeVisible()
+  await expect(
+    desktopLayout(page).getByText('Rank', { exact: true }),
+  ).toBeVisible()
   await expect(
     page.getByRole('heading', { name: /Achievements/ }).first(),
   ).toBeVisible()
