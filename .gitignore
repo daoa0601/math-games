@@ -7,6 +7,7 @@ output
 logs
 *.log
 test-results
+coverage
 playwright-report
 *.local
 .env
