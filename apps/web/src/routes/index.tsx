@@ -95,12 +95,12 @@ function Home() {
           <CardContent>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('daily.title')}
-                </p>
-                <h2 className="font-display mt-1.5 text-2xl font-medium tracking-tight md:text-3xl">
-                  {formatLevelName(locale, dailyChallenge.title)}
                 </h2>
+                <p className="font-display mt-1.5 text-2xl font-medium tracking-tight md:text-3xl">
+                  {formatLevelName(locale, dailyChallenge.title)}
+                </p>
                 <p className="mt-1.5 text-sm text-muted-foreground">
                   {formatGameTitle(locale, dailyChallenge.gameId)} ·{' '}
                   {formatDifficulty(locale, dailyChallenge.difficulty)} ·{' '}
