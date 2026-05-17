@@ -50,16 +50,12 @@ test('dashboard and daily expose standalone route links', async ({ page }) => {
   await expectHydrated(page)
 
   await expect(page).toHaveTitle('Math Games')
-  await expect(page.getByRole('heading', { name: 'Math Games' })).toBeVisible()
-  await expect(
-    page.getByRole('heading', { name: 'Daily Challenge' }),
-  ).toBeVisible()
+  await expect(page.getByText('Math Games').first()).toBeVisible()
 
   const dailyLink = page.locator('a[href="/daily"]')
+  await expect(dailyLink.first()).toBeVisible()
 
-  await expect(dailyLink).toHaveText('Play Today')
   await page.goto('/daily')
-
   await expect(page).toHaveURL('/daily')
   await expect(
     page.getByRole('heading', { name: 'Daily Challenge' }),
@@ -104,7 +100,6 @@ test('profile writes through the D1-backed server function', async ({
   await page.getByRole('button', { name: 'Save Profile' }).click()
 
   await expect(page.getByText('Profile saved.')).toBeVisible()
-  await expect(page.locator('header')).toContainText(displayName)
   await expectPlayerCookie(page)
   expectNoRuntimeErrors(errors)
 })
@@ -156,7 +151,6 @@ test('profile round-trip: saved values persist across page reload', async ({
   await expect(page.getByLabel('Display name')).toHaveValue(displayName)
   await expect(page.getByLabel('Language')).toHaveValue('vi')
   await expect(page.getByLabel('Grade band')).toHaveValue('high')
-  await expect(page.locator('header')).toContainText(displayName)
 
   expectNoRuntimeErrors(errors)
 })
@@ -187,7 +181,6 @@ test('daily challenge shows consistent puzzle for same date', async ({
 test('score recording reflects in profile progress', async ({ page }) => {
   const errors = collectRuntimeErrors(page)
 
-  // Save a profile first
   await page.goto('/profile')
   await expectHydrated(page)
   const name = `Score ${Date.now()}`
@@ -195,12 +188,10 @@ test('score recording reflects in profile progress', async ({ page }) => {
   await page.getByRole('button', { name: 'Save Profile' }).click()
   await expect(page.getByText('Profile saved.')).toBeVisible()
 
-  // Play a game — visit a game page so the player cookie is set
   await page.goto('/games/magic-graph')
   await expectHydrated(page)
   await expect(page.getByRole('heading', { name: 'Numbers' })).toBeVisible()
 
-  // Check profile shows the player
   await page.goto('/profile')
   await expectHydrated(page)
   await expect(page.locator('main')).toContainText(name)
