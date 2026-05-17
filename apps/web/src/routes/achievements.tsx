@@ -47,7 +47,7 @@ function AchievementsRoute() {
             {t('app.title')}
           </Link>
           <span className="text-muted-foreground/50">/</span>
-          <h1 className="text-xl font-bold tracking-tight md:text-2xl">
+          <h1 className="font-display text-xl font-semibold tracking-tight md:text-2xl">
             {t('achievements.title')}
           </h1>
           <Badge variant="secondary">
@@ -63,7 +63,7 @@ function AchievementsRoute() {
         </div>
       </header>
 
-      <Card className="border border-border/50 shadow-lg">
+      <Card>
         <CardContent>
           <ul className="divide-y divide-border/50">
             {ACHIEVEMENTS.map((achievement) => {

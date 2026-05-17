@@ -253,7 +253,7 @@ function MagicGraphRoute() {
           active={solved}
           colors={['#7c3aed', '#a78bfa', '#c4b5fd', '#8b5cf6', '#6d28d9']}
         />
-        <Card className="game-card-bg relative overflow-hidden border border-primary/15 shadow-xl shadow-primary/5">
+        <Card className="game-card-bg relative overflow-hidden border-0">
           <GamePattern pattern="constellation" />
           <CardContent className="relative z-10">
             <div className="relative mx-auto aspect-[300/220] max-w-[520px]">

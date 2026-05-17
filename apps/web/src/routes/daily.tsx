@@ -47,7 +47,7 @@ function DailyRoute() {
             {t('app.title')}
           </Link>
           <span className="text-muted-foreground/50">/</span>
-          <h1 className="text-xl font-bold tracking-tight md:text-2xl">
+          <h1 className="font-display text-xl font-semibold tracking-tight md:text-2xl">
             {t('daily.title')}
           </h1>
         </div>
@@ -57,14 +57,14 @@ function DailyRoute() {
         </div>
       </header>
 
-      <Card className={`${GAME_THEMES[challenge.gameId]} game-card-bg border border-primary/15 shadow-xl shadow-primary/5 ring-1 ring-inset ring-white/10 dark:ring-white/5`}>
+      <Card className={`${GAME_THEMES[challenge.gameId]}`}>
         <CardContent>
           <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
             <div>
-              <p className="text-sm font-semibold uppercase text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {challenge.challengeDate}
               </p>
-              <h2 className="mt-2 text-3xl font-semibold">
+              <h2 className="font-display mt-2 text-3xl font-semibold tracking-tight">
                 {formatLevelName(locale, challenge.title)}
               </h2>
               <dl className="mt-5 grid gap-3 text-sm">

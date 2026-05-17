@@ -253,10 +253,10 @@ function ProfileRoute() {
             {t('app.title')}
           </Link>
           <span className="text-muted-foreground/50">/</span>
-          <h1 className="text-xl font-bold tracking-tight md:text-2xl">
+          <h1 className="font-display text-xl font-semibold tracking-tight md:text-2xl">
             {t('profile.title')}
           </h1>
-          <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm font-bold text-primary">
+          <span className="rounded-full border border-border bg-muted/50 px-3 py-0.5 text-sm text-muted-foreground">
             {profile.displayName}
           </span>
           <span hidden>D1-backed profile state</span>
@@ -267,18 +267,18 @@ function ProfileRoute() {
         </div>
       </header>
 
-      <Card className="border border-border/50 shadow-lg">
+      <Card>
         <CardContent>
-          <div className="flex items-start gap-6">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {t('profile.rank')}
               </p>
-              <p className="mt-1 text-2xl font-extrabold tracking-tight">
+              <p className="font-display mt-1 text-xl font-semibold tracking-tight">
                 {formatRankName(locale, profileSummary.currentRank.name)}
               </p>
               <Progress
-                className="mt-3 h-3"
+                className="mt-3 h-2"
                 value={profileSummary.rankProgress}
               />
               <p className="mt-1.5 text-xs tabular-nums text-muted-foreground">
@@ -290,28 +290,28 @@ function ProfileRoute() {
                   : t('profile.topRank')}
               </p>
             </div>
-            <div className="grid shrink-0 grid-cols-3 gap-4 text-center">
-              <div className="border-t-2 border-t-primary/40 pt-2">
-                <p className="text-xs text-muted-foreground">
+            <div className="flex shrink-0 gap-6 text-sm">
+              <div>
+                <p className="text-muted-foreground">
                   {t('stats.completed')}
                 </p>
-                <p className="mt-1 text-2xl font-extrabold tabular-nums text-primary">
+                <p className="mt-0.5 text-lg font-bold tabular-nums">
                   {profileSummary.completedCount}
                 </p>
               </div>
-              <div className="border-t-2 border-t-accent/40 pt-2">
-                <p className="text-xs text-muted-foreground">
+              <div>
+                <p className="text-muted-foreground">
                   {t('profile.totalAttempts')}
                 </p>
-                <p className="mt-1 text-2xl font-extrabold tabular-nums">
+                <p className="mt-0.5 text-lg font-bold tabular-nums">
                   {profileSummary.totalAttempts}
                 </p>
               </div>
-              <div className="border-t-2 border-t-success/40 pt-2">
-                <p className="text-xs text-muted-foreground">
+              <div>
+                <p className="text-muted-foreground">
                   {t('stats.achievements')}
                 </p>
-                <p className="mt-1 text-2xl font-extrabold tabular-nums text-success">
+                <p className="mt-0.5 text-lg font-bold tabular-nums">
                   {achievementIds.length}
                 </p>
               </div>
@@ -321,7 +321,7 @@ function ProfileRoute() {
       </Card>
 
       <section className="grid gap-6 md:grid-cols-[0.9fr_1.1fr]">
-        <Card className="border border-border/50 shadow-md">
+        <Card>
           <CardHeader>
             <CardTitle>{t('profile.account')}</CardTitle>
           </CardHeader>
