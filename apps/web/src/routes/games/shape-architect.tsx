@@ -1,21 +1,19 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Badge } from '@math-games/ui'
 import { Confetti } from '@math-games/ui'
-import { GamePattern } from '@math-games/ui'
 import {
   formatAchievementName,
   formatDifficulty,
   formatLevelName,
 } from '@/i18n-format'
-import { LanguageToggle } from '@math-games/ui'
+import { GameChrome } from '@math-games/ui'
 import { getHints } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { LearnSection } from '@math-games/ui'
 import { PracticeGeneratorSection } from '@/games/practice-generator-section'
-import { ThemeToggle } from '@math-games/ui'
 import { Button } from '@math-games/ui'
 import { Card, CardContent } from '@math-games/ui'
 import { Separator } from '@math-games/ui'
@@ -530,35 +528,22 @@ function ShapeArchitectRoute() {
 
   return (
     <main className="theme-shape-architect mx-auto flex min-h-screen max-w-5xl flex-col gap-6 overflow-x-hidden px-4 py-6 md:gap-10 md:px-6 md:py-10">
-      <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-border/50 bg-background/95 px-4 py-3 -mx-4 backdrop-blur-sm md:-mx-6 md:px-6">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <Link
-            className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
-            to="/"
-          >
-            {t('app.title')}
-          </Link>
-          <span className="text-muted-foreground">/</span>
-          <h1 className="truncate text-lg font-bold tracking-tight md:text-2xl">
-            {formatLevelName(locale, config.name)}
-          </h1>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="rounded-md bg-primary/10 px-2 py-1 text-sm font-semibold text-primary">
+      <GameChrome
+        game="shape-architect"
+        levelTitle={formatLevelName(locale, config.name)}
+        meta={
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
             {filledTargets}/{config.targetVoxels.length}
           </span>
-          <LanguageToggle />
-          <ThemeToggle />
-        </div>
-      </header>
+        }
+      />
 
       <section className="relative grid gap-4">
         <Confetti
           active={solved}
           colors={['#14b8a6', '#2dd4bf', '#5eead4', '#0d9488', '#0f766e']}
         />
-        <Card className="relative overflow-hidden border border-primary/15 shadow-xl shadow-primary/5">
-          <GamePattern pattern="blueprint" />
+        <Card className="game-card-bg relative overflow-hidden border-0">
           <CardContent className="relative">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xl font-semibold">{t('game.blueprint')}</h2>
@@ -779,7 +764,7 @@ function ShapeArchitectRoute() {
         </Card>
 
         {hints.length > 0 ? (
-          <Card className="border-0 shadow-lg bg-primary/5">
+          <Card className="border border-primary/15 bg-primary/[0.04] shadow-none">
             <CardContent>
               <h3 className="text-sm font-bold text-primary">{t('game.hints')}</h3>
               <ul className="mt-2 grid gap-1.5 text-sm text-muted-foreground">
@@ -793,19 +778,20 @@ function ShapeArchitectRoute() {
 
         {errorPopup ? (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 p-4 animate-slide-up-fade"
             onClick={() => setErrorPopup(null)}
+            role="dialog"
+            aria-modal="true"
           >
             <Card
-              className="mx-4 max-w-sm"
+              className="animate-scale-in w-full max-w-sm border border-destructive/30 shadow-(--card-shadow-long)"
               onClick={(event) => event.stopPropagation()}
             >
-              <CardContent className="text-center">
-                <p className="text-sm font-medium text-destructive">
+              <CardContent className="flex flex-col gap-4">
+                <p className="font-display text-base font-medium tracking-tight text-destructive">
                   {errorPopup}
                 </p>
                 <Button
-                  className="mt-4 w-full"
                   variant="outline"
                   onClick={() => setErrorPopup(null)}
                   type="button"

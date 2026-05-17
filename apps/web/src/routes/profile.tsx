@@ -7,21 +7,26 @@ import type { ChangeEvent, FormEvent } from 'react'
 
 import { ACHIEVEMENTS } from '@/achievements/achievements.logic'
 import {
-  formatAchievementDescription,
-  formatAchievementName,
-  formatAchievementRarity,
   formatGameTitle,
   formatRankName,
 } from '@/i18n-format'
-import { LanguageToggle } from '@math-games/ui'
-import { useLocale } from '@math-games/ui'
-import { ThemeToggle } from '@math-games/ui'
-import { useT } from '@math-games/ui'
-import { Badge } from '@math-games/ui'
-import { Button } from '@math-games/ui'
-import { Card, CardContent, CardHeader, CardTitle } from '@math-games/ui'
-import { Progress } from '@math-games/ui'
-import { Separator } from '@math-games/ui'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  type GameGlyphId,
+  LanguageToggle,
+  MechanicCard,
+  PlayerAvatar,
+  Progress,
+  Separator,
+  ThemeToggle,
+  useLocale,
+  useT,
+  Wordmark,
+} from '@math-games/ui'
 import { gameModules } from '@/games/registry'
 import { RANKS } from '@/player/ranks'
 import {
@@ -243,23 +248,22 @@ function ProfileRoute() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 px-5 py-8 md:gap-10 md:px-8 md:py-12">
-      <header className="flex items-center justify-between gap-3">
+    <main className="mx-auto flex min-h-screen max-w-4xl flex-col px-5 py-8 md:px-8 md:py-12">
+      <header className="flex items-center justify-between gap-4">
         <div className="flex items-baseline gap-3">
           <Link
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             to="/"
+            aria-label={t('app.title')}
+            className="text-muted-foreground transition-colors hover:text-foreground"
           >
-            {t('app.title')}
+            <Wordmark compact label={t('app.title')} />
           </Link>
-          <span className="text-muted-foreground/40">/</span>
+          <span aria-hidden className="text-border">
+            /
+          </span>
           <h1 className="font-display text-xl font-medium tracking-tight md:text-2xl">
             {t('profile.title')}
           </h1>
-          <span className="text-sm text-muted-foreground">
-            {profile.displayName}
-          </span>
-          <span hidden>D1-backed profile state</span>
         </div>
         <div className="flex items-center gap-1">
           <LanguageToggle />
@@ -267,18 +271,25 @@ function ProfileRoute() {
         </div>
       </header>
 
-      <Card>
+      <Card className="mt-8 shadow-(--card-shadow-long)">
         <CardContent>
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+            <PlayerAvatar
+              seed={profile.displayName}
+              className="size-20 shrink-0"
+            />
             <div className="min-w-0 flex-1">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-[0.7rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                 {t('profile.rank')}
               </p>
-              <p className="font-display mt-1 text-xl font-medium tracking-tight">
+              <p className="font-display mt-1 text-2xl font-medium tracking-tight md:text-3xl">
                 {formatRankName(locale, profileSummary.currentRank.name)}
               </p>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                {profile.displayName}
+              </p>
               <Progress
-                className="mt-3 h-2"
+                className="mt-4 h-2"
                 value={profileSummary.rankProgress}
               />
               <p className="mt-1.5 text-xs tabular-nums text-muted-foreground">
@@ -290,37 +301,92 @@ function ProfileRoute() {
                   : t('profile.topRank')}
               </p>
             </div>
-            <div className="flex shrink-0 gap-6 text-sm">
+            <div className="grid shrink-0 grid-cols-3 gap-x-6 gap-y-1 text-sm sm:grid-cols-1 sm:gap-y-3">
               <div>
-                <p className="text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {t('stats.completed')}
                 </p>
-                <p className="mt-0.5 text-lg font-bold tabular-nums">
+                <p className="font-display text-lg font-medium tabular-nums">
                   {profileSummary.completedCount}
                 </p>
               </div>
               <div>
-                <p className="text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {t('profile.totalAttempts')}
                 </p>
-                <p className="mt-0.5 text-lg font-bold tabular-nums">
+                <p className="font-display text-lg font-medium tabular-nums">
                   {profileSummary.totalAttempts}
                 </p>
               </div>
-              <div>
-                <p className="text-muted-foreground">
+              <Link
+                to="/achievements"
+                className="transition-colors hover:text-foreground"
+              >
+                <p className="text-xs text-muted-foreground">
                   {t('stats.achievements')}
                 </p>
-                <p className="mt-0.5 text-lg font-bold tabular-nums">
+                <p className="font-display text-lg font-medium tabular-nums">
                   {achievementIds.length}
+                  <span className="text-sm text-muted-foreground">
+                    /{ACHIEVEMENTS.length}
+                  </span>
                 </p>
-              </div>
+              </Link>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <section className="grid gap-6 md:grid-cols-[0.9fr_1.1fr]">
+      <section className="mt-8">
+        <h2 className="font-display text-lg font-medium tracking-tight">
+          {t('profile.breakdown')}
+        </h2>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          {gameModules.map((module) => {
+            const summary = summarizeGame(progressRows, module.id)
+            const pct =
+              module.levelCount === 0
+                ? 0
+                : Math.round((summary.completed / module.levelCount) * 100)
+
+            return (
+              <MechanicCard key={module.id} game={module.id as GameGlyphId}>
+                <h3 className="font-display text-lg font-medium tracking-tight">
+                  {formatGameTitle(locale, module.id)}
+                </h3>
+                <div className="mt-auto pt-6">
+                  <div className="flex items-baseline justify-between text-xs text-muted-foreground">
+                    <span className="tabular-nums">
+                      {summary.completed}/{module.levelCount}
+                    </span>
+                    <span className="tabular-nums">{pct}%</span>
+                  </div>
+                  <Progress
+                    value={pct}
+                    className="mt-1.5 h-2 bg-primary/15"
+                  />
+                  <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                    <div>
+                      <dt>{t('stats.progress')}</dt>
+                      <dd className="mt-0.5 font-medium tabular-nums text-foreground">
+                        {summary.rows}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>{t('profile.totalAttempts')}</dt>
+                      <dd className="mt-0.5 font-medium tabular-nums text-foreground">
+                        {summary.attempts}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </MechanicCard>
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="mt-8 grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>{t('profile.account')}</CardTitle>
@@ -377,13 +443,15 @@ function ProfileRoute() {
                 </p>
               ) : null}
             </form>
+          </CardContent>
+        </Card>
 
-            <Separator className="my-6" />
-
-            <h2 className="text-sm font-semibold text-muted-foreground">
-              {t('profile.portability')}
-            </h2>
-            <div className="mt-3 grid gap-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('profile.portability')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2">
               <Button
                 variant="outline"
                 onClick={handleExportAchievements}
@@ -406,111 +474,42 @@ function ProfileRoute() {
                 {importStatus}
               </p>
             ) : null}
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('profile.progress')}</CardTitle>
-          </CardHeader>
-          <CardContent>
+            <Separator className="my-6" />
+
+            <h3 className="text-sm font-semibold text-muted-foreground">
+              {t('profile.progress')}
+            </h3>
             {progressRows.length === 0 ? (
-              <p className="text-muted-foreground">{t('profile.noProgress')}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {t('profile.noProgress')}
+              </p>
             ) : (
-              <ol className="divide-y divide-border border-y border-border">
-                {progressRows.map((row) => (
+              <ol className="mt-2 divide-y divide-border/60">
+                {progressRows.slice(0, 8).map((row) => (
                   <li
-                    className="grid gap-1 py-3 text-sm sm:grid-cols-[1fr_auto]"
+                    className="grid gap-1 py-2 text-sm sm:grid-cols-[1fr_auto]"
                     key={`${row.gameId}-${row.levelId}`}
                   >
-                    <span>
-                      <span className="font-semibold">
+                    <span className="truncate">
+                      <span className="font-medium">
                         {formatGameTitle(locale, row.gameId)}
                       </span>{' '}
-                      / {row.levelId}
+                      <span className="text-muted-foreground">
+                        / {row.levelId}
+                      </span>
                     </span>
-                    <span className="text-muted-foreground">
+                    <span className="text-xs tabular-nums text-muted-foreground">
                       {t('profile.attempts')} {row.attempts}
                     </span>
                   </li>
                 ))}
               </ol>
             )}
-
-            <Separator className="my-8" />
-
-            <h2 className="text-xl font-semibold">{t('profile.breakdown')}</h2>
-            <div className="mt-4 grid gap-3">
-              {gameModules.map((module) => {
-                const summary = summarizeGame(progressRows, module.id)
-                const completedPercent =
-                  module.levelCount === 0
-                    ? 0
-                    : (summary.completed / module.levelCount) * 100
-
-                return (
-                  <div className="border-t border-border pt-3" key={module.id}>
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-semibold">
-                        {formatGameTitle(locale, module.id)}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {summary.completed}/{module.levelCount}
-                      </span>
-                    </div>
-                    <Progress className="mt-2 h-2" value={completedPercent} />
-                    <dl className="mt-2 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                      <div>
-                        <dt>{t('stats.progress')}</dt>
-                        <dd className="mt-1 font-medium text-foreground">
-                          {summary.rows}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>{t('profile.totalAttempts')}</dt>
-                        <dd className="mt-1 font-medium text-foreground">
-                          {summary.attempts}
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
-                )
-              })}
-            </div>
-
-            <Separator className="my-8" />
-
-            <h2 className="text-xl font-semibold">
-              {t('profile.achievements')} ({achievementIds.length}/
-              {ACHIEVEMENTS.length})
-            </h2>
-            <ul className="mt-4 divide-y divide-border border-y border-border">
-              {ACHIEVEMENTS.map((achievement) => {
-                const unlocked = achievementIds.includes(achievement.id)
-
-                return (
-                  <li
-                    className={`py-3 text-sm${unlocked ? '' : ' opacity-40'}`}
-                    key={achievement.id}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">
-                        {formatAchievementName(locale, achievement.id)}
-                      </span>
-                      <Badge variant="secondary">
-                        {formatAchievementRarity(locale, achievement.rarity)}
-                      </Badge>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {formatAchievementDescription(locale, achievement.id)}
-                    </p>
-                  </li>
-                )
-              })}
-            </ul>
           </CardContent>
         </Card>
       </section>
+      <span hidden>D1-backed profile state</span>
     </main>
   )
 }

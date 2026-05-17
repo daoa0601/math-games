@@ -5,23 +5,18 @@ import {
   formatAchievementName,
   formatAchievementRarity,
 } from '@/i18n-format'
-import { LanguageToggle } from '@math-games/ui'
-import { useLocale } from '@math-games/ui'
-import { ThemeToggle } from '@math-games/ui'
-import { useT } from '@math-games/ui'
-import { Badge } from '@math-games/ui'
-import { Card, CardContent } from '@math-games/ui'
+import {
+  LanguageToggle,
+  RaritySigil,
+  ThemeToggle,
+  useLocale,
+  useT,
+  Wordmark,
+} from '@math-games/ui'
 import { getPlayerProfileOverview } from '@/player/profile.functions'
 import type { AchievementRarity } from '@/games/game-module'
 import { RouteErrorFallback } from '@/routes/-route-error'
 import { RoutePending } from '@/routes/-route-pending'
-
-const RARITY_STYLES: Record<AchievementRarity, string> = {
-  common: 'border-l-muted-foreground/50',
-  rare: 'border-l-blue-500',
-  epic: 'border-l-purple-500',
-  legendary: 'border-l-amber-500',
-}
 
 export const Route = createFileRoute('/achievements')({
   loader: () => getPlayerProfileOverview(),
@@ -30,32 +25,43 @@ export const Route = createFileRoute('/achievements')({
   pendingComponent: RoutePending,
 })
 
+const RARITY_ORDER: Record<AchievementRarity, number> = {
+  legendary: 0,
+  epic: 1,
+  rare: 2,
+  common: 3,
+}
+
 function AchievementsRoute() {
   const overview = Route.useLoaderData()
   const achievementIds = overview.achievements
   const t = useT()
   const { locale } = useLocale()
 
+  const sorted = [...ACHIEVEMENTS].sort((a, b) => {
+    const aUnlocked = achievementIds.includes(a.id) ? 0 : 1
+    const bUnlocked = achievementIds.includes(b.id) ? 0 : 1
+    if (aUnlocked !== bUnlocked) return aUnlocked - bUnlocked
+    return RARITY_ORDER[a.rarity] - RARITY_ORDER[b.rarity]
+  })
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 px-5 py-8 md:gap-10 md:px-8 md:py-12">
-      <header className="flex items-center justify-between gap-3">
+    <main className="mx-auto flex min-h-screen max-w-4xl flex-col px-5 py-8 md:px-8 md:py-12">
+      <header className="flex items-center justify-between gap-4">
         <div className="flex items-baseline gap-3">
           <Link
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             to="/"
+            aria-label={t('app.title')}
+            className="text-muted-foreground transition-colors hover:text-foreground"
           >
-            {t('app.title')}
+            <Wordmark compact label={t('app.title')} />
           </Link>
-          <span className="text-muted-foreground/40">/</span>
+          <span aria-hidden className="text-border">
+            /
+          </span>
           <h1 className="font-display text-xl font-medium tracking-tight md:text-2xl">
             {t('achievements.title')}
           </h1>
-          <Badge variant="secondary">
-            <span className="font-bold tabular-nums">
-              {achievementIds.length}/{ACHIEVEMENTS.length}
-            </span>{' '}
-            {t('achievements.unlocked')}
-          </Badge>
         </div>
         <div className="flex items-center gap-1">
           <LanguageToggle />
@@ -63,34 +69,58 @@ function AchievementsRoute() {
         </div>
       </header>
 
-      <Card>
-        <CardContent>
-          <ul className="divide-y divide-border/50">
-            {ACHIEVEMENTS.map((achievement) => {
-              const unlocked = achievementIds.includes(achievement.id)
+      <p className="mt-2 text-sm text-muted-foreground">
+        <strong className="font-medium tabular-nums text-foreground">
+          {achievementIds.length}/{ACHIEVEMENTS.length}
+        </strong>{' '}
+        {t('achievements.unlocked')}
+      </p>
 
-              return (
-                <li
-                  className={`border-l-4 py-4 pl-4 text-sm transition-opacity ${RARITY_STYLES[achievement.rarity]} ${unlocked ? '' : 'opacity-40 grayscale'}`}
-                  key={achievement.id}
+      <section className="mt-8 grid gap-3 sm:grid-cols-2">
+        {sorted.map((achievement) => {
+          const unlocked = achievementIds.includes(achievement.id)
+
+          return (
+            <div
+              key={achievement.id}
+              className={
+                'group relative flex items-start gap-4 rounded-2xl border border-border/60 bg-card p-5 shadow-(--card-shadow-long) transition-opacity'
+              }
+            >
+              <RaritySigil
+                rarity={achievement.rarity}
+                locked={!unlocked}
+                className="size-11 shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline gap-2">
+                  <h3
+                    className={
+                      unlocked
+                        ? 'font-display text-base font-medium tracking-tight'
+                        : 'font-display text-base font-medium tracking-tight text-muted-foreground'
+                    }
+                  >
+                    {formatAchievementName(locale, achievement.id)}
+                  </h3>
+                  <span className="text-[0.65rem] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                    {formatAchievementRarity(locale, achievement.rarity)}
+                  </span>
+                </div>
+                <p
+                  className={
+                    unlocked
+                      ? 'mt-1 text-sm leading-relaxed text-muted-foreground'
+                      : 'mt-1 text-sm leading-relaxed text-muted-foreground/60'
+                  }
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold">
-                      {formatAchievementName(locale, achievement.id)}
-                    </span>
-                    <Badge variant="secondary">
-                      {formatAchievementRarity(locale, achievement.rarity)}
-                    </Badge>
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {formatAchievementDescription(locale, achievement.id)}
-                  </p>
-                </li>
-              )
-            })}
-          </ul>
-        </CardContent>
-      </Card>
+                  {formatAchievementDescription(locale, achievement.id)}
+                </p>
+              </div>
+            </div>
+          )
+        })}
+      </section>
     </main>
   )
 }

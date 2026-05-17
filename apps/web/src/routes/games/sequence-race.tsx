@@ -1,21 +1,19 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Confetti } from '@math-games/ui'
-import { GamePattern } from '@math-games/ui'
 import {
   formatAchievementName,
   formatActor,
   formatDifficulty,
   formatLevelName,
 } from '@/i18n-format'
-import { LanguageToggle } from '@math-games/ui'
+import { GameChrome } from '@math-games/ui'
 import { getHints } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { LearnSection } from '@math-games/ui'
 import { PracticeGeneratorSection } from '@/games/practice-generator-section'
-import { ThemeToggle } from '@math-games/ui'
 import { Badge } from '@math-games/ui'
 import { Button } from '@math-games/ui'
 import { Card, CardContent } from '@math-games/ui'
@@ -219,35 +217,22 @@ function SequenceRaceRoute() {
 
   return (
     <main className="theme-sequence-race mx-auto flex min-h-screen max-w-5xl flex-col gap-6 px-4 py-6 md:gap-10 md:px-6 md:py-10">
-      <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-border/50 bg-background/95 px-4 py-3 -mx-4 backdrop-blur-sm md:-mx-6 md:px-6">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <Link
-            className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
-            to="/"
-          >
-            {t('app.title')}
-          </Link>
-          <span className="text-muted-foreground">/</span>
-          <h1 className="truncate text-lg font-bold tracking-tight md:text-2xl">
-            {formatLevelName(locale, config.name)}
-          </h1>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="rounded-md bg-primary/10 px-2 py-1 text-sm font-semibold text-primary">
+      <GameChrome
+        game="sequence-race"
+        levelTitle={formatLevelName(locale, config.name)}
+        meta={
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
             {t('game.target')} {config.target}
           </span>
-          <LanguageToggle />
-          <ThemeToggle />
-        </div>
-      </header>
+        }
+      />
 
       <section className="relative grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
         <Confetti
           active={game.winner === 'player'}
-          colors={['#f97316', '#fb923c', '#fdba74', '#ea580c', '#fbbf24']}
+          colors={['#b8543a', '#c87355', '#d49070', '#a3422c', '#e0a988']}
         />
-        <Card className="relative overflow-hidden border border-primary/15 shadow-xl shadow-primary/5">
-          <GamePattern pattern="arrows" />
+        <Card className="game-card-bg relative overflow-hidden border-0">
           <CardContent className="relative">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xl font-semibold">{t('game.raceLine')}</h2>
@@ -307,7 +292,7 @@ function SequenceRaceRoute() {
         </Card>
 
         <div className="grid gap-4">
-          <Card className="border-0 shadow-lg">
+          <Card className="border border-border/60 shadow-(--card-shadow-long)">
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -371,7 +356,7 @@ function SequenceRaceRoute() {
           </Card>
 
           {hints.length > 0 ? (
-            <Card className="border-0 shadow-lg bg-primary/5">
+            <Card className="border border-primary/15 bg-primary/[0.04] shadow-none">
               <CardContent>
                 <h3 className="text-sm font-bold text-primary">{t('game.hints')}</h3>
                 <ul className="mt-2 grid gap-1.5 text-sm text-muted-foreground">

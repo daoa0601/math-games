@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMemo, useState } from 'react'
 
@@ -7,9 +7,8 @@ import {
   formatAchievementName,
   formatDifficulty,
 } from '@/i18n-format'
-import { LanguageToggle } from '@math-games/ui'
+import { Confetti, GameChrome } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
-import { ThemeToggle } from '@math-games/ui'
 import { Badge } from '@math-games/ui'
 import { Button } from '@math-games/ui'
 import { Card, CardContent, CardHeader } from '@math-games/ui'
@@ -95,22 +94,10 @@ function PatternDetectiveRoute() {
 
   return (
     <main className="theme-pattern-detective mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-6 md:gap-10 md:px-6 md:py-10">
-      <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-border/50 bg-background/95 px-4 py-3 -mx-4 backdrop-blur-sm md:-mx-6 md:px-6">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            {t('app.title')}
-          </Link>
-          <span className="text-muted-foreground">/</span>
-          <h1 className="text-lg font-bold tracking-tight">Pattern Detective</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <LanguageToggle />
-          <ThemeToggle />
-        </div>
-      </header>
+      <GameChrome
+        game="pattern-detective"
+        levelTitle={t('gameTitle.patternDetective')}
+      />
 
       <LevelSelector
         configs={configs}
@@ -123,6 +110,13 @@ function PatternDetectiveRoute() {
           setSaveStatus(null)
         }}
       />
+
+      <div className="relative">
+        <Confetti
+          active={result === 'correct'}
+          colors={['#a06420', '#c88848', '#d9a06d', '#8a5318', '#e8c590']}
+        />
+      </div>
 
       <SequenceCard
         level={level}
@@ -194,7 +188,7 @@ function SequenceCard({
   const answered = result !== null
 
   return (
-    <Card className="border border-primary/15 shadow-xl shadow-primary/5">
+    <Card className="game-card-bg border-0">
       <CardHeader>
         <div className="flex items-center justify-between">
           <Badge variant="outline">{level.patternType}</Badge>
@@ -262,17 +256,27 @@ function ResultCard({
     <Card
       className={
         result === 'correct'
-          ? 'border-green-500/50 bg-green-500/5'
-          : 'border-destructive/50 bg-destructive/5'
+          ? 'animate-scale-in border-success/40 bg-success/[0.05] shadow-(--card-shadow-long)'
+          : 'animate-scale-in border-destructive/40 bg-destructive/[0.05] shadow-(--card-shadow-long)'
       }
     >
-      <CardContent className="flex flex-col gap-3 pt-6">
-        <p className="text-lg font-semibold">
+      <CardContent className="flex flex-col gap-3">
+        <p
+          className={
+            result === 'correct'
+              ? 'font-display text-lg font-medium tracking-tight text-success'
+              : 'font-display text-lg font-medium tracking-tight text-destructive'
+          }
+        >
           {result === 'correct' ? t('stats.solved') : t('game.tryAgain')}
         </p>
         {result === 'wrong' && (
-          <p className="text-muted-foreground">
-            The answer is {answer}.{hint ? ` Hint: ${hint}` : ''}
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            The answer is{' '}
+            <span className="font-medium text-foreground tabular-nums">
+              {answer}
+            </span>
+            .{hint ? ` Hint: ${hint}` : ''}
           </p>
         )}
         {saveStatus && (

@@ -2,6 +2,16 @@
 
 Guidance for agentic coding assistants working in `math-games`.
 
+## Design System — Read Before Touching UI
+
+If your task touches anything visual — adding a new game, building a new
+route, modifying any chrome — read [docs/design-system.md](docs/design-system.md)
+**first**. It enumerates the reusable components (`Wordmark`, `MechanicCard`,
+`GameChrome`, `GameGlyph`, `PlayerAvatar`, `RaritySigil`), the design tokens
+that must be used instead of raw Tailwind colors, the gameplay-vs-chrome
+pattern hierarchy, and the explicit DO / DO-NOT list with reasons. Don't
+relitigate decisions documented there without discussing with the user first.
+
 ## Project Scope
 
 This repository root is the Math Games app. There is no nested app wrapper.
