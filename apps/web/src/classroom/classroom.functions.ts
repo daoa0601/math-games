@@ -3,7 +3,10 @@ import { Effect, Schema } from 'effect'
 
 import { OriginGuardService, RateLimitService } from '@math-games/effect-infra'
 import { PlayerIdentityService } from '@math-games/effect-game'
-import { AssignmentService, ClassroomService } from '@math-games/effect-classroom'
+import {
+  AssignmentService,
+  ClassroomService,
+} from '@math-games/effect-classroom'
 import { runServerEffect } from '@/services/run-server-effect'
 
 const CreateClassroomInput = Schema.Struct({

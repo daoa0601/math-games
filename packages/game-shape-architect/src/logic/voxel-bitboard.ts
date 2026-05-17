@@ -5,43 +5,43 @@
 // ========================================
 
 export class VoxelBitboard {
-  readonly width: number
-  readonly height: number
-  readonly depth: number
-  readonly totalCells: number
-  private data: Uint32Array
+  readonly width: number;
+  readonly height: number;
+  readonly depth: number;
+  readonly totalCells: number;
+  private data: Uint32Array;
 
   constructor(width: number, height: number, depth: number) {
-    this.width = width
-    this.height = height
-    this.depth = depth
-    this.totalCells = width * height * depth
-    this.data = new Uint32Array(Math.ceil(this.totalCells / 32))
+    this.width = width;
+    this.height = height;
+    this.depth = depth;
+    this.totalCells = width * height * depth;
+    this.data = new Uint32Array(Math.ceil(this.totalCells / 32));
   }
 
   private index(x: number, y: number, z: number): number {
-    return x * this.height * this.depth + y * this.depth + z
+    return x * this.height * this.depth + y * this.depth + z;
   }
 
   get(x: number, y: number, z: number): boolean {
-    const idx = this.index(x, y, z)
-    const word = idx >>> 5 // divide by 32
-    const bit = idx & 31 // mod 32
-    return (this.data[word] & (1 << bit)) !== 0
+    const idx = this.index(x, y, z);
+    const word = idx >>> 5; // divide by 32
+    const bit = idx & 31; // mod 32
+    return (this.data[word] & (1 << bit)) !== 0;
   }
 
   set(x: number, y: number, z: number): void {
-    const idx = this.index(x, y, z)
-    const word = idx >>> 5
-    const bit = idx & 31
-    this.data[word] |= 1 << bit
+    const idx = this.index(x, y, z);
+    const word = idx >>> 5;
+    const bit = idx & 31;
+    this.data[word] |= 1 << bit;
   }
 
   clear(x: number, y: number, z: number): void {
-    const idx = this.index(x, y, z)
-    const word = idx >>> 5
-    const bit = idx & 31
-    this.data[word] &= ~(1 << bit)
+    const idx = this.index(x, y, z);
+    const word = idx >>> 5;
+    const bit = idx & 31;
+    this.data[word] &= ~(1 << bit);
   }
 
   /**
@@ -50,9 +50,9 @@ export class VoxelBitboard {
    */
   canPlace(mask: VoxelBitboard): boolean {
     for (let i = 0; i < this.data.length; i++) {
-      if ((this.data[i] & mask.data[i]) !== 0) return false
+      if ((this.data[i] & mask.data[i]) !== 0) return false;
     }
-    return true
+    return true;
   }
 
   /**
@@ -60,7 +60,7 @@ export class VoxelBitboard {
    */
   place(mask: VoxelBitboard): void {
     for (let i = 0; i < this.data.length; i++) {
-      this.data[i] |= mask.data[i]
+      this.data[i] |= mask.data[i];
     }
   }
 
@@ -69,7 +69,7 @@ export class VoxelBitboard {
    */
   remove(mask: VoxelBitboard): void {
     for (let i = 0; i < this.data.length; i++) {
-      this.data[i] &= ~mask.data[i]
+      this.data[i] &= ~mask.data[i];
     }
   }
 
@@ -79,32 +79,32 @@ export class VoxelBitboard {
   isSolved(target: VoxelBitboard): boolean {
     for (let i = 0; i < this.data.length; i++) {
       // Every bit set in target must be set in this
-      if ((this.data[i] & target.data[i]) !== target.data[i]) return false
+      if ((this.data[i] & target.data[i]) !== target.data[i]) return false;
     }
-    return true
+    return true;
   }
 
   clone(): VoxelBitboard {
-    const copy = new VoxelBitboard(this.width, this.height, this.depth)
-    copy.data.set(this.data)
-    return copy
+    const copy = new VoxelBitboard(this.width, this.height, this.depth);
+    copy.data.set(this.data);
+    return copy;
   }
 
   /** Count of set bits. */
   popcount(): number {
-    let count = 0
+    let count = 0;
     for (let v of this.data) {
       // Brian Kernighan's algorithm
       while (v !== 0) {
-        v &= v - 1
-        count++
+        v &= v - 1;
+        count++;
       }
     }
-    return count
+    return count;
   }
 
   static create(width: number, height: number, depth: number): VoxelBitboard {
-    return new VoxelBitboard(width, height, depth)
+    return new VoxelBitboard(width, height, depth);
   }
 
   /**
@@ -117,7 +117,7 @@ export class VoxelBitboard {
     height: number,
     depth: number,
   ): VoxelBitboard {
-    const bb = new VoxelBitboard(width, height, depth)
+    const bb = new VoxelBitboard(width, height, depth);
     for (const p of positions) {
       if (
         p.x >= 0 &&
@@ -127,9 +127,9 @@ export class VoxelBitboard {
         p.z >= 0 &&
         p.z < depth
       ) {
-        bb.set(p.x, p.y, p.z)
+        bb.set(p.x, p.y, p.z);
       }
     }
-    return bb
+    return bb;
   }
 }

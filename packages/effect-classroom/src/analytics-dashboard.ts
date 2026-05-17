@@ -1,60 +1,60 @@
-import { and, avg, count, eq, gte, lte, sql } from 'drizzle-orm'
-import { Context, Effect, Layer } from 'effect'
+import { and, avg, count, eq, gte, lte, sql } from "drizzle-orm";
+import { Context, Effect, Layer } from "effect";
 
-import { schema } from '@math-games/db'
+import { schema } from "@math-games/db";
 
-import { DailyChallengeError, withD1Retry } from '@math-games/effect-infra'
-import { DbService } from '@math-games/effect-game'
+import { DailyChallengeError, withD1Retry } from "@math-games/effect-infra";
+import { DbService } from "@math-games/effect-game";
 
 export interface DateRange {
-  from: string
-  to: string
+  from: string;
+  to: string;
 }
 
 export interface CompletionRateReport {
   byGame: Array<{
-    gameId: string
-    starts: number
-    completions: number
-    rate: number
-  }>
+    gameId: string;
+    starts: number;
+    completions: number;
+    rate: number;
+  }>;
   byDifficulty: Array<{
-    difficulty: string
-    starts: number
-    completions: number
-    rate: number
-  }>
+    difficulty: string;
+    starts: number;
+    completions: number;
+    rate: number;
+  }>;
 }
 
 export interface LevelDifficultyReport {
   levels: Array<{
-    levelId: string
-    averageAttempts: number
-    completionRate: number
-    averageScore: number
-  }>
+    levelId: string;
+    averageAttempts: number;
+    completionRate: number;
+    averageScore: number;
+  }>;
 }
 
 export interface RetentionReport {
-  dailyActive: Array<{ date: string; players: number }>
+  dailyActive: Array<{ date: string; players: number }>;
 }
 
 export interface AnalyticsDashboardShape {
   readonly getCompletionRates: (
     dateRange: DateRange,
-  ) => Effect.Effect<CompletionRateReport, DailyChallengeError>
+  ) => Effect.Effect<CompletionRateReport, DailyChallengeError>;
 
   readonly getLevelDifficulty: (
     gameId: string,
-  ) => Effect.Effect<LevelDifficultyReport, DailyChallengeError>
+  ) => Effect.Effect<LevelDifficultyReport, DailyChallengeError>;
 
   readonly getRetention: (
     dateRange: DateRange,
-  ) => Effect.Effect<RetentionReport, DailyChallengeError>
+  ) => Effect.Effect<RetentionReport, DailyChallengeError>;
 }
 
 export const AnalyticsDashboardService =
-  Context.Service<AnalyticsDashboardShape>('AnalyticsDashboardService')
+  Context.Service<AnalyticsDashboardShape>("AnalyticsDashboardService");
 
 export const AnalyticsDashboardServiceLive = Layer.effect(
   AnalyticsDashboardService,
@@ -69,14 +69,19 @@ export const AnalyticsDashboardServiceLive = Layer.effect(
                   .select({
                     gameId: schema.gameAttempts.gameId,
                     starts: count(),
-                    completions:
-                      sql<number>`sum(case when ${schema.gameAttempts.completed} then 1 else 0 end)`,
+                    completions: sql<number>`sum(case when ${schema.gameAttempts.completed} then 1 else 0 end)`,
                   })
                   .from(schema.gameAttempts)
                   .where(
                     and(
-                      gte(schema.gameAttempts.createdAt, new Date(dateRange.from)),
-                      lte(schema.gameAttempts.createdAt, new Date(dateRange.to)),
+                      gte(
+                        schema.gameAttempts.createdAt,
+                        new Date(dateRange.from),
+                      ),
+                      lte(
+                        schema.gameAttempts.createdAt,
+                        new Date(dateRange.to),
+                      ),
                     ),
                   )
                   .groupBy(schema.gameAttempts.gameId),
@@ -84,21 +89,26 @@ export const AnalyticsDashboardServiceLive = Layer.effect(
                   .select({
                     difficulty: schema.gameAttempts.mode,
                     starts: count(),
-                    completions:
-                      sql<number>`sum(case when ${schema.gameAttempts.completed} then 1 else 0 end)`,
+                    completions: sql<number>`sum(case when ${schema.gameAttempts.completed} then 1 else 0 end)`,
                   })
                   .from(schema.gameAttempts)
                   .where(
                     and(
-                      gte(schema.gameAttempts.createdAt, new Date(dateRange.from)),
-                      lte(schema.gameAttempts.createdAt, new Date(dateRange.to)),
+                      gte(
+                        schema.gameAttempts.createdAt,
+                        new Date(dateRange.from),
+                      ),
+                      lte(
+                        schema.gameAttempts.createdAt,
+                        new Date(dateRange.to),
+                      ),
                     ),
                   )
                   .groupBy(schema.gameAttempts.mode),
               ]),
             catch: (cause) => new DailyChallengeError({ cause }),
           }),
-        )
+        );
 
         return {
           byGame: byGame.map((r) => ({
@@ -113,7 +123,7 @@ export const AnalyticsDashboardServiceLive = Layer.effect(
             completions: Number(r.completions),
             rate: r.starts > 0 ? Number(r.completions) / r.starts : 0,
           })),
-        }
+        };
       }),
 
     getLevelDifficulty: (gameId) =>
@@ -133,7 +143,7 @@ export const AnalyticsDashboardServiceLive = Layer.effect(
                 .groupBy(schema.gameAttempts.levelId),
             catch: (cause) => new DailyChallengeError({ cause }),
           }),
-        )
+        );
 
         return {
           levels: rows.map((r) => ({
@@ -142,7 +152,7 @@ export const AnalyticsDashboardServiceLive = Layer.effect(
             completionRate: Number(r.completionRate),
             averageScore: Number(r.averageScore),
           })),
-        }
+        };
       }),
 
     getRetention: (dateRange) =>
@@ -158,7 +168,10 @@ export const AnalyticsDashboardServiceLive = Layer.effect(
                 .from(schema.gameAttempts)
                 .where(
                   and(
-                    gte(schema.gameAttempts.createdAt, new Date(dateRange.from)),
+                    gte(
+                      schema.gameAttempts.createdAt,
+                      new Date(dateRange.from),
+                    ),
                     lte(schema.gameAttempts.createdAt, new Date(dateRange.to)),
                   ),
                 )
@@ -170,14 +183,14 @@ export const AnalyticsDashboardServiceLive = Layer.effect(
                 ),
             catch: (cause) => new DailyChallengeError({ cause }),
           }),
-        )
+        );
 
         return {
           dailyActive: rows.map((r) => ({
             date: r.date,
             players: Number(r.players),
           })),
-        }
+        };
       }),
   })),
-)
+);

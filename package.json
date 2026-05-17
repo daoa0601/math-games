@@ -10,7 +10,7 @@
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "lint": "turbo lint",
-    "check": "turbo build && turbo typecheck && turbo test && turbo lint",
+    "check": "prettier --check . && turbo typecheck && turbo lint && turbo test && turbo build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "deploy": "pnpm --filter infra run deploy",

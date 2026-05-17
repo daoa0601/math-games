@@ -1,114 +1,114 @@
-import { Data } from 'effect'
+import { Data } from "effect";
 
-export class ProgressWriteError extends Data.TaggedError('ProgressWriteError')<{
-  readonly cause: unknown
+export class ProgressWriteError extends Data.TaggedError("ProgressWriteError")<{
+  readonly cause: unknown;
 }> {
   override get message() {
-    return 'Unable to record game progress'
+    return "Unable to record game progress";
   }
 }
 
 export class GameProgressValidationError extends Data.TaggedError(
-  'GameProgressValidationError',
+  "GameProgressValidationError",
 )<{
-  readonly reason: string
+  readonly reason: string;
 }> {
   override get message() {
-    return this.reason
+    return this.reason;
   }
 }
 
 export class DailyChallengeError extends Data.TaggedError(
-  'DailyChallengeError',
+  "DailyChallengeError",
 )<{
-  readonly cause: unknown
+  readonly cause: unknown;
 }> {
   override get message() {
-    return 'Unable to load daily challenge'
+    return "Unable to load daily challenge";
   }
 }
 
-export class PlayerProfileError extends Data.TaggedError('PlayerProfileError')<{
-  readonly cause: unknown
+export class PlayerProfileError extends Data.TaggedError("PlayerProfileError")<{
+  readonly cause: unknown;
 }> {
   override get message() {
-    return 'Unable to load player profile'
+    return "Unable to load player profile";
   }
 }
 
 export class PlayerProfileWriteError extends Data.TaggedError(
-  'PlayerProfileWriteError',
+  "PlayerProfileWriteError",
 )<{
-  readonly cause: unknown
+  readonly cause: unknown;
 }> {
   override get message() {
-    return 'Unable to save player profile'
+    return "Unable to save player profile";
   }
 }
 
-export class RateLimitError extends Data.TaggedError('RateLimitError')<{
-  readonly key: string
+export class RateLimitError extends Data.TaggedError("RateLimitError")<{
+  readonly key: string;
 }> {
   override get message() {
-    return 'Too many requests'
+    return "Too many requests";
   }
 }
 
-export class CrossOriginError extends Data.TaggedError('CrossOriginError')<{
-  readonly reason: string
+export class CrossOriginError extends Data.TaggedError("CrossOriginError")<{
+  readonly reason: string;
 }> {
   override get message() {
-    return this.reason
+    return this.reason;
   }
 }
 
 export class PlayerProfileValidationError extends Data.TaggedError(
-  'PlayerProfileValidationError',
+  "PlayerProfileValidationError",
 )<{
-  readonly reason: string
+  readonly reason: string;
 }> {
   override get message() {
-    return this.reason
+    return this.reason;
   }
 }
 
-export class ClassroomError extends Data.TaggedError('ClassroomError')<{
-  readonly cause: unknown
+export class ClassroomError extends Data.TaggedError("ClassroomError")<{
+  readonly cause: unknown;
 }> {
   override get message() {
-    return 'Classroom operation failed'
+    return "Classroom operation failed";
   }
 }
 
-export class AuthorizationError extends Data.TaggedError('AuthorizationError')<{
-  readonly reason: string
+export class AuthorizationError extends Data.TaggedError("AuthorizationError")<{
+  readonly reason: string;
 }> {
   override get message() {
-    return this.reason
+    return this.reason;
   }
 }
 
-export class GameAttemptsError extends Data.TaggedError('GameAttemptsError')<{
-  readonly cause: unknown
+export class GameAttemptsError extends Data.TaggedError("GameAttemptsError")<{
+  readonly cause: unknown;
 }> {
   override get message() {
-    return 'Unable to record game attempt'
+    return "Unable to record game attempt";
   }
 }
 
-export class DailyStreakError extends Data.TaggedError('DailyStreakError')<{
-  readonly cause: unknown
+export class DailyStreakError extends Data.TaggedError("DailyStreakError")<{
+  readonly cause: unknown;
 }> {
   override get message() {
-    return 'Unable to record daily streak'
+    return "Unable to record daily streak";
   }
 }
 
-export class SolverTimeoutError extends Data.TaggedError('SolverTimeoutError')<{
-  readonly searchedStates: number
-  readonly timeMs: number
+export class SolverTimeoutError extends Data.TaggedError("SolverTimeoutError")<{
+  readonly searchedStates: number;
+  readonly timeMs: number;
 }> {
   override get message() {
-    return `Solver timed out after ${this.timeMs}ms (${this.searchedStates} states searched)`
+    return `Solver timed out after ${this.timeMs}ms (${this.searchedStates} states searched)`;
   }
 }

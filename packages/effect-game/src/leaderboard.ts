@@ -1,33 +1,33 @@
-import { and, desc, eq, sql } from 'drizzle-orm'
-import { Context, Effect, Layer } from 'effect'
+import { and, desc, eq, sql } from "drizzle-orm";
+import { Context, Effect, Layer } from "effect";
 
-import { schema } from '@math-games/db'
+import { schema } from "@math-games/db";
 
-import { ProgressWriteError, withD1Retry } from '@math-games/effect-infra'
+import { ProgressWriteError, withD1Retry } from "@math-games/effect-infra";
 
-import { DbService } from './db'
+import { DbService } from "./db";
 
 export interface LeaderboardInput {
-  playerId: string
-  gameId: string
-  levelId: string
-  scope: string
-  score: number
-  moves: number
+  playerId: string;
+  gameId: string;
+  levelId: string;
+  scope: string;
+  score: number;
+  moves: number;
 }
 
 export interface LeaderboardEntry {
-  playerId: string
-  displayName: string
-  score: number
-  moves: number
-  achievedAt: Date | null
+  playerId: string;
+  displayName: string;
+  score: number;
+  moves: number;
+  achievedAt: Date | null;
 }
 
 export interface LeaderboardShape {
   readonly recordEntry: (
     input: LeaderboardInput,
-  ) => Effect.Effect<void, ProgressWriteError>
+  ) => Effect.Effect<void, ProgressWriteError>;
 
   readonly getPersonalBests: (
     playerId: string,
@@ -35,17 +35,17 @@ export interface LeaderboardShape {
   ) => Effect.Effect<
     Array<{ levelId: string; score: number; moves: number }>,
     ProgressWriteError
-  >
+  >;
 
   readonly getClassroomLeaderboard: (
     classroomId: string,
     gameId: string,
     levelId: string,
-  ) => Effect.Effect<LeaderboardEntry[], ProgressWriteError>
+  ) => Effect.Effect<LeaderboardEntry[], ProgressWriteError>;
 }
 
 export const LeaderboardService =
-  Context.Service<LeaderboardShape>('LeaderboardService')
+  Context.Service<LeaderboardShape>("LeaderboardService");
 
 export const LeaderboardServiceLive = Layer.effect(
   LeaderboardService,
@@ -96,7 +96,7 @@ export const LeaderboardServiceLive = Layer.effect(
                 and(
                   eq(schema.leaderboardEntries.playerId, playerId),
                   eq(schema.leaderboardEntries.gameId, gameId),
-                  eq(schema.leaderboardEntries.scope, 'personal'),
+                  eq(schema.leaderboardEntries.scope, "personal"),
                 ),
               )
               .orderBy(desc(schema.leaderboardEntries.score)),
@@ -134,4 +134,4 @@ export const LeaderboardServiceLive = Layer.effect(
         }),
       ),
   })),
-)
+);

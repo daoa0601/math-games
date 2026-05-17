@@ -1,34 +1,34 @@
-import { Moon, Sun } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 
-import { Button } from './ui/button'
-import { useT } from './use-t'
+import { Button } from "./ui/button";
+import { useT } from "./use-t";
 
-function getStoredTheme(): 'light' | 'dark' {
-  if (typeof window === 'undefined') return 'light'
-  const stored = localStorage.getItem('mg-theme')
-  return stored === 'dark' ? 'dark' : 'light'
+function getStoredTheme(): "light" | "dark" {
+  if (typeof window === "undefined") return "light";
+  const stored = localStorage.getItem("mg-theme");
+  return stored === "dark" ? "dark" : "light";
 }
 
-function applyTheme(theme: 'light' | 'dark') {
-  document.documentElement.classList.toggle('dark', theme === 'dark')
-  localStorage.setItem('mg-theme', theme)
+function applyTheme(theme: "light" | "dark") {
+  document.documentElement.classList.toggle("dark", theme === "dark");
+  localStorage.setItem("mg-theme", theme);
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
-  const t = useT()
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const t = useT();
 
   useEffect(() => {
-    const stored = getStoredTheme()
-    setTheme(stored)
-    applyTheme(stored)
-  }, [])
+    const stored = getStoredTheme();
+    setTheme(stored);
+    applyTheme(stored);
+  }, []);
 
   function toggle() {
-    const next = theme === 'light' ? 'dark' : 'light'
-    setTheme(next)
-    applyTheme(next)
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    applyTheme(next);
   }
 
   return (
@@ -37,15 +37,15 @@ export function ThemeToggle() {
       size="icon"
       onClick={toggle}
       aria-label={
-        theme === 'light' ? t('toggle.darkMode') : t('toggle.lightMode')
+        theme === "light" ? t("toggle.darkMode") : t("toggle.lightMode")
       }
       type="button"
     >
-      {theme === 'light' ? (
+      {theme === "light" ? (
         <Moon className="h-4 w-4" />
       ) : (
         <Sun className="h-4 w-4" />
       )}
     </Button>
-  )
+  );
 }

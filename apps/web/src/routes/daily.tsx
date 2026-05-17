@@ -99,9 +99,7 @@ function DailyRoute() {
           </div>
 
           {/* Main challenge card */}
-          <article
-            className="relative isolate overflow-hidden rounded-[1.375rem] border border-border/70 bg-card p-[1.375rem] shadow-(--card-shadow-long)"
-          >
+          <article className="relative isolate overflow-hidden rounded-[1.375rem] border border-border/70 bg-card p-[1.375rem] shadow-(--card-shadow-long)">
             <div
               className="absolute inset-0 -z-20 opacity-90"
               style={{ backgroundImage: 'var(--game-gradient)' }}
@@ -119,7 +117,10 @@ function DailyRoute() {
             {/* Metadata grid */}
             <dl className="mt-4 grid grid-cols-2 gap-x-3.5">
               {[
-                [t('daily.difficulty'), formatDifficulty(locale, challenge.difficulty)],
+                [
+                  t('daily.difficulty'),
+                  formatDifficulty(locale, challenge.difficulty),
+                ],
                 [t('daily.level'), challenge.levelId],
                 [t('daily.seed'), challenge.seed],
               ].map(([label, value]) => (
@@ -203,9 +204,7 @@ function DailyRoute() {
           <dl className="mt-5 grid max-w-md gap-1.5 text-sm">
             <div className="flex justify-between gap-6 border-t border-border/60 pt-2">
               <dt className="text-muted-foreground">{t('daily.level')}</dt>
-              <dd className="font-medium tabular-nums">
-                {challenge.levelId}
-              </dd>
+              <dd className="font-medium tabular-nums">{challenge.levelId}</dd>
             </div>
             <div className="flex justify-between gap-6 border-t border-border/60 pt-2">
               <dt className="text-muted-foreground">{t('daily.seed')}</dt>

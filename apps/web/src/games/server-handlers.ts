@@ -11,8 +11,24 @@ import type {
   AchievementImportInput,
   PlayerProfileInput,
 } from '@/player/profile.schema'
-import { HeaderService, KvCacheService, OriginGuardService, ProgressWriteError, RateLimitService, TurnstileService, withD1Retry } from '@math-games/effect-infra'
-import { AnalyticsService, DailyStreakService, DbService, GameAttemptsService, LeaderboardService, PlayerIdentityService, RankService } from '@math-games/effect-game'
+import {
+  HeaderService,
+  KvCacheService,
+  OriginGuardService,
+  ProgressWriteError,
+  RateLimitService,
+  TurnstileService,
+  withD1Retry,
+} from '@math-games/effect-infra'
+import {
+  AnalyticsService,
+  DailyStreakService,
+  DbService,
+  GameAttemptsService,
+  LeaderboardService,
+  PlayerIdentityService,
+  RankService,
+} from '@math-games/effect-game'
 import { runServerEffect } from '@/services/run-server-effect'
 
 import type { GameProgressRequest } from './game-progress.schema'
@@ -114,7 +130,9 @@ export function createRecordProgressPipeline<TModule extends GameModule<any>>(
     }
 
     const wasNewCompletion =
-      result.completed && progress.completedAt !== null && progress.attempts === 1
+      result.completed &&
+      progress.completedAt !== null &&
+      progress.attempts === 1
 
     const rankService = yield* RankService
     const { rankUp } = yield* rankService.computeRankDelta({

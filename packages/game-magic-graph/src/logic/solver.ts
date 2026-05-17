@@ -8,16 +8,16 @@ import type {
   Line,
   LineStatus,
   LineWithStatus,
-} from './types'
+} from "./types";
 
 // ========================================
 // Solvability Check Result
 // ========================================
 
 export interface SolvabilityResult {
-  solvable: boolean
-  solutionCount: number
-  timedOut: boolean
+  solvable: boolean;
+  solutionCount: number;
+  timedOut: boolean;
 }
 
 /**
@@ -28,33 +28,33 @@ export function getLineStatus(
   nodeValues: Map<string, number | null>,
   targetSum: number,
 ): LineWithStatus {
-  let currentSum = 0
-  let filledCount = 0
+  let currentSum = 0;
+  let filledCount = 0;
 
   for (const nodeId of line.nodeIds) {
-    const value = nodeValues.get(nodeId)
+    const value = nodeValues.get(nodeId);
     if (value !== null && value !== undefined) {
-      currentSum += value
-      filledCount++
+      currentSum += value;
+      filledCount++;
     }
   }
 
-  const totalNodes = line.nodeIds.length
-  let status: LineStatus
+  const totalNodes = line.nodeIds.length;
+  let status: LineStatus;
 
   if (filledCount < totalNodes) {
     // Line incomplete
     if (currentSum > targetSum) {
-      status = 'overflow'
+      status = "overflow";
     } else {
-      status = 'incomplete'
+      status = "incomplete";
     }
   } else {
     // Line complete
-    status = currentSum === targetSum ? 'correct' : 'incorrect'
+    status = currentSum === targetSum ? "correct" : "incorrect";
   }
 
-  return { ...line, status, currentSum, filledCount }
+  return { ...line, status, currentSum, filledCount };
 }
 
 /**
@@ -66,9 +66,9 @@ export function isPuzzleSolved(
   targetSum: number,
 ): boolean {
   return lines.every((line) => {
-    const status = getLineStatus(line, nodeValues, targetSum)
-    return status.status === 'correct'
-  })
+    const status = getLineStatus(line, nodeValues, targetSum);
+    return status.status === "correct";
+  });
 }
 
 /**
@@ -84,39 +84,39 @@ export function solve(
   maxSolutions: number = 10,
   maxIterations: number = 100000,
 ): Map<string, number>[] {
-  const solutions: Map<string, number>[] = []
-  const emptyNodes = nodes.filter((n) => !n.isFixed)
-  const fixedValues = new Map<string, number>()
-  let iterations = 0
+  const solutions: Map<string, number>[] = [];
+  const emptyNodes = nodes.filter((n) => !n.isFixed);
+  const fixedValues = new Map<string, number>();
+  let iterations = 0;
 
   nodes.forEach((n) => {
     if (n.isFixed && n.value !== null) {
-      fixedValues.set(n.id, n.value)
+      fixedValues.set(n.id, n.value);
     }
-  })
+  });
 
   function isValidPartial(assignment: Map<string, number>): boolean {
     // Check each line constraint
     for (const line of lines) {
-      let sum = 0
-      let filled = 0
+      let sum = 0;
+      let filled = 0;
       for (const nodeId of line.nodeIds) {
-        const val = assignment.get(nodeId) ?? fixedValues.get(nodeId)
+        const val = assignment.get(nodeId) ?? fixedValues.get(nodeId);
         if (val !== undefined) {
-          sum += val
-          filled++
+          sum += val;
+          filled++;
         }
       }
       // If line is complete, sum must equal target
       if (filled === line.nodeIds.length && sum !== targetSum) {
-        return false
+        return false;
       }
       // If partial, sum must not exceed target
       if (filled < line.nodeIds.length && sum > targetSum) {
-        return false
+        return false;
       }
     }
-    return true
+    return true;
   }
 
   function backtrack(
@@ -124,42 +124,42 @@ export function solve(
     assignment: Map<string, number>,
     usedNumbers: Set<number>,
   ): void {
-    iterations++
-    if (iterations >= maxIterations || solutions.length >= maxSolutions) return
+    iterations++;
+    if (iterations >= maxIterations || solutions.length >= maxSolutions) return;
 
     if (index === emptyNodes.length) {
       // All nodes assigned - check if valid
       if (isValidPartial(assignment)) {
-        solutions.push(new Map(assignment))
+        solutions.push(new Map(assignment));
       }
-      return
+      return;
     }
 
-    const node = emptyNodes[index]
+    const node = emptyNodes[index];
     for (const num of availableNumbers) {
-      if (usedNumbers.has(num)) continue
+      if (usedNumbers.has(num)) continue;
 
-      assignment.set(node.id, num)
-      usedNumbers.add(num)
+      assignment.set(node.id, num);
+      usedNumbers.add(num);
 
       if (isValidPartial(assignment)) {
-        backtrack(index + 1, assignment, usedNumbers)
+        backtrack(index + 1, assignment, usedNumbers);
       }
 
-      assignment.delete(node.id)
-      usedNumbers.delete(num)
+      assignment.delete(node.id);
+      usedNumbers.delete(num);
     }
   }
 
-  const initialUsed = new Set<number>()
+  const initialUsed = new Set<number>();
   nodes.forEach((n) => {
     if (n.isFixed && n.value !== null) {
-      initialUsed.add(n.value)
+      initialUsed.add(n.value);
     }
-  })
+  });
 
-  backtrack(0, new Map(), initialUsed)
-  return solutions
+  backtrack(0, new Map(), initialUsed);
+  return solutions;
 }
 
 // ========================================
@@ -185,7 +185,7 @@ export function checkSolvability(
     puzzle.targetSum,
     1, // We only need to find one solution to prove solvability
     maxIterations,
-  )
+  );
 
   // If we found a solution, it's solvable
   // If we found 0 solutions and didn't time out, it's definitively unsolvable
@@ -195,5 +195,5 @@ export function checkSolvability(
     solvable: solutions.length > 0,
     solutionCount: solutions.length,
     timedOut: false, // The current solver doesn't expose timeout status
-  }
+  };
 }

@@ -3,10 +3,7 @@ import { useServerFn } from '@tanstack/react-start'
 import { useMemo, useState } from 'react'
 
 import type { TranslationKey } from '@/i18n-translations'
-import {
-  formatAchievementName,
-  formatDifficulty,
-} from '@/i18n-format'
+import { formatAchievementName, formatDifficulty } from '@/i18n-format'
 import { Confetti, GameChrome } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { Badge } from '@math-games/ui'
@@ -74,10 +71,8 @@ function PatternDetectiveRoute() {
     )
 
     if (res.ok) {
-      const msg = formatSavedProgress(
-        res.value,
-        progressLabels,
-        (id) => formatAchievementName(locale, id),
+      const msg = formatSavedProgress(res.value, progressLabels, (id) =>
+        formatAchievementName(locale, id),
       )
       if (msg) setSaveStatus(msg)
     }

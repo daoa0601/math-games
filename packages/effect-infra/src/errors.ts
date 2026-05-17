@@ -12,4 +12,4 @@ export {
   ProgressWriteError,
   RateLimitError,
   SolverTimeoutError,
-} from '@math-games/core'
+} from "@math-games/core";

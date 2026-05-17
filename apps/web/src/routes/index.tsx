@@ -1,10 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 
-import {
-  formatGameTag,
-  formatGameTitle,
-  formatLevelName,
-} from '@/i18n-format'
+import { formatGameTag, formatGameTitle, formatLevelName } from '@/i18n-format'
 import {
   buttonVariants,
   GameGlyph,
@@ -94,7 +90,10 @@ function Home() {
         <main className="flex-1 overflow-auto px-4 pb-4 pt-1">
           {/* Greeting */}
           <div className="px-1 pb-3.5 pt-1.5">
-            <p className="eyebrow tabular-nums" style={{ fontSize: '0.625rem' }}>
+            <p
+              className="eyebrow tabular-nums"
+              style={{ fontSize: '0.625rem' }}
+            >
               {new Date()
                 .toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
                   weekday: 'long',
@@ -104,9 +103,7 @@ function Home() {
                 })
                 .toUpperCase()}
             </p>
-            <h1
-              className="font-display mt-2 text-[1.875rem] font-medium leading-[1.05] tracking-tight"
-            >
+            <h1 className="font-display mt-2 text-[1.875rem] font-medium leading-[1.05] tracking-tight">
               {t('home.greeting').replace('{name}', displayName.split(' ')[0])}{' '}
               <span className="text-muted-foreground">
                 {t('home.greetingCta')}
@@ -145,10 +142,7 @@ function Home() {
                 key={stat.label}
                 className="py-3.5 text-center"
                 style={{
-                  borderLeft:
-                    i > 0
-                      ? '1px solid var(--border)'
-                      : 'none',
+                  borderLeft: i > 0 ? '1px solid var(--border)' : 'none',
                   padding: '0.875rem 0.75rem',
                 }}
               >
@@ -179,9 +173,7 @@ function Home() {
               const progress = summarizeProgress(progressRows, game.gameId)
               const pct =
                 game.levelCount > 0
-                  ? Math.round(
-                      (progress.completed / game.levelCount) * 100,
-                    )
+                  ? Math.round((progress.completed / game.levelCount) * 100)
                   : 0
 
               return (
@@ -234,9 +226,7 @@ function Home() {
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             {formatGameTitle(locale, dailyChallenge.gameId)} ·{' '}
-            <span className="tabular-nums">
-              {dailyChallenge.challengeDate}
-            </span>
+            <span className="tabular-nums">{dailyChallenge.challengeDate}</span>
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Link
@@ -246,10 +236,7 @@ function Home() {
             >
               {t('home.start')} →
             </Link>
-            <Link
-              className={buttonVariants({ variant: 'ghost' })}
-              to="/daily"
-            >
+            <Link className={buttonVariants({ variant: 'ghost' })} to="/daily">
               {t('daily.play')}
             </Link>
           </div>
@@ -290,9 +277,7 @@ function Home() {
             const progress = summarizeProgress(progressRows, game.gameId)
             const pct =
               game.levelCount > 0
-                ? Math.round(
-                    (progress.completed / game.levelCount) * 100,
-                  )
+                ? Math.round((progress.completed / game.levelCount) * 100)
                 : 0
 
             return (
@@ -315,10 +300,7 @@ function Home() {
                     </span>
                     <span className="tabular-nums">{pct}%</span>
                   </div>
-                  <Progress
-                    value={pct}
-                    className="mt-1.5 h-2 bg-primary/15"
-                  />
+                  <Progress value={pct} className="mt-1.5 h-2 bg-primary/15" />
                   <Link
                     className={`${buttonVariants({
                       size: 'sm',
@@ -383,9 +365,7 @@ function DailyHeroCard({
         </div>
 
         <div className="relative" style={{ maxWidth: '70%' }}>
-          <p className="eyebrow text-primary">
-            ● {t('home.todayChallenge')}
-          </p>
+          <p className="eyebrow text-primary">● {t('home.todayChallenge')}</p>
           <h2 className="font-display mt-3 text-[1.875rem] font-medium leading-[1.02] tracking-tight">
             {title}
           </h2>
@@ -408,7 +388,11 @@ function DailyHeroCard({
           </div>
           <span
             className={buttonVariants({ size: 'lg' })}
-            style={{ minHeight: '3rem', padding: '0 1.375rem', fontSize: '0.9375rem' }}
+            style={{
+              minHeight: '3rem',
+              padding: '0 1.375rem',
+              fontSize: '0.9375rem',
+            }}
           >
             {t('home.start')} →
           </span>
@@ -439,10 +423,12 @@ function GameIndexCard({
   const { locale } = useLocale()
 
   return (
-    <Link to={to} search={{ level: undefined }} className={`theme-${gameId} block`}>
-      <article
-        className="relative isolate overflow-hidden rounded-2xl border border-border/60 bg-card p-[1.125rem] shadow-(--card-shadow-long)"
-      >
+    <Link
+      to={to}
+      search={{ level: undefined }}
+      className={`theme-${gameId} block`}
+    >
+      <article className="relative isolate overflow-hidden rounded-2xl border border-border/60 bg-card p-[1.125rem] shadow-(--card-shadow-long)">
         <div
           className="absolute inset-0 -z-20 opacity-55"
           style={{ backgroundImage: 'var(--game-gradient)' }}
@@ -460,13 +446,14 @@ function GameIndexCard({
           <span className="font-display text-[0.6875rem] font-medium tabular-nums tracking-[0.06em] text-primary">
             № {index}
           </span>
-          <span className="eyebrow text-muted-foreground" style={{ fontSize: '0.5625rem' }}>
+          <span
+            className="eyebrow text-muted-foreground"
+            style={{ fontSize: '0.5625rem' }}
+          >
             {formatGameTag(locale, gameId)}
           </span>
         </div>
-        <h4
-          className="font-display mt-2 pr-16 text-[1.3125rem] font-medium tracking-tight"
-        >
+        <h4 className="font-display mt-2 pr-16 text-[1.3125rem] font-medium tracking-tight">
           {formatGameTitle(locale, gameId)}
         </h4>
 
@@ -482,7 +469,11 @@ function GameIndexCard({
             <span className="text-[0.6875rem] text-muted-foreground" />
             <span
               className={buttonVariants({ variant: 'outline', size: 'sm' })}
-              style={{ minHeight: '2.25rem', padding: '0 1rem', fontSize: '0.8125rem' }}
+              style={{
+                minHeight: '2.25rem',
+                padding: '0 1rem',
+                fontSize: '0.8125rem',
+              }}
             >
               {completed > 0 ? t('home.continue') : t('game.play')} →
             </span>

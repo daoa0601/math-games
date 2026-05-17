@@ -2,9 +2,7 @@
   "version": "7",
   "dialect": "sqlite",
   "id": "bcafaca1-f24e-4861-b915-9bdcbef47f17",
-  "prevIds": [
-    "9e8bea24-689f-4f66-b1d8-5db3396b9a1e"
-  ],
+  "prevIds": ["9e8bea24-689f-4f66-b1d8-5db3396b9a1e"],
   "ddl": [
     {
       "name": "assignments",
@@ -623,13 +621,9 @@
       "table": "players"
     },
     {
-      "columns": [
-        "classroom_id"
-      ],
+      "columns": ["classroom_id"],
       "tableTo": "classrooms",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
@@ -638,13 +632,9 @@
       "table": "assignments"
     },
     {
-      "columns": [
-        "classroom_id"
-      ],
+      "columns": ["classroom_id"],
       "tableTo": "classrooms",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
@@ -653,13 +643,9 @@
       "table": "classroom_members"
     },
     {
-      "columns": [
-        "player_id"
-      ],
+      "columns": ["player_id"],
       "tableTo": "players",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
@@ -668,13 +654,9 @@
       "table": "classroom_members"
     },
     {
-      "columns": [
-        "teacher_player_id"
-      ],
+      "columns": ["teacher_player_id"],
       "tableTo": "players",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
@@ -683,13 +665,9 @@
       "table": "classrooms"
     },
     {
-      "columns": [
-        "player_id"
-      ],
+      "columns": ["player_id"],
       "tableTo": "players",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
@@ -698,13 +676,9 @@
       "table": "daily_player_results"
     },
     {
-      "columns": [
-        "player_id"
-      ],
+      "columns": ["player_id"],
       "tableTo": "players",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
@@ -713,13 +687,9 @@
       "table": "game_attempts"
     },
     {
-      "columns": [
-        "player_id"
-      ],
+      "columns": ["player_id"],
       "tableTo": "players",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
@@ -728,13 +698,9 @@
       "table": "game_progress"
     },
     {
-      "columns": [
-        "player_id"
-      ],
+      "columns": ["player_id"],
       "tableTo": "players",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
@@ -743,86 +709,63 @@
       "table": "player_achievements"
     },
     {
-      "columns": [
-        "classroom_id",
-        "player_id"
-      ],
+      "columns": ["classroom_id", "player_id"],
       "nameExplicit": false,
       "name": "classroom_members_pk",
       "entityType": "pks",
       "table": "classroom_members"
     },
     {
-      "columns": [
-        "player_id",
-        "challenge_date"
-      ],
+      "columns": ["player_id", "challenge_date"],
       "nameExplicit": false,
       "name": "daily_player_results_pk",
       "entityType": "pks",
       "table": "daily_player_results"
     },
     {
-      "columns": [
-        "player_id",
-        "game_id",
-        "level_id"
-      ],
+      "columns": ["player_id", "game_id", "level_id"],
       "nameExplicit": false,
       "name": "game_progress_pk",
       "entityType": "pks",
       "table": "game_progress"
     },
     {
-      "columns": [
-        "player_id",
-        "achievement_id"
-      ],
+      "columns": ["player_id", "achievement_id"],
       "nameExplicit": false,
       "name": "player_achievements_pk",
       "entityType": "pks",
       "table": "player_achievements"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "assignments_pk",
       "table": "assignments",
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "classrooms_pk",
       "table": "classrooms",
       "entityType": "pks"
     },
     {
-      "columns": [
-        "challenge_date"
-      ],
+      "columns": ["challenge_date"],
       "nameExplicit": false,
       "name": "daily_challenges_pk",
       "table": "daily_challenges",
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "game_attempts_pk",
       "table": "game_attempts",
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "players_pk",
       "table": "players",
@@ -857,9 +800,7 @@
       "table": "players"
     },
     {
-      "columns": [
-        "join_code"
-      ],
+      "columns": ["join_code"],
       "nameExplicit": false,
       "name": "classrooms_join_code_unique",
       "entityType": "uniques",

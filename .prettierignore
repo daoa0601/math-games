@@ -1,6 +1,9 @@
 dist
+coverage
 test-results
 playwright-report
 .wrangler
 .alchemy
+.turbo
 worker-configuration.d.ts
+pnpm-lock.yaml

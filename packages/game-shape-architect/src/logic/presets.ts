@@ -3,22 +3,22 @@
 // Increased difficulty: Easy requires 4-5 pieces minimum
 // ========================================
 
-import type { LevelConfig, Piece, Difficulty, Position3D } from './types'
-import type { LevelValidation } from './engine'
-import { validateAllLevels } from './engine'
-import { createSeededRandom } from '@math-games/core'
-import { generateGuaranteedSolvableWithRetry } from './seededGenerator'
-import { TETRACUBE } from './polycubes'
+import type { LevelConfig, Piece, Difficulty, Position3D } from "./types";
+import type { LevelValidation } from "./engine";
+import { validateAllLevels } from "./engine";
+import { createSeededRandom } from "@math-games/core";
+import { generateGuaranteedSolvableWithRetry } from "./seededGenerator";
+import { TETRACUBE } from "./polycubes";
 import {
   HEXOMINO,
   HEPTOMINO,
   HEXOMINO_KEYS,
   HEPTOMINO_KEYS,
-} from './polyominoes'
+} from "./polyominoes";
 
 // Re-export polyominoes for external use
-export { HEXOMINO, HEPTOMINO, HEXOMINO_KEYS, HEPTOMINO_KEYS }
-export { TETRACUBE, PENTACUBE } from './polycubes'
+export { HEXOMINO, HEPTOMINO, HEXOMINO_KEYS, HEPTOMINO_KEYS };
+export { TETRACUBE, PENTACUBE } from "./polycubes";
 
 // ========================================
 // All 7 Classic Tetris Pieces (Tetrominoes)
@@ -27,7 +27,7 @@ export { TETRACUBE, PENTACUBE } from './polycubes'
 const TETRIS = {
   I: (id: string, color: string): Piece => ({
     id,
-    name: 'I-Block',
+    name: "I-Block",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -39,7 +39,7 @@ const TETRIS = {
 
   O: (id: string, color: string): Piece => ({
     id,
-    name: 'O-Block',
+    name: "O-Block",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -51,7 +51,7 @@ const TETRIS = {
 
   T: (id: string, color: string): Piece => ({
     id,
-    name: 'T-Block',
+    name: "T-Block",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -63,7 +63,7 @@ const TETRIS = {
 
   S: (id: string, color: string): Piece => ({
     id,
-    name: 'S-Block',
+    name: "S-Block",
     color,
     layout: [
       { x: 1, y: 0, z: 0 },
@@ -75,7 +75,7 @@ const TETRIS = {
 
   Z: (id: string, color: string): Piece => ({
     id,
-    name: 'Z-Block',
+    name: "Z-Block",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -87,7 +87,7 @@ const TETRIS = {
 
   J: (id: string, color: string): Piece => ({
     id,
-    name: 'J-Block',
+    name: "J-Block",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -99,7 +99,7 @@ const TETRIS = {
 
   L: (id: string, color: string): Piece => ({
     id,
-    name: 'L-Block',
+    name: "L-Block",
     color,
     layout: [
       { x: 2, y: 0, z: 0 },
@@ -108,13 +108,13 @@ const TETRIS = {
       { x: 2, y: 1, z: 0 },
     ],
   }),
-}
+};
 
 // Pentominoes for harder levels (5 cells each)
 const PENTOMINO = {
   F: (id: string, color: string): Piece => ({
     id,
-    name: 'F-Pento',
+    name: "F-Pento",
     color,
     layout: [
       { x: 1, y: 0, z: 0 },
@@ -127,7 +127,7 @@ const PENTOMINO = {
 
   P: (id: string, color: string): Piece => ({
     id,
-    name: 'P-Pento',
+    name: "P-Pento",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -140,7 +140,7 @@ const PENTOMINO = {
 
   U: (id: string, color: string): Piece => ({
     id,
-    name: 'U-Pento',
+    name: "U-Pento",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -153,7 +153,7 @@ const PENTOMINO = {
 
   W: (id: string, color: string): Piece => ({
     id,
-    name: 'W-Pento',
+    name: "W-Pento",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -167,7 +167,7 @@ const PENTOMINO = {
   // Additional Pentominoes (completing the full set of 12)
   I: (id: string, color: string): Piece => ({
     id,
-    name: 'I-Pento',
+    name: "I-Pento",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -180,7 +180,7 @@ const PENTOMINO = {
 
   L: (id: string, color: string): Piece => ({
     id,
-    name: 'L-Pento',
+    name: "L-Pento",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -193,7 +193,7 @@ const PENTOMINO = {
 
   N: (id: string, color: string): Piece => ({
     id,
-    name: 'N-Pento',
+    name: "N-Pento",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -206,7 +206,7 @@ const PENTOMINO = {
 
   T: (id: string, color: string): Piece => ({
     id,
-    name: 'T-Pento',
+    name: "T-Pento",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -219,7 +219,7 @@ const PENTOMINO = {
 
   V: (id: string, color: string): Piece => ({
     id,
-    name: 'V-Pento',
+    name: "V-Pento",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -232,7 +232,7 @@ const PENTOMINO = {
 
   X: (id: string, color: string): Piece => ({
     id,
-    name: 'X-Pento',
+    name: "X-Pento",
     color,
     layout: [
       { x: 1, y: 0, z: 0 },
@@ -245,7 +245,7 @@ const PENTOMINO = {
 
   Y: (id: string, color: string): Piece => ({
     id,
-    name: 'Y-Pento',
+    name: "Y-Pento",
     color,
     layout: [
       { x: 1, y: 0, z: 0 },
@@ -258,7 +258,7 @@ const PENTOMINO = {
 
   Z: (id: string, color: string): Piece => ({
     id,
-    name: 'Z-Pento',
+    name: "Z-Pento",
     color,
     layout: [
       { x: 0, y: 0, z: 0 },
@@ -268,7 +268,7 @@ const PENTOMINO = {
       { x: 2, y: 2, z: 0 },
     ],
   }),
-}
+};
 
 // POLYCUBE_3D removed - 3D mode archived
 
@@ -280,7 +280,7 @@ export const THEMED_SHAPES = {
   // Cat face (simplified) - 8 cells
   Cat: (id: string, color: string): Piece => ({
     id,
-    name: 'Cat',
+    name: "Cat",
     color,
     layout: [
       // Body (2x2)
@@ -300,7 +300,7 @@ export const THEMED_SHAPES = {
   // Dog (side view) - 9 cells
   Dog: (id: string, color: string): Piece => ({
     id,
-    name: 'Dog',
+    name: "Dog",
     color,
     layout: [
       // Body
@@ -321,7 +321,7 @@ export const THEMED_SHAPES = {
   // Bird - 7 cells
   Bird: (id: string, color: string): Piece => ({
     id,
-    name: 'Bird',
+    name: "Bird",
     color,
     layout: [
       // Body
@@ -341,7 +341,7 @@ export const THEMED_SHAPES = {
   // Car (side view) - 8 cells
   Car: (id: string, color: string): Piece => ({
     id,
-    name: 'Car',
+    name: "Car",
     color,
     layout: [
       // Body
@@ -361,7 +361,7 @@ export const THEMED_SHAPES = {
   // Heart - 8 cells
   Heart: (id: string, color: string): Piece => ({
     id,
-    name: 'Heart',
+    name: "Heart",
     color,
     layout: [
       // Top bumps
@@ -381,7 +381,7 @@ export const THEMED_SHAPES = {
   // Star (5-pointed, simplified) - 9 cells
   Star: (id: string, color: string): Piece => ({
     id,
-    name: 'Star',
+    name: "Star",
     color,
     layout: [
       // Center cross
@@ -400,7 +400,7 @@ export const THEMED_SHAPES = {
   // House - 9 cells
   House: (id: string, color: string): Piece => ({
     id,
-    name: 'House',
+    name: "House",
     color,
     layout: [
       // Base (2x2)
@@ -420,7 +420,7 @@ export const THEMED_SHAPES = {
   // Tree - 7 cells
   Tree: (id: string, color: string): Piece => ({
     id,
-    name: 'Tree',
+    name: "Tree",
     color,
     layout: [
       // Trunk
@@ -434,7 +434,7 @@ export const THEMED_SHAPES = {
       { x: 2, y: 3, z: 0 },
     ],
   }),
-}
+};
 
 // ========================================
 // Preset Levels - ALL require 4+ pieces
@@ -445,50 +445,50 @@ function cuboidVoxels(
   height: number,
   depth: number,
 ): Position3D[] {
-  const voxels: Position3D[] = []
+  const voxels: Position3D[] = [];
 
   for (let z = 0; z < depth; z++) {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        voxels.push({ x, y, z })
+        voxels.push({ x, y, z });
       }
     }
   }
 
-  return voxels
+  return voxels;
 }
 
 export const presetLevels: LevelConfig[] = [
   {
-    id: 'cube_2x2x2',
-    name: 'Two-Layer Cube',
-    type: '3D',
+    id: "cube_2x2x2",
+    name: "Two-Layer Cube",
+    type: "3D",
     gridSize: [2, 2, 2],
     targetVoxels: cuboidVoxels(2, 2, 2),
     pieces: [
-      TETRACUBE.O('cube_layer_1', '#00BCD4'),
-      TETRACUBE.O('cube_layer_2', '#E91E63'),
+      TETRACUBE.O("cube_layer_1", "#00BCD4"),
+      TETRACUBE.O("cube_layer_2", "#E91E63"),
     ],
-    difficulty: 'easy',
+    difficulty: "easy",
   },
   {
-    id: 'tower_2x2x3',
-    name: 'Layer Tower',
-    type: '3D',
+    id: "tower_2x2x3",
+    name: "Layer Tower",
+    type: "3D",
     gridSize: [2, 2, 3],
     targetVoxels: cuboidVoxels(2, 2, 3),
     pieces: [
-      TETRACUBE.O('tower_layer_1', '#00BCD4'),
-      TETRACUBE.O('tower_layer_2', '#FF9800'),
-      TETRACUBE.O('tower_layer_3', '#9C27B0'),
+      TETRACUBE.O("tower_layer_1", "#00BCD4"),
+      TETRACUBE.O("tower_layer_2", "#FF9800"),
+      TETRACUBE.O("tower_layer_3", "#9C27B0"),
     ],
-    difficulty: 'medium',
+    difficulty: "medium",
   },
   // ===== EASY LEVELS (4-5 pieces) =====
   {
-    id: 'easy_1',
-    name: '4x4 Square',
-    type: '2D',
+    id: "easy_1",
+    name: "4x4 Square",
+    type: "2D",
     gridSize: [6, 6, 1],
     targetVoxels: [
       // 4x4 = 16 cells (4 tetrominoes)
@@ -510,17 +510,17 @@ export const presetLevels: LevelConfig[] = [
       { x: 4, y: 4, z: 0 },
     ],
     pieces: [
-      TETRIS.O('o1', '#FFEB3B'),
-      TETRIS.O('o2', '#4CAF50'),
-      TETRIS.O('o3', '#2196F3'),
-      TETRIS.O('o4', '#E91E63'),
+      TETRIS.O("o1", "#FFEB3B"),
+      TETRIS.O("o2", "#4CAF50"),
+      TETRIS.O("o3", "#2196F3"),
+      TETRIS.O("o4", "#E91E63"),
     ],
-    difficulty: 'easy',
+    difficulty: "easy",
   },
   {
-    id: 'easy_2',
-    name: 'Long Strip',
-    type: '2D',
+    id: "easy_2",
+    name: "Long Strip",
+    type: "2D",
     gridSize: [8, 5, 1],
     targetVoxels: [
       // 8x2 = 16 cells
@@ -542,17 +542,17 @@ export const presetLevels: LevelConfig[] = [
       { x: 7, y: 2, z: 0 },
     ],
     pieces: [
-      TETRIS.I('i1', '#00BCD4'),
-      TETRIS.I('i2', '#4CAF50'),
-      TETRIS.I('i3', '#FF9800'),
-      TETRIS.I('i4', '#9C27B0'),
+      TETRIS.I("i1", "#00BCD4"),
+      TETRIS.I("i2", "#4CAF50"),
+      TETRIS.I("i3", "#FF9800"),
+      TETRIS.I("i4", "#9C27B0"),
     ],
-    difficulty: 'easy',
+    difficulty: "easy",
   },
   {
-    id: 'easy_3',
-    name: 'T-Formation',
-    type: '2D',
+    id: "easy_3",
+    name: "T-Formation",
+    type: "2D",
     gridSize: [7, 7, 1],
     targetVoxels: [
       // Simple T-shape = 16 cells = 4 O-blocks
@@ -576,17 +576,17 @@ export const presetLevels: LevelConfig[] = [
       { x: 3, y: 6, z: 0 },
     ],
     pieces: [
-      TETRIS.O('o1', '#00BCD4'),
-      TETRIS.O('o2', '#9C27B0'),
-      TETRIS.O('o3', '#E91E63'),
-      TETRIS.O('o4', '#FF9800'),
+      TETRIS.O("o1", "#00BCD4"),
+      TETRIS.O("o2", "#9C27B0"),
+      TETRIS.O("o3", "#E91E63"),
+      TETRIS.O("o4", "#FF9800"),
     ],
-    difficulty: 'easy',
+    difficulty: "easy",
   },
   {
-    id: 'easy_4',
-    name: 'Rectangle',
-    type: '2D',
+    id: "easy_4",
+    name: "Rectangle",
+    type: "2D",
     gridSize: [8, 5, 1],
     targetVoxels: [
       // 6x4 = 24 cells = 6 O-blocks (easily solvable)
@@ -616,21 +616,21 @@ export const presetLevels: LevelConfig[] = [
       { x: 6, y: 4, z: 0 },
     ],
     pieces: [
-      TETRIS.O('o1', '#00BCD4'),
-      TETRIS.O('o2', '#FFEB3B'),
-      TETRIS.O('o3', '#9C27B0'),
-      TETRIS.O('o4', '#FF9800'),
-      TETRIS.O('o5', '#2196F3'),
-      TETRIS.O('o6', '#4CAF50'),
+      TETRIS.O("o1", "#00BCD4"),
+      TETRIS.O("o2", "#FFEB3B"),
+      TETRIS.O("o3", "#9C27B0"),
+      TETRIS.O("o4", "#FF9800"),
+      TETRIS.O("o5", "#2196F3"),
+      TETRIS.O("o6", "#4CAF50"),
     ],
-    difficulty: 'easy',
+    difficulty: "easy",
   },
 
   // ===== MEDIUM LEVELS (5-6 pieces) =====
   {
-    id: 'med_1',
-    name: 'Plus Sign',
-    type: '2D',
+    id: "med_1",
+    name: "Plus Sign",
+    type: "2D",
     gridSize: [8, 8, 1],
     targetVoxels: [
       // Plus shape = 20 cells = 5 O-blocks
@@ -659,18 +659,18 @@ export const presetLevels: LevelConfig[] = [
       { x: 4, y: 6, z: 0 },
     ],
     pieces: [
-      TETRIS.O('o1', '#FFEB3B'),
-      TETRIS.O('o2', '#4CAF50'),
-      TETRIS.O('o3', '#00BCD4'),
-      TETRIS.O('o4', '#9C27B0'),
-      TETRIS.O('o5', '#E91E63'),
+      TETRIS.O("o1", "#FFEB3B"),
+      TETRIS.O("o2", "#4CAF50"),
+      TETRIS.O("o3", "#00BCD4"),
+      TETRIS.O("o4", "#9C27B0"),
+      TETRIS.O("o5", "#E91E63"),
     ],
-    difficulty: 'medium',
+    difficulty: "medium",
   },
   {
-    id: 'med_2',
-    name: 'Staircase',
-    type: '2D',
+    id: "med_2",
+    name: "Staircase",
+    type: "2D",
     gridSize: [8, 5, 1],
     targetVoxels: [
       // Simple stair pattern = 20 cells = 5 tetrominoes
@@ -696,18 +696,18 @@ export const presetLevels: LevelConfig[] = [
       { x: 6, y: 2, z: 0 },
     ],
     pieces: [
-      TETRIS.O('o1', '#FFEB3B'),
-      TETRIS.O('o2', '#4CAF50'),
-      TETRIS.O('o3', '#2196F3'),
-      TETRIS.O('o4', '#FF9800'),
-      TETRIS.O('o5', '#E91E63'),
+      TETRIS.O("o1", "#FFEB3B"),
+      TETRIS.O("o2", "#4CAF50"),
+      TETRIS.O("o3", "#2196F3"),
+      TETRIS.O("o4", "#FF9800"),
+      TETRIS.O("o5", "#E91E63"),
     ],
-    difficulty: 'medium',
+    difficulty: "medium",
   },
   {
-    id: 'med_3',
-    name: 'H-Shape',
-    type: '2D',
+    id: "med_3",
+    name: "H-Shape",
+    type: "2D",
     gridSize: [8, 6, 1],
     targetVoxels: [
       // H pattern = 20 cells = 5 tetrominoes
@@ -733,20 +733,20 @@ export const presetLevels: LevelConfig[] = [
       { x: 2, y: 5, z: 0 },
     ],
     pieces: [
-      TETRIS.O('o1', '#FFEB3B'),
-      TETRIS.O('o2', '#4CAF50'),
-      TETRIS.O('o3', '#2196F3'),
-      TETRIS.I('i1', '#00BCD4'),
-      TETRIS.O('o4', '#E91E63'),
+      TETRIS.O("o1", "#FFEB3B"),
+      TETRIS.O("o2", "#4CAF50"),
+      TETRIS.O("o3", "#2196F3"),
+      TETRIS.I("i1", "#00BCD4"),
+      TETRIS.O("o4", "#E91E63"),
     ],
-    difficulty: 'medium',
+    difficulty: "medium",
   },
 
   // ===== HARD LEVELS (6-7 pieces) =====
   {
-    id: 'hard_1',
-    name: 'Tetris Master',
-    type: '2D',
+    id: "hard_1",
+    name: "Tetris Master",
+    type: "2D",
     gridSize: [8, 5, 1],
     targetVoxels: [
       // 6x4 = 24 cells = 6 tetrominoes
@@ -776,19 +776,19 @@ export const presetLevels: LevelConfig[] = [
       { x: 6, y: 4, z: 0 },
     ],
     pieces: [
-      TETRIS.I('i1', '#00BCD4'),
-      TETRIS.I('i2', '#26A69A'),
-      TETRIS.O('o1', '#FFEB3B'),
-      TETRIS.O('o2', '#FFC107'),
-      TETRIS.O('o3', '#FF9800'),
-      TETRIS.O('o4', '#E91E63'),
+      TETRIS.I("i1", "#00BCD4"),
+      TETRIS.I("i2", "#26A69A"),
+      TETRIS.O("o1", "#FFEB3B"),
+      TETRIS.O("o2", "#FFC107"),
+      TETRIS.O("o3", "#FF9800"),
+      TETRIS.O("o4", "#E91E63"),
     ],
-    difficulty: 'hard',
+    difficulty: "hard",
   },
   {
-    id: 'hard_2',
-    name: 'Big Rectangle',
-    type: '2D',
+    id: "hard_2",
+    name: "Big Rectangle",
+    type: "2D",
     gridSize: [10, 5, 1],
     targetVoxels: [
       // 8x4 = 32 cells = 8 O-blocks
@@ -826,21 +826,21 @@ export const presetLevels: LevelConfig[] = [
       { x: 8, y: 4, z: 0 },
     ],
     pieces: [
-      TETRIS.O('o1', '#00BCD4'),
-      TETRIS.O('o2', '#26A69A'),
-      TETRIS.O('o3', '#FFEB3B'),
-      TETRIS.O('o4', '#FFC107'),
-      TETRIS.O('o5', '#9C27B0'),
-      TETRIS.O('o6', '#4CAF50'),
-      TETRIS.O('o7', '#2196F3'),
-      TETRIS.O('o8', '#E91E63'),
+      TETRIS.O("o1", "#00BCD4"),
+      TETRIS.O("o2", "#26A69A"),
+      TETRIS.O("o3", "#FFEB3B"),
+      TETRIS.O("o4", "#FFC107"),
+      TETRIS.O("o5", "#9C27B0"),
+      TETRIS.O("o6", "#4CAF50"),
+      TETRIS.O("o7", "#2196F3"),
+      TETRIS.O("o8", "#E91E63"),
     ],
-    difficulty: 'hard',
+    difficulty: "hard",
   },
   {
-    id: 'hard_3',
-    name: 'Long Board',
-    type: '2D',
+    id: "hard_3",
+    name: "Long Board",
+    type: "2D",
     gridSize: [10, 5, 1],
     targetVoxels: [
       // 8x4 = 32 cells = 8 I-blocks (rotated vertically)
@@ -878,21 +878,21 @@ export const presetLevels: LevelConfig[] = [
       { x: 8, y: 4, z: 0 },
     ],
     pieces: [
-      TETRIS.I('i1', '#E91E63'),
-      TETRIS.I('i2', '#3F51B5'),
-      TETRIS.I('i3', '#009688'),
-      TETRIS.I('i4', '#FF5722'),
-      TETRIS.I('i5', '#FFEB3B'),
-      TETRIS.I('i6', '#00BCD4'),
-      TETRIS.I('i7', '#4CAF50'),
-      TETRIS.I('i8', '#9C27B0'),
+      TETRIS.I("i1", "#E91E63"),
+      TETRIS.I("i2", "#3F51B5"),
+      TETRIS.I("i3", "#009688"),
+      TETRIS.I("i4", "#FF5722"),
+      TETRIS.I("i5", "#FFEB3B"),
+      TETRIS.I("i6", "#00BCD4"),
+      TETRIS.I("i7", "#4CAF50"),
+      TETRIS.I("i8", "#9C27B0"),
     ],
-    difficulty: 'hard',
+    difficulty: "hard",
   },
   {
-    id: 'hard_4',
-    name: 'Ultimate',
-    type: '2D',
+    id: "hard_4",
+    name: "Ultimate",
+    type: "2D",
     gridSize: [11, 7, 1],
     targetVoxels: [
       // 8x4 = 32 cells = 8 tetrominoes
@@ -930,23 +930,23 @@ export const presetLevels: LevelConfig[] = [
       { x: 8, y: 4, z: 0 },
     ],
     pieces: [
-      TETRIS.I('i1', '#00BCD4'),
-      TETRIS.I('i2', '#26A69A'),
-      TETRIS.O('o1', '#FFEB3B'),
-      TETRIS.O('o2', '#FFC107'),
-      TETRIS.T('t1', '#9C27B0'),
-      TETRIS.T('t2', '#7B1FA2'),
-      TETRIS.L('l1', '#FF9800'),
-      TETRIS.J('j1', '#2196F3'),
+      TETRIS.I("i1", "#00BCD4"),
+      TETRIS.I("i2", "#26A69A"),
+      TETRIS.O("o1", "#FFEB3B"),
+      TETRIS.O("o2", "#FFC107"),
+      TETRIS.T("t1", "#9C27B0"),
+      TETRIS.T("t2", "#7B1FA2"),
+      TETRIS.L("l1", "#FF9800"),
+      TETRIS.J("j1", "#2196F3"),
     ],
-    difficulty: 'hard',
+    difficulty: "hard",
   },
 
   // ===== EXPERT LEVELS (Full Pentomino Set) =====
   {
-    id: 'expert_1',
-    name: 'Pentomino Rectangle',
-    type: '2D',
+    id: "expert_1",
+    name: "Pentomino Rectangle",
+    type: "2D",
     gridSize: [8, 6, 1],
     targetVoxels: [
       // 5x4 = 20 cells = 4 pentominoes
@@ -972,17 +972,17 @@ export const presetLevels: LevelConfig[] = [
       { x: 5, y: 4, z: 0 },
     ],
     pieces: [
-      PENTOMINO.I('pi1', '#E91E63'),
-      PENTOMINO.L('pl1', '#3F51B5'),
-      PENTOMINO.V('pv1', '#FF5722'),
-      PENTOMINO.P('pp1', '#795548'),
+      PENTOMINO.I("pi1", "#E91E63"),
+      PENTOMINO.L("pl1", "#3F51B5"),
+      PENTOMINO.V("pv1", "#FF5722"),
+      PENTOMINO.P("pp1", "#795548"),
     ],
-    difficulty: 'hard',
+    difficulty: "hard",
   },
   {
-    id: 'expert_2',
-    name: 'Wide Grid',
-    type: '2D',
+    id: "expert_2",
+    name: "Wide Grid",
+    type: "2D",
     gridSize: [9, 5, 1],
     targetVoxels: [
       // 8x3 = 24 cells = 6 O-blocks
@@ -1012,17 +1012,17 @@ export const presetLevels: LevelConfig[] = [
       { x: 8, y: 3, z: 0 },
     ],
     pieces: [
-      TETRIS.I('i1', '#E91E63'),
-      TETRIS.I('i2', '#3F51B5'),
-      TETRIS.I('i3', '#009688'),
-      TETRIS.I('i4', '#FF5722'),
-      TETRIS.I('i5', '#FFEB3B'),
-      TETRIS.I('i6', '#00BCD4'),
+      TETRIS.I("i1", "#E91E63"),
+      TETRIS.I("i2", "#3F51B5"),
+      TETRIS.I("i3", "#009688"),
+      TETRIS.I("i4", "#FF5722"),
+      TETRIS.I("i5", "#FFEB3B"),
+      TETRIS.I("i6", "#00BCD4"),
     ],
-    difficulty: 'hard',
+    difficulty: "hard",
   },
   // 3D levels removed - focusing on polished 2D experience
-]
+];
 
 // ========================================
 // Random Level Generator (Guaranteed Solvable)
@@ -1047,10 +1047,10 @@ export const presetLevels: LevelConfig[] = [
  */
 export function generateRandomLevel(difficulty: Difficulty): LevelConfig {
   // Create unique seed from timestamp + random for variety
-  const seed = `random_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  const rng = createSeededRandom(seed)
+  const seed = `random_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const rng = createSeededRandom(seed);
 
-  return generateGuaranteedSolvableWithRetry(rng, difficulty)
+  return generateGuaranteedSolvableWithRetry(rng, difficulty);
 }
 
 // ========================================
@@ -1062,9 +1062,9 @@ export function generateRandomLevel(difficulty: Difficulty): LevelConfig {
  * Logs warnings for levels with volume mismatches
  */
 export function runLevelValidation(): Map<string, LevelValidation> {
-  const results = validateAllLevels(presetLevels)
-  return results
+  const results = validateAllLevels(presetLevels);
+  return results;
 }
 
 // Export for external use
-export type { LevelValidation }
+export type { LevelValidation };

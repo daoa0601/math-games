@@ -9,13 +9,13 @@ export type {
   LineWithStatus,
   Difficulty,
   OptimizationGoal,
-} from './types'
+} from "./types";
 
 // Re-export functions
-export { getLineStatus, isPuzzleSolved, solve } from './solver'
+export { getLineStatus, isPuzzleSolved, solve } from "./solver";
 export {
   magicTrianglePuzzle,
   linePuzzle,
   crossPuzzle,
   puzzleTemplates,
-} from './puzzles'
+} from "./puzzles";

@@ -1,19 +1,19 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ['src/index.ts'],
-  format: ['esm'],
-  target: 'es2022',
+  entry: ["src/index.ts"],
+  format: ["esm"],
+  target: "es2022",
   dts: true,
   splitting: false,
   sourcemap: true,
   clean: true,
   external: [
-    'effect',
+    "effect",
     /^effect\//,
-    'drizzle-orm',
+    "drizzle-orm",
     /^drizzle-orm\//,
-    'cloudflare:workers',
+    "cloudflare:workers",
     /^@math-games\//,
   ],
-})
+});

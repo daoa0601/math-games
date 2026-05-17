@@ -1,34 +1,34 @@
-export const playerCookieName = 'mg_player'
-export const playerCookieMaxAge = 60 * 60 * 24 * 365
-export const localPlayerId = 'local-player'
+export const playerCookieName = "mg_player";
+export const playerCookieMaxAge = 60 * 60 * 24 * 365;
+export const localPlayerId = "local-player";
 
 export interface PlayerIdentity {
-  id: string
-  displayName: string
-  locale: 'en' | 'vi'
-  gradeBand: 'elementary' | 'middle' | 'high'
+  id: string;
+  displayName: string;
+  locale: "en" | "vi";
+  gradeBand: "elementary" | "middle" | "high";
 }
 
 export const defaultPlayerIdentity: PlayerIdentity = {
   id: localPlayerId,
-  displayName: 'Guest Player',
-  locale: 'en',
-  gradeBand: 'elementary',
-}
+  displayName: "Guest Player",
+  locale: "en",
+  gradeBand: "elementary",
+};
 
 const playerIdPattern =
-  /^player_[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  /^player_[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function createPlayerId(
   createUuid: () => string = () => crypto.randomUUID(),
 ) {
-  return `player_${createUuid()}`
+  return `player_${createUuid()}`;
 }
 
 export function createGuestDisplayName(playerId: string) {
   return playerId === localPlayerId
     ? defaultPlayerIdentity.displayName
-    : `Guest ${playerId.slice('player_'.length, 'player_'.length + 8)}`
+    : `Guest ${playerId.slice("player_".length, "player_".length + 8)}`;
 }
 
 export function createPlayerIdentity(playerId: string): PlayerIdentity {
@@ -36,20 +36,20 @@ export function createPlayerIdentity(playerId: string): PlayerIdentity {
     ...defaultPlayerIdentity,
     id: playerId,
     displayName: createGuestDisplayName(playerId),
-  }
+  };
 }
 
 export function parsePlayerIdCookie(cookieHeader: string | null | undefined) {
-  if (cookieHeader === null || cookieHeader === undefined) return null
+  if (cookieHeader === null || cookieHeader === undefined) return null;
 
   const cookie = cookieHeader
-    .split(';')
+    .split(";")
     .map((part) => part.trim())
-    .find((part) => part.startsWith(`${playerCookieName}=`))
+    .find((part) => part.startsWith(`${playerCookieName}=`));
 
-  const value = cookie?.slice(playerCookieName.length + 1)
+  const value = cookie?.slice(playerCookieName.length + 1);
 
-  return value !== undefined && playerIdPattern.test(value) ? value : null
+  return value !== undefined && playerIdPattern.test(value) ? value : null;
 }
 
 function isHttpsRequest(host: string | null | undefined): boolean {
@@ -57,24 +57,24 @@ function isHttpsRequest(host: string | null | undefined): boolean {
   // CF Workers in production serve over HTTPS with a workers.dev or custom
   // domain Host. Use a hostname check rather than X-Forwarded-Proto since
   // CF doesn't always populate it on the platform's own ingress.
-  if (host === null || host === undefined) return false
+  if (host === null || host === undefined) return false;
 
-  const hostname = host.split(':')[0]
+  const hostname = host.split(":")[0];
 
   if (
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1' ||
-    hostname === '::1' ||
-    hostname.endsWith('.localhost')
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    hostname.endsWith(".localhost")
   ) {
-    return false
+    return false;
   }
 
-  return true
+  return true;
 }
 
 export function serializePlayerIdCookie(playerId: string, host?: string) {
-  const secure = isHttpsRequest(host) ? '; Secure' : ''
+  const secure = isHttpsRequest(host) ? "; Secure" : "";
 
-  return `${playerCookieName}=${playerId}; Path=/; Max-Age=${playerCookieMaxAge}; HttpOnly; SameSite=Lax${secure}`
+  return `${playerCookieName}=${playerId}; Path=/; Max-Age=${playerCookieMaxAge}; HttpOnly; SameSite=Lax${secure}`;
 }

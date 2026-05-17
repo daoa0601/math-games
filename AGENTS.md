@@ -2,6 +2,31 @@
 
 Guidance for agentic coding assistants working in `math-games`.
 
+## Quality Gates — Run Before Every Commit
+
+Every commit must pass these checks. Run them in this order before
+committing; CI enforces the same pipeline and will reject failures.
+
+```bash
+pnpm format:check   # Prettier formatting
+pnpm typecheck      # TypeScript strict mode
+pnpm lint           # ESLint
+pnpm test           # Vitest unit tests
+pnpm build          # Client + SSR production bundles
+```
+
+Or run all at once:
+
+```bash
+pnpm check          # format:check + typecheck + lint + test + build
+```
+
+**If any gate fails, fix it before committing.** Do not skip hooks,
+disable rules, or weaken thresholds to make CI pass. If a lint rule
+or coverage threshold is genuinely wrong, discuss with the user first.
+
+**Formatting**: Run `pnpm format` to auto-fix. Never commit unformatted code.
+
 ## Design System — Read Before Touching UI
 
 If your task touches anything visual — adding a new game, building a new

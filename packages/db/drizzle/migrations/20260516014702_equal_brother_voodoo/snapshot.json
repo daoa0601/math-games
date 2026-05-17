@@ -2,9 +2,7 @@
   "version": "7",
   "dialect": "sqlite",
   "id": "9e8bea24-689f-4f66-b1d8-5db3396b9a1e",
-  "prevIds": [
-    "8e2c54ca-4a01-4581-9fad-09e3c3f13421"
-  ],
+  "prevIds": ["8e2c54ca-4a01-4581-9fad-09e3c3f13421"],
   "ddl": [
     {
       "name": "daily_challenges",
@@ -317,13 +315,9 @@
       "table": "players"
     },
     {
-      "columns": [
-        "player_id"
-      ],
+      "columns": ["player_id"],
       "tableTo": "players",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
@@ -332,13 +326,9 @@
       "table": "daily_player_results"
     },
     {
-      "columns": [
-        "player_id"
-      ],
+      "columns": ["player_id"],
       "tableTo": "players",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
@@ -347,13 +337,9 @@
       "table": "game_progress"
     },
     {
-      "columns": [
-        "player_id"
-      ],
+      "columns": ["player_id"],
       "tableTo": "players",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
@@ -362,49 +348,35 @@
       "table": "player_achievements"
     },
     {
-      "columns": [
-        "player_id",
-        "challenge_date"
-      ],
+      "columns": ["player_id", "challenge_date"],
       "nameExplicit": false,
       "name": "daily_player_results_pk",
       "entityType": "pks",
       "table": "daily_player_results"
     },
     {
-      "columns": [
-        "player_id",
-        "game_id",
-        "level_id"
-      ],
+      "columns": ["player_id", "game_id", "level_id"],
       "nameExplicit": false,
       "name": "game_progress_pk",
       "entityType": "pks",
       "table": "game_progress"
     },
     {
-      "columns": [
-        "player_id",
-        "achievement_id"
-      ],
+      "columns": ["player_id", "achievement_id"],
       "nameExplicit": false,
       "name": "player_achievements_pk",
       "entityType": "pks",
       "table": "player_achievements"
     },
     {
-      "columns": [
-        "challenge_date"
-      ],
+      "columns": ["challenge_date"],
       "nameExplicit": false,
       "name": "daily_challenges_pk",
       "table": "daily_challenges",
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "players_pk",
       "table": "players",

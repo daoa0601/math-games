@@ -5,7 +5,11 @@ import { Effect } from 'effect'
 
 import { getAchievementById } from '@/achievements/achievements.logic'
 import { schema } from '@math-games/db'
-import { PlayerProfileError, PlayerProfileWriteError, withD1Retry } from '@math-games/effect-infra'
+import {
+  PlayerProfileError,
+  PlayerProfileWriteError,
+  withD1Retry,
+} from '@math-games/effect-infra'
 import { DbService, PlayerIdentityService } from '@math-games/effect-game'
 
 import type {

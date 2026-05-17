@@ -358,7 +358,9 @@ function SequenceRaceRoute() {
           {hints.length > 0 ? (
             <Card className="border border-primary/15 bg-primary/[0.04] shadow-none">
               <CardContent>
-                <h3 className="text-sm font-bold text-primary">{t('game.hints')}</h3>
+                <h3 className="text-sm font-bold text-primary">
+                  {t('game.hints')}
+                </h3>
                 <ul className="mt-2 grid gap-1.5 text-sm text-muted-foreground">
                   {hints.map((hint) => (
                     <li key={hint}>- {hint}</li>

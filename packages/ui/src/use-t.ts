@@ -1,6 +1,6 @@
-import { useLocale } from './locale-context'
+import { useLocale } from "./locale-context";
 
 export function useT() {
-  const { t } = useLocale()
-  return t
+  const { t } = useLocale();
+  return t;
 }

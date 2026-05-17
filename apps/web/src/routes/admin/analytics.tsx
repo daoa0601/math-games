@@ -17,7 +17,11 @@ import {
 } from '@/classroom/analytics.functions'
 import { runServerAction } from '@/routes/-server-action-result'
 import { RouteErrorFallback } from '@/routes/-route-error'
-import type { CompletionRateReport, RetentionReport, LevelDifficultyReport } from '@math-games/effect-classroom'
+import type {
+  CompletionRateReport,
+  RetentionReport,
+  LevelDifficultyReport,
+} from '@math-games/effect-classroom'
 
 export const Route = createFileRoute('/admin/analytics')({
   component: AnalyticsDashboard,
@@ -111,9 +115,37 @@ function AnalyticsDashboard() {
 
       {loading && (
         <div className="grid gap-6">
-          <Card><CardHeader><Skeleton className="h-6 w-48" /></CardHeader><CardContent><div className="grid gap-4 md:grid-cols-2"><Skeleton className="h-16 rounded-md" /><Skeleton className="h-16 rounded-md" /></div></CardContent></Card>
-          <Card><CardHeader><Skeleton className="h-6 w-40" /></CardHeader><CardContent><Skeleton className="h-20 rounded-md" /></CardContent></Card>
-          <Card><CardHeader><Skeleton className="h-6 w-52" /></CardHeader><CardContent><div className="space-y-2"><Skeleton className="h-10 rounded-md" /><Skeleton className="h-10 rounded-md" /><Skeleton className="h-10 rounded-md" /></div></CardContent></Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Skeleton className="h-16 rounded-md" />
+                <Skeleton className="h-16 rounded-md" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-20 rounded-md" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-52" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Skeleton className="h-10 rounded-md" />
+                <Skeleton className="h-10 rounded-md" />
+                <Skeleton className="h-10 rounded-md" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 

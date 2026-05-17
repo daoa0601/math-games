@@ -2,7 +2,12 @@ import { eq } from '@math-games/db'
 import { Effect } from 'effect'
 
 import { schema } from '@math-games/db'
-import { ClockService, DailyChallengeError, KvCacheService, withD1Retry } from '@math-games/effect-infra'
+import {
+  ClockService,
+  DailyChallengeError,
+  KvCacheService,
+  withD1Retry,
+} from '@math-games/effect-infra'
 import { DbService } from '@math-games/effect-game'
 
 import { parseDailyChallengeConfig, planDailyChallenge } from './daily.logic'

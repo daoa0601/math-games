@@ -1,66 +1,67 @@
-import { and, avg, count, eq, max, sql } from 'drizzle-orm'
-import { Context, Effect, Layer } from 'effect'
+import { and, avg, count, eq, max, sql } from "drizzle-orm";
+import { Context, Effect, Layer } from "effect";
 
-import { schema } from '@math-games/db'
+import { schema } from "@math-games/db";
 
-import { GameAttemptsError, withD1Retry } from '@math-games/effect-infra'
+import { GameAttemptsError, withD1Retry } from "@math-games/effect-infra";
 
-import { DbService } from './db'
+import { DbService } from "./db";
 
 export interface AttemptInput {
-  playerId: string
-  gameId: string
-  levelId: string
-  score: number
-  completed: boolean
-  moves: number
-  durationMs?: number
-  mode: 'practice' | 'daily'
-  completionJson?: string
+  playerId: string;
+  gameId: string;
+  levelId: string;
+  score: number;
+  completed: boolean;
+  moves: number;
+  durationMs?: number;
+  mode: "practice" | "daily";
+  completionJson?: string;
 }
 
 export interface Attempt {
-  id: string
-  score: number
-  completed: boolean
-  moves: number
-  durationMs: number | null
-  mode: string
-  createdAt: Date | null
+  id: string;
+  score: number;
+  completed: boolean;
+  moves: number;
+  durationMs: number | null;
+  mode: string;
+  createdAt: Date | null;
 }
 
 export interface GameStats {
-  totalAttempts: number
-  completionRate: number
-  averageScore: number
-  averageMoves: number
-  bestScoreByLevel: Record<string, number>
+  totalAttempts: number;
+  completionRate: number;
+  averageScore: number;
+  averageMoves: number;
+  bestScoreByLevel: Record<string, number>;
 }
 
 export interface GameAttemptsShape {
   readonly record: (
     input: AttemptInput,
-  ) => Effect.Effect<void, GameAttemptsError>
+  ) => Effect.Effect<void, GameAttemptsError>;
 
   readonly getHistory: (
     playerId: string,
     gameId: string,
     levelId: string,
-  ) => Effect.Effect<Attempt[], GameAttemptsError>
+  ) => Effect.Effect<Attempt[], GameAttemptsError>;
 
   readonly getStats: (
     playerId: string,
     gameId: string,
-  ) => Effect.Effect<GameStats, GameAttemptsError>
+  ) => Effect.Effect<GameStats, GameAttemptsError>;
 }
 
-export const GameAttemptsService =
-  Context.Service<GameAttemptsShape>('GameAttemptsService')
+export const GameAttemptsService = Context.Service<GameAttemptsShape>(
+  "GameAttemptsService",
+);
 
 function generateId(): string {
-  const bytes = new Uint8Array(12)
-  crypto.getRandomValues(bytes)
-  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
+  const bytes = new Uint8Array(12);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 export const GameAttemptsServiceLive = Layer.effect(
@@ -123,8 +124,7 @@ export const GameAttemptsServiceLive = Layer.effect(
                 db
                   .select({
                     totalAttempts: count(),
-                    completedCount:
-                      sql<number>`sum(case when ${schema.gameAttempts.completed} then 1 else 0 end)`,
+                    completedCount: sql<number>`sum(case when ${schema.gameAttempts.completed} then 1 else 0 end)`,
                     avgScore: avg(schema.gameAttempts.score),
                     avgMoves: avg(schema.gameAttempts.moves),
                   })
@@ -151,11 +151,11 @@ export const GameAttemptsServiceLive = Layer.effect(
               ]),
             catch: (cause) => new GameAttemptsError({ cause }),
           }),
-        )
+        );
 
-        const agg = aggregates[0]
-        const total = agg.totalAttempts
-        const completed = Number(agg.completedCount)
+        const agg = aggregates[0];
+        const total = agg.totalAttempts;
+        const completed = Number(agg.completedCount);
 
         return {
           totalAttempts: total,
@@ -165,7 +165,7 @@ export const GameAttemptsServiceLive = Layer.effect(
           bestScoreByLevel: Object.fromEntries(
             bestScores.map((r) => [r.levelId, r.best ?? 0]),
           ),
-        }
+        };
       }),
   })),
-)
+);

@@ -10,30 +10,30 @@ This document is **load-bearing**. Future agents adding new games or UI must fol
 
 Use these. Do not roll your own equivalents.
 
-| Component | Purpose | Source |
-|-----------|---------|--------|
-| `<Wordmark label compact? />` | "Math Games" + connected-dots glyph. `compact` for breadcrumbs. | [packages/ui/src/wordmark.tsx](../packages/ui/src/wordmark.tsx) |
-| `<GameGlyph game />` | Per-game custom SVG. 4 hand-drawn primitives (constellation / podium / split-triangle / dotted-gap). | [packages/ui/src/game-glyph.tsx](../packages/ui/src/game-glyph.tsx) |
-| `<MechanicCard game tone? showGlyph? showPattern? />` | Themed card with `--game-gradient` bg, optional `GamePattern` watermark, anchored `GameGlyph`. **Decorative chrome only — never wrap a playfield in this.** | [packages/ui/src/mechanic-card.tsx](../packages/ui/src/mechanic-card.tsx) |
-| `<GameChrome game levelTitle meta? />` | Sticky game-page header with wordmark/breadcrumb/glyph/title. Includes `LanguageToggle`+`ThemeToggle`. Use in every game route — do not roll your own header. | [packages/ui/src/game-chrome.tsx](../packages/ui/src/game-chrome.tsx) |
-| `<PlayerAvatar seed />` | Deterministic 2-shape geometric avatar from a seed string (typically `displayName`). | [packages/ui/src/player-avatar.tsx](../packages/ui/src/player-avatar.tsx) |
-| `<RaritySigil rarity locked? />` | Achievement icon — geometric primitive per rarity (circle/square/triangle/hexagon), filled vs outline. | [packages/ui/src/rarity-sigil.tsx](../packages/ui/src/rarity-sigil.tsx) |
-| `<GamePattern pattern />` | Tiled SVG pattern watermark. **For non-gameplay surfaces only.** | [packages/ui/src/game-pattern.tsx](../packages/ui/src/game-pattern.tsx) |
+| Component                                             | Purpose                                                                                                                                                       | Source                                                                    |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `<Wordmark label compact? />`                         | "Math Games" + connected-dots glyph. `compact` for breadcrumbs.                                                                                               | [packages/ui/src/wordmark.tsx](../packages/ui/src/wordmark.tsx)           |
+| `<GameGlyph game />`                                  | Per-game custom SVG. 4 hand-drawn primitives (constellation / podium / split-triangle / dotted-gap).                                                          | [packages/ui/src/game-glyph.tsx](../packages/ui/src/game-glyph.tsx)       |
+| `<MechanicCard game tone? showGlyph? showPattern? />` | Themed card with `--game-gradient` bg, optional `GamePattern` watermark, anchored `GameGlyph`. **Decorative chrome only — never wrap a playfield in this.**   | [packages/ui/src/mechanic-card.tsx](../packages/ui/src/mechanic-card.tsx) |
+| `<GameChrome game levelTitle meta? />`                | Sticky game-page header with wordmark/breadcrumb/glyph/title. Includes `LanguageToggle`+`ThemeToggle`. Use in every game route — do not roll your own header. | [packages/ui/src/game-chrome.tsx](../packages/ui/src/game-chrome.tsx)     |
+| `<PlayerAvatar seed />`                               | Deterministic 2-shape geometric avatar from a seed string (typically `displayName`).                                                                          | [packages/ui/src/player-avatar.tsx](../packages/ui/src/player-avatar.tsx) |
+| `<RaritySigil rarity locked? />`                      | Achievement icon — geometric primitive per rarity (circle/square/triangle/hexagon), filled vs outline.                                                        | [packages/ui/src/rarity-sigil.tsx](../packages/ui/src/rarity-sigil.tsx)   |
+| `<GamePattern pattern />`                             | Tiled SVG pattern watermark. **For non-gameplay surfaces only.**                                                                                              | [packages/ui/src/game-pattern.tsx](../packages/ui/src/game-pattern.tsx)   |
 
 ## Design Tokens (`apps/web/src/styles.css`)
 
 Use these instead of raw Tailwind colors or hard-coded values.
 
-| Token | Use |
-|-------|-----|
-| `--card-shadow-long` | All elevated cards. Replaces `shadow-xl`, `shadow-lg`, multi-layer shadows. |
-| `--game-gradient` | Card background tint per game. Already authored per theme. |
-| `--game-gradient-soft` | Lighter variant. Use when more than ~6 tinted surfaces would be on screen. |
-| `--success` | Correct/solved state. Replaces raw `bg-green-500/X`. |
-| `--destructive` | Wrong/error state. Already a Tailwind utility (`text-destructive`, `bg-destructive`). |
-| `--chart-1/2/3` | Per-game accent palette. For confetti and small UI accents. |
-| `--rank-gold` | Legendary rarity color. |
-| `--line-correct` / `--line-incorrect` / `--line-pending` | In-game state colors for puzzle elements. |
+| Token                                                    | Use                                                                                   |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `--card-shadow-long`                                     | All elevated cards. Replaces `shadow-xl`, `shadow-lg`, multi-layer shadows.           |
+| `--game-gradient`                                        | Card background tint per game. Already authored per theme.                            |
+| `--game-gradient-soft`                                   | Lighter variant. Use when more than ~6 tinted surfaces would be on screen.            |
+| `--success`                                              | Correct/solved state. Replaces raw `bg-green-500/X`.                                  |
+| `--destructive`                                          | Wrong/error state. Already a Tailwind utility (`text-destructive`, `bg-destructive`). |
+| `--chart-1/2/3`                                          | Per-game accent palette. For confetti and small UI accents.                           |
+| `--rank-gold`                                            | Legendary rarity color.                                                               |
+| `--line-correct` / `--line-incorrect` / `--line-pending` | In-game state colors for puzzle elements.                                             |
 
 ## DO
 
@@ -75,18 +75,18 @@ These have specific reasons. Don't relitigate.
 
 Where each visual layer is allowed:
 
-| Surface | Body grain | `--game-gradient` | `GamePattern` watermark | `GameGlyph` |
-|---------|-----------:|------------------:|------------------------:|------------:|
-| Body background | YES (subtle) | — | — | — |
-| Home `MechanicCard` | inherits | YES | YES (`/[0.025]` light, `/[0.035]` dark) | YES |
-| Daily hero card | inherits | YES | YES | YES |
-| Game-page header | inherits | — | — | YES (size-5) |
-| **Playfield card** | inherits | YES (atmospheric) | **NO** | — |
-| Sidebar/controls | inherits | — | — | — |
-| Hints card | inherits | — | — | — |
-| Profile identity card | inherits | — | — | — |
-| Profile per-game cards | inherits | YES | YES | YES |
-| Achievement cards | inherits | — | — | — (uses `RaritySigil` instead) |
+| Surface                |   Body grain | `--game-gradient` |                 `GamePattern` watermark |                    `GameGlyph` |
+| ---------------------- | -----------: | ----------------: | --------------------------------------: | -----------------------------: |
+| Body background        | YES (subtle) |                 — |                                       — |                              — |
+| Home `MechanicCard`    |     inherits |               YES | YES (`/[0.025]` light, `/[0.035]` dark) |                            YES |
+| Daily hero card        |     inherits |               YES |                                     YES |                            YES |
+| Game-page header       |     inherits |                 — |                                       — |                   YES (size-5) |
+| **Playfield card**     |     inherits | YES (atmospheric) |                                  **NO** |                              — |
+| Sidebar/controls       |     inherits |                 — |                                       — |                              — |
+| Hints card             |     inherits |                 — |                                       — |                              — |
+| Profile identity card  |     inherits |                 — |                                       — |                              — |
+| Profile per-game cards |     inherits |               YES |                                     YES |                            YES |
+| Achievement cards      |     inherits |                 — |                                       — | — (uses `RaritySigil` instead) |
 
 ## Workspace / Build Gotchas
 

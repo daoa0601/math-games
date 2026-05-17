@@ -1,15 +1,15 @@
-import { cn } from './cn'
+import { cn } from "./cn";
 
 export type GameGlyphId =
-  | 'magic-graph'
-  | 'sequence-race'
-  | 'shape-architect'
-  | 'pattern-detective'
+  | "magic-graph"
+  | "sequence-race"
+  | "shape-architect"
+  | "pattern-detective";
 
 interface GameGlyphProps {
-  game: GameGlyphId
-  className?: string
-  title?: string
+  game: GameGlyphId;
+  className?: string;
+  title?: string;
 }
 
 function MagicGraphGlyph() {
@@ -47,7 +47,7 @@ function MagicGraphGlyph() {
       <circle cx="46" cy="20" r="5.5" fill="currentColor" />
       <circle cx="32" cy="48" r="5.5" fill="currentColor" />
     </>
-  )
+  );
 }
 
 function SequenceRaceGlyph() {
@@ -71,30 +71,16 @@ function SequenceRaceGlyph() {
         fill="currentColor"
         opacity="0.75"
       />
-      <rect
-        x="43"
-        y="12"
-        width="13"
-        height="44"
-        rx="2"
-        fill="currentColor"
-      />
+      <rect x="43" y="12" width="13" height="44" rx="2" fill="currentColor" />
     </>
-  )
+  );
 }
 
 function ShapeArchitectGlyph() {
   return (
     <>
-      <path
-        d="M32 8 L8 52 L32 52 Z"
-        fill="currentColor"
-        opacity="0.55"
-      />
-      <path
-        d="M32 8 L32 52 L56 52 Z"
-        fill="currentColor"
-      />
+      <path d="M32 8 L8 52 L32 52 Z" fill="currentColor" opacity="0.55" />
+      <path d="M32 8 L32 52 L56 52 Z" fill="currentColor" />
       <path
         d="M32 8 L32 52"
         stroke="var(--background)"
@@ -103,7 +89,7 @@ function ShapeArchitectGlyph() {
         opacity="0.7"
       />
     </>
-  )
+  );
 }
 
 function PatternDetectiveGlyph() {
@@ -122,28 +108,28 @@ function PatternDetectiveGlyph() {
       />
       <circle cx="53" cy="32" r="5" fill="currentColor" />
     </>
-  )
+  );
 }
 
 const glyphs: Record<GameGlyphId, () => React.JSX.Element> = {
-  'magic-graph': MagicGraphGlyph,
-  'sequence-race': SequenceRaceGlyph,
-  'shape-architect': ShapeArchitectGlyph,
-  'pattern-detective': PatternDetectiveGlyph,
-}
+  "magic-graph": MagicGraphGlyph,
+  "sequence-race": SequenceRaceGlyph,
+  "shape-architect": ShapeArchitectGlyph,
+  "pattern-detective": PatternDetectiveGlyph,
+};
 
 export function GameGlyph({ game, className, title }: GameGlyphProps) {
-  const Glyph = glyphs[game]
+  const Glyph = glyphs[game];
 
   return (
     <svg
       aria-hidden={title ? undefined : true}
-      role={title ? 'img' : undefined}
+      role={title ? "img" : undefined}
       viewBox="0 0 64 64"
-      className={cn('text-primary', className)}
+      className={cn("text-primary", className)}
     >
       {title ? <title>{title}</title> : null}
       <Glyph />
     </svg>
-  )
+  );
 }

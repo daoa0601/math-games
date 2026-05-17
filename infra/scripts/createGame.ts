@@ -1,34 +1,51 @@
-import fs from 'node:fs'
-import path from 'node:path'
+import fs from "node:fs";
+import path from "node:path";
 
-const name = process.argv[2]
+const name = process.argv[2];
 if (!name) {
-  console.error('Usage: pnpm create:game <name>')
-  console.error('  <name> should be PascalCase, e.g. PatternDetective')
-  process.exit(1)
+  console.error("Usage: pnpm create:game <name>");
+  console.error("  <name> should be PascalCase, e.g. PatternDetective");
+  process.exit(1);
 }
 
-const pascal = name.charAt(0).toUpperCase() + name.slice(1)
-const kebab = pascal
-  .replace(/([a-z])([A-Z])/g, '$1-$2')
-  .toLowerCase()
-const camel = pascal.charAt(0).toLowerCase() + pascal.slice(1)
+const pascal = name.charAt(0).toUpperCase() + name.slice(1);
+const kebab = pascal.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+const camel = pascal.charAt(0).toLowerCase() + pascal.slice(1);
 
-const gamesDir = path.resolve(import.meta.dirname, '..', 'src', 'games', pascal)
-const routeFile = path.resolve(import.meta.dirname, '..', 'src', 'routes', 'games', `${kebab}.tsx`)
-const registryFile = path.resolve(import.meta.dirname, '..', 'src', 'games', 'registry.ts')
+const gamesDir = path.resolve(
+  import.meta.dirname,
+  "..",
+  "src",
+  "games",
+  pascal,
+);
+const routeFile = path.resolve(
+  import.meta.dirname,
+  "..",
+  "src",
+  "routes",
+  "games",
+  `${kebab}.tsx`,
+);
+const registryFile = path.resolve(
+  import.meta.dirname,
+  "..",
+  "src",
+  "games",
+  "registry.ts",
+);
 
 if (fs.existsSync(gamesDir)) {
-  console.error(`Directory already exists: src/games/${pascal}/`)
-  process.exit(1)
+  console.error(`Directory already exists: src/games/${pascal}/`);
+  process.exit(1);
 }
 
-fs.mkdirSync(gamesDir, { recursive: true })
-fs.mkdirSync(path.join(gamesDir, '__tests__'), { recursive: true })
+fs.mkdirSync(gamesDir, { recursive: true });
+fs.mkdirSync(path.join(gamesDir, "__tests__"), { recursive: true });
 
 // translations.ts
 fs.writeFileSync(
-  path.join(gamesDir, 'translations.ts'),
+  path.join(gamesDir, "translations.ts"),
   `export const ${camel}Translations = {
   en: {
     'gameTitle.${camel}': '${pascal}',
@@ -40,7 +57,7 @@ fs.writeFileSync(
   },
 } as const
 `,
-)
+);
 
 // catalog
 fs.writeFileSync(
@@ -56,7 +73,7 @@ export const catalog: readonly ${pascal}Config[] = [
 
 export const difficulties = ['easy', 'medium', 'hard'] as const
 `,
-)
+);
 
 // schema
 fs.writeFileSync(
@@ -69,11 +86,11 @@ export const ${pascal}CompletionSchema = Schema.Struct({
 
 export type ${pascal}Completion = typeof ${pascal}CompletionSchema.Type
 `,
-)
+);
 
 // logic
 fs.writeFileSync(
-  path.join(gamesDir, 'logic.ts'),
+  path.join(gamesDir, "logic.ts"),
   `import type { ${pascal}Config } from './${kebab}.catalog'
 import type { ${pascal}Completion } from './${kebab}.schema'
 
@@ -85,11 +102,11 @@ export function validate(
   return { completed: false, moves: 1 }
 }
 `,
-)
+);
 
 // module.ts
 fs.writeFileSync(
-  path.join(gamesDir, 'module.ts'),
+  path.join(gamesDir, "module.ts"),
   `import { Effect, Schema } from 'effect'
 
 import type {
@@ -109,7 +126,7 @@ import { validate } from './logic'
 
 const achievements: readonly Achievement[] = [
   {
-    id: '${kebab.replace(/-/g, '_')}_first',
+    id: '${kebab.replace(/-/g, "_")}_first',
     category: '${kebab}',
     name: 'First ${pascal}',
     description: 'Complete a ${pascal} puzzle.',
@@ -143,8 +160,8 @@ function evaluateAchievements(
   unlocked: ReadonlySet<string>,
 ): string[] {
   const newly: string[] = []
-  if (ctx.completed && !unlocked.has('${kebab.replace(/-/g, '_')}_first')) {
-    newly.push('${kebab.replace(/-/g, '_')}_first')
+  if (ctx.completed && !unlocked.has('${kebab.replace(/-/g, "_")}_first')) {
+    newly.push('${kebab.replace(/-/g, "_")}_first')
   }
   return newly
 }
@@ -194,7 +211,7 @@ export const ${camel}Module = {
     }),
 } as const satisfies GameModule<${pascal}Config>
 `,
-)
+);
 
 // server functions
 fs.writeFileSync(
@@ -221,11 +238,11 @@ export const record${pascal}Progress = createServerFn({ method: 'POST' })
     runServerEffect(createRecordProgressPipeline(${camel}Module, data)),
   )
 `,
-)
+);
 
 // basic test
 fs.writeFileSync(
-  path.join(gamesDir, '__tests__', 'logic.test.ts'),
+  path.join(gamesDir, "__tests__", "logic.test.ts"),
   `import { describe, expect, test } from 'vitest'
 import { validate } from '../logic'
 
@@ -240,7 +257,7 @@ describe('${pascal} validation', () => {
   })
 })
 `,
-)
+);
 
 // route placeholder
 fs.writeFileSync(
@@ -260,21 +277,15 @@ function ${pascal}Page() {
   )
 }
 `,
-)
+);
 
 // Append import to registry.ts
-const registryContent = fs.readFileSync(registryFile, 'utf-8')
-const importLine = `import { ${camel}Module } from './${pascal}/module'`
+const registryContent = fs.readFileSync(registryFile, "utf-8");
+const importLine = `import { ${camel}Module } from './${pascal}/module'`;
 const updatedRegistry = registryContent
-  .replace(
-    /(import .* from '.\/\w+\/module'\n)(?!import)/,
-    `$1${importLine}\n`,
-  )
-  .replace(
-    /(\] as const)/,
-    `  ${camel}Module,\n$1`,
-  )
-fs.writeFileSync(registryFile, updatedRegistry)
+  .replace(/(import .* from '.\/\w+\/module'\n)(?!import)/, `$1${importLine}\n`)
+  .replace(/(\] as const)/, `  ${camel}Module,\n$1`);
+fs.writeFileSync(registryFile, updatedRegistry);
 
 console.log(`
 Created game scaffolding for "${pascal}":
@@ -299,4 +310,4 @@ Checklist:
   [ ] Add navigation link in src/routes/index.tsx
   [ ] Add Vietnamese translations
   [ ] Run pnpm check
-`)
+`);

@@ -15,19 +15,19 @@
 
 export interface SeededRandom {
   /** Get next random number in range [0, 1) */
-  next: () => number
+  next: () => number;
 
   /** Get random integer in range [min, max] inclusive */
-  nextInt: (min: number, max: number) => number
+  nextInt: (min: number, max: number) => number;
 
   /** Pick random element from array */
-  pick: <T>(array: readonly T[]) => T
+  pick: <T>(array: readonly T[]) => T;
 
   /** Return a shuffled copy of array (Fisher-Yates with seeded RNG) */
-  shuffle: <T>(array: readonly T[]) => T[]
+  shuffle: <T>(array: readonly T[]) => T[];
 
   /** Get the seed string */
-  readonly seed: string
+  readonly seed: string;
 }
 
 /**
@@ -35,11 +35,11 @@ export interface SeededRandom {
  * Simple, fast, and produces good distribution for our use case.
  */
 function hashString(str: string): number {
-  let hash = 5381
+  let hash = 5381;
   for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash) ^ str.charCodeAt(i)
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
   }
-  return hash >>> 0 // Convert to unsigned 32-bit
+  return hash >>> 0; // Convert to unsigned 32-bit
 }
 
 /**
@@ -50,13 +50,13 @@ function hashString(str: string): number {
  * @returns Function that returns next random number in [0, 1)
  */
 function mulberry32(seed: number): () => number {
-  let state = seed
+  let state = seed;
   return function () {
-    let t = (state += 0x6d2b79f5)
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
+    let t = (state += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 /**
@@ -70,37 +70,37 @@ function mulberry32(seed: number): () => number {
  * const option = rng.pick(['line', 'cross', 'triangle']);  // Same choice every time for this seed
  */
 export function createSeededRandom(seed: string): SeededRandom {
-  const numericSeed = hashString(seed)
-  const rng = mulberry32(numericSeed)
+  const numericSeed = hashString(seed);
+  const rng = mulberry32(numericSeed);
 
   return {
     seed,
 
     next(): number {
-      return rng()
+      return rng();
     },
 
     nextInt(min: number, max: number): number {
-      return Math.floor(rng() * (max - min + 1)) + min
+      return Math.floor(rng() * (max - min + 1)) + min;
     },
 
     pick<T>(array: readonly T[]): T {
       if (array.length === 0) {
-        throw new Error('Cannot pick from empty array')
+        throw new Error("Cannot pick from empty array");
       }
-      return array[Math.floor(rng() * array.length)]
+      return array[Math.floor(rng() * array.length)];
     },
 
     shuffle<T>(array: readonly T[]): T[] {
-      const result = [...array]
+      const result = [...array];
       // Fisher-Yates shuffle with seeded RNG
       for (let i = result.length - 1; i > 0; i--) {
-        const j = Math.floor(rng() * (i + 1))
-        ;[result[i], result[j]] = [result[j], result[i]]
+        const j = Math.floor(rng() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
       }
-      return result
+      return result;
     },
-  }
+  };
 }
 
 /**
@@ -116,5 +116,5 @@ export function createSeededRandom(seed: string): SeededRandom {
  * // This will always generate the same puzzle for Jan 1, 2025 MagicGraph daily
  */
 export function createDailyRandom(date: string, gameId: string): SeededRandom {
-  return createSeededRandom(`${date}-${gameId}`)
+  return createSeededRandom(`${date}-${gameId}`);
 }

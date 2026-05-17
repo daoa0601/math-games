@@ -3,38 +3,38 @@
 // Solves the polyomino packing as an exact cover problem.
 // ========================================
 
-import type { LevelConfig, Piece, Position3D, Rotation3D } from './types'
-import { rotatePieceLayout3D, isInBounds } from './engine'
-import type { SolutionStep, SolverResult } from './solver'
-import { generate2DRotations, generate3DRotations } from './solver'
+import type { LevelConfig, Piece, Position3D, Rotation3D } from "./types";
+import { rotatePieceLayout3D, isInBounds } from "./engine";
+import type { SolutionStep, SolverResult } from "./solver";
+import { generate2DRotations, generate3DRotations } from "./solver";
 
 // ========================================
 // DLX Data Structures
 // ========================================
 
 interface DLXNode {
-  left: DLXNode
-  right: DLXNode
-  up: DLXNode
-  down: DLXNode
-  column: DLXColumnHeader
+  left: DLXNode;
+  right: DLXNode;
+  up: DLXNode;
+  down: DLXNode;
+  column: DLXColumnHeader;
   /** Index into the rows array for solution tracking */
-  rowIndex: number
+  rowIndex: number;
 }
 
 interface DLXColumnHeader extends DLXNode {
-  size: number
-  name: string
+  size: number;
+  name: string;
 }
 
 interface PlacementRow {
-  pieceId: string
-  position: Position3D
-  rotation: Rotation3D
+  pieceId: string;
+  position: Position3D;
+  rotation: Rotation3D;
   /** Which target cell indices this placement covers */
-  coveredTargets: number[]
+  coveredTargets: number[];
   /** Which piece index (for the piece constraint column) */
-  pieceIndex: number
+  pieceIndex: number;
 }
 
 // ========================================
@@ -45,39 +45,39 @@ function getUniqueRotatedLayouts(
   piece: Piece,
   rotations: Rotation3D[],
 ): { layout: Position3D[]; rotation: Rotation3D }[] {
-  const seen = new Set<string>()
-  const unique: { layout: Position3D[]; rotation: Rotation3D }[] = []
+  const seen = new Set<string>();
+  const unique: { layout: Position3D[]; rotation: Rotation3D }[] = [];
 
   for (const rotation of rotations) {
-    const rotated = rotatePieceLayout3D(piece.layout, rotation)
+    const rotated = rotatePieceLayout3D(piece.layout, rotation);
     const sorted = [...rotated].sort((a, b) =>
       a.x !== b.x ? a.x - b.x : a.y !== b.y ? a.y - b.y : a.z - b.z,
-    )
-    const key = sorted.map((p) => `${p.x},${p.y},${p.z}`).join('|')
+    );
+    const key = sorted.map((p) => `${p.x},${p.y},${p.z}`).join("|");
 
     if (!seen.has(key)) {
-      seen.add(key)
-      unique.push({ layout: rotated, rotation })
+      seen.add(key);
+      unique.push({ layout: rotated, rotation });
     }
   }
 
-  return unique
+  return unique;
 }
 
 function buildRows(level: LevelConfig): PlacementRow[] {
   const rotations =
-    level.type === '3D' ? generate3DRotations() : generate2DRotations()
-  const targetIndexMap = new Map<string, number>()
+    level.type === "3D" ? generate3DRotations() : generate2DRotations();
+  const targetIndexMap = new Map<string, number>();
   for (let i = 0; i < level.targetVoxels.length; i++) {
-    const t = level.targetVoxels[i]
-    targetIndexMap.set(`${t.x},${t.y},${t.z}`, i)
+    const t = level.targetVoxels[i];
+    targetIndexMap.set(`${t.x},${t.y},${t.z}`, i);
   }
 
-  const rows: PlacementRow[] = []
+  const rows: PlacementRow[] = [];
 
   for (let pieceIndex = 0; pieceIndex < level.pieces.length; pieceIndex++) {
-    const piece = level.pieces[pieceIndex]
-    const uniqueLayouts = getUniqueRotatedLayouts(piece, rotations)
+    const piece = level.pieces[pieceIndex];
+    const uniqueLayouts = getUniqueRotatedLayouts(piece, rotations);
 
     for (const { layout, rotation } of uniqueLayouts) {
       // For each cell in the rotated layout, try each target as anchor
@@ -87,32 +87,32 @@ function buildRows(level: LevelConfig): PlacementRow[] {
             x: target.x - cell.x,
             y: target.y - cell.y,
             z: target.z - cell.z,
-          }
+          };
 
           // Check all cells of the piece in world space
           const worldCells = layout.map((c) => ({
             x: position.x + c.x,
             y: position.y + c.y,
             z: position.z + c.z,
-          }))
+          }));
 
           // All cells must be in bounds
-          if (!worldCells.every((c) => isInBounds(c, level.gridSize))) continue
+          if (!worldCells.every((c) => isInBounds(c, level.gridSize))) continue;
 
           // Collect which target cells are covered
-          const coveredTargets: number[] = []
+          const coveredTargets: number[] = [];
 
           for (const wc of worldCells) {
-            const key = `${wc.x},${wc.y},${wc.z}`
-            const idx = targetIndexMap.get(key)
+            const key = `${wc.x},${wc.y},${wc.z}`;
+            const idx = targetIndexMap.get(key);
             if (idx !== undefined) {
-              coveredTargets.push(idx)
+              coveredTargets.push(idx);
             }
           }
 
           // For exact cover: every cell of the piece must cover a target
           // (no overhangs allowed in DLX formulation)
-          if (coveredTargets.length !== layout.length) continue
+          if (coveredTargets.length !== layout.length) continue;
 
           // Deduplicate: same piece+position+rotation from different anchors
           if (
@@ -127,7 +127,7 @@ function buildRows(level: LevelConfig): PlacementRow[] {
                 r.rotation.z === rotation.z,
             )
           )
-            continue
+            continue;
 
           rows.push({
             pieceId: piece.id,
@@ -135,13 +135,13 @@ function buildRows(level: LevelConfig): PlacementRow[] {
             rotation,
             coveredTargets,
             pieceIndex,
-          })
+          });
         }
       }
     }
   }
 
-  return rows
+  return rows;
 }
 
 // ========================================
@@ -153,77 +153,77 @@ function buildDLX(
   numTargets: number,
   numPieces: number,
 ): { root: DLXColumnHeader; columns: DLXColumnHeader[]; allRows: DLXNode[][] } {
-  const numCols = numTargets + numPieces
+  const numCols = numTargets + numPieces;
 
   // Create root header (self-linked circular sentinel)
-  const root = makeSelfLinkedHeader('root')
+  const root = makeSelfLinkedHeader("root");
 
   // Create column headers
-  const columns: DLXColumnHeader[] = []
+  const columns: DLXColumnHeader[] = [];
   for (let i = 0; i < numCols; i++) {
     const col = makeSelfLinkedHeader(
       i < numTargets ? `t${i}` : `p${i - numTargets}`,
-    )
+    );
 
     // Link horizontally
-    col.left = root.left
-    col.right = root
-    root.left.right = col
-    root.left = col
+    col.left = root.left;
+    col.right = root;
+    root.left.right = col;
+    root.left = col;
 
-    columns.push(col)
+    columns.push(col);
   }
 
   // Add rows
-  const allRows: DLXNode[][] = []
+  const allRows: DLXNode[][] = [];
   for (let ri = 0; ri < rows.length; ri++) {
-    const row = rows[ri]
-    const nodes: DLXNode[] = []
+    const row = rows[ri];
+    const nodes: DLXNode[] = [];
 
     // Target columns
     for (const ti of row.coveredTargets) {
-      nodes.push(createNode(columns[ti], ri))
+      nodes.push(createNode(columns[ti], ri));
     }
     // Piece column
-    nodes.push(createNode(columns[numTargets + row.pieceIndex], ri))
+    nodes.push(createNode(columns[numTargets + row.pieceIndex], ri));
 
     // Link nodes horizontally
     for (let i = 0; i < nodes.length; i++) {
-      nodes[i].left = nodes[(i - 1 + nodes.length) % nodes.length]
-      nodes[i].right = nodes[(i + 1) % nodes.length]
+      nodes[i].left = nodes[(i - 1 + nodes.length) % nodes.length];
+      nodes[i].right = nodes[(i + 1) % nodes.length];
     }
 
-    allRows.push(nodes)
+    allRows.push(nodes);
   }
 
-  return { root, columns, allRows }
+  return { root, columns, allRows };
 }
 
 function makeSelfLinkedHeader(name: string): DLXColumnHeader {
-  const h = { size: 0, name, rowIndex: -1 } as Partial<DLXColumnHeader>
-  const header = h as DLXColumnHeader
-  header.left = header
-  header.right = header
-  header.up = header
-  header.down = header
-  header.column = header
-  return header
+  const h = { size: 0, name, rowIndex: -1 } as Partial<DLXColumnHeader>;
+  const header = h as DLXColumnHeader;
+  header.left = header;
+  header.right = header;
+  header.up = header;
+  header.down = header;
+  header.column = header;
+  return header;
 }
 
 function createNode(column: DLXColumnHeader, rowIndex: number): DLXNode {
-  const n = { rowIndex, column } as Partial<DLXNode>
-  const node = n as DLXNode
-  node.left = node
-  node.right = node
+  const n = { rowIndex, column } as Partial<DLXNode>;
+  const node = n as DLXNode;
+  node.left = node;
+  node.right = node;
 
   // Link vertically into column
-  node.up = column.up
-  node.down = column
-  column.up.down = node
-  column.up = node
-  column.size++
+  node.up = column.up;
+  node.down = column;
+  column.up.down = node;
+  column.up = node;
+  column.size++;
 
-  return node
+  return node;
 }
 
 // ========================================
@@ -231,53 +231,53 @@ function createNode(column: DLXColumnHeader, rowIndex: number): DLXNode {
 // ========================================
 
 function cover(col: DLXColumnHeader): void {
-  col.right.left = col.left
-  col.left.right = col.right
+  col.right.left = col.left;
+  col.left.right = col.right;
 
-  let row = col.down
+  let row = col.down;
   while (row !== col) {
-    let node = row.right
+    let node = row.right;
     while (node !== row) {
-      node.down.up = node.up
-      node.up.down = node.down
-      node.column.size--
-      node = node.right
+      node.down.up = node.up;
+      node.up.down = node.down;
+      node.column.size--;
+      node = node.right;
     }
-    row = row.down
+    row = row.down;
   }
 }
 
 function uncover(col: DLXColumnHeader): void {
-  let row = col.up
+  let row = col.up;
   while (row !== col) {
-    let node = row.left
+    let node = row.left;
     while (node !== row) {
-      node.column.size++
-      node.down.up = node
-      node.up.down = node
-      node = node.left
+      node.column.size++;
+      node.down.up = node;
+      node.up.down = node;
+      node = node.left;
     }
-    row = row.up
+    row = row.up;
   }
 
-  col.right.left = col
-  col.left.right = col
+  col.right.left = col;
+  col.left.right = col;
 }
 
 function chooseSmallestColumn(root: DLXColumnHeader): DLXColumnHeader | null {
-  let best: DLXColumnHeader | null = null
-  let bestSize = Infinity
+  let best: DLXColumnHeader | null = null;
+  let bestSize = Infinity;
 
-  let col = root.right as DLXColumnHeader
+  let col = root.right as DLXColumnHeader;
   while (col !== root) {
     if (col.size < bestSize) {
-      bestSize = col.size
-      best = col
+      bestSize = col.size;
+      best = col;
     }
-    col = col.right as DLXColumnHeader
+    col = col.right as DLXColumnHeader;
   }
 
-  return best
+  return best;
 }
 
 // ========================================
@@ -288,8 +288,8 @@ export function solvePuzzleDLX(
   level: LevelConfig,
   maxTimeMs: number = 5000,
 ): SolverResult {
-  const startTime = performance.now()
-  let searchedStates = 0
+  const startTime = performance.now();
+  let searchedStates = 0;
 
   // Edge cases
   if (level.targetVoxels.length === 0) {
@@ -299,99 +299,105 @@ export function solvePuzzleDLX(
       searchedStates: 0,
       timeMs: 0,
       timedOut: false,
-    }
+    };
   }
 
-  const targetVolume = level.targetVoxels.length
-  const pieceVolume = level.pieces.reduce((sum, p) => sum + p.layout.length, 0)
+  const targetVolume = level.targetVoxels.length;
+  const pieceVolume = level.pieces.reduce((sum, p) => sum + p.layout.length, 0);
   if (pieceVolume !== targetVolume) {
     return {
       solvable: false,
       searchedStates: 0,
       timeMs: performance.now() - startTime,
       timedOut: false,
-    }
+    };
   }
 
   // Build the cover matrix
-  const rows = buildRows(level)
+  const rows = buildRows(level);
   if (rows.length === 0) {
     return {
       solvable: false,
       searchedStates: 0,
       timeMs: performance.now() - startTime,
       timedOut: false,
-    }
+    };
   }
 
   const { root } = buildDLX(
     rows,
     level.targetVoxels.length,
     level.pieces.length,
-  )
+  );
 
   // Search
-  const solutionRowIndices: number[] = []
+  const solutionRowIndices: number[] = [];
 
   function search(): boolean {
-    if (performance.now() - startTime > maxTimeMs) return false
+    if (performance.now() - startTime > maxTimeMs) return false;
 
     // All columns covered → solution found
-    if (root.right === root) return true
+    if (root.right === root) return true;
 
-    const col = chooseSmallestColumn(root)
-    if (!col || col.size === 0) return false
+    const col = chooseSmallestColumn(root);
+    if (!col || col.size === 0) return false;
 
-    cover(col)
+    cover(col);
 
-    let row = col.down
+    let row = col.down;
     while (row !== col) {
-      searchedStates++
-      solutionRowIndices.push(row.rowIndex)
+      searchedStates++;
+      solutionRowIndices.push(row.rowIndex);
 
       // Cover all columns in this row
-      let node = row.right
+      let node = row.right;
       while (node !== row) {
-        cover(node.column)
-        node = node.right
+        cover(node.column);
+        node = node.right;
       }
 
-      if (search()) return true
+      if (search()) return true;
 
       // Backtrack: uncover columns in reverse order
-      node = row.left
+      node = row.left;
       while (node !== row) {
-        uncover(node.column)
-        node = node.left
+        uncover(node.column);
+        node = node.left;
       }
 
-      solutionRowIndices.pop()
+      solutionRowIndices.pop();
 
       if (performance.now() - startTime > maxTimeMs) {
-        uncover(col)
-        return false
+        uncover(col);
+        return false;
       }
 
-      row = row.down
+      row = row.down;
     }
 
-    uncover(col)
-    return false
+    uncover(col);
+    return false;
   }
 
-  const found = search()
-  const timeMs = performance.now() - startTime
-  const timedOut = timeMs >= maxTimeMs
+  const found = search();
+  const timeMs = performance.now() - startTime;
+  const timedOut = timeMs >= maxTimeMs;
 
   if (found) {
     const solution: SolutionStep[] = solutionRowIndices.map((ri) => ({
       pieceId: rows[ri].pieceId,
       position: rows[ri].position,
       rotation: rows[ri].rotation,
-    }))
+    }));
 
-    return { solvable: true, solution, searchedStates, timeMs, timedOut: false }
+    return {
+      solvable: true,
+      solution,
+      searchedStates,
+      timeMs,
+      timedOut: false,
+    };
   }
 
-  return { solvable: false, searchedStates, timeMs, timedOut }
+  return { solvable: false, searchedStates, timeMs, timedOut };
 }

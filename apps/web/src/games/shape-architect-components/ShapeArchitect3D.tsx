@@ -52,10 +52,7 @@ export function ShapeArchitect3D({
   const [ready, setReady] = useState(false)
   const [hoveredCell3D, setHoveredCell3D] = useState<Position3D | null>(null)
 
-  const grid = useMemo(
-    () => VoxelGrid.fromNestedArray(gridState),
-    [gridState],
-  )
+  const grid = useMemo(() => VoxelGrid.fromNestedArray(gridState), [gridState])
 
   const ghostPiece = useMemo((): GhostPiece | null => {
     const source = hoveredCell3D ?? pendingPosition
@@ -77,7 +74,14 @@ export function ShapeArchitect3D({
       ),
       isValid: position !== null,
     }
-  }, [selectedPiece, hoveredCell3D, pendingPosition, grid, placementRotation, gridSize])
+  }, [
+    selectedPiece,
+    hoveredCell3D,
+    pendingPosition,
+    grid,
+    placementRotation,
+    gridSize,
+  ])
 
   useEffect(() => {
     const canvas = canvasRef.current

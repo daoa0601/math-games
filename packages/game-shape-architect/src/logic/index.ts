@@ -3,7 +3,7 @@
 // ========================================
 
 // VoxelGrid
-export { VoxelGrid } from './voxel-grid'
+export { VoxelGrid } from "./voxel-grid";
 
 // Types
 export type {
@@ -17,9 +17,9 @@ export type {
   LevelConfig,
   GameState,
   ShapeArchitectGameState,
-} from './types'
+} from "./types";
 
-export { DEFAULT_ROTATION } from './types'
+export { DEFAULT_ROTATION } from "./types";
 
 // Engine functions
 export {
@@ -42,20 +42,20 @@ export {
   validateLevelVolume,
   validateAllLevels,
   type LevelValidation,
-} from './engine'
+} from "./engine";
 
 // Presets
 export {
   presetLevels,
   generateRandomLevel,
   runLevelValidation,
-} from './presets'
+} from "./presets";
 export {
   TETRACUBE,
   PENTACUBE,
   TETRACUBE_KEYS,
   PENTACUBE_KEYS,
-} from './polycubes'
+} from "./polycubes";
 
 // Seeded Generator
 export {
@@ -63,9 +63,9 @@ export {
   previewDailyLevel,
   generateCohesivePuzzle,
   generateGuaranteedSolvableWithRetry,
-} from './seededGenerator'
+} from "./seededGenerator";
 
-export { generateConstructivePuzzle } from './puzzleEngine'
+export { generateConstructivePuzzle } from "./puzzleEngine";
 
 // Solver
 export {
@@ -76,10 +76,10 @@ export {
   generate3DRotations,
   type SolverResult,
   type SolutionStep,
-} from './solver'
+} from "./solver";
 
 // DLX Solver
-export { solvePuzzleDLX } from './dlx-solver'
+export { solvePuzzleDLX } from "./dlx-solver";
 
 // Bitboard
-export { VoxelBitboard } from './voxel-bitboard'
+export { VoxelBitboard } from "./voxel-bitboard";

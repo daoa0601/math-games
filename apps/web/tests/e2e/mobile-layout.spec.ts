@@ -100,9 +100,7 @@ test.describe('mobile layout — game routes', () => {
     await expectHydrated(page)
     await expectNoHorizontalOverflow(page)
 
-    await expect(
-      page.getByRole('heading', { name: 'Blueprint' }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Blueprint' })).toBeVisible()
   })
 })
 

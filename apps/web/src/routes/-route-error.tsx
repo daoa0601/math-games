@@ -33,7 +33,10 @@ export function RouteErrorFallback({ error, reset }: ErrorComponentProps) {
       )}
       <div className="mt-6 flex gap-3">
         <Button onClick={reset}>{t('error.retry')}</Button>
-        <Link to="/" className="inline-flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground">
+        <Link
+          to="/"
+          className="inline-flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+        >
           {t('app.dashboard')}
         </Link>
       </div>

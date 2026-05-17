@@ -286,7 +286,10 @@ function ProfileRoute() {
         <main className="flex-1 overflow-auto px-4 pb-5 pt-1">
           {/* Identity */}
           <section className="flex items-center gap-4 px-1 pb-5 pt-3">
-            <PlayerAvatar seed={profile.displayName} className="size-22 shrink-0" />
+            <PlayerAvatar
+              seed={profile.displayName}
+              className="size-22 shrink-0"
+            />
             <div className="min-w-0 flex-1">
               <p className="eyebrow" style={{ fontSize: '0.5625rem' }}>
                 {t('profile.player')}
@@ -359,9 +362,7 @@ function ProfileRoute() {
               const pct =
                 module.levelCount === 0
                   ? 0
-                  : Math.round(
-                      (summary.completed / module.levelCount) * 100,
-                    )
+                  : Math.round((summary.completed / module.levelCount) * 100)
               const gid = module.id as GameGlyphId
 
               return (
@@ -388,15 +389,11 @@ function ProfileRoute() {
                   </p>
                   <div className="mt-3 flex justify-between text-[0.6875rem] text-muted-foreground">
                     <span className="tabular-nums">
-                      {summary.completed}/{module.levelCount}{' '}
-                      {t('home.levels')}
+                      {summary.completed}/{module.levelCount} {t('home.levels')}
                     </span>
                     <span className="tabular-nums">{pct}%</span>
                   </div>
-                  <Progress
-                    value={pct}
-                    className="mt-1 h-2 bg-primary/15"
-                  />
+                  <Progress value={pct} className="mt-1 h-2 bg-primary/15" />
                 </div>
               )
             })}
@@ -566,15 +563,10 @@ function ProfileRoute() {
               const pct =
                 module.levelCount === 0
                   ? 0
-                  : Math.round(
-                      (summary.completed / module.levelCount) * 100,
-                    )
+                  : Math.round((summary.completed / module.levelCount) * 100)
 
               return (
-                <MechanicCard
-                  key={module.id}
-                  game={module.id as GameGlyphId}
-                >
+                <MechanicCard key={module.id} game={module.id as GameGlyphId}>
                   <h3 className="font-display text-lg font-medium tracking-tight">
                     {formatGameTitle(locale, module.id)}
                   </h3>
@@ -651,9 +643,7 @@ function ProfileRoute() {
                     defaultValue={profile.gradeBand}
                     name="gradeBand"
                   >
-                    <option value="elementary">
-                      {t('grade.elementary')}
-                    </option>
+                    <option value="elementary">{t('grade.elementary')}</option>
                     <option value="middle">{t('grade.middle')}</option>
                     <option value="high">{t('grade.high')}</option>
                   </select>
@@ -691,9 +681,7 @@ function ProfileRoute() {
                     className="sr-only"
                     type="file"
                     accept="application/json,.json"
-                    onChange={(event) =>
-                      void handleImportAchievements(event)
-                    }
+                    onChange={(event) => void handleImportAchievements(event)}
                   />
                 </label>
               </div>

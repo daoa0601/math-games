@@ -3,4 +3,4 @@ export const env = {
   CACHE: {},
   ANALYTICS: {},
   R2_ASSETS: {},
-}
+};

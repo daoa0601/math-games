@@ -44,7 +44,9 @@ function ClassroomRoute() {
       'Failed to create classroom.',
     )
     if (res.ok) {
-      setStatus(`Created classroom "${res.value.name}" — code: ${res.value.joinCode}`)
+      setStatus(
+        `Created classroom "${res.value.name}" — code: ${res.value.joinCode}`,
+      )
     } else {
       setStatus(res.message)
     }

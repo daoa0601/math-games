@@ -1,7 +1,7 @@
-import { Schema } from 'effect'
+import { Schema } from "effect";
 
 export class MagicGraphCompletion extends Schema.Class<MagicGraphCompletion>(
-  'MagicGraphCompletion',
+  "MagicGraphCompletion",
 )({
   nodeValues: Schema.Record(
     Schema.String,

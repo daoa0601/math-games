@@ -12,7 +12,9 @@ export const RANKS: readonly Rank[] = [
 ]
 
 export function computeRank(score: number): Rank {
-  return [...RANKS].reverse().find((rank) => score >= rank.threshold) ?? RANKS[0]
+  return (
+    [...RANKS].reverse().find((rank) => score >= rank.threshold) ?? RANKS[0]
+  )
 }
 
 export function computeRankScore(

@@ -1,29 +1,29 @@
-import { cn } from './cn'
+import { cn } from "./cn";
 
 interface PlayerAvatarProps {
-  seed: string
-  className?: string
-  title?: string
+  seed: string;
+  className?: string;
+  title?: string;
 }
 
 const PALETTE = [
-  'oklch(0.55 0.15 25)',
-  'oklch(0.48 0.1 170)',
-  'oklch(0.45 0.15 290)',
-  'oklch(0.58 0.14 70)',
-  'oklch(0.5 0.08 130)',
-  'oklch(0.55 0.12 340)',
-] as const
+  "oklch(0.55 0.15 25)",
+  "oklch(0.48 0.1 170)",
+  "oklch(0.45 0.15 290)",
+  "oklch(0.58 0.14 70)",
+  "oklch(0.5 0.08 130)",
+  "oklch(0.55 0.12 340)",
+] as const;
 
-const SHAPES = ['circle', 'square', 'triangle', 'diamond'] as const
-type ShapeKind = (typeof SHAPES)[number]
+const SHAPES = ["circle", "square", "triangle", "diamond"] as const;
+type ShapeKind = (typeof SHAPES)[number];
 
 function hashSeed(seed: string): number {
-  let h = 5381
+  let h = 5381;
   for (let i = 0; i < seed.length; i += 1) {
-    h = ((h << 5) + h) ^ seed.charCodeAt(i)
+    h = ((h << 5) + h) ^ seed.charCodeAt(i);
   }
-  return h >>> 0
+  return h >>> 0;
 }
 
 function Shape({
@@ -35,21 +35,21 @@ function Shape({
   rotate,
   opacity = 1,
 }: {
-  kind: ShapeKind
-  cx: number
-  cy: number
-  size: number
-  color: string
-  rotate: number
-  opacity?: number
+  kind: ShapeKind;
+  cx: number;
+  cy: number;
+  size: number;
+  color: string;
+  rotate: number;
+  opacity?: number;
 }) {
-  const r = size / 2
-  const transform = `rotate(${rotate} ${cx} ${cy})`
+  const r = size / 2;
+  const transform = `rotate(${rotate} ${cx} ${cy})`;
 
-  if (kind === 'circle') {
-    return <circle cx={cx} cy={cy} r={r} fill={color} opacity={opacity} />
+  if (kind === "circle") {
+    return <circle cx={cx} cy={cy} r={r} fill={color} opacity={opacity} />;
   }
-  if (kind === 'square') {
+  if (kind === "square") {
     return (
       <rect
         x={cx - r}
@@ -61,10 +61,10 @@ function Shape({
         opacity={opacity}
         transform={transform}
       />
-    )
+    );
   }
-  if (kind === 'triangle') {
-    const h = size * 0.92
+  if (kind === "triangle") {
+    const h = size * 0.92;
     return (
       <path
         d={`M ${cx} ${cy - h / 2} L ${cx + r} ${cy + h / 2} L ${cx - r} ${
@@ -74,7 +74,7 @@ function Shape({
         opacity={opacity}
         transform={transform}
       />
-    )
+    );
   }
   return (
     <path
@@ -83,28 +83,28 @@ function Shape({
       opacity={opacity}
       transform={transform}
     />
-  )
+  );
 }
 
 export function PlayerAvatar({ seed, className, title }: PlayerAvatarProps) {
-  const h = hashSeed(seed || 'guest')
+  const h = hashSeed(seed || "guest");
 
-  const shapeA = SHAPES[h & 0x3]
-  const shapeB = SHAPES[(h >> 2) & 0x3]
-  const colorA = PALETTE[(h >> 4) % PALETTE.length]
-  const colorB = PALETTE[(h >> 10) % PALETTE.length]
-  const rotateA = ((h >> 14) & 0x3f) * 6
-  const rotateB = ((h >> 20) & 0x3f) * 6
-  const offsetX = (((h >> 26) & 0x7) - 3.5) * 1.5
-  const offsetY = ((h >> 5) & 0x7) - 3.5
+  const shapeA = SHAPES[h & 0x3];
+  const shapeB = SHAPES[(h >> 2) & 0x3];
+  const colorA = PALETTE[(h >> 4) % PALETTE.length];
+  const colorB = PALETTE[(h >> 10) % PALETTE.length];
+  const rotateA = ((h >> 14) & 0x3f) * 6;
+  const rotateB = ((h >> 20) & 0x3f) * 6;
+  const offsetX = (((h >> 26) & 0x7) - 3.5) * 1.5;
+  const offsetY = ((h >> 5) & 0x7) - 3.5;
 
   return (
     <svg
       aria-hidden={title ? undefined : true}
-      role={title ? 'img' : undefined}
+      role={title ? "img" : undefined}
       viewBox="0 0 32 32"
       className={cn(
-        'overflow-hidden rounded-md bg-muted text-foreground',
+        "overflow-hidden rounded-md bg-muted text-foreground",
         className,
       )}
     >
@@ -128,5 +128,5 @@ export function PlayerAvatar({ seed, className, title }: PlayerAvatarProps) {
         opacity={0.92}
       />
     </svg>
-  )
+  );
 }

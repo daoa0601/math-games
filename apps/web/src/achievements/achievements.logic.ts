@@ -100,7 +100,10 @@ export function checkAchievements(
 
   const fromGame =
     context.gameId in registry
-      ? registry[context.gameId as GameId].evaluateAchievements(context, unlocked)
+      ? registry[context.gameId as GameId].evaluateAchievements(
+          context,
+          unlocked,
+        )
       : []
 
   return [...fromGlobal, ...fromGame]

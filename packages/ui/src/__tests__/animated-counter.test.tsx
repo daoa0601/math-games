@@ -1,70 +1,70 @@
-import { render, screen, act } from '@testing-library/react'
-import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest'
+import { render, screen, act } from "@testing-library/react";
+import { describe, expect, test, beforeEach, afterEach, vi } from "vitest";
 
-import { AnimatedCounter } from '../animated-counter'
+import { AnimatedCounter } from "../animated-counter";
 
-describe('AnimatedCounter', () => {
+describe("AnimatedCounter", () => {
   beforeEach(() => {
-    vi.useFakeTimers()
-  })
+    vi.useFakeTimers();
+  });
 
   afterEach(() => {
-    vi.useRealTimers()
-  })
+    vi.useRealTimers();
+  });
 
-  test('displays the initial value of zero', () => {
-    render(<AnimatedCounter value={0} />)
-    expect(screen.getByText('0')).toBeInTheDocument()
-  })
+  test("displays the initial value of zero", () => {
+    render(<AnimatedCounter value={0} />);
+    expect(screen.getByText("0")).toBeInTheDocument();
+  });
 
-  test('displays a non-zero value after animation completes', () => {
-    render(<AnimatedCounter value={100} duration={100} />)
+  test("displays a non-zero value after animation completes", () => {
+    render(<AnimatedCounter value={100} duration={100} />);
 
     // Advance past the animation duration so rAF fires
     act(() => {
-      vi.advanceTimersByTime(200)
-    })
+      vi.advanceTimersByTime(200);
+    });
 
-    expect(screen.getByText('100')).toBeInTheDocument()
-  })
+    expect(screen.getByText("100")).toBeInTheDocument();
+  });
 
-  test('applies the provided className to the span', () => {
+  test("applies the provided className to the span", () => {
     const { container } = render(
       <AnimatedCounter value={42} className="score-display" />,
-    )
-    const span = container.querySelector('span')
-    expect(span).toHaveClass('score-display')
-  })
+    );
+    const span = container.querySelector("span");
+    expect(span).toHaveClass("score-display");
+  });
 
-  test('updates to a new target value when props change', () => {
-    const { rerender } = render(<AnimatedCounter value={50} duration={100} />)
-
-    act(() => {
-      vi.advanceTimersByTime(200)
-    })
-    expect(screen.getByText('50')).toBeInTheDocument()
-
-    rerender(<AnimatedCounter value={75} duration={100} />)
+  test("updates to a new target value when props change", () => {
+    const { rerender } = render(<AnimatedCounter value={50} duration={100} />);
 
     act(() => {
-      vi.advanceTimersByTime(200)
-    })
-    expect(screen.getByText('75')).toBeInTheDocument()
-  })
+      vi.advanceTimersByTime(200);
+    });
+    expect(screen.getByText("50")).toBeInTheDocument();
 
-  test('counts down when value decreases', () => {
-    const { rerender } = render(<AnimatedCounter value={100} duration={100} />)
+    rerender(<AnimatedCounter value={75} duration={100} />);
 
     act(() => {
-      vi.advanceTimersByTime(200)
-    })
-    expect(screen.getByText('100')).toBeInTheDocument()
+      vi.advanceTimersByTime(200);
+    });
+    expect(screen.getByText("75")).toBeInTheDocument();
+  });
 
-    rerender(<AnimatedCounter value={0} duration={100} />)
+  test("counts down when value decreases", () => {
+    const { rerender } = render(<AnimatedCounter value={100} duration={100} />);
 
     act(() => {
-      vi.advanceTimersByTime(200)
-    })
-    expect(screen.getByText('0')).toBeInTheDocument()
-  })
-})
+      vi.advanceTimersByTime(200);
+    });
+    expect(screen.getByText("100")).toBeInTheDocument();
+
+    rerender(<AnimatedCounter value={0} duration={100} />);
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(screen.getByText("0")).toBeInTheDocument();
+  });
+});

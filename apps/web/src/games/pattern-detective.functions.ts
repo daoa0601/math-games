@@ -10,9 +10,9 @@ import { runServerEffect } from '@/services/run-server-effect'
 
 import { patternDetectiveModule } from '@math-games/game-pattern-detective'
 
-export const getPatternDetectiveCatalog = createServerFn({ method: 'GET' }).handler(
-  createGetCatalogHandler(patternDetectiveModule),
-)
+export const getPatternDetectiveCatalog = createServerFn({
+  method: 'GET',
+}).handler(createGetCatalogHandler(patternDetectiveModule))
 
 export const recordPatternDetectiveProgress = createServerFn({ method: 'POST' })
   .inputValidator(Schema.decodeUnknownSync(GameProgressRequest))

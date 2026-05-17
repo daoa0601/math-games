@@ -1,24 +1,24 @@
-import type { Difficulty, LevelConfig, Piece, Position3D } from './types'
-import type { SeededRandom } from '@math-games/core'
-import { getPieceWorldPositions, rotatePieceLayout3D } from './engine'
+import type { Difficulty, LevelConfig, Piece, Position3D } from "./types";
+import type { SeededRandom } from "@math-games/core";
+import { getPieceWorldPositions, rotatePieceLayout3D } from "./engine";
 
 interface PieceTemplate {
-  name: string
-  layout: Position3D[]
+  name: string;
+  layout: Position3D[];
 }
 
 const PIECE_COLORS = [
-  '#00BCD4',
-  '#F44336',
-  '#4CAF50',
-  '#FF9800',
-  '#9C27B0',
-  '#2196F3',
-  '#795548',
-  '#E91E63',
-  '#26A69A',
-  '#3F51B5',
-]
+  "#00BCD4",
+  "#F44336",
+  "#4CAF50",
+  "#FF9800",
+  "#9C27B0",
+  "#2196F3",
+  "#795548",
+  "#E91E63",
+  "#26A69A",
+  "#3F51B5",
+];
 
 const PIECE_COUNT_RANGE: Record<Difficulty, [number, number]> = {
   easy: [3, 4],
@@ -26,25 +26,25 @@ const PIECE_COUNT_RANGE: Record<Difficulty, [number, number]> = {
   hard: [7, 8],
   expert: [6, 8],
   master: [5, 7],
-}
+};
 
 const ROTATIONS_2D = [
   { x: 0, y: 0, z: 0 },
   { x: 0, y: 0, z: 90 },
   { x: 0, y: 0, z: 180 },
   { x: 0, y: 0, z: 270 },
-]
+];
 
 const ADJACENT_2D = [
   { x: 1, y: 0, z: 0 },
   { x: -1, y: 0, z: 0 },
   { x: 0, y: 1, z: 0 },
   { x: 0, y: -1, z: 0 },
-]
+];
 
 const TETROMINOES: PieceTemplate[] = [
   {
-    name: 'I-Block',
+    name: "I-Block",
     layout: [
       { x: 0, y: 0, z: 0 },
       { x: 1, y: 0, z: 0 },
@@ -53,7 +53,7 @@ const TETROMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'T-Block',
+    name: "T-Block",
     layout: [
       { x: 0, y: 0, z: 0 },
       { x: 1, y: 0, z: 0 },
@@ -62,7 +62,7 @@ const TETROMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'L-Block',
+    name: "L-Block",
     layout: [
       { x: 0, y: 0, z: 0 },
       { x: 0, y: 1, z: 0 },
@@ -71,7 +71,7 @@ const TETROMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'J-Block',
+    name: "J-Block",
     layout: [
       { x: 1, y: 0, z: 0 },
       { x: 1, y: 1, z: 0 },
@@ -80,7 +80,7 @@ const TETROMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'S-Block',
+    name: "S-Block",
     layout: [
       { x: 1, y: 0, z: 0 },
       { x: 2, y: 0, z: 0 },
@@ -89,7 +89,7 @@ const TETROMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'Z-Block',
+    name: "Z-Block",
     layout: [
       { x: 0, y: 0, z: 0 },
       { x: 1, y: 0, z: 0 },
@@ -97,11 +97,11 @@ const TETROMINOES: PieceTemplate[] = [
       { x: 2, y: 1, z: 0 },
     ],
   },
-]
+];
 
 const PENTOMINOES: PieceTemplate[] = [
   {
-    name: 'F-Pento',
+    name: "F-Pento",
     layout: [
       { x: 1, y: 0, z: 0 },
       { x: 2, y: 0, z: 0 },
@@ -111,7 +111,7 @@ const PENTOMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'P-Pento',
+    name: "P-Pento",
     layout: [
       { x: 0, y: 0, z: 0 },
       { x: 1, y: 0, z: 0 },
@@ -121,7 +121,7 @@ const PENTOMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'U-Pento',
+    name: "U-Pento",
     layout: [
       { x: 0, y: 0, z: 0 },
       { x: 2, y: 0, z: 0 },
@@ -131,7 +131,7 @@ const PENTOMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'W-Pento',
+    name: "W-Pento",
     layout: [
       { x: 0, y: 0, z: 0 },
       { x: 0, y: 1, z: 0 },
@@ -141,7 +141,7 @@ const PENTOMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'V-Pento',
+    name: "V-Pento",
     layout: [
       { x: 0, y: 0, z: 0 },
       { x: 0, y: 1, z: 0 },
@@ -151,7 +151,7 @@ const PENTOMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'Y-Pento',
+    name: "Y-Pento",
     layout: [
       { x: 1, y: 0, z: 0 },
       { x: 0, y: 1, z: 0 },
@@ -161,7 +161,7 @@ const PENTOMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'N-Pento',
+    name: "N-Pento",
     layout: [
       { x: 0, y: 0, z: 0 },
       { x: 0, y: 1, z: 0 },
@@ -170,11 +170,11 @@ const PENTOMINOES: PieceTemplate[] = [
       { x: 1, y: 3, z: 0 },
     ],
   },
-]
+];
 
 const HEXOMINOES: PieceTemplate[] = [
   {
-    name: 'Hook-Hex',
+    name: "Hook-Hex",
     layout: [
       { x: 0, y: 0, z: 0 },
       { x: 1, y: 0, z: 0 },
@@ -185,7 +185,7 @@ const HEXOMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'Stair-Hex',
+    name: "Stair-Hex",
     layout: [
       { x: 0, y: 0, z: 0 },
       { x: 0, y: 1, z: 0 },
@@ -196,7 +196,7 @@ const HEXOMINOES: PieceTemplate[] = [
     ],
   },
   {
-    name: 'Cross-Hex',
+    name: "Cross-Hex",
     layout: [
       { x: 1, y: 0, z: 0 },
       { x: 0, y: 1, z: 0 },
@@ -206,22 +206,22 @@ const HEXOMINOES: PieceTemplate[] = [
       { x: 1, y: 3, z: 0 },
     ],
   },
-]
+];
 
 function getTemplateBank(difficulty: Difficulty): PieceTemplate[] {
-  if (difficulty === 'easy') return TETROMINOES
-  if (difficulty === 'medium') return [...TETROMINOES, ...PENTOMINOES]
-  return [...PENTOMINOES, ...HEXOMINOES]
+  if (difficulty === "easy") return TETROMINOES;
+  if (difficulty === "medium") return [...TETROMINOES, ...PENTOMINOES];
+  return [...PENTOMINOES, ...HEXOMINOES];
 }
 
 function keyOf(pos: Position3D): string {
-  return `${pos.x},${pos.y},${pos.z}`
+  return `${pos.x},${pos.y},${pos.z}`;
 }
 
 function normalizeLayout(layout: Position3D[]): Position3D[] {
-  const minX = Math.min(...layout.map((pos) => pos.x))
-  const minY = Math.min(...layout.map((pos) => pos.y))
-  const minZ = Math.min(...layout.map((pos) => pos.z))
+  const minX = Math.min(...layout.map((pos) => pos.x));
+  const minY = Math.min(...layout.map((pos) => pos.y));
+  const minZ = Math.min(...layout.map((pos) => pos.z));
 
   return layout
     .map((pos) => ({
@@ -231,7 +231,7 @@ function normalizeLayout(layout: Position3D[]): Position3D[] {
     }))
     .sort((a, b) =>
       a.y !== b.y ? a.y - b.y : a.x !== b.x ? a.x - b.x : a.z - b.z,
-    )
+    );
 }
 
 function createPiece(
@@ -244,24 +244,24 @@ function createPiece(
     name: template.name,
     color,
     layout: normalizeLayout(template.layout),
-  }
+  };
 }
 
 function uniqueRotatedLayouts(piece: Piece): Position3D[][] {
-  const seen = new Set<string>()
-  const layouts: Position3D[][] = []
+  const seen = new Set<string>();
+  const layouts: Position3D[][] = [];
 
   for (const rotation of ROTATIONS_2D) {
-    const layout = normalizeLayout(rotatePieceLayout3D(piece.layout, rotation))
-    const key = layout.map(keyOf).join('|')
+    const layout = normalizeLayout(rotatePieceLayout3D(piece.layout, rotation));
+    const key = layout.map(keyOf).join("|");
 
     if (!seen.has(key)) {
-      seen.add(key)
-      layouts.push(layout)
+      seen.add(key);
+      layouts.push(layout);
     }
   }
 
-  return layouts
+  return layouts;
 }
 
 function touchesOccupied(
@@ -272,7 +272,7 @@ function touchesOccupied(
     ADJACENT_2D.some((dir) =>
       occupied.has(keyOf({ x: pos.x + dir.x, y: pos.y + dir.y, z: pos.z })),
     ),
-  )
+  );
 }
 
 function canPlace(
@@ -282,7 +282,7 @@ function canPlace(
   return (
     positions.every((pos) => !occupied.has(keyOf(pos))) &&
     touchesOccupied(positions, occupied)
-  )
+  );
 }
 
 function findPlacement(
@@ -291,16 +291,16 @@ function findPlacement(
   rng: SeededRandom,
 ): Position3D[] | null {
   const occupiedCells = Array.from(occupied).map((key) => {
-    const [x, y, z] = key.split(',').map(Number)
-    return { x, y, z }
-  })
+    const [x, y, z] = key.split(",").map(Number);
+    return { x, y, z };
+  });
 
-  const layouts = rng.shuffle(uniqueRotatedLayouts(piece))
-  const anchors = rng.shuffle(occupiedCells)
-  const directions = rng.shuffle(ADJACENT_2D)
+  const layouts = rng.shuffle(uniqueRotatedLayouts(piece));
+  const anchors = rng.shuffle(occupiedCells);
+  const directions = rng.shuffle(ADJACENT_2D);
 
   for (const layout of layouts) {
-    const localCells = rng.shuffle(layout)
+    const localCells = rng.shuffle(layout);
 
     for (const anchor of anchors) {
       for (const dir of directions) {
@@ -308,34 +308,34 @@ function findPlacement(
           x: anchor.x + dir.x,
           y: anchor.y + dir.y,
           z: anchor.z,
-        }
+        };
 
         for (const local of localCells) {
           const position = {
             x: target.x - local.x,
             y: target.y - local.y,
             z: target.z - local.z,
-          }
+          };
           const world = layout.map((cell) => ({
             x: position.x + cell.x,
             y: position.y + cell.y,
             z: position.z + cell.z,
-          }))
+          }));
 
           if (canPlace(world, occupied)) {
-            return world
+            return world;
           }
         }
       }
     }
   }
 
-  return null
+  return null;
 }
 
 function normalizeTarget(cells: Position3D[]): Position3D[] {
-  const minX = Math.min(...cells.map((pos) => pos.x))
-  const minY = Math.min(...cells.map((pos) => pos.y))
+  const minX = Math.min(...cells.map((pos) => pos.x));
+  const minY = Math.min(...cells.map((pos) => pos.y));
 
   return cells
     .map((pos) => ({
@@ -345,42 +345,42 @@ function normalizeTarget(cells: Position3D[]): Position3D[] {
     }))
     .sort((a, b) =>
       a.y !== b.y ? a.y - b.y : a.x !== b.x ? a.x - b.x : a.z - b.z,
-    )
+    );
 }
 
 function gridSizeFor(cells: Position3D[]): [number, number, number] {
-  const maxX = Math.max(...cells.map((pos) => pos.x))
-  const maxY = Math.max(...cells.map((pos) => pos.y))
+  const maxX = Math.max(...cells.map((pos) => pos.x));
+  const maxY = Math.max(...cells.map((pos) => pos.y));
 
-  return [maxX + 2, maxY + 2, 1]
+  return [maxX + 2, maxY + 2, 1];
 }
 
 function hasVariedShapes(pieces: Piece[]): boolean {
-  return new Set(pieces.map((piece) => piece.name)).size >= 3
+  return new Set(pieces.map((piece) => piece.name)).size >= 3;
 }
 
 function buildCandidate(
   rng: SeededRandom,
   difficulty: Difficulty,
 ): { pieces: Piece[]; targetVoxels: Position3D[] } | null {
-  const [minPieces, maxPieces] = PIECE_COUNT_RANGE[difficulty]
-  const pieceCount = rng.nextInt(minPieces, maxPieces)
-  const bank = getTemplateBank(difficulty)
-  const colors = rng.shuffle(PIECE_COLORS)
-  const templates = rng.shuffle(bank)
+  const [minPieces, maxPieces] = PIECE_COUNT_RANGE[difficulty];
+  const pieceCount = rng.nextInt(minPieces, maxPieces);
+  const bank = getTemplateBank(difficulty);
+  const colors = rng.shuffle(PIECE_COLORS);
+  const templates = rng.shuffle(bank);
   const pieces = Array.from({ length: pieceCount }, (_, index) =>
     createPiece(
       templates[index % templates.length],
       index,
       colors[index % colors.length],
     ),
-  )
+  );
 
-  if (!hasVariedShapes(pieces)) return null
+  if (!hasVariedShapes(pieces)) return null;
 
-  const occupied = new Set<string>()
+  const occupied = new Set<string>();
   for (let i = 0; i < pieces.length; i++) {
-    const piece = pieces[i]
+    const piece = pieces[i];
 
     if (i === 0) {
       for (const pos of getPieceWorldPositions(
@@ -388,30 +388,30 @@ function buildCandidate(
         { x: 0, y: 0, z: 0 },
         { x: 0, y: 0, z: 0 },
       )) {
-        occupied.add(keyOf(pos))
+        occupied.add(keyOf(pos));
       }
-      continue
+      continue;
     }
 
-    const positions = findPlacement(piece, occupied, rng)
-    if (positions === null) return null
+    const positions = findPlacement(piece, occupied, rng);
+    if (positions === null) return null;
 
     for (const pos of positions) {
-      occupied.add(keyOf(pos))
+      occupied.add(keyOf(pos));
     }
   }
 
   const targetVoxels = normalizeTarget(
     Array.from(occupied).map((key) => {
-      const [x, y, z] = key.split(',').map(Number)
-      return { x, y, z }
+      const [x, y, z] = key.split(",").map(Number);
+      return { x, y, z };
     }),
-  )
+  );
 
   return {
     pieces: rng.shuffle(pieces),
     targetVoxels,
-  }
+  };
 }
 
 export function generateConstructivePuzzle(
@@ -419,26 +419,26 @@ export function generateConstructivePuzzle(
   difficulty: Difficulty,
 ): LevelConfig | null {
   for (let attempt = 0; attempt < 40; attempt++) {
-    const candidate = buildCandidate(rng, difficulty)
+    const candidate = buildCandidate(rng, difficulty);
     if (!candidate) {
-      rng.next()
-      continue
+      rng.next();
+      continue;
     }
 
     return {
       id: `cohesive_${rng.seed}`,
       name: `Constructive ${difficulty} (${candidate.pieces.length} pieces)`,
-      type: '2D',
+      type: "2D",
       gridSize: gridSizeFor(candidate.targetVoxels),
       targetVoxels: candidate.targetVoxels,
       pieces: candidate.pieces,
       difficulty,
-    }
+    };
   }
 
-  return null
+  return null;
 }
 
 export const PUZZLE_ENGINE_CONSTANTS = {
   PIECE_COUNT_RANGE,
-} as const
+} as const;

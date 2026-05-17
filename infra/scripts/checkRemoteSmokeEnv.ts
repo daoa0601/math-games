@@ -1,17 +1,17 @@
-import 'dotenv/config'
+import "dotenv/config";
 
 /* eslint-disable @typescript-eslint/no-unnecessary-condition -- CLI env and entrypoint checks depend on runtime process state */
 
-import { pathToFileURL } from 'node:url'
+import { pathToFileURL } from "node:url";
 
-import { resolveRemoteWorkerBaseUrl } from './resolveRemoteWorkerUrl'
+import { resolveRemoteWorkerBaseUrl } from "./resolveRemoteWorkerUrl";
 
 interface RemoteSmokeEnvCliOptions {
-  env?: Record<string, string | undefined>
-  fetchImpl?: typeof fetch
-  log?: (message: string) => void
-  error?: (message: string) => void
-  rawRemoteUrl?: string
+  env?: Record<string, string | undefined>;
+  fetchImpl?: typeof fetch;
+  log?: (message: string) => void;
+  error?: (message: string) => void;
+  rawRemoteUrl?: string;
 }
 
 export async function checkRemoteSmokeEnv(
@@ -19,15 +19,15 @@ export async function checkRemoteSmokeEnv(
   {
     env = process.env,
     fetchImpl = fetch,
-  }: Pick<RemoteSmokeEnvCliOptions, 'env' | 'fetchImpl'> = {},
+  }: Pick<RemoteSmokeEnvCliOptions, "env" | "fetchImpl"> = {},
 ) {
   const remoteUrl = await resolveRemoteWorkerBaseUrl({
     env,
     fetchImpl,
     rawRemoteUrl,
-  })
+  });
 
-  return `Remote Worker smoke target verified: ${remoteUrl.origin}`
+  return `Remote Worker smoke target verified: ${remoteUrl.origin}`;
 }
 
 export async function runRemoteSmokeEnvCheck({
@@ -38,25 +38,25 @@ export async function runRemoteSmokeEnvCheck({
   error = console.error,
 }: RemoteSmokeEnvCliOptions = {}) {
   try {
-    log(await checkRemoteSmokeEnv(rawRemoteUrl, { env, fetchImpl }))
+    log(await checkRemoteSmokeEnv(rawRemoteUrl, { env, fetchImpl }));
 
-    return 0
+    return 0;
   } catch (caught) {
-    error(caught instanceof Error ? caught.message : String(caught))
+    error(caught instanceof Error ? caught.message : String(caught));
 
-    return 1
+    return 1;
   }
 }
 
 function isMainModule() {
-  const entrypoint = process.argv[1]
+  const entrypoint = process.argv[1];
 
   return (
     entrypoint !== undefined &&
     import.meta.url === pathToFileURL(entrypoint).href
-  )
+  );
 }
 
 if (isMainModule()) {
-  process.exitCode = await runRemoteSmokeEnvCheck()
+  process.exitCode = await runRemoteSmokeEnvCheck();
 }

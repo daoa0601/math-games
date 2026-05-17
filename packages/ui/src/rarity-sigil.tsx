@@ -1,27 +1,27 @@
-import { cn } from './cn'
+import { cn } from "./cn";
 
-export type Rarity = 'common' | 'rare' | 'epic' | 'legendary'
+export type Rarity = "common" | "rare" | "epic" | "legendary";
 
 interface RaritySigilProps {
-  rarity: Rarity
-  locked?: boolean
-  className?: string
-  title?: string
+  rarity: Rarity;
+  locked?: boolean;
+  className?: string;
+  title?: string;
 }
 
 const RARITY_COLOR: Record<Rarity, string> = {
-  common: 'text-muted-foreground',
-  rare: 'text-(--chart-2)',
-  epic: 'text-(--chart-3)',
-  legendary: 'text-(--rank-gold)',
-}
+  common: "text-muted-foreground",
+  rare: "text-(--chart-2)",
+  epic: "text-(--chart-3)",
+  legendary: "text-(--rank-gold)",
+};
 
 function Shape({ rarity, locked }: { rarity: Rarity; locked: boolean }) {
-  const strokeWidth = 4
-  const stroke = 'currentColor'
-  const fill = locked ? 'none' : 'currentColor'
+  const strokeWidth = 4;
+  const stroke = "currentColor";
+  const fill = locked ? "none" : "currentColor";
 
-  if (rarity === 'common') {
+  if (rarity === "common") {
     return (
       <circle
         cx="24"
@@ -31,10 +31,10 @@ function Shape({ rarity, locked }: { rarity: Rarity; locked: boolean }) {
         stroke={stroke}
         strokeWidth={strokeWidth}
       />
-    )
+    );
   }
 
-  if (rarity === 'rare') {
+  if (rarity === "rare") {
     return (
       <rect
         x="10"
@@ -46,10 +46,10 @@ function Shape({ rarity, locked }: { rarity: Rarity; locked: boolean }) {
         stroke={stroke}
         strokeWidth={strokeWidth}
       />
-    )
+    );
   }
 
-  if (rarity === 'epic') {
+  if (rarity === "epic") {
     return (
       <path
         d="M 24 8 L 40 38 L 8 38 Z"
@@ -58,7 +58,7 @@ function Shape({ rarity, locked }: { rarity: Rarity; locked: boolean }) {
         strokeWidth={strokeWidth}
         strokeLinejoin="round"
       />
-    )
+    );
   }
 
   return (
@@ -69,7 +69,7 @@ function Shape({ rarity, locked }: { rarity: Rarity; locked: boolean }) {
       strokeWidth={strokeWidth}
       strokeLinejoin="round"
     />
-  )
+  );
 }
 
 export function RaritySigil({
@@ -81,12 +81,12 @@ export function RaritySigil({
   return (
     <svg
       aria-hidden={title ? undefined : true}
-      role={title ? 'img' : undefined}
+      role={title ? "img" : undefined}
       viewBox="0 0 48 48"
       className={cn(RARITY_COLOR[rarity], className)}
     >
       {title ? <title>{title}</title> : null}
       <Shape rarity={rarity} locked={locked} />
     </svg>
-  )
+  );
 }

@@ -1,21 +1,18 @@
-import { cn } from './cn'
+import { cn } from "./cn";
 
 interface WordmarkProps {
-  label: string
-  className?: string
-  compact?: boolean
+  label: string;
+  className?: string;
+  compact?: boolean;
 }
 
 export function Wordmark({ label, className, compact = false }: WordmarkProps) {
   return (
-    <div className={cn('flex items-center gap-2.5', className)}>
+    <div className={cn("flex items-center gap-2.5", className)}>
       <svg
         aria-hidden="true"
         viewBox="0 0 32 32"
-        className={cn(
-          'text-current',
-          compact ? 'size-5' : 'size-7 md:size-8',
-        )}
+        className={cn("text-current", compact ? "size-5" : "size-7 md:size-8")}
       >
         <line
           x1="9"
@@ -51,12 +48,12 @@ export function Wordmark({ label, className, compact = false }: WordmarkProps) {
       </svg>
       <span
         className={cn(
-          'font-display font-medium tracking-tight',
-          compact ? 'text-base' : 'text-2xl md:text-3xl',
+          "font-display font-medium tracking-tight",
+          compact ? "text-base" : "text-2xl md:text-3xl",
         )}
       >
         {label}
       </span>
     </div>
-  )
+  );
 }

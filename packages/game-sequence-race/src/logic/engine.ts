@@ -2,23 +2,28 @@
 // Sequence Sprinter - Game Engine
 // ========================================
 
-import type { SequenceState, HistoryEntry, GameConfig, GameMode } from './types'
+import type {
+  SequenceState,
+  HistoryEntry,
+  GameConfig,
+  GameMode,
+} from "./types";
 
 /**
  * Create initial game state from config
  */
 export function createGameState(config: GameConfig): SequenceState {
-  const mode = config.mode ?? 'vs-ai'
+  const mode = config.mode ?? "vs-ai";
 
   // Determine starting turn
-  let startingTurn: SequenceState['turn']
-  if (mode === 'two-player') {
-    startingTurn = 'player1'
+  let startingTurn: SequenceState["turn"];
+  if (mode === "two-player") {
+    startingTurn = "player1";
   } else if (config.aiMovesFirst) {
     // AI moves first - player gets second-mover advantage
-    startingTurn = 'ai'
+    startingTurn = "ai";
   } else {
-    startingTurn = 'player'
+    startingTurn = "player";
   }
 
   return {
@@ -30,7 +35,7 @@ export function createGameState(config: GameConfig): SequenceState {
     winner: null,
     gameOver: false,
     mode,
-  }
+  };
 }
 
 /**
@@ -39,7 +44,7 @@ export function createGameState(config: GameConfig): SequenceState {
 export function getValidMoves(state: SequenceState): number[] {
   return state.availableSteps.filter(
     (step) => state.currentPosition + step <= state.target,
-  )
+  );
 }
 
 /**
@@ -49,31 +54,31 @@ export function isValidMove(state: SequenceState, step: number): boolean {
   return (
     state.availableSteps.includes(step) &&
     state.currentPosition + step <= state.target
-  )
+  );
 }
 
 /**
  * Get the next turn based on current turn and game mode
  */
 function getNextTurn(
-  currentTurn: SequenceState['turn'],
+  currentTurn: SequenceState["turn"],
   mode: GameMode,
-): SequenceState['turn'] {
-  if (mode === 'two-player') {
-    return currentTurn === 'player1' ? 'player2' : 'player1'
+): SequenceState["turn"] {
+  if (mode === "two-player") {
+    return currentTurn === "player1" ? "player2" : "player1";
   }
   // vs-ai mode
-  return currentTurn === 'player' ? 'ai' : 'player'
+  return currentTurn === "player" ? "ai" : "player";
 }
 
 /**
  * Check if the current turn is a human player (for UI logic)
  */
 export function isHumanTurn(state: SequenceState): boolean {
-  if (state.mode === 'two-player') {
-    return true // Both turns are human in two-player
+  if (state.mode === "two-player") {
+    return true; // Both turns are human in two-player
   }
-  return state.turn === 'player'
+  return state.turn === "player";
 }
 
 /**
@@ -81,23 +86,23 @@ export function isHumanTurn(state: SequenceState): boolean {
  */
 export function applyMove(state: SequenceState, step: number): SequenceState {
   if (!isValidMove(state, step)) {
-    return state
+    return state;
   }
 
-  const newPosition = state.currentPosition + step
-  const newAvailable = state.availableSteps.filter((s) => s !== step)
+  const newPosition = state.currentPosition + step;
+  const newAvailable = state.availableSteps.filter((s) => s !== step);
 
   const entry: HistoryEntry = {
     actor: state.turn,
     step,
     position: newPosition,
-  }
+  };
 
   // Check win condition
-  const isWin = newPosition === state.target
+  const isWin = newPosition === state.target;
 
   // Get next turn based on mode
-  const nextTurn = getNextTurn(state.turn, state.mode)
+  const nextTurn = getNextTurn(state.turn, state.mode);
   const nextState: SequenceState = {
     ...state,
     currentPosition: newPosition,
@@ -106,25 +111,25 @@ export function applyMove(state: SequenceState, step: number): SequenceState {
     history: [...state.history, entry],
     winner: isWin ? state.turn : null,
     gameOver: isWin,
-  }
+  };
 
   // If winner, game is over
   if (isWin) {
-    return nextState
+    return nextState;
   }
 
   // Check if next player is stuck (no valid moves)
-  const nextValidMoves = getValidMoves(nextState)
+  const nextValidMoves = getValidMoves(nextState);
   if (nextValidMoves.length === 0) {
     // Current player wins because opponent is stuck
     return {
       ...nextState,
       winner: state.turn,
       gameOver: true,
-    }
+    };
   }
 
-  return nextState
+  return nextState;
 }
 
 // ========================================
@@ -132,48 +137,48 @@ export function applyMove(state: SequenceState, step: number): SequenceState {
 // ========================================
 
 interface MinimaxResult {
-  score: number
-  move: number | null
+  score: number;
+  move: number | null;
 }
 
 // Depth limits by difficulty (prevents UI blocking on large step pools)
-const DEPTH_LIMITS: Record<'easy' | 'medium' | 'hard', number> = {
+const DEPTH_LIMITS: Record<"easy" | "medium" | "hard", number> = {
   easy: 6,
   medium: 10,
   hard: 20, // Effectively unlimited for most puzzles
-}
+};
 
 /**
  * Heuristic evaluation when depth limit is reached.
  * Estimates winning probability based on position and remaining moves.
  */
 function heuristicEval(state: SequenceState, isMaximizing: boolean): number {
-  const distanceToTarget = state.target - state.currentPosition
+  const distanceToTarget = state.target - state.currentPosition;
   const avgStep =
     state.availableSteps.length > 0
       ? state.availableSteps.reduce((a, b) => a + b, 0) /
         state.availableSteps.length
-      : 1
+      : 1;
 
   // Estimate: closer to target with more moves = better position
-  const movesNeeded = distanceToTarget / avgStep
+  const movesNeeded = distanceToTarget / avgStep;
   const movesAvailable = state.availableSteps.filter(
     (s) => state.currentPosition + s <= state.target,
-  ).length
+  ).length;
 
   // Score based on position advantage
   // Being close to winning is good for current player
-  let score = 0
+  let score = 0;
   if (movesAvailable > 0) {
     // Having more moves relative to distance is advantageous
-    score = (movesAvailable / Math.max(1, movesNeeded)) * 50
+    score = (movesAvailable / Math.max(1, movesNeeded)) * 50;
   } else {
     // No valid moves - current player loses
-    score = -50
+    score = -50;
   }
 
   // Return from AI's perspective
-  return isMaximizing ? score : -score
+  return isMaximizing ? score : -score;
 }
 
 /**
@@ -184,8 +189,8 @@ function createStateKey(
   availableSteps: number[],
   isMaximizing: boolean,
 ): string {
-  const remainingSteps = [...availableSteps].sort((a, b) => a - b).join(',')
-  return `${position}-${remainingSteps}-${isMaximizing ? 1 : 0}`
+  const remainingSteps = [...availableSteps].sort((a, b) => a - b).join(",");
+  return `${position}-${remainingSteps}-${isMaximizing ? 1 : 0}`;
 }
 
 /**
@@ -206,55 +211,55 @@ function minimax(
     state.currentPosition,
     state.availableSteps,
     isMaximizing,
-  )
+  );
 
   if (memo.has(key)) {
-    return memo.get(key)!
+    return memo.get(key)!;
   }
 
   // Terminal states
   if (state.gameOver) {
-    const score = state.winner === 'ai' ? 100 : -100
-    return { score, move: null }
+    const score = state.winner === "ai" ? 100 : -100;
+    return { score, move: null };
   }
 
-  const validMoves = getValidMoves(state)
+  const validMoves = getValidMoves(state);
 
   if (validMoves.length === 0) {
     // No moves available - current player loses
-    const score = isMaximizing ? -100 : 100
-    return { score, move: null }
+    const score = isMaximizing ? -100 : 100;
+    return { score, move: null };
   }
 
   // Depth limit reached - use heuristic evaluation
   if (depth >= maxDepth) {
-    const score = heuristicEval(state, isMaximizing)
-    return { score, move: validMoves[0] }
+    const score = heuristicEval(state, isMaximizing);
+    return { score, move: validMoves[0] };
   }
 
-  let bestMove: number | null = null
-  let bestScore = isMaximizing ? -Infinity : Infinity
+  let bestMove: number | null = null;
+  let bestScore = isMaximizing ? -Infinity : Infinity;
 
   for (const move of validMoves) {
-    const nextState = applyMove(state, move)
-    const result = minimax(nextState, !isMaximizing, memo, depth + 1, maxDepth)
+    const nextState = applyMove(state, move);
+    const result = minimax(nextState, !isMaximizing, memo, depth + 1, maxDepth);
 
     if (isMaximizing) {
       if (result.score > bestScore) {
-        bestScore = result.score
-        bestMove = move
+        bestScore = result.score;
+        bestMove = move;
       }
     } else {
       if (result.score < bestScore) {
-        bestScore = result.score
-        bestMove = move
+        bestScore = result.score;
+        bestMove = move;
       }
     }
   }
 
-  const result = { score: bestScore, move: bestMove }
-  memo.set(key, result)
-  return result
+  const result = { score: bestScore, move: bestMove };
+  memo.set(key, result);
+  return result;
 }
 
 /**
@@ -262,32 +267,32 @@ function minimax(
  */
 export function getAIMove(
   state: SequenceState,
-  difficulty: 'easy' | 'medium' | 'hard',
+  difficulty: "easy" | "medium" | "hard",
 ): number {
-  const validMoves = getValidMoves(state)
+  const validMoves = getValidMoves(state);
 
   if (validMoves.length === 0) {
-    throw new Error('No valid moves available')
+    throw new Error("No valid moves available");
   }
 
-  if (difficulty === 'easy') {
+  if (difficulty === "easy") {
     // Random move
-    return validMoves[Math.floor(Math.random() * validMoves.length)]
+    return validMoves[Math.floor(Math.random() * validMoves.length)];
   }
 
-  if (difficulty === 'medium') {
+  if (difficulty === "medium") {
     // 50% optimal, 50% random
     if (Math.random() < 0.5) {
-      return validMoves[Math.floor(Math.random() * validMoves.length)]
+      return validMoves[Math.floor(Math.random() * validMoves.length)];
     }
   }
 
   // Medium/Hard: Optimal with depth limit (Minimax)
-  const memo = new Map<string, MinimaxResult>()
-  const maxDepth = DEPTH_LIMITS[difficulty]
-  const result = minimax(state, true, memo, 0, maxDepth)
+  const memo = new Map<string, MinimaxResult>();
+  const maxDepth = DEPTH_LIMITS[difficulty];
+  const result = minimax(state, true, memo, 0, maxDepth);
 
-  return result.move ?? validMoves[0]
+  return result.move ?? validMoves[0];
 }
 
 /**
@@ -295,17 +300,17 @@ export function getAIMove(
  * Uses hard difficulty depth for accurate analysis
  */
 export function analyzePosition(state: SequenceState): {
-  canWin: boolean
-  bestMove: number | null
+  canWin: boolean;
+  bestMove: number | null;
 } {
-  const memo = new Map<string, MinimaxResult>()
-  const isAITurn = state.turn === 'ai'
-  const result = minimax(state, isAITurn, memo, 0, DEPTH_LIMITS.hard)
+  const memo = new Map<string, MinimaxResult>();
+  const isAITurn = state.turn === "ai";
+  const result = minimax(state, isAITurn, memo, 0, DEPTH_LIMITS.hard);
 
   return {
     canWin: isAITurn ? result.score > 0 : result.score < 0,
     bestMove: result.move,
-  }
+  };
 }
 
 // ========================================
@@ -313,11 +318,11 @@ export function analyzePosition(state: SequenceState): {
 // ========================================
 
 export interface MoveAnalysis {
-  wasOptimal: boolean
-  playerMove: number
-  optimalMove: number | null
-  aiCounterMove: number | null
-  explanation: string
+  wasOptimal: boolean;
+  playerMove: number;
+  optimalMove: number | null;
+  aiCounterMove: number | null;
+  explanation: string;
 }
 
 /**
@@ -329,11 +334,11 @@ export function analyzePlayerMove(
   playerMove: number,
 ): MoveAnalysis {
   // Get optimal move from this position
-  const optimalAnalysis = analyzePosition(stateBefore)
-  const wasOptimal = optimalAnalysis.bestMove === playerMove
+  const optimalAnalysis = analyzePosition(stateBefore);
+  const wasOptimal = optimalAnalysis.bestMove === playerMove;
 
   // Simulate the player's move
-  const stateAfterPlayer = applyMove(stateBefore, playerMove)
+  const stateAfterPlayer = applyMove(stateBefore, playerMove);
 
   // If game is over after player move, no counter analysis needed
   if (stateAfterPlayer.gameOver) {
@@ -342,22 +347,22 @@ export function analyzePlayerMove(
       playerMove,
       optimalMove: playerMove,
       aiCounterMove: null,
-      explanation: 'You reached the target!',
-    }
+      explanation: "You reached the target!",
+    };
   }
 
   // Analyze AI's best response
-  const aiAnalysis = analyzePosition(stateAfterPlayer)
-  const aiCounterMove = aiAnalysis.bestMove
+  const aiAnalysis = analyzePosition(stateAfterPlayer);
+  const aiCounterMove = aiAnalysis.bestMove;
 
   // Generate educational explanation
-  let explanation: string
+  let explanation: string;
 
   if (wasOptimal) {
     if (optimalAnalysis.canWin) {
-      explanation = `Good move! You're on track to win.`
+      explanation = `Good move! You're on track to win.`;
     } else {
-      explanation = `Solid choice - making the best of a tough position.`
+      explanation = `Solid choice - making the best of a tough position.`;
     }
   } else {
     // Player made a suboptimal move
@@ -365,11 +370,11 @@ export function analyzePlayerMove(
       // Player had a winning move but now AI can win
       explanation =
         `If you had taken ${optimalAnalysis.bestMove}, you could have won. ` +
-        `Now I can take ${aiCounterMove} and gain the advantage!`
+        `Now I can take ${aiCounterMove} and gain the advantage!`;
     } else if (aiCounterMove !== null) {
-      explanation = `Interesting choice! I'll take ${aiCounterMove} in response.`
+      explanation = `Interesting choice! I'll take ${aiCounterMove} in response.`;
     } else {
-      explanation = `That move changes the game dynamics.`
+      explanation = `That move changes the game dynamics.`;
     }
   }
 
@@ -379,7 +384,7 @@ export function analyzePlayerMove(
     optimalMove: optimalAnalysis.bestMove,
     aiCounterMove,
     explanation,
-  }
+  };
 }
 
 // ========================================
@@ -387,10 +392,10 @@ export function analyzePlayerMove(
 // ========================================
 
 export interface FairnessResult {
-  isPlayerWinnable: boolean
-  isAIWinnable: boolean
-  firstMoverAdvantage: 'player' | 'ai' | 'neither' | 'both'
-  optimalFirstMove: number | null
+  isPlayerWinnable: boolean;
+  isAIWinnable: boolean;
+  firstMoverAdvantage: "player" | "ai" | "neither" | "both";
+  optimalFirstMove: number | null;
 }
 
 /**
@@ -398,28 +403,28 @@ export interface FairnessResult {
  * Returns analysis of who can force a win with optimal play
  */
 export function validateGameFairness(config: GameConfig): FairnessResult {
-  const initialState = createGameState(config)
+  const initialState = createGameState(config);
 
   // Analyze from player's perspective (player goes first)
-  const playerAnalysis = analyzePosition(initialState)
+  const playerAnalysis = analyzePosition(initialState);
 
   // Create hypothetical state where AI goes first to check AI advantage
   const aiFirstState: SequenceState = {
     ...initialState,
-    turn: 'ai',
-  }
-  const aiAnalysis = analyzePosition(aiFirstState)
+    turn: "ai",
+  };
+  const aiAnalysis = analyzePosition(aiFirstState);
 
   // Determine first mover advantage
-  let firstMoverAdvantage: FairnessResult['firstMoverAdvantage']
+  let firstMoverAdvantage: FairnessResult["firstMoverAdvantage"];
   if (playerAnalysis.canWin && !aiAnalysis.canWin) {
-    firstMoverAdvantage = 'player'
+    firstMoverAdvantage = "player";
   } else if (!playerAnalysis.canWin && aiAnalysis.canWin) {
-    firstMoverAdvantage = 'ai'
+    firstMoverAdvantage = "ai";
   } else if (playerAnalysis.canWin && aiAnalysis.canWin) {
-    firstMoverAdvantage = 'both' // First mover always wins
+    firstMoverAdvantage = "both"; // First mover always wins
   } else {
-    firstMoverAdvantage = 'neither' // Second player can always force draw/win
+    firstMoverAdvantage = "neither"; // Second player can always force draw/win
   }
 
   return {
@@ -427,7 +432,7 @@ export function validateGameFairness(config: GameConfig): FairnessResult {
     isAIWinnable: aiAnalysis.canWin,
     firstMoverAdvantage,
     optimalFirstMove: playerAnalysis.bestMove,
-  }
+  };
 }
 
 /**
@@ -437,11 +442,11 @@ export function validateGameFairness(config: GameConfig): FairnessResult {
 export function validateAllPresets(
   presets: GameConfig[],
 ): Map<string, FairnessResult> {
-  const results = new Map<string, FairnessResult>()
+  const results = new Map<string, FairnessResult>();
 
   for (const preset of presets) {
-    results.set(preset.id, validateGameFairness(preset))
+    results.set(preset.id, validateGameFairness(preset));
   }
 
-  return results
+  return results;
 }

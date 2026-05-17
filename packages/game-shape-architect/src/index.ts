@@ -1,10 +1,10 @@
-export { shapeArchitectModule } from './module'
-export * from './logic'
-export * from './catalog'
-export { ShapeArchitectCompletion } from './schema'
-export { useSolverWorker } from './logic/useSolverWorker'
-export * from './rendering/three-scene'
-export * from './rendering/isometric'
-export * from './logic/engine'
-export * from './logic/types'
-export { VoxelGrid } from './logic/voxel-grid'
+export { shapeArchitectModule } from "./module";
+export * from "./logic";
+export * from "./catalog";
+export { ShapeArchitectCompletion } from "./schema";
+export { useSolverWorker } from "./logic/useSolverWorker";
+export * from "./rendering/three-scene";
+export * from "./rendering/isometric";
+export * from "./logic/engine";
+export * from "./logic/types";
+export { VoxelGrid } from "./logic/voxel-grid";
