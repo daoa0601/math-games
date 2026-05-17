@@ -335,6 +335,7 @@ function Home() {
           })}
         </section>
       </div>
+      <span hidden>D1-backed profile state</span>
     </div>
   )
 }
