@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { gameRoutes, blockedOldRootPaths } from "./smokeRoutes";
+
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const appRoot = join(scriptDir, "..");
 const baseUrl = process.env.SMOKE_BASE_URL ?? "http://localhost:3000";
@@ -24,25 +26,10 @@ const standaloneRoutes: RouteSmokeCheck[] = [
     path: "/profile",
     expectedText: ["Player Profile", "Progress Snapshot"],
   },
-  {
-    path: "/games/magic-graph",
-    expectedText: ["Magic", "Puzzles"],
-  },
-  {
-    path: "/games/sequence-race",
-    expectedText: ["Race Line", "Levels"],
-  },
-  {
-    path: "/games/shape-architect",
-    expectedText: ["Blueprint", "Pieces"],
-  },
+  ...gameRoutes,
 ];
 
-const blockedRootGameRoutes = [
-  "/magic-graph",
-  "/sequence-race",
-  "/shape-architect",
-] as const;
+const blockedRootGameRoutes = blockedOldRootPaths;
 
 const oldRootRouteFiles = [
   "src/routes/magic-graph.tsx",

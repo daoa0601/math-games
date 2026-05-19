@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react'
 
 import type { TranslationKey } from '@/i18n-translations'
 import { formatAchievementName, formatDifficulty } from '@/i18n-format'
-import { Confetti, GameChrome } from '@math-games/ui'
+import { LevelGrid } from '@/games/level-grid'
+import { Confetti, GameChrome, LevelNav } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { Badge } from '@math-games/ui'
 import { Button } from '@math-games/ui'
@@ -46,6 +47,7 @@ function PatternDetectiveRoute() {
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
 
   const level = configs.find((c) => c.id === currentLevelId) ?? configs[0]
+  const levelIndex = configs.indexOf(level)
 
   const choices = useMemo(
     () => shuffleChoices(level.answer, level.distractors, hashStr(level.id)),
@@ -78,13 +80,16 @@ function PatternDetectiveRoute() {
     }
   }
 
-  function handleNext() {
-    const idx = configs.indexOf(level)
-    const next = configs[idx + 1] ?? configs[0]
-    setCurrentLevelId(next.id)
+  function selectLevel(config: PatternConfig) {
+    setCurrentLevelId(config.id)
     setSelected(null)
     setResult(null)
     setSaveStatus(null)
+  }
+
+  function handleNext() {
+    const next = configs[levelIndex + 1] ?? configs[0]
+    selectLevel(next)
   }
 
   return (
@@ -92,25 +97,31 @@ function PatternDetectiveRoute() {
       <GameChrome
         game="pattern-detective"
         levelTitle={t('gameTitle.patternDetective')}
+        meta={
+          <LevelNav
+            currentIndex={levelIndex}
+            total={configs.length}
+            onPrev={() => selectLevel(configs[levelIndex - 1])}
+            onNext={() => selectLevel(configs[levelIndex + 1])}
+          />
+        }
       />
 
-      <LevelSelector
-        configs={configs}
-        currentId={level.id}
-        locale={locale}
+      <LevelGrid
+        items={configs.map((c) => ({
+          id: c.id,
+          name: c.patternType,
+          subtitle: formatDifficulty(locale, c.difficulty),
+        }))}
+        selectedId={level.id}
         onSelect={(id) => {
-          setCurrentLevelId(id)
-          setSelected(null)
-          setResult(null)
-          setSaveStatus(null)
+          const config = configs.find((c) => c.id === id)
+          if (config) selectLevel(config)
         }}
       />
 
       <div className="relative">
-        <Confetti
-          active={result === 'correct'}
-          colors={['#a06420', '#c88848', '#d9a06d', '#8a5318', '#e8c590']}
-        />
+        <Confetti active={result === 'correct'} />
       </div>
 
       <SequenceCard
@@ -132,38 +143,6 @@ function PatternDetectiveRoute() {
         />
       )}
     </main>
-  )
-}
-
-function LevelSelector({
-  configs,
-  currentId,
-  locale,
-  onSelect,
-}: {
-  configs: readonly PatternConfig[]
-  currentId: string
-  locale: string
-  onSelect: (id: string) => void
-}) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {configs.map((c) => (
-        <button
-          key={c.id}
-          onClick={() => onSelect(c.id)}
-          className={`rounded-md px-3 py-1 text-sm transition-colors ${
-            c.id === currentId
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground hover:bg-muted/80'
-          }`}
-        >
-          {formatDifficulty(locale as 'en' | 'vi', c.difficulty)}
-          {' · '}
-          {c.patternType}
-        </button>
-      ))}
-    </div>
   )
 }
 
@@ -267,18 +246,18 @@ function ResultCard({
         </p>
         {result === 'wrong' && (
           <p className="text-sm leading-relaxed text-muted-foreground">
-            The answer is{' '}
+            {t('game.answerIs')}{' '}
             <span className="font-medium text-foreground tabular-nums">
               {answer}
             </span>
-            .{hint ? ` Hint: ${hint}` : ''}
+            .{hint ? ` ${t('game.hint')}: ${hint}` : ''}
           </p>
         )}
         {saveStatus && (
           <p className="text-sm text-muted-foreground">{saveStatus}</p>
         )}
         <Button onClick={onNext} className="self-start">
-          Next Level
+          {t('game.nextLevel')}
         </Button>
       </CardContent>
     </Card>

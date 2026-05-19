@@ -11,7 +11,15 @@ export type {
   RetentionReport,
 } from "./analytics-dashboard";
 export { AssignmentService, AssignmentServiceLive } from "./assignment";
-export type { AssignmentShape } from "./assignment";
+export type {
+  AssignmentShape,
+  AssignmentWithProgress,
+  StudentAssignment,
+} from "./assignment";
 export { ClassroomLayer } from "./classroom-layer";
 export { ClassroomService, ClassroomServiceLive } from "./classroom";
-export type { ClassroomShape } from "./classroom";
+export type {
+  ClassroomShape,
+  ClassroomSummary,
+  MemberWithProgress,
+} from "./classroom";

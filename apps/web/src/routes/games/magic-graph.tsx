@@ -9,10 +9,11 @@ import {
   formatDifficulty,
   formatLevelName,
 } from '@/i18n-format'
-import { GameChrome } from '@math-games/ui'
+import { GameChrome, LevelNav } from '@math-games/ui'
 import { getHints } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { LearnSection } from '@math-games/ui'
+import { LevelGrid } from '@/games/level-grid'
 import { PracticeGeneratorSection } from '@/games/practice-generator-section'
 import { Button } from '@math-games/ui'
 import { Card, CardContent, CardHeader } from '@math-games/ui'
@@ -72,6 +73,7 @@ function MagicGraphRoute() {
       availableConfigs[0],
     [availableConfigs, selectedPuzzleId],
   )
+  const configIndex = availableConfigs.indexOf(config)
   const [values, setValues] = useState(() => createInitialValues(config))
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null)
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
@@ -228,17 +230,22 @@ function MagicGraphRoute() {
         game="magic-graph"
         levelTitle={formatLevelName(locale, config.name)}
         meta={
-          <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
-            {t('game.target')} {config.targetSum}
-          </span>
+          <div className="flex items-center gap-2">
+            <LevelNav
+              currentIndex={configIndex}
+              total={availableConfigs.length}
+              onPrev={() => selectPuzzle(availableConfigs[configIndex - 1])}
+              onNext={() => selectPuzzle(availableConfigs[configIndex + 1])}
+            />
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
+              {t('game.target')} {config.targetSum}
+            </span>
+          </div>
         }
       />
 
       <section className="relative grid gap-6 md:grid-cols-[1.15fr_0.85fr]">
-        <Confetti
-          active={solved}
-          colors={['#7c3aed', '#a78bfa', '#c4b5fd', '#8b5cf6', '#6d28d9']}
-        />
+        <Confetti active={solved} />
         <Card className="game-card-bg relative overflow-hidden border-0">
           <CardContent className="relative z-10">
             <div className="relative mx-auto aspect-[300/220] max-w-[520px]">
@@ -475,33 +482,18 @@ function MagicGraphRoute() {
         defaultDifficulty="medium"
         onGenerate={generatePracticePuzzle}
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {availableConfigs.map((puzzle) => {
-            const selected = puzzle.id === config.id
-
-            return (
-              <button
-                className={
-                  selected
-                    ? 'rounded-lg border border-primary bg-primary px-4 py-4 text-left text-primary-foreground'
-                    : 'rounded-lg border border-border px-4 py-4 text-left hover:border-primary'
-                }
-                key={puzzle.id}
-                onClick={() => selectPuzzle(puzzle)}
-                type="button"
-              >
-                <span className="block font-semibold">
-                  {formatLevelName(locale, puzzle.name)}
-                </span>
-                <span className="mt-1 block text-sm capitalize opacity-80">
-                  {formatDifficulty(locale, puzzle.difficulty)} ·{' '}
-                  {puzzle.nodes.length} {t('stats.nodes')} · {t('game.target')}{' '}
-                  {puzzle.targetSum}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+        <LevelGrid
+          items={availableConfigs.map((puzzle) => ({
+            id: puzzle.id,
+            name: puzzle.name,
+            subtitle: `${formatDifficulty(locale, puzzle.difficulty)} · ${puzzle.nodes.length} ${t('stats.nodes')} · ${t('game.target')} ${puzzle.targetSum}`,
+          }))}
+          selectedId={config.id}
+          onSelect={(id) => {
+            const puzzle = availableConfigs.find((c) => c.id === id)
+            if (puzzle) selectPuzzle(puzzle)
+          }}
+        />
       </PracticeGeneratorSection>
 
       <LearnSection gameId="magic-graph" />

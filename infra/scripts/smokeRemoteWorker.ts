@@ -5,6 +5,7 @@ import "dotenv/config";
 import { pathToFileURL } from "node:url";
 
 import { resolveRemoteWorkerBaseUrl } from "./resolveRemoteWorkerUrl";
+import { gameRoutes, blockedOldRootPaths } from "./smokeRoutes";
 
 export {};
 
@@ -45,25 +46,13 @@ export const requiredRoutes: readonly RequiredRoute[] = [
     expectedHeader: "set-cookie",
     expectedHeaderText: "mg_player=",
   },
-  {
-    path: "/games/magic-graph",
-    expectedText: "Numbers",
-  },
-  {
-    path: "/games/sequence-race",
-    expectedText: "Race Line",
-  },
-  {
-    path: "/games/shape-architect",
-    expectedText: "Blueprint",
-  },
+  ...gameRoutes.map((r) => ({
+    path: r.path,
+    expectedText: r.expectedText[0],
+  })),
 ] as const;
 
-export const blockedRoutes = [
-  "/magic-graph",
-  "/sequence-race",
-  "/shape-architect",
-] as const;
+export const blockedRoutes = blockedOldRootPaths;
 export const cloudflareEdgeHeader = "cf-ray";
 const cloudflareRayIdPattern = /^[0-9a-f]+-[A-Z]{3}$/i;
 

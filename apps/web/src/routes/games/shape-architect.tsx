@@ -9,10 +9,11 @@ import {
   formatDifficulty,
   formatLevelName,
 } from '@/i18n-format'
-import { GameChrome } from '@math-games/ui'
+import { GameChrome, LevelNav } from '@math-games/ui'
 import { getHints } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { LearnSection } from '@math-games/ui'
+import { LevelGrid } from '@/games/level-grid'
 import { PracticeGeneratorSection } from '@/games/practice-generator-section'
 import { Button } from '@math-games/ui'
 import { Card, CardContent } from '@math-games/ui'
@@ -168,6 +169,7 @@ function ShapeArchitectRoute() {
       availableConfigs[0],
     [availableConfigs, selectedLevelId],
   )
+  const configIndex = availableConfigs.indexOf(config)
   const [serverState, setServerState] = useState(() =>
     createInitialServerState(config),
   )
@@ -532,17 +534,22 @@ function ShapeArchitectRoute() {
         game="shape-architect"
         levelTitle={formatLevelName(locale, config.name)}
         meta={
-          <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
-            {filledTargets}/{config.targetVoxels.length}
-          </span>
+          <div className="flex items-center gap-2">
+            <LevelNav
+              currentIndex={configIndex}
+              total={availableConfigs.length}
+              onPrev={() => selectLevel(availableConfigs[configIndex - 1])}
+              onNext={() => selectLevel(availableConfigs[configIndex + 1])}
+            />
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
+              {filledTargets}/{config.targetVoxels.length}
+            </span>
+          </div>
         }
       />
 
       <section className="relative grid gap-4">
-        <Confetti
-          active={solved}
-          colors={['#14b8a6', '#2dd4bf', '#5eead4', '#0d9488', '#0f766e']}
-        />
+        <Confetti active={solved} />
         <Card className="game-card-bg relative overflow-hidden border-0">
           <CardContent className="relative">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -815,34 +822,18 @@ function ShapeArchitectRoute() {
         defaultDifficulty="medium"
         onGenerate={generatePracticeLevel}
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {availableConfigs.map((optionLevel) => {
-            const selected = optionLevel.id === config.id
-
-            return (
-              <button
-                className={
-                  selected
-                    ? 'rounded-lg border border-primary bg-primary px-4 py-4 text-left text-primary-foreground'
-                    : 'rounded-lg border border-border px-4 py-4 text-left hover:border-primary'
-                }
-                key={optionLevel.id}
-                onClick={() => selectLevel(optionLevel)}
-                type="button"
-              >
-                <span className="block font-semibold">
-                  {formatLevelName(locale, optionLevel.name)}
-                </span>
-                <span className="mt-1 block text-sm capitalize opacity-80">
-                  {formatDifficulty(locale, optionLevel.difficulty)} ·{' '}
-                  {optionLevel.type} · {optionLevel.pieces.length}{' '}
-                  {t('stats.pieces')} · {optionLevel.targetVoxels.length}{' '}
-                  {t('stats.cells')}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+        <LevelGrid
+          items={availableConfigs.map((optionLevel) => ({
+            id: optionLevel.id,
+            name: optionLevel.name,
+            subtitle: `${formatDifficulty(locale, optionLevel.difficulty)} · ${optionLevel.type} · ${optionLevel.pieces.length} ${t('stats.pieces')} · ${optionLevel.targetVoxels.length} ${t('stats.cells')}`,
+          }))}
+          selectedId={config.id}
+          onSelect={(id) => {
+            const level = availableConfigs.find((c) => c.id === id)
+            if (level) selectLevel(level)
+          }}
+        />
       </PracticeGeneratorSection>
 
       <LearnSection gameId="shape-architect" />

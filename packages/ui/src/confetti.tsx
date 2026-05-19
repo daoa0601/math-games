@@ -16,6 +16,42 @@ const PARTICLE_COUNT = 80;
 const DURATION_MS = 2000;
 const GRAVITY = 0.12;
 
+const THEME_VARS = [
+  "--chart-1",
+  "--chart-2",
+  "--chart-3",
+  "--primary",
+  "--accent",
+];
+
+const DEFAULT_COLORS = [
+  "#7c3aed",
+  "#f97316",
+  "#14b8a6",
+  "#eab308",
+  "#ec4899",
+  "#3b82f6",
+];
+
+function resolveThemeColors(element: HTMLElement): string[] | null {
+  const styles = getComputedStyle(element);
+  const probe = document.createElement("div");
+  probe.style.display = "none";
+  element.appendChild(probe);
+
+  const resolved: string[] = [];
+  for (const v of THEME_VARS) {
+    const raw = styles.getPropertyValue(v).trim();
+    if (!raw) continue;
+    probe.style.color = raw;
+    const rgb = getComputedStyle(probe).color;
+    if (rgb) resolved.push(rgb);
+  }
+
+  element.removeChild(probe);
+  return resolved.length >= 3 ? resolved : null;
+}
+
 function createParticles(
   width: number,
   height: number,
@@ -45,10 +81,7 @@ interface ConfettiProps {
   colors?: string[];
 }
 
-export function Confetti({
-  active,
-  colors = ["#7c3aed", "#f97316", "#14b8a6", "#eab308", "#ec4899", "#3b82f6"],
-}: ConfettiProps) {
+export function Confetti({ active, colors }: ConfettiProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -60,14 +93,17 @@ export function Confetti({
     const maybeCtx = canvas.getContext("2d");
     if (!maybeCtx) return;
 
-    const rect = canvas.parentElement?.getBoundingClientRect();
-    if (!rect) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
 
+    const rect = parent.getBoundingClientRect();
     canvas.width = rect.width;
     canvas.height = rect.height;
 
+    const palette = colors ?? resolveThemeColors(parent) ?? DEFAULT_COLORS;
+
     const g = maybeCtx;
-    const particles = createParticles(canvas.width, canvas.height, colors);
+    const particles = createParticles(canvas.width, canvas.height, palette);
     const startTime = performance.now();
     let frameId: number;
 

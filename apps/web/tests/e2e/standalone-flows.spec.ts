@@ -82,7 +82,7 @@ test('dashboard and daily expose standalone route links', async ({ page }) => {
   await page.goto(dailyGameHref)
 
   await expect(page).toHaveURL(
-    /\/games\/(magic-graph|sequence-race|shape-architect)/,
+    /\/games\/(magic-graph|sequence-race|shape-architect|pattern-detective)/,
   )
   await expect(page.locator('main').first()).toBeVisible()
   expectNoRuntimeErrors(errors)

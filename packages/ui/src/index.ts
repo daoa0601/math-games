@@ -30,6 +30,7 @@ export { GamePattern } from "./game-pattern";
 export type { PatternType } from "./game-pattern";
 export { getHints, learnContent } from "./learn-content";
 export { LearnSection } from "./learn-section";
+export { LevelNav } from "./level-nav";
 export { LocaleProvider, useLocale } from "./locale-context";
 export { MechanicCard } from "./mechanic-card";
 export { MobileAppHeader } from "./mobile-app-header";

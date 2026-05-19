@@ -9,10 +9,11 @@ import {
   formatDifficulty,
   formatLevelName,
 } from '@/i18n-format'
-import { GameChrome } from '@math-games/ui'
+import { GameChrome, LevelNav } from '@math-games/ui'
 import { getHints } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { LearnSection } from '@math-games/ui'
+import { LevelGrid } from '@/games/level-grid'
 import { PracticeGeneratorSection } from '@/games/practice-generator-section'
 import { Badge } from '@math-games/ui'
 import { Button } from '@math-games/ui'
@@ -76,6 +77,7 @@ function SequenceRaceRoute() {
       availableConfigs[0],
     [availableConfigs, selectedLevelId],
   )
+  const configIndex = availableConfigs.indexOf(config)
   const sequence = config.stepPool
   const sequenceType = config.sequenceType ?? 'arithmetic'
   const sequenceInfo: SequenceInfo = sequenceInfoByType[sequenceType]
@@ -221,17 +223,22 @@ function SequenceRaceRoute() {
         game="sequence-race"
         levelTitle={formatLevelName(locale, config.name)}
         meta={
-          <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
-            {t('game.target')} {config.target}
-          </span>
+          <div className="flex items-center gap-2">
+            <LevelNav
+              currentIndex={configIndex}
+              total={availableConfigs.length}
+              onPrev={() => selectLevel(availableConfigs[configIndex - 1])}
+              onNext={() => selectLevel(availableConfigs[configIndex + 1])}
+            />
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
+              {t('game.target')} {config.target}
+            </span>
+          </div>
         }
       />
 
       <section className="relative grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
-        <Confetti
-          active={game.winner === 'player'}
-          colors={['#b8543a', '#c87355', '#d49070', '#a3422c', '#e0a988']}
-        />
+        <Confetti active={game.winner === 'player'} />
         <Card className="game-card-bg relative overflow-hidden border-0">
           <CardContent className="relative">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -383,35 +390,22 @@ function SequenceRaceRoute() {
         defaultDifficulty="medium"
         onGenerate={generatePracticeLevel}
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {availableConfigs.map((optionLevel) => {
-            const levelSequenceType = optionLevel.sequenceType ?? 'arithmetic'
-            const info = sequenceInfoByType[levelSequenceType]
-            const selected = optionLevel.id === config.id
-
-            return (
-              <button
-                className={
-                  selected
-                    ? 'rounded-lg border border-primary bg-primary px-4 py-4 text-left text-primary-foreground'
-                    : 'rounded-lg border border-border px-4 py-4 text-left hover:border-primary'
-                }
-                key={optionLevel.id}
-                onClick={() => selectLevel(optionLevel)}
-                type="button"
-              >
-                <span className="block font-semibold">
-                  {formatLevelName(locale, optionLevel.name)}
-                </span>
-                <span className="mt-1 block text-sm capitalize opacity-80">
-                  {formatDifficulty(locale, optionLevel.difficulty)} ·{' '}
-                  {formatLevelName(locale, info.name)} · {t('game.target')}{' '}
-                  {optionLevel.target}
-                </span>
-              </button>
-            )
+        <LevelGrid
+          items={availableConfigs.map((optionLevel) => {
+            const info =
+              sequenceInfoByType[optionLevel.sequenceType ?? 'arithmetic']
+            return {
+              id: optionLevel.id,
+              name: optionLevel.name,
+              subtitle: `${formatDifficulty(locale, optionLevel.difficulty)} · ${formatLevelName(locale, info.name)} · ${t('game.target')} ${optionLevel.target}`,
+            }
           })}
-        </div>
+          selectedId={config.id}
+          onSelect={(id) => {
+            const level = availableConfigs.find((c) => c.id === id)
+            if (level) selectLevel(level)
+          }}
+        />
       </PracticeGeneratorSection>
 
       <LearnSection gameId="sequence-race" />

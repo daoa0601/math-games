@@ -13,6 +13,7 @@
     "check": "prettier --check . && turbo typecheck && turbo lint && turbo test && turbo build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "preflight": "pnpm check && pnpm infra:check",
     "deploy": "pnpm --filter infra run deploy",
     "infra:check": "pnpm --filter @math-games/infra run check",
     "infra:bootstrap": "pnpm --filter @math-games/infra run bootstrap",
