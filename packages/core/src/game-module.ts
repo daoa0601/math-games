@@ -70,6 +70,8 @@ export interface GameModule<
   readonly route: string;
   readonly title: string;
   readonly description: string;
+  /** Set to false to hide from dashboards and daily rotation. Defaults to true. */
+  readonly published?: boolean;
   readonly difficulties: readonly string[];
   readonly achievements: readonly Achievement[];
   readonly levelCount: number;

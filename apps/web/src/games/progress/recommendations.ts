@@ -1,5 +1,5 @@
 import type { GameId } from '@/games/registry'
-import { GAME_MODULES } from '@/games/registry'
+import { PUBLISHED_GAME_MODULES } from '@/games/registry'
 
 export interface Recommendation {
   gameId: GameId
@@ -24,7 +24,7 @@ export function computeRecommendations(
 
   const recommendations: Recommendation[] = []
 
-  for (const mod of GAME_MODULES) {
+  for (const mod of PUBLISHED_GAME_MODULES) {
     if (recommendations.length >= MAX_RECOMMENDATIONS) break
 
     const catalog = mod.getCatalog()

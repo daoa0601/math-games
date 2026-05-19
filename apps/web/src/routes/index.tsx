@@ -19,7 +19,7 @@ import {
   Wordmark,
 } from '@math-games/ui'
 import { getDailyChallenge } from '@/daily/daily.functions'
-import { gameModules, registry } from '@/games/registry'
+import { publishedGameModules, registry } from '@/games/registry'
 import { getPlayerProfileOverview } from '@/player/profile.functions'
 import type { PlayerProgressSummary } from '@/player/profile.server'
 import { RouteErrorFallback } from '@/routes/-route-error'
@@ -41,7 +41,7 @@ export const Route = createFileRoute('/')({
 
     return {
       dailyChallenge,
-      games: gameModules.map((module, index) => ({
+      games: publishedGameModules.map((module, index) => ({
         description: module.description,
         gameId: module.id,
         index: String(index + 1).padStart(2, '0'),

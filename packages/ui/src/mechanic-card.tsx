@@ -11,6 +11,8 @@ const GAME_PATTERN: Record<GameGlyphId, PatternType> = {
   "sequence-race": "arrows",
   "shape-architect": "blueprint",
   "pattern-detective": "magnifier",
+  "fraction-builder": "grid",
+  "equation-balance": "triangles",
 };
 
 interface MechanicCardProps extends React.ComponentProps<"div"> {

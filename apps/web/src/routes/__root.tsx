@@ -8,7 +8,7 @@ import { formatGameTitle } from '@/i18n-format'
 import { translations } from '@/i18n-translations'
 import { LocaleProvider, useLocale } from '@math-games/ui'
 import { useT } from '@math-games/ui'
-import { GAME_MODULES } from '@/games/registry'
+import { PUBLISHED_GAME_MODULES } from '@/games/registry'
 import geistCss from '@fontsource-variable/geist/index.css?url'
 import appCss from '../styles.css?url'
 
@@ -74,7 +74,7 @@ function StandaloneNotFound() {
         >
           {t('app.dashboard')}
         </a>
-        {GAME_MODULES.map((m) => (
+        {PUBLISHED_GAME_MODULES.map((m) => (
           <a
             key={m.id}
             className="rounded-lg border border-border px-4 py-2"

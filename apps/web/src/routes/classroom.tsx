@@ -9,7 +9,7 @@ import { Button } from '@math-games/ui'
 import { Card, CardContent, CardHeader, CardTitle } from '@math-games/ui'
 import { Progress } from '@math-games/ui'
 import { useT } from '@math-games/ui'
-import { GAME_MODULES } from '@/games/registry'
+import { PUBLISHED_GAME_MODULES } from '@/games/registry'
 import {
   createAssignment,
   createClassroom,
@@ -411,7 +411,7 @@ function ClassroomDetail({
                     required
                     className="rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
                   >
-                    {GAME_MODULES.map((m) => (
+                    {PUBLISHED_GAME_MODULES.map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.title}
                       </option>

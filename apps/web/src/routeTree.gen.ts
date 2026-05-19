@@ -18,6 +18,8 @@ import { Route as GamesShapeArchitectRouteImport } from './routes/games/shape-ar
 import { Route as GamesSequenceRaceRouteImport } from './routes/games/sequence-race'
 import { Route as GamesPatternDetectiveRouteImport } from './routes/games/pattern-detective'
 import { Route as GamesMagicGraphRouteImport } from './routes/games/magic-graph'
+import { Route as GamesFractionBuilderRouteImport } from './routes/games/fraction-builder'
+import { Route as GamesEquationBalanceRouteImport } from './routes/games/equation-balance'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 
 const ProfileRoute = ProfileRouteImport.update({
@@ -65,6 +67,16 @@ const GamesMagicGraphRoute = GamesMagicGraphRouteImport.update({
   path: '/games/magic-graph',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesFractionBuilderRoute = GamesFractionBuilderRouteImport.update({
+  id: '/games/fraction-builder',
+  path: '/games/fraction-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesEquationBalanceRoute = GamesEquationBalanceRouteImport.update({
+  id: '/games/equation-balance',
+  path: '/games/equation-balance',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   id: '/admin/analytics',
   path: '/admin/analytics',
@@ -78,6 +90,8 @@ export interface FileRoutesByFullPath {
   '/daily': typeof DailyRoute
   '/profile': typeof ProfileRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/games/equation-balance': typeof GamesEquationBalanceRoute
+  '/games/fraction-builder': typeof GamesFractionBuilderRoute
   '/games/magic-graph': typeof GamesMagicGraphRoute
   '/games/pattern-detective': typeof GamesPatternDetectiveRoute
   '/games/sequence-race': typeof GamesSequenceRaceRoute
@@ -90,6 +104,8 @@ export interface FileRoutesByTo {
   '/daily': typeof DailyRoute
   '/profile': typeof ProfileRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/games/equation-balance': typeof GamesEquationBalanceRoute
+  '/games/fraction-builder': typeof GamesFractionBuilderRoute
   '/games/magic-graph': typeof GamesMagicGraphRoute
   '/games/pattern-detective': typeof GamesPatternDetectiveRoute
   '/games/sequence-race': typeof GamesSequenceRaceRoute
@@ -103,6 +119,8 @@ export interface FileRoutesById {
   '/daily': typeof DailyRoute
   '/profile': typeof ProfileRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/games/equation-balance': typeof GamesEquationBalanceRoute
+  '/games/fraction-builder': typeof GamesFractionBuilderRoute
   '/games/magic-graph': typeof GamesMagicGraphRoute
   '/games/pattern-detective': typeof GamesPatternDetectiveRoute
   '/games/sequence-race': typeof GamesSequenceRaceRoute
@@ -117,6 +135,8 @@ export interface FileRouteTypes {
     | '/daily'
     | '/profile'
     | '/admin/analytics'
+    | '/games/equation-balance'
+    | '/games/fraction-builder'
     | '/games/magic-graph'
     | '/games/pattern-detective'
     | '/games/sequence-race'
@@ -129,6 +149,8 @@ export interface FileRouteTypes {
     | '/daily'
     | '/profile'
     | '/admin/analytics'
+    | '/games/equation-balance'
+    | '/games/fraction-builder'
     | '/games/magic-graph'
     | '/games/pattern-detective'
     | '/games/sequence-race'
@@ -141,6 +163,8 @@ export interface FileRouteTypes {
     | '/daily'
     | '/profile'
     | '/admin/analytics'
+    | '/games/equation-balance'
+    | '/games/fraction-builder'
     | '/games/magic-graph'
     | '/games/pattern-detective'
     | '/games/sequence-race'
@@ -154,6 +178,8 @@ export interface RootRouteChildren {
   DailyRoute: typeof DailyRoute
   ProfileRoute: typeof ProfileRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  GamesEquationBalanceRoute: typeof GamesEquationBalanceRoute
+  GamesFractionBuilderRoute: typeof GamesFractionBuilderRoute
   GamesMagicGraphRoute: typeof GamesMagicGraphRoute
   GamesPatternDetectiveRoute: typeof GamesPatternDetectiveRoute
   GamesSequenceRaceRoute: typeof GamesSequenceRaceRoute
@@ -225,6 +251,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesMagicGraphRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games/fraction-builder': {
+      id: '/games/fraction-builder'
+      path: '/games/fraction-builder'
+      fullPath: '/games/fraction-builder'
+      preLoaderRoute: typeof GamesFractionBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/equation-balance': {
+      id: '/games/equation-balance'
+      path: '/games/equation-balance'
+      fullPath: '/games/equation-balance'
+      preLoaderRoute: typeof GamesEquationBalanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/analytics': {
       id: '/admin/analytics'
       path: '/admin/analytics'
@@ -242,6 +282,8 @@ const rootRouteChildren: RootRouteChildren = {
   DailyRoute: DailyRoute,
   ProfileRoute: ProfileRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  GamesEquationBalanceRoute: GamesEquationBalanceRoute,
+  GamesFractionBuilderRoute: GamesFractionBuilderRoute,
   GamesMagicGraphRoute: GamesMagicGraphRoute,
   GamesPatternDetectiveRoute: GamesPatternDetectiveRoute,
   GamesSequenceRaceRoute: GamesSequenceRaceRoute,

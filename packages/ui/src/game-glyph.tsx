@@ -4,7 +4,9 @@ export type GameGlyphId =
   | "magic-graph"
   | "sequence-race"
   | "shape-architect"
-  | "pattern-detective";
+  | "pattern-detective"
+  | "fraction-builder"
+  | "equation-balance";
 
 interface GameGlyphProps {
   game: GameGlyphId;
@@ -111,11 +113,77 @@ function PatternDetectiveGlyph() {
   );
 }
 
+function FractionBuilderGlyph() {
+  return (
+    <>
+      {/* fraction bar */}
+      <line
+        x1="16"
+        y1="32"
+        x2="48"
+        y2="32"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      {/* numerator dot */}
+      <circle cx="32" cy="20" r="6" fill="currentColor" />
+      {/* denominator dots */}
+      <circle cx="24" cy="44" r="5" fill="currentColor" opacity="0.7" />
+      <circle cx="40" cy="44" r="5" fill="currentColor" opacity="0.7" />
+    </>
+  );
+}
+
+function EquationBalanceGlyph() {
+  return (
+    <>
+      {/* balance beam */}
+      <line
+        x1="12"
+        y1="32"
+        x2="52"
+        y2="32"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      {/* fulcrum triangle */}
+      <polygon points="32,32 27,44 37,44" fill="currentColor" opacity="0.6" />
+      {/* left pan */}
+      <circle cx="18" cy="28" r="5" fill="currentColor" />
+      {/* right pan */}
+      <circle cx="46" cy="28" r="5" fill="currentColor" opacity="0.5" />
+      {/* equals sign */}
+      <line
+        x1="28"
+        y1="18"
+        x2="36"
+        y2="18"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <line
+        x1="28"
+        y1="22"
+        x2="36"
+        y2="22"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </>
+  );
+}
+
 const glyphs: Record<GameGlyphId, () => React.JSX.Element> = {
   "magic-graph": MagicGraphGlyph,
   "sequence-race": SequenceRaceGlyph,
   "shape-architect": ShapeArchitectGlyph,
   "pattern-detective": PatternDetectiveGlyph,
+  "fraction-builder": FractionBuilderGlyph,
+  "equation-balance": EquationBalanceGlyph,
 };
 
 export function GameGlyph({ game, className, title }: GameGlyphProps) {

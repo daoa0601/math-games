@@ -38,7 +38,7 @@ importers:
         version: 1.4.1(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@cloudflare/vite-plugin':
         specifier: 1.36.4
-        version: 1.36.4(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(workerd@1.20260516.1)(wrangler@4.90.1)
+        version: 1.36.4(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(workerd@1.20260508.1)(wrangler@4.90.1)
       '@fontsource-variable/geist':
         specifier: 5.2.8
         version: 5.2.8
@@ -57,6 +57,12 @@ importers:
       '@math-games/effect-infra':
         specifier: workspace:*
         version: link:../../packages/effect-infra
+      '@math-games/game-equation-balance':
+        specifier: workspace:*
+        version: link:../../packages/game-equation-balance
+      '@math-games/game-fraction-builder':
+        specifier: workspace:*
+        version: link:../../packages/game-fraction-builder
       '@math-games/game-magic-graph':
         specifier: workspace:*
         version: link:../../packages/game-magic-graph
@@ -189,7 +195,7 @@ importers:
         version: 4.0.0-beta.66(effect@4.0.0-beta.66)
       alchemy:
         specifier: 2.0.0-beta.38
-        version: 2.0.0-beta.38(@effect/platform-node@4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1))(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@types/react@19.2.14)(drizzle-kit@1.0.0-rc.2)(drizzle-orm@1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76))(effect@4.0.0-beta.66)(typescript@6.0.3)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@4.1.6)(workerd@1.20260508.1)(ws@8.20.1)
+        version: 2.0.0-beta.38(@effect/platform-node@4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1))(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@types/react@19.2.14)(drizzle-kit@1.0.0-rc.2)(drizzle-orm@1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76))(effect@4.0.0-beta.66)(typescript@6.0.3)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@4.1.6)(workerd@1.20260516.1)(ws@8.20.1)
       drizzle-kit:
         specifier: 1.0.0-rc.2
         version: 1.0.0-rc.2
@@ -325,6 +331,38 @@ importers:
       tsup:
         specifier: 8.5.0
         version: 8.5.0(jiti@2.7.0)(postcss@8.5.14)(tsx@4.21.0)(typescript@6.0.3)(yaml@2.9.0)
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 4.1.6
+        version: 4.1.6(@types/node@22.19.19)(@vitest/coverage-v8@4.1.6)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@6.0.3))(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))
+
+  packages/game-equation-balance:
+    dependencies:
+      '@math-games/core':
+        specifier: workspace:*
+        version: link:../core
+      effect:
+        specifier: 4.0.0-beta.66
+        version: 4.0.0-beta.66
+    devDependencies:
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 4.1.6
+        version: 4.1.6(@types/node@22.19.19)(@vitest/coverage-v8@4.1.6)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@6.0.3))(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))
+
+  packages/game-fraction-builder:
+    dependencies:
+      '@math-games/core':
+        specifier: workspace:*
+        version: link:../core
+      effect:
+        specifier: 4.0.0-beta.66
+        version: 4.0.0-beta.66
+    devDependencies:
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -7381,9 +7419,9 @@ snapshots:
     optionalDependencies:
       workerd: 1.20260516.1
 
-  '@cloudflare/vite-plugin@1.36.4(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(workerd@1.20260516.1)(wrangler@4.90.1)':
+  '@cloudflare/vite-plugin@1.36.4(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(workerd@1.20260508.1)(wrangler@4.90.1)':
     dependencies:
-      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260516.1)
+      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260508.1)
       miniflare: 4.20260508.0
       unenv: 2.0.0-rc.24
       vite: 8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)
@@ -7473,17 +7511,17 @@ snapshots:
       '@distilled.cloud/core': 0.20.2(effect@4.0.0-beta.66)
       effect: 4.0.0-beta.66
 
-  '@distilled.cloud/cloudflare-rolldown-plugin@0.2.0(rolldown@1.0.0-rc.17)(workerd@1.20260508.1)':
+  '@distilled.cloud/cloudflare-rolldown-plugin@0.2.0(rolldown@1.0.0-rc.17)(workerd@1.20260516.1)':
     dependencies:
-      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260508.1)
+      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260516.1)
       rolldown: 1.0.0-rc.17
       unenv: 2.0.0-rc.24
     transitivePeerDependencies:
       - workerd
 
-  '@distilled.cloud/cloudflare-rolldown-plugin@0.3.0(rolldown@1.0.0-rc.17)(workerd@1.20260508.1)':
+  '@distilled.cloud/cloudflare-rolldown-plugin@0.3.0(rolldown@1.0.0-rc.17)(workerd@1.20260516.1)':
     dependencies:
-      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260508.1)
+      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260516.1)
       rolldown: 1.0.0-rc.17
       unenv: 2.0.0-rc.24
     transitivePeerDependencies:
@@ -7500,9 +7538,9 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@distilled.cloud/cloudflare-vite-plugin@0.2.0(rolldown@1.0.0-rc.17)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(workerd@1.20260508.1)':
+  '@distilled.cloud/cloudflare-vite-plugin@0.2.0(rolldown@1.0.0-rc.17)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(workerd@1.20260516.1)':
     dependencies:
-      '@distilled.cloud/cloudflare-rolldown-plugin': 0.2.0(rolldown@1.0.0-rc.17)(workerd@1.20260508.1)
+      '@distilled.cloud/cloudflare-rolldown-plugin': 0.2.0(rolldown@1.0.0-rc.17)(workerd@1.20260516.1)
       vite: 8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)
     transitivePeerDependencies:
       - rolldown
@@ -10169,16 +10207,16 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alchemy@2.0.0-beta.38(@effect/platform-node@4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1))(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@types/react@19.2.14)(drizzle-kit@1.0.0-rc.2)(drizzle-orm@1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76))(effect@4.0.0-beta.66)(typescript@6.0.3)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@4.1.6)(workerd@1.20260508.1)(ws@8.20.1):
+  alchemy@2.0.0-beta.38(@effect/platform-node@4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1))(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@types/react@19.2.14)(drizzle-kit@1.0.0-rc.2)(drizzle-orm@1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76))(effect@4.0.0-beta.66)(typescript@6.0.3)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@4.1.6)(workerd@1.20260516.1)(ws@8.20.1):
     dependencies:
       '@aws-sdk/credential-providers': 3.1048.0
       '@clack/prompts': 0.11.0
       '@distilled.cloud/aws': 0.20.2(effect@4.0.0-beta.66)
       '@distilled.cloud/axiom': 0.20.2(effect@4.0.0-beta.66)
       '@distilled.cloud/cloudflare': 0.20.2(effect@4.0.0-beta.66)
-      '@distilled.cloud/cloudflare-rolldown-plugin': 0.3.0(rolldown@1.0.0-rc.17)(workerd@1.20260508.1)
+      '@distilled.cloud/cloudflare-rolldown-plugin': 0.3.0(rolldown@1.0.0-rc.17)(workerd@1.20260516.1)
       '@distilled.cloud/cloudflare-runtime': 0.3.2(@distilled.cloud/cloudflare@0.20.2(effect@4.0.0-beta.66))(@effect/platform-node@4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1))(effect@4.0.0-beta.66)(typescript@6.0.3)
-      '@distilled.cloud/cloudflare-vite-plugin': 0.2.0(rolldown@1.0.0-rc.17)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(workerd@1.20260508.1)
+      '@distilled.cloud/cloudflare-vite-plugin': 0.2.0(rolldown@1.0.0-rc.17)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(workerd@1.20260516.1)
       '@distilled.cloud/core': 0.20.2(effect@4.0.0-beta.66)
       '@distilled.cloud/neon': 0.20.2(effect@4.0.0-beta.66)
       '@effect/vitest': 4.0.0-beta.66(effect@4.0.0-beta.66)(vitest@4.1.6)

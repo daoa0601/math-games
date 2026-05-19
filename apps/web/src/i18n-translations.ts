@@ -1,4 +1,6 @@
 import { coreTranslations } from '@math-games/core'
+import { equationBalanceModule } from '@math-games/game-equation-balance'
+import { fractionBuilderModule } from '@math-games/game-fraction-builder'
 import { magicGraphModule } from '@math-games/game-magic-graph'
 import { patternDetectiveModule } from '@math-games/game-pattern-detective'
 import { sequenceRaceModule } from '@math-games/game-sequence-race'
@@ -9,6 +11,8 @@ const GAME_MODULES = [
   sequenceRaceModule,
   shapeArchitectModule,
   patternDetectiveModule,
+  fractionBuilderModule,
+  equationBalanceModule,
 ] as const
 
 const gameEn = Object.assign(
