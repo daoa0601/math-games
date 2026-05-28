@@ -9,7 +9,7 @@ import {
   formatDifficulty,
   formatLevelName,
 } from '@/i18n-format'
-import { GameChrome, LevelNav, MobileGameHeader } from '@math-games/ui'
+import { GameDesktopShell, GameMobileShell, LevelNav } from '@math-games/ui'
 import { useNavigate } from '@tanstack/react-router'
 import { getHints } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
@@ -221,25 +221,24 @@ function MagicGraphRoute() {
   return (
     <>
       {/* ── DESKTOP LAYOUT (≥ md) ────────────────────────────── */}
-      <main className="theme-magic-graph mx-auto hidden min-h-screen max-w-5xl flex-col gap-6 px-4 py-6 md:flex md:gap-10 md:px-6 md:py-10">
-        <GameChrome
-          game="magic-graph"
-          levelTitle={formatLevelName(locale, config.name)}
-          meta={
-            <div className="flex items-center gap-2">
-              <LevelNav
-                currentIndex={configIndex}
-                total={availableConfigs.length}
-                onPrev={() => selectLevel(availableConfigs[configIndex - 1])}
-                onNext={() => selectLevel(availableConfigs[configIndex + 1])}
-              />
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
-                {t('game.target')} {config.targetSum}
-              </span>
-            </div>
-          }
-        />
-
+      <GameDesktopShell
+        game="magic-graph"
+        levelTitle={formatLevelName(locale, config.name)}
+        maxWidth="5xl"
+        meta={
+          <div className="flex items-center gap-2">
+            <LevelNav
+              currentIndex={configIndex}
+              total={availableConfigs.length}
+              onPrev={() => selectLevel(availableConfigs[configIndex - 1])}
+              onNext={() => selectLevel(availableConfigs[configIndex + 1])}
+            />
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
+              {t('game.target')} {config.targetSum}
+            </span>
+          </div>
+        }
+      >
         <section className="relative grid gap-6 md:grid-cols-[1.15fr_0.85fr]">
           <Confetti active={solved} />
           <Card className="game-card-bg relative overflow-hidden border-0">
@@ -480,37 +479,35 @@ function MagicGraphRoute() {
         </PracticeGeneratorSection>
 
         <LearnSection gameId="magic-graph" />
-      </main>
+      </GameDesktopShell>
 
       {/* ── MOBILE LAYOUT (< md) ─────────────────────────────── */}
-      <div className="theme-magic-graph body-noise flex min-h-screen flex-col md:hidden">
-        <MobileGameHeader
-          game="magic-graph"
-          levelTitle={`${t('stats.levels')} ${String(configIndex + 1).padStart(2, '0')} / ${String(availableConfigs.length).padStart(2, '0')}`}
-          backLabel={t('app.dashboard')}
-          onBack={() => void navigate({ to: '/' })}
-          meta={
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-1.5">
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                className="text-primary"
-              >
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 7v5l3 2" />
-              </svg>
-              <span className="font-display text-[0.8125rem] font-medium tabular-nums text-primary">
-                {timerLabel}
-              </span>
-            </div>
-          }
-        />
-
+      <GameMobileShell
+        game="magic-graph"
+        levelTitle={`${t('stats.levels')} ${String(configIndex + 1).padStart(2, '0')} / ${String(availableConfigs.length).padStart(2, '0')}`}
+        backLabel={t('app.dashboard')}
+        onBack={() => void navigate({ to: '/' })}
+        meta={
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-1.5">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              className="text-primary"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v5l3 2" />
+            </svg>
+            <span className="font-display text-[0.8125rem] font-medium tabular-nums text-primary">
+              {timerLabel}
+            </span>
+          </div>
+        }
+      >
         <main className="flex flex-1 flex-col overflow-auto">
           {/* Goal band */}
           <div className="flex items-start justify-between gap-3.5 px-5 pt-4 pb-3.5">
@@ -705,7 +702,7 @@ function MagicGraphRoute() {
             onDismiss={() => setErrorPopup(null)}
           />
         ) : null}
-      </div>
+      </GameMobileShell>
     </>
   )
 }

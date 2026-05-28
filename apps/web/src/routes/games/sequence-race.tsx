@@ -9,7 +9,7 @@ import {
   formatDifficulty,
   formatLevelName,
 } from '@/i18n-format'
-import { GameChrome, LevelNav, MobileGameHeader } from '@math-games/ui'
+import { GameDesktopShell, GameMobileShell, LevelNav } from '@math-games/ui'
 import { useNavigate } from '@tanstack/react-router'
 import { getHints } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
@@ -212,25 +212,24 @@ function SequenceRaceRoute() {
   return (
     <>
       {/* ── DESKTOP LAYOUT (≥ md) ────────────────────────────── */}
-      <main className="theme-sequence-race mx-auto hidden min-h-screen max-w-5xl flex-col gap-6 px-4 py-6 md:flex md:gap-10 md:px-6 md:py-10">
-        <GameChrome
-          game="sequence-race"
-          levelTitle={formatLevelName(locale, config.name)}
-          meta={
-            <div className="flex items-center gap-2">
-              <LevelNav
-                currentIndex={configIndex}
-                total={availableConfigs.length}
-                onPrev={() => selectLevel(availableConfigs[configIndex - 1])}
-                onNext={() => selectLevel(availableConfigs[configIndex + 1])}
-              />
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
-                {t('game.target')} {config.target}
-              </span>
-            </div>
-          }
-        />
-
+      <GameDesktopShell
+        game="sequence-race"
+        levelTitle={formatLevelName(locale, config.name)}
+        maxWidth="5xl"
+        meta={
+          <div className="flex items-center gap-2">
+            <LevelNav
+              currentIndex={configIndex}
+              total={availableConfigs.length}
+              onPrev={() => selectLevel(availableConfigs[configIndex - 1])}
+              onNext={() => selectLevel(availableConfigs[configIndex + 1])}
+            />
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
+              {t('game.target')} {config.target}
+            </span>
+          </div>
+        }
+      >
         <section className="relative grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
           <Confetti active={game.winner === 'player'} />
           <Card className="game-card-bg relative overflow-hidden border-0">
@@ -405,25 +404,23 @@ function SequenceRaceRoute() {
         </PracticeGeneratorSection>
 
         <LearnSection gameId="sequence-race" />
-      </main>
+      </GameDesktopShell>
 
       {/* ── MOBILE LAYOUT (< md) ─────────────────────────────── */}
-      <div className="theme-sequence-race body-noise flex min-h-screen flex-col md:hidden">
-        <MobileGameHeader
-          game="sequence-race"
-          levelTitle={`${t('stats.levels')} ${String(configIndex + 1).padStart(2, '0')} · ${formatLevelName(locale, config.name)}`}
-          backLabel={t('app.dashboard')}
-          onBack={() => void navigate({ to: '/' })}
-          meta={
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-1.5">
-              <span className="size-1.5 rounded-full bg-primary" />
-              <span className="font-display text-[0.8125rem] font-medium tabular-nums text-primary">
-                {timerLabel}
-              </span>
-            </div>
-          }
-        />
-
+      <GameMobileShell
+        game="sequence-race"
+        levelTitle={`${t('stats.levels')} ${String(configIndex + 1).padStart(2, '0')} · ${formatLevelName(locale, config.name)}`}
+        backLabel={t('app.dashboard')}
+        onBack={() => void navigate({ to: '/' })}
+        meta={
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-1.5">
+            <span className="size-1.5 rounded-full bg-primary" />
+            <span className="font-display text-[0.8125rem] font-medium tabular-nums text-primary">
+              {timerLabel}
+            </span>
+          </div>
+        }
+      >
         {/* Progress bar */}
         <div className="mx-4 mt-3.5 h-1.5 overflow-hidden rounded-full bg-primary/15">
           <div
@@ -578,7 +575,7 @@ function SequenceRaceRoute() {
             </p>
           ) : null}
         </main>
-      </div>
+      </GameMobileShell>
     </>
   )
 }

@@ -24,6 +24,8 @@ export { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 export { AnimatedCounter } from "./animated-counter";
 export { Confetti } from "./confetti";
 export { GameChrome } from "./game-chrome";
+export { GameDesktopShell } from "./game-desktop-shell";
+export { GameMobileShell } from "./game-mobile-shell";
 export { GameGlyph } from "./game-glyph";
 export type { GameGlyphId } from "./game-glyph";
 export { GamePattern } from "./game-pattern";

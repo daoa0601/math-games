@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { formatAchievementName, formatDifficulty } from '@/i18n-format'
 import {
   Confetti,
-  GameChrome,
+  GameDesktopShell,
+  GameMobileShell,
   LevelNav,
-  MobileGameHeader,
   useLevelSelection,
   useSaveStatus,
 } from '@math-games/ui'
@@ -119,20 +119,18 @@ function FractionBuilderRoute() {
   return (
     <>
       {/* ── DESKTOP LAYOUT (≥ md) ────────────────────────────── */}
-      <main className="theme-fraction-builder mx-auto hidden min-h-screen max-w-3xl flex-col gap-6 px-4 py-6 md:flex md:gap-10 md:px-6 md:py-10">
-        <GameChrome
-          game="fraction-builder"
-          levelTitle={t('gameTitle.fractionBuilder')}
-          meta={
-            <LevelNav
-              currentIndex={levelIndex}
-              total={availableConfigs.length}
-              onPrev={() => selectLevelRaw(availableConfigs[levelIndex - 1])}
-              onNext={() => selectLevelRaw(availableConfigs[levelIndex + 1])}
-            />
-          }
-        />
-
+      <GameDesktopShell
+        game="fraction-builder"
+        levelTitle={t('gameTitle.fractionBuilder')}
+        meta={
+          <LevelNav
+            currentIndex={levelIndex}
+            total={availableConfigs.length}
+            onPrev={() => selectLevelRaw(availableConfigs[levelIndex - 1])}
+            onNext={() => selectLevelRaw(availableConfigs[levelIndex + 1])}
+          />
+        }
+      >
         <LevelGrid
           items={availableConfigs.map((c) => ({
             id: c.id,
@@ -285,27 +283,25 @@ function FractionBuilderRoute() {
             )}
           </CardContent>
         </Card>
-      </main>
+      </GameDesktopShell>
 
       {/* ── MOBILE LAYOUT (< md) ─────────────────────────────── */}
-      <div className="theme-fraction-builder body-noise flex min-h-screen flex-col md:hidden">
-        <MobileGameHeader
-          game="fraction-builder"
-          levelTitle={`${t('stats.levels')} ${String(levelIndex + 1).padStart(2, '0')} / ${String(availableConfigs.length).padStart(2, '0')}`}
-          backLabel={t('app.dashboard')}
-          onBack={() => void navigate({ to: '/' })}
-          meta={
-            <div className="inline-flex items-center rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-1.5">
-              <span
-                className="eyebrow text-primary"
-                style={{ fontSize: '0.5rem', letterSpacing: '0.12em' }}
-              >
-                {modeLabel}
-              </span>
-            </div>
-          }
-        />
-
+      <GameMobileShell
+        game="fraction-builder"
+        levelTitle={`${t('stats.levels')} ${String(levelIndex + 1).padStart(2, '0')} / ${String(availableConfigs.length).padStart(2, '0')}`}
+        backLabel={t('app.dashboard')}
+        onBack={() => void navigate({ to: '/' })}
+        meta={
+          <div className="inline-flex items-center rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-1.5">
+            <span
+              className="eyebrow text-primary"
+              style={{ fontSize: '0.5rem', letterSpacing: '0.12em' }}
+            >
+              {modeLabel}
+            </span>
+          </div>
+        }
+      >
         <Confetti active={result === 'correct'} />
 
         <main className="flex flex-1 flex-col overflow-auto">
@@ -611,7 +607,7 @@ function FractionBuilderRoute() {
             )}
           </div>
         </main>
-      </div>
+      </GameMobileShell>
     </>
   )
 }
