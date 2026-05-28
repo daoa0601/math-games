@@ -30,6 +30,8 @@ const GAME_PATTERN: Record<string, PatternType> = {
   'sequence-race': 'arrows',
   'shape-architect': 'blueprint',
   'pattern-detective': 'magnifier',
+  'fraction-builder': 'grid',
+  'equation-balance': 'triangles',
 }
 
 export const Route = createFileRoute('/')({
