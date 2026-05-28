@@ -10,7 +10,6 @@ export const fractionBuilderModule = createGameModule({
   route: "/games/fraction-builder",
   title: "Fraction Builder",
   description: "Build, simplify, and compare fractions.",
-  published: false,
   difficulties,
   catalog,
   completionSchema: FractionBuilderCompletionSchema,
@@ -26,13 +25,16 @@ export const fractionBuilderModule = createGameModule({
       rarity: "common",
       unlockWhen: { completed: true },
     },
+    // "medium" ⇒ simplify mode and "hard" ⇒ compare mode: difficulty proxies
+    // for the level's mode (the shared achievement system has no mode
+    // predicate). __tests__/catalog.test.ts enforces that difficulty↔mode 1:1.
     {
       id: "fb_simplify_master",
       category: "fraction-builder",
       name: "Simplify Master",
       description: "Simplify a fraction correctly.",
       rarity: "rare",
-      unlockWhen: { completed: true },
+      unlockWhen: { completed: true, difficulty: "medium" },
     },
     {
       id: "fb_compare_expert",
@@ -40,7 +42,7 @@ export const fractionBuilderModule = createGameModule({
       name: "Comparison Expert",
       description: "Correctly compare two fractions.",
       rarity: "rare",
-      unlockWhen: { completed: true },
+      unlockWhen: { completed: true, difficulty: "hard" },
     },
   ],
 });

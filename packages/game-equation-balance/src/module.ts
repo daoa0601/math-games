@@ -10,7 +10,6 @@ export const equationBalanceModule = createGameModule({
   route: "/games/equation-balance",
   title: "Equation Balance",
   description: "Find the missing number that balances the equation.",
-  published: false,
   difficulties,
   catalog,
   completionSchema: EquationBalanceCompletionSchema,

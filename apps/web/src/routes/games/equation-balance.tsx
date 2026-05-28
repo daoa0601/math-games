@@ -17,7 +17,10 @@ import { Card, CardContent, CardHeader } from '@math-games/ui'
 import { useT } from '@math-games/ui'
 import { LevelGrid } from '@/games/level-grid'
 import { validateLevelSearch } from '@/games/level-search'
-import { validate, formatEquation } from '@math-games/game-equation-balance'
+import {
+  validate,
+  formatEquationTokens,
+} from '@math-games/game-equation-balance'
 import {
   getEquationBalanceCatalog,
   recordEquationBalanceProgress,
@@ -47,7 +50,6 @@ function EquationBalanceRoute() {
 
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
-  const [feedback, setFeedback] = useState<string | null>(null)
   const { saveStatus, setSaveStatus, clearSaveStatus } = useSaveStatus()
 
   const {
@@ -62,7 +64,6 @@ function EquationBalanceRoute() {
     onReset: () => {
       setSelectedAnswer(null)
       setResult(null)
-      setFeedback(null)
       clearSaveStatus()
     },
   })
@@ -80,9 +81,6 @@ function EquationBalanceRoute() {
     const completion = { answer: selectedAnswer }
     const validation = validate(level, completion)
     setResult(validation.completed ? 'correct' : 'wrong')
-    if (!validation.completed && validation.feedback?.kind === 'generic') {
-      setFeedback(validation.feedback.message)
-    }
 
     const res = await runServerAction(
       () =>
@@ -154,7 +152,9 @@ function EquationBalanceRoute() {
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-center font-mono text-2xl tracking-wide">
-              {formatEquation(level)}
+              {formatEquationTokens(level)
+                .map((token) => token.text)
+                .join(' ')}
             </p>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -208,11 +208,6 @@ function EquationBalanceRoute() {
                     ? t('stats.solved')
                     : t('game.tryAgain')}
                 </p>
-                {feedback && (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {feedback}
-                  </p>
-                )}
                 {saveStatus && (
                   <p className="mt-1 text-sm text-muted-foreground">
                     {saveStatus}
@@ -266,42 +261,40 @@ function EquationBalanceRoute() {
           <section className="game-card-bg relative mx-4 flex flex-col items-center gap-3.5 overflow-hidden rounded-[1.375rem] border border-border/70 px-4.5 py-5 shadow-(--card-shadow-long)">
             {/* Equation in mono */}
             <p className="font-mono inline-flex items-baseline gap-2 tabular-nums text-[1.75rem] font-medium tracking-tight">
-              {formatEquation(level)
-                .split(' ')
-                .map((tok, i) => {
-                  if (tok === '?') {
-                    return (
-                      <span
-                        key={i}
-                        className="font-display inline-flex size-9 translate-y-0.5 items-center justify-center rounded-[0.625rem] border border-dashed border-primary/50 bg-primary/[0.06] text-[1.375rem] font-medium text-primary"
-                      >
-                        ?
-                      </span>
-                    )
-                  }
-                  if (['+', '-', '×', '*', '='].includes(tok)) {
-                    return (
-                      <span key={i} className="text-muted-foreground">
-                        {tok === '*' ? '×' : tok}
-                      </span>
-                    )
-                  }
-                  if (parseInt(tok, 10) === level.rightSide) {
-                    return (
-                      <span key={i} className="text-primary">
-                        {tok}
-                      </span>
-                    )
-                  }
-                  return <span key={i}>{tok}</span>
-                })}
+              {formatEquationTokens(level).map((token, i) => {
+                if (token.role === 'unknown') {
+                  return (
+                    <span
+                      key={i}
+                      className="font-display inline-flex size-9 translate-y-0.5 items-center justify-center rounded-[0.625rem] border border-dashed border-primary/50 bg-primary/[0.06] text-[1.375rem] font-medium text-primary"
+                    >
+                      {token.text}
+                    </span>
+                  )
+                }
+                if (token.role === 'operator' || token.role === 'equals') {
+                  return (
+                    <span key={i} className="text-muted-foreground">
+                      {token.text}
+                    </span>
+                  )
+                }
+                if (token.role === 'rhs') {
+                  return (
+                    <span key={i} className="text-primary">
+                      {token.text}
+                    </span>
+                  )
+                }
+                return <span key={i}>{token.text}</span>
+              })}
             </p>
 
             {/* Live feedback chip */}
             {result === 'wrong' && selectedAnswer !== null ? (
               <span className="font-mono inline-flex items-center gap-1.5 rounded-full border border-line-incorrect/25 bg-line-incorrect/[0.08] px-3 py-1.5 text-[0.6875rem] font-medium text-line-incorrect">
                 <span>✗</span>
-                <span>{feedback ?? t('game.tryAgain')}</span>
+                <span>{t('game.tryAgain')}</span>
               </span>
             ) : result === 'correct' ? (
               <span className="font-mono inline-flex items-center gap-1.5 rounded-full border border-line-correct/30 bg-line-correct/10 px-3 py-1.5 text-[0.6875rem] font-medium text-line-correct">
@@ -369,7 +362,6 @@ function EquationBalanceRoute() {
               onClick={() => {
                 setSelectedAnswer(null)
                 setResult(null)
-                setFeedback(null)
               }}
               className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background text-[0.8125rem] font-medium text-foreground"
             >

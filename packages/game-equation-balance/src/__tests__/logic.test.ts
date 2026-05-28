@@ -1,6 +1,11 @@
 import { describe, expect, test } from "vitest";
 import type { GameFeedback } from "@math-games/core";
-import { validate, substituteAndEvaluate, formatEquation } from "../logic";
+import {
+  validate,
+  substituteAndEvaluate,
+  formatEquation,
+  formatEquationTokens,
+} from "../logic";
 import type { EquationConfig } from "../catalog";
 import { evaluate } from "../catalog";
 
@@ -44,6 +49,52 @@ describe("formatEquation", () => {
       choices: [],
     };
     expect(formatEquation(level)).toBe("2 * ? + 1 = 9");
+  });
+});
+
+describe("formatEquationTokens", () => {
+  test("tags unknown, operators, and right-hand side by role", () => {
+    const level: EquationConfig = {
+      id: "t",
+      difficulty: "medium",
+      mode: "one-step",
+      leftTerms: [2, "?", 1],
+      leftOps: ["*", "+"],
+      rightSide: 9,
+      answer: 4,
+      choices: [],
+    };
+    expect(formatEquationTokens(level)).toEqual([
+      { text: "2", role: "operand" },
+      { text: "×", role: "operator" },
+      { text: "?", role: "unknown" },
+      { text: "+", role: "operator" },
+      { text: "1", role: "operand" },
+      { text: "=", role: "equals" },
+      { text: "9", role: "rhs" },
+    ]);
+  });
+
+  test("a left operand equal to the right side stays operand, not rhs", () => {
+    const level: EquationConfig = {
+      id: "t",
+      difficulty: "hard",
+      mode: "two-step",
+      leftTerms: [5, "?", 5],
+      leftOps: ["*", "-"],
+      rightSide: 5,
+      answer: 2,
+      choices: [],
+    };
+    expect(formatEquationTokens(level).map((token) => token.role)).toEqual([
+      "operand",
+      "operator",
+      "unknown",
+      "operator",
+      "operand",
+      "equals",
+      "rhs",
+    ]);
   });
 });
 

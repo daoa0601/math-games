@@ -39,10 +39,15 @@ relitigate decisions documented there without discussing with the user first.
 
 ## Project Scope
 
-This repository root is the Math Games app. There is no nested app wrapper.
+This is a Turborepo monorepo (pnpm workspaces). The TanStack Start app lives in
+`apps/web/`; the shared core, Drizzle layer, Effect service domains, UI, and the
+games live in `packages/*`; IaC lives in `infra/`.
 
-Portable game logic lives under `src/games/**/logic` and is imported through
-the app-local `@/*` or `#/*` aliases.
+Each game is a framework-free package at `packages/game-<name>/src` (logic,
+catalog, module, schema, translations, tests) depending only on `@math-games/core`.
+Server functions (`createServerFn`, in `*.functions.ts`) and routes stay in
+`apps/web`, which wires games through `apps/web/src/games/registry.ts`. Inside
+`apps/web`, the `@/*` and `#/*` aliases both resolve to `apps/web/src`.
 
 ## Stack
 
@@ -51,6 +56,8 @@ the app-local `@/*` or `#/*` aliases.
 - Drizzle ORM with Cloudflare D1.
 - Effect at server/runtime boundaries where workflows touch IO.
 - Alchemy v2 for Cloudflare D1 and Worker infrastructure.
+- Turborepo + pnpm workspaces. Hybrid build: `core`/`db`/`effect-*` built with
+  tsup; `game-*`/`ui` are source packages Vite resolves directly.
 - pnpm only.
 
 ## Commands
@@ -82,8 +89,12 @@ Canonical game routes are:
 - `/games/magic-graph`
 - `/games/sequence-race`
 - `/games/shape-architect`
+- `/games/pattern-detective`
+- `/games/fraction-builder`
+- `/games/equation-balance`
 
-Old root game paths such as `/magic-graph`, `/sequence-race`, and
+The registry (`apps/web/src/games/registry.ts`) is the source of truth for the
+game list. Old root game paths such as `/magic-graph`, `/sequence-race`, and
 `/shape-architect` must stay rejected. Do not add redirects, aliases, or
 fallback routes for them.
 

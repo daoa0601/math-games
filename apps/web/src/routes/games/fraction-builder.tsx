@@ -49,7 +49,6 @@ function FractionBuilderRoute() {
   const [denominator, setDenominator] = useState<number | null>(null)
   const [compareAnswer, setCompareAnswer] = useState<string | null>(null)
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
-  const [feedback, setFeedback] = useState<string | null>(null)
   const { saveStatus, setSaveStatus, clearSaveStatus } = useSaveStatus()
 
   const {
@@ -73,7 +72,6 @@ function FractionBuilderRoute() {
     setDenominator(null)
     setCompareAnswer(null)
     setResult(null)
-    setFeedback(null)
     clearSaveStatus()
   }
 
@@ -90,9 +88,6 @@ function FractionBuilderRoute() {
 
     const validation = validate(level, completion)
     setResult(validation.completed ? 'correct' : 'wrong')
-    if (!validation.completed && validation.feedback?.kind === 'generic') {
-      setFeedback(validation.feedback.message)
-    }
 
     const res = await runServerAction(
       () =>
@@ -203,7 +198,11 @@ function FractionBuilderRoute() {
             ) : (
               <div className="flex items-center justify-center gap-4">
                 <div className="flex flex-col items-center gap-1">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div
+                    role="group"
+                    aria-label={t('fb.numerator')}
+                    className="grid grid-cols-2 gap-2"
+                  >
                     {level.choices.map((n) => (
                       <Button
                         key={`n-${n}`}
@@ -217,7 +216,11 @@ function FractionBuilderRoute() {
                     ))}
                   </div>
                   <div className="h-0.5 w-16 bg-foreground" />
-                  <div className="grid grid-cols-2 gap-2">
+                  <div
+                    role="group"
+                    aria-label={t('fb.denominator')}
+                    className="grid grid-cols-2 gap-2"
+                  >
                     {level.choices.map((n) => (
                       <Button
                         key={`d-${n}`}
@@ -270,11 +273,6 @@ function FractionBuilderRoute() {
                     ? t('stats.solved')
                     : t('game.tryAgain')}
                 </p>
-                {feedback && (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {feedback}
-                  </p>
-                )}
                 {saveStatus && (
                   <p className="mt-1 text-sm text-muted-foreground">
                     {saveStatus}
@@ -574,11 +572,6 @@ function FractionBuilderRoute() {
             </div>
           )}
 
-          {feedback && result === 'wrong' ? (
-            <p className="mx-4 mt-3 text-center text-[0.6875rem] text-destructive">
-              {feedback}
-            </p>
-          ) : null}
           {saveStatus ? (
             <p className="mx-4 mt-2 text-center text-[0.6875rem] text-muted-foreground">
               {saveStatus}
