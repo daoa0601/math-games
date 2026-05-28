@@ -2,7 +2,12 @@ import type { DailyChallengePick, GameFeedback } from "@math-games/core";
 import { createGameModule } from "@math-games/core";
 import { shapeArchitectTranslations } from "./translations";
 
-import { canPlacePiece, checkSolved, initializeGrid, placePiece } from "./logic";
+import {
+  canPlacePiece,
+  checkSolved,
+  initializeGrid,
+  placePiece,
+} from "./logic";
 import type { LevelConfig, PlacedPiece, Rotation3D } from "./logic";
 import { ShapeArchitectCompletion as ShapeArchitectCompletionSchema } from "./schema";
 import {
@@ -32,7 +37,11 @@ const cachedCatalog = getShapeArchitectCatalog();
 function getDailyPick(hash: number): DailyChallengePick {
   const { configs } = cachedCatalog;
   const config = configs[hash % configs.length];
-  return { levelId: config.id, title: config.name, difficulty: config.difficulty };
+  return {
+    levelId: config.id,
+    title: config.name,
+    difficulty: config.difficulty,
+  };
 }
 
 function resolveLevelConfig(levelId: string): LevelConfig | null {
@@ -100,7 +109,8 @@ function validateGameState(
 
     const piece = level.pieces.find((c) => c.id === pieceId);
     if (!piece) return null;
-    if (!canPlacePiece(grid, piece, position, rotation, level.gridSize)) return null;
+    if (!canPlacePiece(grid, piece, position, rotation, level.gridSize))
+      return null;
 
     grid = placePiece(grid, piece, position, rotation);
     usedPieceIds.add(pieceId);
@@ -113,7 +123,10 @@ function validateGameState(
     return {
       completed,
       moves,
-      feedback: { kind: "generic" as const, message: "Not all target cells are covered." },
+      feedback: {
+        kind: "generic" as const,
+        message: "Not all target cells are covered.",
+      },
     };
   }
 

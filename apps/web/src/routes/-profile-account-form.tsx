@@ -2,7 +2,14 @@ import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 
-import { Button, Card, CardContent, CardHeader, CardTitle, useT } from '@math-games/ui'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  useT,
+} from '@math-games/ui'
 import { updatePlayerProfile } from '@/player/profile.functions'
 import type { PlayerProfileInput } from '@/player/profile.schema'
 import type { PlayerProfileRecord } from '@/player/profile.server'
@@ -27,7 +34,10 @@ interface ProfileAccountFormProps {
   onSaved: (profile: PlayerProfileRecord) => void
 }
 
-export function ProfileAccountForm({ initialProfile, onSaved }: ProfileAccountFormProps) {
+export function ProfileAccountForm({
+  initialProfile,
+  onSaved,
+}: ProfileAccountFormProps) {
   const t = useT()
   const saveProfile = useServerFn(updatePlayerProfile)
   const [status, setStatus] = useState<string | null>(null)

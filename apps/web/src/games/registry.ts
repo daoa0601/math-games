@@ -30,7 +30,8 @@ export const registry = Object.fromEntries(
 ) as { [K in GameId]: Extract<(typeof GAME_MODULES)[number], { id: K }> }
 
 /** All modules as an array (same as GAME_MODULES but typed via registry). */
-export const gameModules = GAME_MODULES as readonly (typeof GAME_MODULES)[number][]
+export const gameModules =
+  GAME_MODULES as readonly (typeof GAME_MODULES)[number][]
 
 /** Published modules only. */
 export const publishedGameModules = PUBLISHED_GAME_MODULES

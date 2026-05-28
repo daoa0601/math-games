@@ -19,7 +19,11 @@ import { Button } from '@math-games/ui'
 import { Card, CardContent } from '@math-games/ui'
 import { Separator } from '@math-games/ui'
 import { ToggleGroup, ToggleGroupItem } from '@math-games/ui'
-import { useGameSession, useLevelSelection, useSaveStatus } from '@math-games/ui'
+import {
+  useGameSession,
+  useLevelSelection,
+  useSaveStatus,
+} from '@math-games/ui'
 import { validateLevelSearch } from '@/games/level-search'
 import {
   DEFAULT_ROTATION,
@@ -89,25 +93,30 @@ function ShapeArchitectRoute() {
   const validateMove = useServerFn(validateShapeArchitectMove)
   const { saveStatus, setSaveStatus, clearSaveStatus } = useSaveStatus()
 
-  const { config, configIndex, availableConfigs, selectLevel, addAndSelectConfig } =
-    useLevelSelection({
-      configs,
-      initialConfigId,
-      searchLevel,
-      onReset: (newConfig) => {
-        setServerState(createInitialServerState(newConfig))
-        setPlacements([])
-        setOptimisticGrid(null)
-        setPendingAction(null)
-        setSelectedPieceId(null)
-        setPlacementRotation(DEFAULT_ROTATION)
-        setErrorPopup(null)
-        setViewMode('2d')
-        setPendingPosition(null)
-        clearSaveStatus()
-        solvedProgressKeyRef.current = null
-      },
-    })
+  const {
+    config,
+    configIndex,
+    availableConfigs,
+    selectLevel,
+    addAndSelectConfig,
+  } = useLevelSelection({
+    configs,
+    initialConfigId,
+    searchLevel,
+    onReset: (newConfig) => {
+      setServerState(createInitialServerState(newConfig))
+      setPlacements([])
+      setOptimisticGrid(null)
+      setPendingAction(null)
+      setSelectedPieceId(null)
+      setPlacementRotation(DEFAULT_ROTATION)
+      setErrorPopup(null)
+      setViewMode('2d')
+      setPendingPosition(null)
+      clearSaveStatus()
+      solvedProgressKeyRef.current = null
+    },
+  })
 
   const [serverState, setServerState] = useState(() =>
     createInitialServerState(config),

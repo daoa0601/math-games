@@ -12,15 +12,10 @@ import type {
   SolutionStep,
 } from '@math-games/game-shape-architect'
 
-export function buildSolvedGrid(
-  config: LevelConfig,
-  solution: SolutionStep[],
-) {
+export function buildSolvedGrid(config: LevelConfig, solution: SolutionStep[]) {
   return solution.reduce((grid, step) => {
     const piece = config.pieces.find((c) => c.id === step.pieceId)
-    return piece
-      ? placePiece(grid, piece, step.position, step.rotation)
-      : grid
+    return piece ? placePiece(grid, piece, step.position, step.rotation) : grid
   }, initializeGrid(config))
 }
 

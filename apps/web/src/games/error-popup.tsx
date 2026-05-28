@@ -6,7 +6,11 @@ interface ErrorPopupProps {
   onDismiss: () => void
 }
 
-export function ErrorPopup({ message, dismissLabel, onDismiss }: ErrorPopupProps) {
+export function ErrorPopup({
+  message,
+  dismissLabel,
+  onDismiss,
+}: ErrorPopupProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 p-4 animate-slide-up-fade"

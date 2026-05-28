@@ -38,7 +38,11 @@ const cachedCatalog = getMagicGraphCatalog();
 function getDailyPick(hash: number): DailyChallengePick {
   const { configs } = cachedCatalog;
   const config = configs[hash % configs.length];
-  return { levelId: config.id, title: config.name, difficulty: config.difficulty };
+  return {
+    levelId: config.id,
+    title: config.name,
+    difficulty: config.difficulty,
+  };
 }
 
 function resolveLevelConfig(levelId: string): PuzzleConfig | null {
@@ -70,7 +74,9 @@ function validateGameState(
   const usedNumbers = new Set<number>();
 
   for (const node of level.nodes) {
-    const value = Object.hasOwn(nodeValues, node.id) ? nodeValues[node.id] : null;
+    const value = Object.hasOwn(nodeValues, node.id)
+      ? nodeValues[node.id]
+      : null;
 
     if (node.isFixed) {
       if (value !== null && value !== node.value) return null;

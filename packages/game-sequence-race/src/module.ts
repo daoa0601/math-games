@@ -7,10 +7,18 @@ import type {
 import { createGameModule } from "@math-games/core";
 import { sequenceRaceTranslations } from "./translations";
 
-import { applyMove, createGameState, getValidMoves, presetGames } from "./logic";
+import {
+  applyMove,
+  createGameState,
+  getValidMoves,
+  presetGames,
+} from "./logic";
 import type { GameConfig, HistoryEntry } from "./logic";
 import { SequenceRaceCompletion as SequenceRaceCompletionSchema } from "./schema";
-import { getSequenceRaceCatalog, getSequenceRacePracticeConfig } from "./catalog";
+import {
+  getSequenceRaceCatalog,
+  getSequenceRacePracticeConfig,
+} from "./catalog";
 import type { SequenceRaceDifficulty } from "./catalog";
 
 const difficulties = ["easy", "medium", "hard"] as const;
@@ -33,7 +41,11 @@ const cachedCatalog = getSequenceRaceCatalog();
 
 function getDailyPick(hash: number): DailyChallengePick {
   const config = presetGames[hash % presetGames.length];
-  return { levelId: config.id, title: config.name, difficulty: config.difficulty };
+  return {
+    levelId: config.id,
+    title: config.name,
+    difficulty: config.difficulty,
+  };
 }
 
 function resolveLevelConfig(levelId: string): GameConfig | null {

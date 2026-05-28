@@ -234,10 +234,7 @@ function ProfileRoute() {
         </section>
 
         <section className="mt-8 grid gap-6 md:grid-cols-2">
-          <ProfileAccountForm
-            initialProfile={profile}
-            onSaved={setProfile}
-          />
+          <ProfileAccountForm initialProfile={profile} onSaved={setProfile} />
           <ProfilePortability
             achievementIds={achievementIds}
             progressRows={progressRows}

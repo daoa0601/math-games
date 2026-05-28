@@ -40,13 +40,15 @@ export function useLevelSelection<TConfig extends { id: string }>({
   const [availableConfigs, setAvailableConfigs] = useState(configs);
 
   const requestedId = searchLevel
-    ? (availableConfigs.find((c) => c.id === searchLevel)?.id ?? initialConfigId)
+    ? (availableConfigs.find((c) => c.id === searchLevel)?.id ??
+      initialConfigId)
     : undefined;
 
   const [selectedId, setSelectedId] = useState(requestedId ?? initialConfigId);
 
   const config = useMemo(
-    () => availableConfigs.find((c) => c.id === selectedId) ?? availableConfigs[0],
+    () =>
+      availableConfigs.find((c) => c.id === selectedId) ?? availableConfigs[0],
     [availableConfigs, selectedId],
   );
 
@@ -68,25 +70,19 @@ export function useLevelSelection<TConfig extends { id: string }>({
     onResetRef.current?.(newConfig);
   }, [requestedId, selectedId, availableConfigs]);
 
-  const selectLevel = useCallback(
-    (next: TConfig) => {
-      setSelectedId(next.id);
-      onResetRef.current?.(next);
-    },
-    [],
-  );
+  const selectLevel = useCallback((next: TConfig) => {
+    setSelectedId(next.id);
+    onResetRef.current?.(next);
+  }, []);
 
-  const addAndSelectConfig = useCallback(
-    (next: TConfig) => {
-      setAvailableConfigs((current) => [
-        next,
-        ...current.filter((c) => c.id !== next.id),
-      ]);
-      setSelectedId(next.id);
-      onResetRef.current?.(next);
-    },
-    [],
-  );
+  const addAndSelectConfig = useCallback((next: TConfig) => {
+    setAvailableConfigs((current) => [
+      next,
+      ...current.filter((c) => c.id !== next.id),
+    ]);
+    setSelectedId(next.id);
+    onResetRef.current?.(next);
+  }, []);
 
   return {
     config,

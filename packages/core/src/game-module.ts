@@ -185,11 +185,17 @@ function evaluateAchievementsByCondition(
     .filter((a) => {
       if (!a.unlockWhen || unlocked.has(a.id)) return false;
       const c = a.unlockWhen;
-      if (c.completed !== undefined && ctx.completed !== c.completed) return false;
-      if (c.difficulty !== undefined && ctx.difficulty !== c.difficulty) return false;
-      if (c.isOptimalSolution !== undefined && ctx.isOptimalSolution !== c.isOptimalSolution)
+      if (c.completed !== undefined && ctx.completed !== c.completed)
         return false;
-      if (c.wasWinner !== undefined && ctx.wasWinner !== c.wasWinner) return false;
+      if (c.difficulty !== undefined && ctx.difficulty !== c.difficulty)
+        return false;
+      if (
+        c.isOptimalSolution !== undefined &&
+        ctx.isOptimalSolution !== c.isOptimalSolution
+      )
+        return false;
+      if (c.wasWinner !== undefined && ctx.wasWinner !== c.wasWinner)
+        return false;
       return true;
     })
     .map((a) => a.id);
@@ -258,7 +264,11 @@ export function createGameModule<
     input.getDailyPick ??
     ((hash: number) => {
       const level = catalog[hash % catalog.length];
-      return { levelId: level.id, title: level.id, difficulty: level.difficulty };
+      return {
+        levelId: level.id,
+        title: level.id,
+        difficulty: level.difficulty,
+      };
     });
 
   const validateGameState =
@@ -304,5 +314,8 @@ export function createGameModule<
     }),
   };
 
-  return module as GameModule<TConfig> & { readonly id: TId; readonly route: TRoute };
+  return module as GameModule<TConfig> & {
+    readonly id: TId;
+    readonly route: TRoute;
+  };
 }
