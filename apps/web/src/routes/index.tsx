@@ -14,6 +14,7 @@ import {
   PlayerAvatar,
   Progress,
   ThemeToggle,
+  useHydrated,
   useLocale,
   useT,
   Wordmark,
@@ -82,6 +83,21 @@ function Home() {
   const dailyModule = registry[dailyChallenge.gameId as keyof typeof registry]
   const dailyTo = dailyModule?.route ?? `/games/${dailyChallenge.gameId}`
   const displayName = overview.profile.displayName
+
+  // Compute the local date only after mount: rendering it during SSR (UTC) and
+  // again on the client (local timezone) can disagree on the calendar day near
+  // midnight and trip a hydration mismatch.
+  const hydrated = useHydrated()
+  const today = hydrated
+    ? new Date()
+        .toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
+          weekday: 'long',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })
+        .toUpperCase()
+    : ''
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -214,14 +230,7 @@ function Home() {
               className="eyebrow tabular-nums"
               style={{ fontSize: '0.625rem' }}
             >
-              {new Date()
-                .toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                })
-                .toUpperCase()}
+              {today}
             </p>
             <h1 className="font-display mt-2 text-[1.875rem] font-medium leading-[1.05] tracking-tight">
               {t('home.greeting').replace('{name}', displayName.split(' ')[0])}{' '}

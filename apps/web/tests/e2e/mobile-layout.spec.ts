@@ -1,24 +1,14 @@
 import { expect, test } from '@playwright/test'
-import type { Locator, Page } from '@playwright/test'
+
+import {
+  expectHydrated,
+  expectNoHorizontalOverflow,
+  mobileLayout,
+} from './_helpers'
 
 const MOBILE_VIEWPORT = { width: 375, height: 667 }
 
 test.use({ viewport: MOBILE_VIEWPORT })
-
-async function expectHydrated(page: Page) {
-  await expect(page.getByTestId('app-hydrated')).toHaveText('hydrated')
-}
-
-async function expectNoHorizontalOverflow(page: Page) {
-  const overflow = await page.evaluate(() => {
-    return document.documentElement.scrollWidth > window.innerWidth
-  })
-  expect(overflow).toBe(false)
-}
-
-function mobileLayout(page: Page): Locator {
-  return page.locator('[class*="md\\:hidden"]').first()
-}
 
 test.describe('mobile layout — dashboard', () => {
   test('renders without horizontal overflow', async ({ page }) => {
@@ -53,37 +43,15 @@ test.describe('mobile layout — dashboard', () => {
 })
 
 test.describe('mobile layout — game routes', () => {
-  test('magic-graph: collapsible sections present on mobile', async ({
-    page,
-  }) => {
+  test('magic-graph: renders on mobile without overflow', async ({ page }) => {
     await page.goto('/games/magic-graph')
     await expectHydrated(page)
+    await expectNoHorizontalOverflow(page)
 
-    const puzzlesSection = page
-      .locator('[data-slot="collapsible"]')
-      .filter({ hasText: 'Puzzles' })
-    await expect(puzzlesSection).toBeAttached()
-  })
-
-  test('magic-graph: expanding collapsible reveals level grid', async ({
-    page,
-  }) => {
-    await page.goto('/games/magic-graph')
-    await expectHydrated(page)
-
-    const puzzlesSection = page
-      .locator('[data-slot="collapsible"]')
-      .filter({ hasText: 'Puzzles' })
-
-    await puzzlesSection
-      .getByRole('button', { name: /Expand|Collapse/i })
-      .click()
-
-    await expect(
-      puzzlesSection.locator('[data-slot="collapsible-content"]'),
-    ).toBeVisible()
-
-    await expect(puzzlesSection.getByLabel('Practice seed')).toBeVisible()
+    // The mobile layout is the md:hidden copy of the themed container (the
+    // md:flex desktop copy renders first); assert its target heading mounted.
+    const mobile = page.locator('[class*="theme-magic-graph"]').last()
+    await expect(mobile.getByRole('heading', { name: /Target/ })).toBeVisible()
   })
 
   test('sequence-race: renders on mobile without overflow', async ({

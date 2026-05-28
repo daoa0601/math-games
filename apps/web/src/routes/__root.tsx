@@ -1,12 +1,12 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import { Component, useEffect, useState } from 'react'
+import { Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
 
 import { formatGameTitle } from '@/i18n-format'
 import { translations } from '@/i18n-translations'
-import { LocaleProvider, useLocale } from '@math-games/ui'
+import { LocaleProvider, useHydrated, useLocale } from '@math-games/ui'
 import { useT } from '@math-games/ui'
 import { PUBLISHED_GAME_MODULES } from '@/games/registry'
 import geistCss from '@fontsource-variable/geist/index.css?url'
@@ -163,11 +163,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 }
 
 function HydrationMarker() {
-  const [hydrated, setHydrated] = useState(false)
-
-  useEffect(() => {
-    setHydrated(true)
-  }, [])
+  const hydrated = useHydrated()
 
   return (
     <span data-testid="app-hydrated" hidden>

@@ -1,29 +1,16 @@
 import { expect, test } from '@playwright/test'
-import type { Locator, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
-function collectRuntimeErrors(page: Page) {
-  const errors: string[] = []
+import {
+  collectRuntimeErrors,
+  desktopLayout,
+  expectHydrated,
+  expectNoRuntimeErrors,
+} from './_helpers'
 
-  page.on('console', (message) => {
-    if (message.type() === 'error') {
-      errors.push(message.text())
-    }
-  })
-
-  page.on('pageerror', (error) => {
-    errors.push(error.message)
-  })
-
-  return errors
-}
-
-function expectNoRuntimeErrors(errors: string[]) {
-  expect(errors).toEqual([])
-}
-
-async function expectHydrated(page: Page) {
-  await expect(page.getByTestId('app-hydrated')).toHaveText('hydrated')
-}
+// The daily challenge links to whichever game today's rotation selected; assert
+// the structural contract (a /games/<slug> route) rather than enumerating slugs.
+const GAME_PATH_RE = /\/games\/[a-z-]+/
 
 async function expectPlayerCookie(page: Page) {
   const cookies = await page.context().cookies()
@@ -33,10 +20,6 @@ async function expectPlayerCookie(page: Page) {
     /^player_[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
   )
   expect(playerCookie?.httpOnly).toBe(true)
-}
-
-function desktopLayout(page: Page): Locator {
-  return page.locator('[class*="md\\:flex"]').first()
 }
 
 test('old root game routes are rejected', async ({ page }) => {
@@ -69,10 +52,7 @@ test('dashboard and daily expose standalone route links', async ({ page }) => {
 
   const dailyGameLink = desktopLayout(page).locator('a[href^="/games/"]')
 
-  await expect(dailyGameLink).toHaveAttribute(
-    'href',
-    /^\/games\/(magic-graph|sequence-race|shape-architect|pattern-detective)/,
-  )
+  await expect(dailyGameLink).toHaveAttribute('href', GAME_PATH_RE)
   const dailyGameHref = await dailyGameLink.getAttribute('href')
 
   if (dailyGameHref === null) {
@@ -81,9 +61,7 @@ test('dashboard and daily expose standalone route links', async ({ page }) => {
 
   await page.goto(dailyGameHref)
 
-  await expect(page).toHaveURL(
-    /\/games\/(magic-graph|sequence-race|shape-architect|pattern-detective)/,
-  )
+  await expect(page).toHaveURL(GAME_PATH_RE)
   await expect(page.locator('main').first()).toBeVisible()
   expectNoRuntimeErrors(errors)
 })

@@ -1,29 +1,10 @@
 import { expect, test } from '@playwright/test'
-import type { Page } from '@playwright/test'
 
-function collectRuntimeErrors(page: Page) {
-  const errors: string[] = []
-
-  page.on('console', (message) => {
-    if (message.type() === 'error') {
-      errors.push(message.text())
-    }
-  })
-
-  page.on('pageerror', (error) => {
-    errors.push(error.message)
-  })
-
-  return errors
-}
-
-function expectNoRuntimeErrors(errors: string[]) {
-  expect(errors).toEqual([])
-}
-
-async function expectHydrated(page: Page) {
-  await expect(page.getByTestId('app-hydrated')).toHaveText('hydrated')
-}
+import {
+  collectRuntimeErrors,
+  expectHydrated,
+  expectNoRuntimeErrors,
+} from './_helpers'
 
 test.describe('pattern-detective gameplay', () => {
   test('correct answer shows Solved and Next Level button', async ({

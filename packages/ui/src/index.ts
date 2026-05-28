@@ -48,6 +48,7 @@ export { TurnstileWidget } from "./TurnstileWidget";
 export { Wordmark } from "./wordmark";
 
 export { useGameSession } from "./use-game-session";
+export { useHydrated } from "./use-hydrated";
 export { useLevelSelection } from "./use-level-selection";
 export { useSaveStatus } from "./use-save-status";
 export { useT } from "./use-t";
