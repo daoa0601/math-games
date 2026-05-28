@@ -29,11 +29,11 @@ export const registry = Object.fromEntries(
   GAME_MODULES.map((m) => [m.id, m]),
 ) as { [K in GameId]: Extract<(typeof GAME_MODULES)[number], { id: K }> }
 
-export const gameModules = Object.values(registry)
+/** All modules as an array (same as GAME_MODULES but typed via registry). */
+export const gameModules = GAME_MODULES as readonly (typeof GAME_MODULES)[number][]
 
-export const publishedGameModules = gameModules.filter(
-  (m) => !('published' in m && m.published === false),
-)
+/** Published modules only. */
+export const publishedGameModules = PUBLISHED_GAME_MODULES
 
 export const dailyGameRotation: readonly GameId[] = PUBLISHED_GAME_MODULES.map(
   (m) => m.id,

@@ -65,7 +65,7 @@ export {
   generateGuaranteedSolvableWithRetry,
 } from "./seededGenerator";
 
-export { generateConstructivePuzzle } from "./puzzleEngine";
+export { generateConstructivePuzzle } from "./seeded-level-generator";
 
 // Solver
 export {

@@ -3,15 +3,17 @@ export type {
   AchievementCategory,
   AchievementContext,
   AchievementRarity,
+  AchievementUnlockCondition,
   DailyChallengePick,
   GameCatalog,
   GameFeedback,
   GameModule,
+  GameModuleInput,
   GameProgressInput,
   GameTranslations,
   ScoreContext,
 } from "./game-module";
-export { createValidateAndComputeScore } from "./game-module";
+export { createGameModule, createValidateAndComputeScore } from "./game-module";
 
 export { GameProgressRequest } from "./game-progress.schema";
 

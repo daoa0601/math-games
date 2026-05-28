@@ -34,6 +34,7 @@ export { LevelNav } from "./level-nav";
 export { LocaleProvider, useLocale } from "./locale-context";
 export { MechanicCard } from "./mechanic-card";
 export { MobileAppHeader } from "./mobile-app-header";
+export { MobileGameHeader } from "./mobile-game-header";
 export { MobileTabBar } from "./mobile-tab-bar";
 export type { TabId } from "./mobile-tab-bar";
 export { PlayerAvatar } from "./player-avatar";
@@ -47,6 +48,8 @@ export { TurnstileWidget } from "./TurnstileWidget";
 export { Wordmark } from "./wordmark";
 
 export { useGameSession } from "./use-game-session";
+export { useLevelSelection } from "./use-level-selection";
+export { useSaveStatus } from "./use-save-status";
 export { useT } from "./use-t";
 
 export type { Locale, TranslationDict } from "./locale-context";

@@ -5,12 +5,20 @@ import { GameProgressValidationError } from "./errors";
 export type AchievementCategory = "global" | string;
 export type AchievementRarity = "common" | "rare" | "epic" | "legendary";
 
+export interface AchievementUnlockCondition {
+  completed?: boolean;
+  difficulty?: string;
+  isOptimalSolution?: boolean;
+  wasWinner?: boolean;
+}
+
 export interface Achievement {
   id: string;
   category: AchievementCategory;
   name: string;
   description: string;
   rarity: AchievementRarity;
+  unlockWhen?: AchievementUnlockCondition;
 }
 
 export interface AchievementContext {
@@ -166,4 +174,135 @@ export function createValidateAndComputeScore<
         ...extras,
       };
     });
+}
+
+function evaluateAchievementsByCondition(
+  achievements: readonly Achievement[],
+  ctx: AchievementContext,
+  unlocked: ReadonlySet<string>,
+): string[] {
+  return achievements
+    .filter((a) => {
+      if (!a.unlockWhen || unlocked.has(a.id)) return false;
+      const c = a.unlockWhen;
+      if (c.completed !== undefined && ctx.completed !== c.completed) return false;
+      if (c.difficulty !== undefined && ctx.difficulty !== c.difficulty) return false;
+      if (c.isOptimalSolution !== undefined && ctx.isOptimalSolution !== c.isOptimalSolution)
+        return false;
+      if (c.wasWinner !== undefined && ctx.wasWinner !== c.wasWinner) return false;
+      return true;
+    })
+    .map((a) => a.id);
+}
+
+type GameValidationResult = {
+  completed: boolean;
+  moves: number;
+  feedback?: GameFeedback;
+} | null;
+
+export interface GameModuleInput<
+  TConfig extends { id: string; difficulty: string },
+> {
+  id: string;
+  route: string;
+  title: string;
+  description: string;
+  published?: boolean;
+  difficulties: readonly string[];
+  achievements: readonly Achievement[];
+  translations: GameTranslations;
+  completionSchema: Schema.Decoder<unknown>;
+  computeScore: (ctx: ScoreContext) => number;
+
+  catalog: readonly TConfig[];
+
+  validate?: (level: TConfig, completion: any) => GameValidationResult;
+  evaluateAchievements?: (
+    ctx: AchievementContext,
+    unlocked: ReadonlySet<string>,
+  ) => string[];
+  getCatalog?: () => GameCatalog<TConfig>;
+  levelCount?: number;
+  getDailyPick?: (hash: number) => DailyChallengePick;
+  resolveLevelConfig?: (levelId: string) => TConfig | null;
+  validateGameState?: (level: TConfig, raw: unknown) => GameValidationResult;
+  progressExtras?: (input: GameProgressInput) => {
+    isOptimalSolution?: boolean;
+    wasWinner?: boolean;
+  };
+}
+
+export function createGameModule<
+  TConfig extends { id: string; difficulty: string },
+  const TId extends string,
+  const TRoute extends string,
+>(
+  input: GameModuleInput<TConfig> & { id: TId; route: TRoute },
+): GameModule<TConfig> & { readonly id: TId; readonly route: TRoute } {
+  const { catalog } = input;
+
+  const getCatalog =
+    input.getCatalog ??
+    (() => ({
+      config: catalog[0],
+      configs: [...catalog],
+      initialConfigId: catalog[0].id,
+    }));
+
+  const resolveLevelConfig =
+    input.resolveLevelConfig ??
+    ((levelId: string) => catalog.find((c) => c.id === levelId) ?? null);
+
+  const getDailyPick =
+    input.getDailyPick ??
+    ((hash: number) => {
+      const level = catalog[hash % catalog.length];
+      return { levelId: level.id, title: level.id, difficulty: level.difficulty };
+    });
+
+  const validateGameState =
+    input.validateGameState ??
+    ((level: TConfig, raw: unknown): GameValidationResult => {
+      if (!input.validate) return null;
+      try {
+        const parsed = Schema.decodeUnknownSync(input.completionSchema)(raw);
+        return input.validate(level, parsed);
+      } catch {
+        return null;
+      }
+    });
+
+  const evaluateAchievements =
+    input.evaluateAchievements ??
+    ((ctx: AchievementContext, unlocked: ReadonlySet<string>) =>
+      evaluateAchievementsByCondition(input.achievements, ctx, unlocked));
+
+  const module = {
+    id: input.id as TId,
+    route: input.route as TRoute,
+    title: input.title,
+    description: input.description,
+    ...(input.published !== undefined ? { published: input.published } : {}),
+    difficulties: input.difficulties,
+    achievements: input.achievements,
+    translations: input.translations,
+    levelCount: input.levelCount ?? catalog.length,
+    getCatalog,
+    getDailyPick,
+    computeScore: input.computeScore,
+    evaluateAchievements,
+    ...(input.progressExtras ? { progressExtras: input.progressExtras } : {}),
+    resolveLevelConfig,
+    validateGameState,
+    validateAndComputeScore: createValidateAndComputeScore({
+      completionSchema: input.completionSchema,
+      resolveLevelConfig,
+      validateGameState,
+      computeScore: input.computeScore,
+      ...(input.progressExtras ? { progressExtras: input.progressExtras } : {}),
+    }),
+  };
+
+  return module as GameModule<TConfig> & { readonly id: TId; readonly route: TRoute };
 }

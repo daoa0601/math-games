@@ -20,6 +20,7 @@ import { Route as GamesPatternDetectiveRouteImport } from './routes/games/patter
 import { Route as GamesMagicGraphRouteImport } from './routes/games/magic-graph'
 import { Route as GamesFractionBuilderRouteImport } from './routes/games/fraction-builder'
 import { Route as GamesEquationBalanceRouteImport } from './routes/games/equation-balance'
+import { Route as DevDesignCanvasRouteImport } from './routes/dev/design-canvas'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 
 const ProfileRoute = ProfileRouteImport.update({
@@ -77,6 +78,11 @@ const GamesEquationBalanceRoute = GamesEquationBalanceRouteImport.update({
   path: '/games/equation-balance',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DevDesignCanvasRoute = DevDesignCanvasRouteImport.update({
+  id: '/dev/design-canvas',
+  path: '/dev/design-canvas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   id: '/admin/analytics',
   path: '/admin/analytics',
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/daily': typeof DailyRoute
   '/profile': typeof ProfileRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/dev/design-canvas': typeof DevDesignCanvasRoute
   '/games/equation-balance': typeof GamesEquationBalanceRoute
   '/games/fraction-builder': typeof GamesFractionBuilderRoute
   '/games/magic-graph': typeof GamesMagicGraphRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/daily': typeof DailyRoute
   '/profile': typeof ProfileRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/dev/design-canvas': typeof DevDesignCanvasRoute
   '/games/equation-balance': typeof GamesEquationBalanceRoute
   '/games/fraction-builder': typeof GamesFractionBuilderRoute
   '/games/magic-graph': typeof GamesMagicGraphRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/daily': typeof DailyRoute
   '/profile': typeof ProfileRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/dev/design-canvas': typeof DevDesignCanvasRoute
   '/games/equation-balance': typeof GamesEquationBalanceRoute
   '/games/fraction-builder': typeof GamesFractionBuilderRoute
   '/games/magic-graph': typeof GamesMagicGraphRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/daily'
     | '/profile'
     | '/admin/analytics'
+    | '/dev/design-canvas'
     | '/games/equation-balance'
     | '/games/fraction-builder'
     | '/games/magic-graph'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/daily'
     | '/profile'
     | '/admin/analytics'
+    | '/dev/design-canvas'
     | '/games/equation-balance'
     | '/games/fraction-builder'
     | '/games/magic-graph'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/daily'
     | '/profile'
     | '/admin/analytics'
+    | '/dev/design-canvas'
     | '/games/equation-balance'
     | '/games/fraction-builder'
     | '/games/magic-graph'
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   DailyRoute: typeof DailyRoute
   ProfileRoute: typeof ProfileRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  DevDesignCanvasRoute: typeof DevDesignCanvasRoute
   GamesEquationBalanceRoute: typeof GamesEquationBalanceRoute
   GamesFractionBuilderRoute: typeof GamesFractionBuilderRoute
   GamesMagicGraphRoute: typeof GamesMagicGraphRoute
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesEquationBalanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dev/design-canvas': {
+      id: '/dev/design-canvas'
+      path: '/dev/design-canvas'
+      fullPath: '/dev/design-canvas'
+      preLoaderRoute: typeof DevDesignCanvasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/analytics': {
       id: '/admin/analytics'
       path: '/admin/analytics'
@@ -282,6 +302,7 @@ const rootRouteChildren: RootRouteChildren = {
   DailyRoute: DailyRoute,
   ProfileRoute: ProfileRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  DevDesignCanvasRoute: DevDesignCanvasRoute,
   GamesEquationBalanceRoute: GamesEquationBalanceRoute,
   GamesFractionBuilderRoute: GamesFractionBuilderRoute,
   GamesMagicGraphRoute: GamesMagicGraphRoute,

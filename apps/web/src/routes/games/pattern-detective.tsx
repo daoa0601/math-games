@@ -5,7 +5,13 @@ import { useMemo, useState } from 'react'
 import type { TranslationKey } from '@/i18n-translations'
 import { formatAchievementName, formatDifficulty } from '@/i18n-format'
 import { LevelGrid } from '@/games/level-grid'
-import { Confetti, GameChrome, LevelNav } from '@math-games/ui'
+import {
+  Confetti,
+  GameChrome,
+  LevelNav,
+  useLevelSelection,
+  useSaveStatus,
+} from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { Badge } from '@math-games/ui'
 import { Button } from '@math-games/ui'
@@ -40,14 +46,25 @@ function PatternDetectiveRoute() {
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordPatternDetectiveProgress)
 
-  const initialId = searchLevel ?? initialConfigId
-  const [currentLevelId, setCurrentLevelId] = useState(initialId)
   const [selected, setSelected] = useState<number | null>(null)
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
-  const [saveStatus, setSaveStatus] = useState<string | null>(null)
+  const { saveStatus, setSaveStatus, clearSaveStatus } = useSaveStatus()
 
-  const level = configs.find((c) => c.id === currentLevelId) ?? configs[0]
-  const levelIndex = configs.indexOf(level)
+  const {
+    config: level,
+    configIndex: levelIndex,
+    availableConfigs,
+    selectLevel: selectLevelRaw,
+  } = useLevelSelection({
+    configs,
+    initialConfigId,
+    searchLevel,
+    onReset: () => {
+      setSelected(null)
+      setResult(null)
+      clearSaveStatus()
+    },
+  })
 
   const choices = useMemo(
     () => shuffleChoices(level.answer, level.distractors, hashStr(level.id)),
@@ -80,16 +97,9 @@ function PatternDetectiveRoute() {
     }
   }
 
-  function selectLevel(config: PatternConfig) {
-    setCurrentLevelId(config.id)
-    setSelected(null)
-    setResult(null)
-    setSaveStatus(null)
-  }
-
   function handleNext() {
-    const next = configs[levelIndex + 1] ?? configs[0]
-    selectLevel(next)
+    const next = availableConfigs[levelIndex + 1] ?? availableConfigs[0]
+    selectLevelRaw(next)
   }
 
   return (
@@ -100,23 +110,23 @@ function PatternDetectiveRoute() {
         meta={
           <LevelNav
             currentIndex={levelIndex}
-            total={configs.length}
-            onPrev={() => selectLevel(configs[levelIndex - 1])}
-            onNext={() => selectLevel(configs[levelIndex + 1])}
+            total={availableConfigs.length}
+            onPrev={() => selectLevelRaw(availableConfigs[levelIndex - 1])}
+            onNext={() => selectLevelRaw(availableConfigs[levelIndex + 1])}
           />
         }
       />
 
       <LevelGrid
-        items={configs.map((c) => ({
+        items={availableConfigs.map((c) => ({
           id: c.id,
           name: c.patternType,
           subtitle: formatDifficulty(locale, c.difficulty),
         }))}
         selectedId={level.id}
         onSelect={(id) => {
-          const config = configs.find((c) => c.id === id)
-          if (config) selectLevel(config)
+          const config = availableConfigs.find((c) => c.id === id)
+          if (config) selectLevelRaw(config)
         }}
       />
 

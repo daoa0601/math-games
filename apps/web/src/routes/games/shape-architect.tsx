@@ -19,28 +19,32 @@ import { Button } from '@math-games/ui'
 import { Card, CardContent } from '@math-games/ui'
 import { Separator } from '@math-games/ui'
 import { ToggleGroup, ToggleGroupItem } from '@math-games/ui'
-import { useGameSession } from '@math-games/ui'
+import { useGameSession, useLevelSelection, useSaveStatus } from '@math-games/ui'
 import { validateLevelSearch } from '@/games/level-search'
 import {
   DEFAULT_ROTATION,
   canPlacePiece,
   findNearestValidPosition,
   initializeGrid,
-  placePiece,
   rotateBy90OnAxis,
-  VoxelGrid,
 } from '@math-games/game-shape-architect'
 import type {
-  CellState,
-  LevelConfig,
   Piece,
   PlacedPiece,
   Position3D,
   Rotation3D,
   RotationAxis,
-  ShapeArchitectGameState,
-  SolutionStep,
+  VoxelGrid,
 } from '@math-games/game-shape-architect'
+import { ErrorPopup } from '@/games/error-popup'
+import {
+  buildOptimisticGrid,
+  buildPlacedPieces,
+  buildSolvedGrid,
+  createInitialServerState,
+  gridFromState,
+  pieceIsPlaced,
+} from '@/games/shape-architect-components/game-state-helpers'
 import {
   PlacementToolbar,
   PositionedPlacementToolbar,
@@ -76,78 +80,6 @@ export const Route = createFileRoute('/games/shape-architect')({
   pendingComponent: GameRoutePending,
 })
 
-function buildSolvedGrid(config: LevelConfig, solution: SolutionStep[]) {
-  return solution.reduce((grid, step) => {
-    const piece = config.pieces.find(
-      (candidate) => candidate.id === step.pieceId,
-    )
-
-    if (!piece) {
-      return grid
-    }
-
-    return placePiece(grid, piece, step.position, step.rotation)
-  }, initializeGrid(config))
-}
-
-function buildPlacedPieces(
-  config: LevelConfig,
-  solution: SolutionStep[],
-): PlacedPiece[] {
-  return solution.flatMap((step) => {
-    const piece = config.pieces.find(
-      (candidate) => candidate.id === step.pieceId,
-    )
-
-    if (!piece) {
-      return []
-    }
-
-    return {
-      pieceId: step.pieceId,
-      position: step.position,
-      rotation: step.rotation,
-      color: piece.color,
-    }
-  })
-}
-
-function pieceIsPlaced(placedPieces: PlacedPiece[], piece: Piece) {
-  return placedPieces.some((placedPiece) => placedPiece.pieceId === piece.id)
-}
-
-function createInitialServerState(
-  config: LevelConfig,
-): ShapeArchitectGameState {
-  return {
-    grid: initializeGrid(config).toNestedArray(),
-    placedPieces: [],
-    remainingPieces: [...config.pieces],
-    isSolved: false,
-    moveCount: 0,
-    accepted: true,
-  }
-}
-
-function gridFromState(gridState: CellState[][][]): VoxelGrid {
-  return VoxelGrid.fromNestedArray(gridState)
-}
-
-function buildOptimisticGrid(
-  config: LevelConfig,
-  placements: PlacedPiece[],
-): VoxelGrid {
-  return placements.reduce((grid, placement) => {
-    const piece = config.pieces.find(
-      (candidate) => candidate.id === placement.pieceId,
-    )
-
-    return piece
-      ? placePiece(grid, piece, placement.position, placement.rotation)
-      : grid
-  }, initializeGrid(config))
-}
-
 function ShapeArchitectRoute() {
   const t = useT()
   const { locale } = useLocale()
@@ -155,21 +87,28 @@ function ShapeArchitectRoute() {
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordShapeArchitectProgress)
   const validateMove = useServerFn(validateShapeArchitectMove)
-  const [availableConfigs, setAvailableConfigs] = useState(configs)
-  const requestedLevelId = searchLevel
-    ? (availableConfigs.find((candidate) => candidate.id === searchLevel)?.id ??
-      initialConfigId)
-    : undefined
-  const [selectedLevelId, setSelectedLevelId] = useState(
-    requestedLevelId ?? initialConfigId,
-  )
-  const config = useMemo(
-    () =>
-      availableConfigs.find((candidate) => candidate.id === selectedLevelId) ??
-      availableConfigs[0],
-    [availableConfigs, selectedLevelId],
-  )
-  const configIndex = availableConfigs.indexOf(config)
+  const { saveStatus, setSaveStatus, clearSaveStatus } = useSaveStatus()
+
+  const { config, configIndex, availableConfigs, selectLevel, addAndSelectConfig } =
+    useLevelSelection({
+      configs,
+      initialConfigId,
+      searchLevel,
+      onReset: (newConfig) => {
+        setServerState(createInitialServerState(newConfig))
+        setPlacements([])
+        setOptimisticGrid(null)
+        setPendingAction(null)
+        setSelectedPieceId(null)
+        setPlacementRotation(DEFAULT_ROTATION)
+        setErrorPopup(null)
+        setViewMode('2d')
+        setPendingPosition(null)
+        clearSaveStatus()
+        solvedProgressKeyRef.current = null
+      },
+    })
+
   const [serverState, setServerState] = useState(() =>
     createInitialServerState(config),
   )
@@ -179,7 +118,6 @@ function ShapeArchitectRoute() {
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null)
   const [placementRotation, setPlacementRotation] =
     useState<Rotation3D>(DEFAULT_ROTATION)
-  const [saveStatus, setSaveStatus] = useState<string | null>(null)
   const [errorPopup, setErrorPopup] = useState<string | null>(null)
   const [levelAttempts, setLevelAttempts] = useState(0)
   const [viewMode, setViewMode] = useState<ViewMode>('2d')
@@ -196,12 +134,6 @@ function ShapeArchitectRoute() {
   )
   const grid = optimisticGrid ?? serverGrid
   const placedPieces = placements
-
-  useEffect(() => {
-    if (!saveStatus) return
-    const timer = setTimeout(() => setSaveStatus(null), 5000)
-    return () => clearTimeout(timer)
-  }, [saveStatus])
 
   useEffect(() => {
     if (!solver.result) return
@@ -229,26 +161,6 @@ function ShapeArchitectRoute() {
         ),
     })
   }, [solver.result])
-
-  useEffect(() => {
-    if (!requestedLevelId) return
-
-    const nextConfig =
-      availableConfigs.find((candidate) => candidate.id === requestedLevelId) ??
-      availableConfigs[0]
-
-    if (nextConfig.id === selectedLevelId) return
-
-    setSelectedLevelId(nextConfig.id)
-    setServerState(createInitialServerState(nextConfig))
-    setPlacements([])
-    setOptimisticGrid(null)
-    setPendingAction(null)
-    setSelectedPieceId(null)
-    setPlacementRotation(DEFAULT_ROTATION)
-    setSaveStatus(null)
-    solvedProgressKeyRef.current = null
-  }, [availableConfigs, requestedLevelId, selectedLevelId])
 
   const solved = serverState.isSolved
   const session = useGameSession({ completed: solved, resetKey: config.id })
@@ -309,7 +221,7 @@ function ShapeArchitectRoute() {
     setPendingAction(options.action)
     setPlacements(nextPlacements)
     setOptimisticGrid(options.optimisticGrid)
-    setSaveStatus(null)
+    clearSaveStatus()
 
     const result = await runServerAction(
       () =>
@@ -369,23 +281,7 @@ function ShapeArchitectRoute() {
     setSelectedPieceId(null)
     setPlacementRotation(DEFAULT_ROTATION)
     setPendingPosition(null)
-    setSaveStatus(null)
-    solvedProgressKeyRef.current = null
-    session.resetSession()
-  }
-
-  function selectLevel(nextLevel: LevelConfig) {
-    setSelectedLevelId(nextLevel.id)
-    setServerState(createInitialServerState(nextLevel))
-    setPlacements([])
-    setOptimisticGrid(null)
-    setPendingAction(null)
-    setSelectedPieceId(null)
-    setPlacementRotation(DEFAULT_ROTATION)
-    setPendingPosition(null)
-
-    setSaveStatus(null)
-    setLevelAttempts(0)
+    clearSaveStatus()
     solvedProgressKeyRef.current = null
     session.resetSession()
   }
@@ -397,14 +293,14 @@ function ShapeArchitectRoute() {
     setSelectedPieceId(piece.id)
     setPendingPosition(null)
 
-    setSaveStatus(null)
+    clearSaveStatus()
   }
 
   function rotateSelectedPiece(axis: RotationAxis = 'z') {
     if (selectedPiece === null) return
 
     setPlacementRotation((rotation) => rotateBy90OnAxis(rotation, axis))
-    setSaveStatus(null)
+    clearSaveStatus()
   }
 
   function handleCellClick(attemptedPosition: Position3D) {
@@ -415,7 +311,7 @@ function ShapeArchitectRoute() {
     }
 
     setPendingPosition(attemptedPosition)
-    setSaveStatus(null)
+    clearSaveStatus()
   }
 
   const pendingCanPlace =
@@ -488,7 +384,7 @@ function ShapeArchitectRoute() {
   function cancelPlacement() {
     setPendingPosition(null)
 
-    setSaveStatus(null)
+    clearSaveStatus()
   }
 
   function undoPlacement() {
@@ -506,7 +402,7 @@ function ShapeArchitectRoute() {
     setPlacementRotation(DEFAULT_ROTATION)
     setPendingPosition(null)
 
-    setSaveStatus(null)
+    clearSaveStatus()
     solvedProgressKeyRef.current = null
     void validatePlacements(nextPlacedPieces, {
       action: 'undo',
@@ -520,12 +416,7 @@ function ShapeArchitectRoute() {
       seed,
       difficulty as ShapeArchitectPracticeDifficulty,
     )
-
-    setAvailableConfigs((currentConfigs) => [
-      nextConfig,
-      ...currentConfigs.filter((candidate) => candidate.id !== nextConfig.id),
-    ])
-    selectLevel(nextConfig)
+    addAndSelectConfig(nextConfig)
   }
 
   return (
@@ -589,7 +480,7 @@ function ShapeArchitectRoute() {
                     setSelectedPieceId(null)
                     setPlacementRotation(DEFAULT_ROTATION)
                     setPendingPosition(null)
-                    setSaveStatus(null)
+                    clearSaveStatus()
                   }}
                   variant="outline"
                   size="sm"
@@ -784,30 +675,11 @@ function ShapeArchitectRoute() {
         ) : null}
 
         {errorPopup ? (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 p-4 animate-slide-up-fade"
-            onClick={() => setErrorPopup(null)}
-            role="dialog"
-            aria-modal="true"
-          >
-            <Card
-              className="animate-scale-in w-full max-w-sm border border-destructive/30 shadow-(--card-shadow-long)"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <CardContent className="flex flex-col gap-4">
-                <p className="font-display text-base font-medium tracking-tight text-destructive">
-                  {errorPopup}
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={() => setErrorPopup(null)}
-                  type="button"
-                >
-                  {t('game.tryAgain')}
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          <ErrorPopup
+            message={errorPopup}
+            dismissLabel={t('game.tryAgain')}
+            onDismiss={() => setErrorPopup(null)}
+          />
         ) : null}
       </section>
 

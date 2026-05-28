@@ -9,7 +9,8 @@ import {
   formatDifficulty,
   formatLevelName,
 } from '@/i18n-format'
-import { GameChrome, LevelNav } from '@math-games/ui'
+import { GameChrome, LevelNav, MobileGameHeader } from '@math-games/ui'
+import { useNavigate } from '@tanstack/react-router'
 import { getHints } from '@math-games/ui'
 import { useLocale } from '@math-games/ui'
 import { LearnSection } from '@math-games/ui'
@@ -17,7 +18,12 @@ import { LevelGrid } from '@/games/level-grid'
 import { PracticeGeneratorSection } from '@/games/practice-generator-section'
 import { Button } from '@math-games/ui'
 import { Card, CardContent, CardHeader } from '@math-games/ui'
-import { useGameSession } from '@math-games/ui'
+import {
+  useGameSession,
+  useLevelSelection,
+  useSaveStatus,
+} from '@math-games/ui'
+import { ErrorPopup } from '@/games/error-popup'
 import { validateLevelSearch } from '@/games/level-search'
 import { getLineStatus, isPuzzleSolved } from '@math-games/game-magic-graph'
 import type { GraphNode, PuzzleConfig } from '@math-games/game-magic-graph'
@@ -56,52 +62,37 @@ function createNodeValueMap(values: NodeValues) {
 function MagicGraphRoute() {
   const t = useT()
   const { locale } = useLocale()
+  const navigate = useNavigate()
   const { configs, initialConfigId } = Route.useLoaderData()
   const { level: searchLevel } = Route.useSearch()
   const recordProgress = useServerFn(recordMagicGraphProgress)
-  const [availableConfigs, setAvailableConfigs] = useState(configs)
-  const requestedPuzzleId = searchLevel
-    ? (availableConfigs.find((candidate) => candidate.id === searchLevel)?.id ??
-      initialConfigId)
-    : undefined
-  const [selectedPuzzleId, setSelectedPuzzleId] = useState(
-    requestedPuzzleId ?? initialConfigId,
+
+  const [values, setValues] = useState<NodeValues>(() =>
+    createInitialValues(configs[0]),
   )
-  const config = useMemo(
-    () =>
-      availableConfigs.find((candidate) => candidate.id === selectedPuzzleId) ??
-      availableConfigs[0],
-    [availableConfigs, selectedPuzzleId],
-  )
-  const configIndex = availableConfigs.indexOf(config)
-  const [values, setValues] = useState(() => createInitialValues(config))
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null)
-  const [saveStatus, setSaveStatus] = useState<string | null>(null)
   const [errorPopup, setErrorPopup] = useState<string | null>(null)
   const [levelAttempts, setLevelAttempts] = useState(0)
   const prevAllFilledRef = useRef(false)
+  const { saveStatus, setSaveStatus, clearSaveStatus } = useSaveStatus()
 
-  useEffect(() => {
-    if (!saveStatus) return
-    const timer = setTimeout(() => setSaveStatus(null), 5000)
-    return () => clearTimeout(timer)
-  }, [saveStatus])
-
-  useEffect(() => {
-    if (!requestedPuzzleId) return
-
-    const nextConfig =
-      availableConfigs.find(
-        (candidate) => candidate.id === requestedPuzzleId,
-      ) ?? availableConfigs[0]
-
-    if (nextConfig.id === selectedPuzzleId) return
-
-    setSelectedPuzzleId(nextConfig.id)
-    setValues(createInitialValues(nextConfig))
-    setSelectedNumber(null)
-    setSaveStatus(null)
-  }, [availableConfigs, requestedPuzzleId, selectedPuzzleId])
+  const {
+    config,
+    configIndex,
+    availableConfigs,
+    selectLevel,
+    addAndSelectConfig,
+  } = useLevelSelection({
+    configs,
+    initialConfigId,
+    searchLevel,
+    onReset: (newConfig) => {
+      setValues(createInitialValues(newConfig))
+      setSelectedNumber(null)
+      clearSaveStatus()
+      setLevelAttempts(0)
+    },
+  })
 
   const nodeValues = useMemo(() => createNodeValueMap(values), [values])
   const nodeLookup = useMemo(
@@ -176,7 +167,7 @@ function MagicGraphRoute() {
 
     if (values[node.id] !== null) {
       setValues({ ...values, [node.id]: null })
-      setSaveStatus(null)
+      clearSaveStatus()
       return
     }
 
@@ -192,22 +183,13 @@ function MagicGraphRoute() {
 
     setValues(nextValues)
     setSelectedNumber(null)
-    setSaveStatus(null)
+    clearSaveStatus()
   }
 
   function resetPuzzle() {
     setValues(createInitialValues(config))
     setSelectedNumber(null)
-    setSaveStatus(null)
-    session.resetSession()
-  }
-
-  function selectPuzzle(puzzle: PuzzleConfig) {
-    setSelectedPuzzleId(puzzle.id)
-    setValues(createInitialValues(puzzle))
-    setSelectedNumber(null)
-    setSaveStatus(null)
-    setLevelAttempts(0)
+    clearSaveStatus()
     session.resetSession()
   }
 
@@ -216,39 +198,353 @@ function MagicGraphRoute() {
       seed,
       difficulty as MagicGraphPracticeDifficulty,
     )
-
-    setAvailableConfigs((currentConfigs) => [
-      nextConfig,
-      ...currentConfigs.filter((candidate) => candidate.id !== nextConfig.id),
-    ])
-    selectPuzzle(nextConfig)
+    addAndSelectConfig(nextConfig)
   }
 
-  return (
-    <main className="theme-magic-graph mx-auto flex min-h-screen max-w-5xl flex-col gap-6 px-4 py-6 md:gap-10 md:px-6 md:py-10">
-      <GameChrome
-        game="magic-graph"
-        levelTitle={formatLevelName(locale, config.name)}
-        meta={
-          <div className="flex items-center gap-2">
-            <LevelNav
-              currentIndex={configIndex}
-              total={availableConfigs.length}
-              onPrev={() => selectPuzzle(availableConfigs[configIndex - 1])}
-              onNext={() => selectPuzzle(availableConfigs[configIndex + 1])}
-            />
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
-              {t('game.target')} {config.targetSum}
-            </span>
-          </div>
-        }
-      />
+  const timerLabel =
+    session.mode === 'timed'
+      ? `${Math.floor(session.remainingSeconds / 60)
+          .toString()
+          .padStart(2, '0')}:${(session.remainingSeconds % 60)
+          .toString()
+          .padStart(2, '0')}`
+      : `${Math.floor(session.elapsedSeconds / 60)
+          .toString()
+          .padStart(2, '0')}:${(session.elapsedSeconds % 60)
+          .toString()
+          .padStart(2, '0')}`
+  const availableNumbers = config.availableNumbers
+  const remainingCount = availableNumbers.filter(
+    (n) => !usedNumbers.has(n),
+  ).length
 
-      <section className="relative grid gap-6 md:grid-cols-[1.15fr_0.85fr]">
-        <Confetti active={solved} />
-        <Card className="game-card-bg relative overflow-hidden border-0">
-          <CardContent className="relative z-10">
-            <div className="relative mx-auto aspect-[300/220] max-w-[520px]">
+  return (
+    <>
+      {/* ── DESKTOP LAYOUT (≥ md) ────────────────────────────── */}
+      <main className="theme-magic-graph mx-auto hidden min-h-screen max-w-5xl flex-col gap-6 px-4 py-6 md:flex md:gap-10 md:px-6 md:py-10">
+        <GameChrome
+          game="magic-graph"
+          levelTitle={formatLevelName(locale, config.name)}
+          meta={
+            <div className="flex items-center gap-2">
+              <LevelNav
+                currentIndex={configIndex}
+                total={availableConfigs.length}
+                onPrev={() => selectLevel(availableConfigs[configIndex - 1])}
+                onNext={() => selectLevel(availableConfigs[configIndex + 1])}
+              />
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium tabular-nums text-primary">
+                {t('game.target')} {config.targetSum}
+              </span>
+            </div>
+          }
+        />
+
+        <section className="relative grid gap-6 md:grid-cols-[1.15fr_0.85fr]">
+          <Confetti active={solved} />
+          <Card className="game-card-bg relative overflow-hidden border-0">
+            <CardContent className="relative z-10">
+              <div className="relative mx-auto aspect-[300/220] max-w-[520px]">
+                <svg
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full"
+                  viewBox="0 0 300 220"
+                >
+                  {lineStatuses.map((line) => {
+                    const points = line.nodeIds.flatMap((nodeId) => {
+                      const node = nodeLookup.get(nodeId)
+                      return node
+                        ? [`${node.position.x},${node.position.y}`]
+                        : []
+                    })
+
+                    const color =
+                      line.status === 'correct'
+                        ? 'var(--line-correct)'
+                        : line.status === 'incorrect' ||
+                            line.status === 'overflow'
+                          ? 'var(--line-incorrect)'
+                          : 'var(--line-pending)'
+
+                    return (
+                      <polyline
+                        fill="none"
+                        key={line.id}
+                        points={points.join(' ')}
+                        stroke={color}
+                        strokeLinecap="round"
+                        strokeWidth="3"
+                        style={
+                          line.status === 'correct'
+                            ? {
+                                filter:
+                                  'drop-shadow(0 0 4px var(--line-correct))',
+                              }
+                            : undefined
+                        }
+                      />
+                    )
+                  })}
+                </svg>
+
+                {config.nodes.map((node) => {
+                  const filled = values[node.id] !== null
+                  return (
+                    <button
+                      aria-label={`Node ${node.id}`}
+                      className={`absolute flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 text-lg font-bold shadow-md transition-all ${
+                        node.isFixed
+                          ? 'border-muted bg-muted/60 text-muted-foreground'
+                          : filled
+                            ? 'border-primary bg-primary text-primary-foreground shadow-primary/25'
+                            : 'border-primary/50 bg-card hover:border-primary hover:shadow-lg'
+                      } ${filled ? 'animate-node-pop' : ''}`}
+                      disabled={node.isFixed}
+                      key={node.id}
+                      onClick={() => placeNumber(node)}
+                      style={{
+                        left: `${(node.position.x / 300) * 100}%`,
+                        top: `${(node.position.y / 220) * 100}%`,
+                      }}
+                      type="button"
+                    >
+                      {values[node.id] ?? ''}
+                    </button>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-4">
+            <Card className="border border-border/60 shadow-(--card-shadow-long)">
+              <CardHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-xl font-bold leading-none">
+                    {t('game.numbers')}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant={
+                          session.mode === 'practice' ? 'default' : 'outline'
+                        }
+                        onClick={() => session.setMode('practice')}
+                        type="button"
+                      >
+                        {t('game.practice')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={
+                          session.mode === 'timed' ? 'default' : 'outline'
+                        }
+                        onClick={() => session.setMode('timed')}
+                        type="button"
+                      >
+                        {t('game.timed')}
+                      </Button>
+                    </div>
+                    <Badge
+                      variant={session.timedOut ? 'destructive' : 'secondary'}
+                    >
+                      {session.mode === 'timed'
+                        ? `${Math.floor(session.remainingSeconds / 60)}:${(session.remainingSeconds % 60).toString().padStart(2, '0')}`
+                        : `${Math.floor(session.elapsedSeconds / 60)}:${(session.elapsedSeconds % 60).toString().padStart(2, '0')}`}
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-2">
+                  {config.availableNumbers.map((number) => (
+                    <Button
+                      variant={
+                        selectedNumber === number ? 'default' : 'outline'
+                      }
+                      size="lg"
+                      className={`py-3 text-lg font-bold transition-all ${
+                        selectedNumber === number
+                          ? 'shadow-md shadow-primary/20 ring-2 ring-primary/30'
+                          : 'hover:shadow-md'
+                      }`}
+                      disabled={session.timedOut || usedNumbers.has(number)}
+                      key={number}
+                      onClick={() => setSelectedNumber(number)}
+                      type="button"
+                    >
+                      {number}
+                    </Button>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={resetPuzzle}
+                    type="button"
+                  >
+                    {t('game.reset')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => session.setPaused(!session.paused)}
+                    type="button"
+                  >
+                    {session.paused ? t('game.resume') : t('game.pause')}
+                  </Button>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
+                  <span>
+                    {t('stats.filled') + ' '}
+                    {filledCount}/{config.nodes.length}
+                  </span>
+                  {levelAttempts > 0 ? (
+                    <span>
+                      {t('profile.attempts')} {levelAttempts}
+                    </span>
+                  ) : null}
+                  <span>
+                    {solved
+                      ? t('stats.solved')
+                      : `${selectedNumber !== null ? `${t('game.selected') + ': '}${selectedNumber}` : t('game.tapNumber')}`}
+                  </span>
+                </div>
+
+                {saveStatus ? (
+                  <p className="mt-3 border-t border-border pt-3 text-sm text-muted-foreground">
+                    {saveStatus}
+                  </p>
+                ) : null}
+
+                {session.timedOut ? (
+                  <p className="mt-3 border-t border-border pt-3 text-sm font-medium text-destructive">
+                    {t('game.timedOut')}
+                  </p>
+                ) : null}
+              </CardContent>
+            </Card>
+
+            {hints.length > 0 ? (
+              <Card className="border border-primary/15 bg-primary/[0.04] shadow-none">
+                <CardContent>
+                  <h3 className="text-sm font-bold text-primary">
+                    {t('game.hints')}
+                  </h3>
+                  <ul className="mt-2 grid gap-1.5 text-sm text-muted-foreground">
+                    {hints.map((hint) => (
+                      <li key={hint}>- {hint}</li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {errorPopup ? (
+              <ErrorPopup
+                message={errorPopup}
+                dismissLabel={t('game.tryAgain')}
+                onDismiss={() => setErrorPopup(null)}
+              />
+            ) : null}
+          </div>
+        </section>
+
+        <PracticeGeneratorSection
+          title={t('game.puzzles')}
+          description={t('game.templatesDescription')}
+          difficulties={[
+            { value: 'easy', label: t('diff.easy') },
+            { value: 'medium', label: t('diff.medium') },
+            { value: 'hard', label: t('diff.hard') },
+          ]}
+          defaultDifficulty="medium"
+          onGenerate={generatePracticePuzzle}
+        >
+          <LevelGrid
+            items={availableConfigs.map((puzzle) => ({
+              id: puzzle.id,
+              name: puzzle.name,
+              subtitle: `${formatDifficulty(locale, puzzle.difficulty)} · ${puzzle.nodes.length} ${t('stats.nodes')} · ${t('game.target')} ${puzzle.targetSum}`,
+            }))}
+            selectedId={config.id}
+            onSelect={(id) => {
+              const puzzle = availableConfigs.find((c) => c.id === id)
+              if (puzzle) selectLevel(puzzle)
+            }}
+          />
+        </PracticeGeneratorSection>
+
+        <LearnSection gameId="magic-graph" />
+      </main>
+
+      {/* ── MOBILE LAYOUT (< md) ─────────────────────────────── */}
+      <div className="theme-magic-graph body-noise flex min-h-screen flex-col md:hidden">
+        <MobileGameHeader
+          game="magic-graph"
+          levelTitle={`${t('stats.levels')} ${String(configIndex + 1).padStart(2, '0')} / ${String(availableConfigs.length).padStart(2, '0')}`}
+          backLabel={t('app.dashboard')}
+          onBack={() => void navigate({ to: '/' })}
+          meta={
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-1.5">
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                className="text-primary"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+              </svg>
+              <span className="font-display text-[0.8125rem] font-medium tabular-nums text-primary">
+                {timerLabel}
+              </span>
+            </div>
+          }
+        />
+
+        <main className="flex flex-1 flex-col overflow-auto">
+          {/* Goal band */}
+          <div className="flex items-start justify-between gap-3.5 px-5 pt-4 pb-3.5">
+            <div className="min-w-0 flex-1">
+              <p
+                className="eyebrow text-primary"
+                style={{ fontSize: '0.5625rem' }}
+              >
+                ○ {formatLevelName(locale, config.name)}
+              </p>
+              <h2 className="font-display mt-1.5 text-lg font-medium tracking-tight">
+                {t('game.target')}{' '}
+                <span className="font-display tabular-nums text-primary">
+                  {config.targetSum}
+                </span>
+              </h2>
+            </div>
+            <div className="rounded-xl border border-primary/25 px-3.5 py-2 text-center">
+              <p className="eyebrow" style={{ fontSize: '0.5rem' }}>
+                {t('game.target')}
+              </p>
+              <p className="font-display text-[1.375rem] font-medium leading-none tabular-nums text-primary">
+                {config.targetSum}
+              </p>
+            </div>
+          </div>
+
+          {/* Playfield */}
+          <section
+            className="game-card-bg relative mx-4 flex min-h-[22.5rem] flex-1 flex-col justify-center overflow-hidden rounded-[1.375rem] border border-border/70 px-4 py-4.5 shadow-(--card-shadow-long)"
+            style={{ padding: '1.125rem 1rem' }}
+          >
+            <Confetti active={solved} />
+            <div className="relative mx-auto aspect-[300/220] w-full max-w-md">
               <svg
                 aria-hidden="true"
                 className="absolute inset-0 h-full w-full"
@@ -259,7 +555,6 @@ function MagicGraphRoute() {
                     const node = nodeLookup.get(nodeId)
                     return node ? [`${node.position.x},${node.position.y}`] : []
                   })
-
                   const color =
                     line.status === 'correct'
                       ? 'var(--line-correct)'
@@ -267,7 +562,6 @@ function MagicGraphRoute() {
                           line.status === 'overflow'
                         ? 'var(--line-incorrect)'
                         : 'var(--line-pending)'
-
                   return (
                     <polyline
                       fill="none"
@@ -276,14 +570,6 @@ function MagicGraphRoute() {
                       stroke={color}
                       strokeLinecap="round"
                       strokeWidth="3"
-                      style={
-                        line.status === 'correct'
-                          ? {
-                              filter:
-                                'drop-shadow(0 0 4px var(--line-correct))',
-                            }
-                          : undefined
-                      }
                     />
                   )
                 })}
@@ -294,12 +580,12 @@ function MagicGraphRoute() {
                 return (
                   <button
                     aria-label={`Node ${node.id}`}
-                    className={`absolute flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 text-lg font-bold shadow-md transition-all ${
+                    className={`absolute flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 font-display text-lg font-medium shadow-md transition-all ${
                       node.isFixed
                         ? 'border-muted bg-muted/60 text-muted-foreground'
                         : filled
-                          ? 'border-primary bg-primary text-primary-foreground shadow-primary/25'
-                          : 'border-primary/50 bg-card hover:border-primary hover:shadow-lg'
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : 'border-primary/50 bg-card'
                     } ${filled ? 'animate-node-pop' : ''}`}
                     disabled={node.isFixed}
                     key={node.id}
@@ -315,188 +601,111 @@ function MagicGraphRoute() {
                 )
               })}
             </div>
-          </CardContent>
-        </Card>
+          </section>
 
-        <div className="grid gap-4">
-          <Card className="border border-border/60 shadow-(--card-shadow-long)">
-            <CardHeader>
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-xl font-bold leading-none">
-                  {t('game.numbers')}
-                </h2>
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      variant={
-                        session.mode === 'practice' ? 'default' : 'outline'
-                      }
-                      onClick={() => session.setMode('practice')}
-                      type="button"
-                    >
-                      {t('game.practice')}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={session.mode === 'timed' ? 'default' : 'outline'}
-                      onClick={() => session.setMode('timed')}
-                      type="button"
-                    >
-                      {t('game.timed')}
-                    </Button>
-                  </div>
-                  <Badge
-                    variant={session.timedOut ? 'destructive' : 'secondary'}
-                  >
-                    {session.mode === 'timed'
-                      ? `${Math.floor(session.remainingSeconds / 60)}:${(session.remainingSeconds % 60).toString().padStart(2, '0')}`
-                      : `${Math.floor(session.elapsedSeconds / 60)}:${(session.elapsedSeconds % 60).toString().padStart(2, '0')}`}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-2">
-                {config.availableNumbers.map((number) => (
-                  <Button
-                    variant={selectedNumber === number ? 'default' : 'outline'}
-                    size="lg"
-                    className={`py-3 text-lg font-bold transition-all ${
-                      selectedNumber === number
-                        ? 'shadow-md shadow-primary/20 ring-2 ring-primary/30'
-                        : 'hover:shadow-md'
-                    }`}
-                    disabled={session.timedOut || usedNumbers.has(number)}
-                    key={number}
-                    onClick={() => setSelectedNumber(number)}
-                    type="button"
-                  >
-                    {number}
-                  </Button>
-                ))}
-              </div>
-
-              <div className="mt-4 flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={resetPuzzle}
-                  type="button"
-                >
-                  {t('game.reset')}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => session.setPaused(!session.paused)}
-                  type="button"
-                >
-                  {session.paused ? t('game.resume') : t('game.pause')}
-                </Button>
-              </div>
-
-              <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
-                <span>
-                  {t('stats.filled') + ' '}
-                  {filledCount}/{config.nodes.length}
-                </span>
-                {levelAttempts > 0 ? (
-                  <span>
-                    {t('profile.attempts')} {levelAttempts}
-                  </span>
-                ) : null}
-                <span>
-                  {solved
-                    ? t('stats.solved')
-                    : `${selectedNumber !== null ? `${t('game.selected') + ': '}${selectedNumber}` : t('game.tapNumber')}`}
-                </span>
-              </div>
-
-              {saveStatus ? (
-                <p className="mt-3 border-t border-border pt-3 text-sm text-muted-foreground">
-                  {saveStatus}
-                </p>
-              ) : null}
-
-              {session.timedOut ? (
-                <p className="mt-3 border-t border-border pt-3 text-sm font-medium text-destructive">
-                  {t('game.timedOut')}
-                </p>
-              ) : null}
-            </CardContent>
-          </Card>
-
+          {/* Hint chip */}
           {hints.length > 0 ? (
-            <Card className="border border-primary/15 bg-primary/[0.04] shadow-none">
-              <CardContent>
-                <h3 className="text-sm font-bold text-primary">
-                  {t('game.hints')}
-                </h3>
-                <ul className="mt-2 grid gap-1.5 text-sm text-muted-foreground">
-                  {hints.map((hint) => (
-                    <li key={hint}>- {hint}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ) : null}
-
-          {errorPopup ? (
-            <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 p-4 animate-slide-up-fade"
-              onClick={() => setErrorPopup(null)}
-              role="dialog"
-              aria-modal="true"
-            >
-              <Card
-                className="animate-scale-in w-full max-w-sm border border-destructive/30 shadow-(--card-shadow-long)"
-                onClick={(event) => event.stopPropagation()}
+            <div className="mx-4 mt-3.5 mb-1.5 flex items-start gap-2.5 rounded-2xl border border-primary/15 bg-primary/[0.05] px-3.5 py-3">
+              <div
+                className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/15 font-display font-medium text-primary"
+                style={{ fontSize: '0.875rem' }}
               >
-                <CardContent className="flex flex-col gap-4">
-                  <p className="font-display text-base font-medium tracking-tight text-destructive">
-                    {errorPopup}
-                  </p>
-                  <Button
-                    variant="outline"
-                    onClick={() => setErrorPopup(null)}
-                    type="button"
-                  >
-                    {t('game.tryAgain')}
-                  </Button>
-                </CardContent>
-              </Card>
+                ?
+              </div>
+              <p
+                className="leading-snug text-foreground"
+                style={{ fontSize: '0.75rem', lineHeight: 1.45 }}
+              >
+                {hints[0]}
+              </p>
             </div>
           ) : null}
-        </div>
-      </section>
 
-      <PracticeGeneratorSection
-        title={t('game.puzzles')}
-        description={t('game.templatesDescription')}
-        difficulties={[
-          { value: 'easy', label: t('diff.easy') },
-          { value: 'medium', label: t('diff.medium') },
-          { value: 'hard', label: t('diff.hard') },
-        ]}
-        defaultDifficulty="medium"
-        onGenerate={generatePracticePuzzle}
-      >
-        <LevelGrid
-          items={availableConfigs.map((puzzle) => ({
-            id: puzzle.id,
-            name: puzzle.name,
-            subtitle: `${formatDifficulty(locale, puzzle.difficulty)} · ${puzzle.nodes.length} ${t('stats.nodes')} · ${t('game.target')} ${puzzle.targetSum}`,
-          }))}
-          selectedId={config.id}
-          onSelect={(id) => {
-            const puzzle = availableConfigs.find((c) => c.id === id)
-            if (puzzle) selectPuzzle(puzzle)
-          }}
-        />
-      </PracticeGeneratorSection>
+          {/* Number rail — bottom-fixed touch zone */}
+          <div className="mt-auto border-t border-border bg-card/60 px-4 pt-3 pb-4">
+            <div className="flex items-baseline justify-between px-0.5 pb-2">
+              <span className="eyebrow" style={{ fontSize: '0.5625rem' }}>
+                {t('game.tapNumber')}
+              </span>
+              <span
+                className="font-display tabular-nums text-muted-foreground"
+                style={{ fontSize: '0.6875rem' }}
+              >
+                {remainingCount} / {availableNumbers.length}
+              </span>
+            </div>
+            <div
+              className="grid gap-2"
+              style={{
+                gridTemplateColumns: `repeat(${Math.min(6, availableNumbers.length)}, 1fr)`,
+              }}
+            >
+              {availableNumbers.map((number) => {
+                const used = usedNumbers.has(number)
+                const on = selectedNumber === number
+                return (
+                  <button
+                    key={number}
+                    type="button"
+                    disabled={session.timedOut || used}
+                    onClick={() => setSelectedNumber(on ? null : number)}
+                    className={`aspect-square rounded-xl border font-display text-xl font-medium transition-colors ${
+                      on
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : used
+                          ? 'border-border bg-primary/[0.04] text-muted-foreground line-through opacity-45'
+                          : 'border-border bg-card text-foreground'
+                    }`}
+                  >
+                    {number}
+                  </button>
+                )
+              })}
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={resetPuzzle}
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-border bg-background text-[0.8125rem] font-medium text-foreground"
+              >
+                ↺ {t('game.reset')}
+              </button>
+              <button
+                type="button"
+                onClick={() => session.setPaused(!session.paused)}
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background text-[0.8125rem] font-medium text-foreground"
+              >
+                {session.paused ? t('game.resume') : t('game.pause')}
+              </button>
+              <button
+                type="button"
+                disabled={hints.length === 0}
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background text-[0.8125rem] font-medium text-foreground disabled:opacity-50"
+              >
+                {t('game.hint')} · {hints.length}
+              </button>
+            </div>
+            {saveStatus ? (
+              <p className="mt-2.5 text-center text-[0.6875rem] text-muted-foreground">
+                {saveStatus}
+              </p>
+            ) : null}
+            {session.timedOut ? (
+              <p className="mt-2.5 text-center text-[0.6875rem] font-medium text-destructive">
+                {t('game.timedOut')}
+              </p>
+            ) : null}
+          </div>
+        </main>
 
-      <LearnSection gameId="magic-graph" />
-    </main>
+        {errorPopup ? (
+          <ErrorPopup
+            message={errorPopup}
+            dismissLabel={t('game.tryAgain')}
+            onDismiss={() => setErrorPopup(null)}
+          />
+        ) : null}
+      </div>
+    </>
   )
 }

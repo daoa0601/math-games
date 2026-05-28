@@ -4,7 +4,7 @@ import { createDailyRandom, createSeededRandom } from "@math-games/core";
 import {
   generateConstructivePuzzle,
   PUZZLE_ENGINE_CONSTANTS,
-} from "./puzzleEngine";
+} from "./seeded-level-generator";
 import { presetLevels } from "./presets";
 
 const MAX_RETRY_ATTEMPTS = 10;

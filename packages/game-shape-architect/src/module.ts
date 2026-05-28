@@ -1,21 +1,8 @@
-import type {
-  Achievement,
-  AchievementContext,
-  DailyChallengePick,
-  GameFeedback,
-  GameModule,
-  GameProgressInput,
-  ScoreContext,
-} from "@math-games/core";
-import { createValidateAndComputeScore } from "@math-games/core";
+import type { DailyChallengePick, GameFeedback } from "@math-games/core";
+import { createGameModule } from "@math-games/core";
 import { shapeArchitectTranslations } from "./translations";
 
-import {
-  canPlacePiece,
-  checkSolved,
-  initializeGrid,
-  placePiece,
-} from "./logic";
+import { canPlacePiece, checkSolved, initializeGrid, placePiece } from "./logic";
 import type { LevelConfig, PlacedPiece, Rotation3D } from "./logic";
 import { ShapeArchitectCompletion as ShapeArchitectCompletionSchema } from "./schema";
 import {
@@ -40,79 +27,22 @@ export interface ShapeArchitectCompletion {
   placements: PlacedPiece[];
 }
 
-const achievements: readonly Achievement[] = [
-  {
-    id: "sa_first_build",
-    category: "shape-architect",
-    name: "First Build",
-    description: "Complete a Shape Architect puzzle.",
-    rarity: "common",
-  },
-  {
-    id: "sa_master_architect",
-    category: "shape-architect",
-    name: "Master Architect",
-    description: "Complete a master Shape Architect puzzle.",
-    rarity: "epic",
-  },
-];
-
-function evaluateAchievements(
-  ctx: AchievementContext,
-  unlocked: ReadonlySet<string>,
-): string[] {
-  const newly: string[] = [];
-
-  if (ctx.completed && !unlocked.has("sa_first_build")) {
-    newly.push("sa_first_build");
-  }
-
-  if (
-    ctx.completed &&
-    ctx.difficulty === "master" &&
-    !unlocked.has("sa_master_architect")
-  ) {
-    newly.push("sa_master_architect");
-  }
-
-  return newly;
-}
-
 const cachedCatalog = getShapeArchitectCatalog();
-const cachedGetCatalog = () => cachedCatalog;
 
 function getDailyPick(hash: number): DailyChallengePick {
   const { configs } = cachedCatalog;
   const config = configs[hash % configs.length];
-
-  return {
-    levelId: config.id,
-    title: config.name,
-    difficulty: config.difficulty,
-  };
-}
-
-function computeScore({ completed, moves }: ScoreContext) {
-  return completed ? Math.max(20, 100 - moves * 5) : 10;
-}
-
-function progressExtras(_input: GameProgressInput) {
-  return {};
+  return { levelId: config.id, title: config.name, difficulty: config.difficulty };
 }
 
 function resolveLevelConfig(levelId: string): LevelConfig | null {
-  const preset = cachedCatalog.configs.find(
-    (candidate) => candidate.id === levelId,
-  );
-
+  const preset = cachedCatalog.configs.find((c) => c.id === levelId);
   if (preset) return preset;
 
   const match = levelId.match(practiceIdPattern);
-
   if (!match) return null;
 
   const difficulty = match[1] as ShapeArchitectPracticeDifficulty;
-
   if (!practiceDifficulties.includes(difficulty)) return null;
 
   return getShapeArchitectPracticeConfig(match[2], difficulty);
@@ -122,9 +52,7 @@ function isValidPosition(
   value: unknown,
 ): value is { x: number; y: number; z: number } {
   if (value === null || typeof value !== "object") return false;
-
   const { x, y, z } = value as Record<string, unknown>;
-
   return (
     typeof x === "number" &&
     typeof y === "number" &&
@@ -138,7 +66,6 @@ function isValidPosition(
 function isValidRotation(value: unknown): value is Rotation3D {
   if (!isValidPosition(value)) return false;
   const { x, y, z } = value;
-
   return (
     [0, 90, 180, 270].includes(x) &&
     [0, 90, 180, 270].includes(y) &&
@@ -153,7 +80,6 @@ function validateGameState(
   if (raw === null || typeof raw !== "object") return null;
 
   const completion = raw as Partial<ShapeArchitectCompletion>;
-
   if (!Array.isArray(completion.placements)) return null;
   if (completion.placements.length > MAX_PLACEMENTS) return null;
 
@@ -172,12 +98,9 @@ function validateGameState(
     if (!isValidRotation(rotation)) return null;
     if (usedPieceIds.has(pieceId)) return null;
 
-    const piece = level.pieces.find((candidate) => candidate.id === pieceId);
-
+    const piece = level.pieces.find((c) => c.id === pieceId);
     if (!piece) return null;
-    if (!canPlacePiece(grid, piece, position, rotation, level.gridSize)) {
-      return null;
-    }
+    if (!canPlacePiece(grid, piece, position, rotation, level.gridSize)) return null;
 
     grid = placePiece(grid, piece, position, rotation);
     usedPieceIds.add(pieceId);
@@ -190,37 +113,46 @@ function validateGameState(
     return {
       completed,
       moves,
-      feedback: {
-        kind: "generic" as const,
-        message: "Not all target cells are covered.",
-      },
+      feedback: { kind: "generic" as const, message: "Not all target cells are covered." },
     };
   }
 
   return { completed, moves };
 }
 
-export const shapeArchitectModule = {
+export const shapeArchitectModule = createGameModule({
   id: "shape-architect",
   route: "/games/shape-architect",
   title: "Shape Architect",
   description: "Dissection puzzles built from portable geometry logic.",
   difficulties,
-  achievements,
+  catalog: cachedCatalog.configs,
+  completionSchema: ShapeArchitectCompletionSchema,
   translations: shapeArchitectTranslations,
+  getCatalog: () => cachedCatalog,
   levelCount: cachedCatalog.configs.length,
-  getCatalog: cachedGetCatalog,
   getDailyPick,
-  computeScore,
-  evaluateAchievements,
-  validateAndComputeScore: createValidateAndComputeScore({
-    completionSchema: ShapeArchitectCompletionSchema,
-    resolveLevelConfig,
-    validateGameState,
-    computeScore,
-    progressExtras,
-  }),
-  progressExtras,
   resolveLevelConfig,
   validateGameState,
-} as const satisfies GameModule<LevelConfig>;
+  computeScore: ({ completed, moves }) =>
+    completed ? Math.max(20, 100 - moves * 5) : 10,
+  progressExtras: () => ({}),
+  achievements: [
+    {
+      id: "sa_first_build",
+      category: "shape-architect",
+      name: "First Build",
+      description: "Complete a Shape Architect puzzle.",
+      rarity: "common",
+      unlockWhen: { completed: true },
+    },
+    {
+      id: "sa_master_architect",
+      category: "shape-architect",
+      name: "Master Architect",
+      description: "Complete a master Shape Architect puzzle.",
+      rarity: "epic",
+      unlockWhen: { completed: true, difficulty: "master" },
+    },
+  ],
+});
