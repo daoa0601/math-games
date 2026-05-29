@@ -18,6 +18,7 @@ export { createGameModule, createValidateAndComputeScore } from "./game-module";
 export { GameProgressRequest } from "./game-progress.schema";
 
 export type { HintStep, LevelManifest, SolutionStep } from "./level-manifest";
+export { toClientCatalog, toClientManifest } from "./level-manifest";
 
 export {
   AuthorizationError,

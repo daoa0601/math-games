@@ -6,13 +6,13 @@ import type { GradeBand } from "./profile.schema";
  *
  * Steps are localized via `labelKey` (+ `params`), never raw text, so item
  * logic stays string-free and en/vi parity holds. `data` carries an optional
- * game-specific structured payload (e.g. a piece placement) for replay and is
- * opaque to core.
+ * game-specific replay payload — flat serializable primitives (flatten nested
+ * structure into keys) so the manifest stays server-fn / JSON serializable.
  */
 export interface SolutionStep {
   readonly labelKey: string;
   readonly params?: Readonly<Record<string, string | number>>;
-  readonly data?: Readonly<Record<string, unknown>>;
+  readonly data?: Readonly<Record<string, string | number | boolean>>;
 }
 
 /**
@@ -57,4 +57,36 @@ export interface LevelManifest {
   readonly solutionTrace?: readonly SolutionStep[];
   /** Faded-scaffold hint path. SERVER-ONLY — strip before sending to the client. */
   readonly hintPath?: readonly HintStep[];
+}
+
+/**
+ * Strip the SERVER-ONLY fields (solutionTrace, hintPath) from a manifest so it
+ * is safe to send to the browser — they encode the answer. The result is still
+ * a LevelManifest (those fields are optional); undefined values are omitted by
+ * JSON serialization.
+ */
+export function toClientManifest(manifest: LevelManifest): LevelManifest {
+  return { ...manifest, solutionTrace: undefined, hintPath: undefined };
+}
+
+/**
+ * Map every config in a catalog through {@link toClientManifest}, so no level
+ * served to the client carries its solution. Shape-preserving.
+ */
+export function toClientCatalog<
+  T extends { manifest?: LevelManifest },
+>(catalog: {
+  config: T;
+  configs: readonly T[];
+  initialConfigId: string;
+}): { config: T; configs: T[]; initialConfigId: string } {
+  const strip = (config: T): T =>
+    config.manifest
+      ? ({ ...config, manifest: toClientManifest(config.manifest) } as T)
+      : config;
+  return {
+    config: strip(catalog.config),
+    configs: catalog.configs.map(strip),
+    initialConfigId: catalog.initialConfigId,
+  };
 }

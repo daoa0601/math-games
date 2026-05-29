@@ -31,6 +31,7 @@ import {
 } from '@math-games/effect-game'
 import { runServerEffect } from '@/services/run-server-effect'
 
+import { toClientCatalog } from '@math-games/core'
 import type { GameModule, GameProgressRequest } from '@math-games/core'
 
 const CATALOG_CACHE_TTL = 3600
@@ -53,7 +54,9 @@ export function createGetCatalogHandler<TModule extends GameModule<any>>(
         const cached = yield* kvCache.get<Catalog>(`catalog:${module.id}`)
         if (cached) return cached
 
-        const catalog: Catalog = module.getCatalog() as Catalog
+        // Strip SERVER-ONLY manifest fields (solution traces/hints) before the
+        // catalog is cached or sent to the browser.
+        const catalog = toClientCatalog(module.getCatalog()) as Catalog
 
         yield* kvCache.put(`catalog:${module.id}`, catalog, CATALOG_CACHE_TTL)
 
