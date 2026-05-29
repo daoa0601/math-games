@@ -84,7 +84,11 @@ export class RootErrorBoundary extends Component<
 
 export function RootDocument({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: the inline script below applies the stored theme
+    // class to <html> before React hydrates, so the client `class` intentionally
+    // differs from the SSR output (which can't know the client's localStorage).
+    // This suppresses the warning one level deep — only on <html>'s own attributes.
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script
