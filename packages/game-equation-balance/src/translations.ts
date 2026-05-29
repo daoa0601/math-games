@@ -8,6 +8,8 @@ export const equationBalanceTranslations = {
     "eb.mode.twoStep": "Two-Step",
     "eb.goal": "Find the number that balances the equation",
     "eb.chooseValue": "Choose value for ?",
+    "eb.feedback.wrong_substitution":
+      "Substituting {answer} makes the left side {result}, not {rightSide}. Both sides must match.",
     "eb.practiceDescription":
       "Generate endless practice equations — pick a difficulty from easy to master.",
     "achievement.eb_first_equation.name": "First Equation",
@@ -25,6 +27,8 @@ export const equationBalanceTranslations = {
     "eb.mode.twoStep": "Hai bước",
     "eb.goal": "Tìm số khiến hai vế cân bằng",
     "eb.chooseValue": "Chọn giá trị cho ?",
+    "eb.feedback.wrong_substitution":
+      "Thay {answer} làm vế trái bằng {result}, không phải {rightSide}. Hai vế phải bằng nhau.",
     "eb.practiceDescription":
       "Tạo vô số phương trình luyện tập — chọn độ khó từ dễ đến bậc thầy.",
     "achievement.eb_first_equation.name": "Phương Trình Đầu Tiên",

@@ -71,8 +71,9 @@ export function validate(
       completed: false,
       moves: 1,
       feedback: {
-        kind: "generic",
-        message: `Substituting ${answer} gives ${result}, not ${level.rightSide}.`,
+        kind: "misconception",
+        labelKey: "eb.feedback.wrong_substitution",
+        params: { answer, result, rightSide: level.rightSide },
       },
     };
   }

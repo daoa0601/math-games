@@ -4,8 +4,8 @@ import { validate } from "../logic";
 import type { FractionConfig } from "../catalog";
 import { gcd, isSimplified } from "../catalog";
 
-function feedbackMessage(fb: GameFeedback | undefined): string | undefined {
-  return fb?.kind === "generic" ? fb.message : undefined;
+function misconception(fb: GameFeedback | undefined) {
+  return fb?.kind === "misconception" ? fb : undefined;
 }
 
 describe("gcd", () => {
@@ -43,13 +43,17 @@ describe("build mode", () => {
   test("wrong fraction fails", () => {
     const result = validate(level, { numerator: 1, denominator: 3 });
     expect(result.completed).toBe(false);
-    expect(feedbackMessage(result.feedback)).toContain("does not equal");
+    const fb = misconception(result.feedback);
+    expect(fb?.labelKey).toBe("fb.feedback.not_equal");
+    expect(fb?.params).toMatchObject({ n: 1, d: 3, targetN: 1, targetD: 2 });
   });
 
   test("zero denominator fails", () => {
     const result = validate(level, { numerator: 1, denominator: 0 });
     expect(result.completed).toBe(false);
-    expect(feedbackMessage(result.feedback)).toContain("zero");
+    expect(misconception(result.feedback)?.labelKey).toBe(
+      "fb.feedback.zero_denominator",
+    );
   });
 });
 
@@ -70,13 +74,17 @@ describe("simplify mode", () => {
   test("unsimplified equivalent fails with hint", () => {
     const result = validate(level, { numerator: 2, denominator: 4 });
     expect(result.completed).toBe(false);
-    expect(feedbackMessage(result.feedback)).toContain("simplified further");
+    const fb = misconception(result.feedback);
+    expect(fb?.labelKey).toBe("fb.feedback.not_simplified");
+    expect(fb?.params).toMatchObject({ n: 2, d: 4, divisor: 2 });
   });
 
   test("non-equivalent fraction fails", () => {
     const result = validate(level, { numerator: 1, denominator: 3 });
     expect(result.completed).toBe(false);
-    expect(feedbackMessage(result.feedback)).toContain("not equivalent");
+    const fb = misconception(result.feedback);
+    expect(fb?.labelKey).toBe("fb.feedback.not_equivalent");
+    expect(fb?.params).toMatchObject({ n: 1, d: 3, targetN: 4, targetD: 8 });
   });
 });
 
@@ -106,7 +114,14 @@ describe("compare mode", () => {
       compareAnswer: "right",
     });
     expect(result.completed).toBe(false);
-    expect(feedbackMessage(result.feedback)).toContain("greater than");
+    const fb = misconception(result.feedback);
+    expect(fb?.labelKey).toBe("fb.feedback.compare_greater");
+    expect(fb?.params).toMatchObject({
+      targetN: 1,
+      targetD: 2,
+      compN: 1,
+      compD: 3,
+    });
   });
 
   test("equal fractions", () => {

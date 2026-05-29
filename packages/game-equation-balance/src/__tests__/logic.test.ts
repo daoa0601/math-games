@@ -9,8 +9,8 @@ import {
 import type { EquationConfig } from "../catalog";
 import { evaluate } from "../catalog";
 
-function feedbackMessage(fb: GameFeedback | undefined): string | undefined {
-  return fb?.kind === "generic" ? fb.message : undefined;
+function misconception(fb: GameFeedback | undefined) {
+  return fb?.kind === "misconception" ? fb : undefined;
 }
 
 describe("evaluate", () => {
@@ -132,11 +132,12 @@ describe("validate — fill mode", () => {
     expect(result.completed).toBe(true);
   });
 
-  test("wrong answer fails with feedback", () => {
+  test("wrong answer fails with keyed substitution feedback", () => {
     const result = validate(level, { answer: 4 });
     expect(result.completed).toBe(false);
-    expect(feedbackMessage(result.feedback)).toContain("Substituting 4");
-    expect(feedbackMessage(result.feedback)).toContain("gives 7");
+    const fb = misconception(result.feedback);
+    expect(fb?.labelKey).toBe("eb.feedback.wrong_substitution");
+    expect(fb?.params).toMatchObject({ answer: 4, result: 7 });
   });
 });
 
@@ -181,9 +182,11 @@ describe("validate — two-step mode", () => {
     expect(result.completed).toBe(true);
   });
 
-  test("wrong answer fails with substitution feedback", () => {
+  test("wrong answer fails with keyed substitution feedback", () => {
     const result = validate(level, { answer: 4 });
     expect(result.completed).toBe(false);
-    expect(feedbackMessage(result.feedback)).toContain("not 23");
+    const fb = misconception(result.feedback);
+    expect(fb?.labelKey).toBe("eb.feedback.wrong_substitution");
+    expect(fb?.params).toMatchObject({ answer: 4, result: 19, rightSide: 23 });
   });
 });

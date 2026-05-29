@@ -1,7 +1,12 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
-import { formatAchievementName, formatDifficulty } from '@/i18n-format'
+import {
+  formatAchievementName,
+  formatDifficulty,
+  formatGameFeedback,
+} from '@/i18n-format'
+import type { GameFeedback } from '@math-games/core'
 import {
   Confetti,
   GameDesktopShell,
@@ -42,6 +47,7 @@ export function EquationBalanceRoute() {
 
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
+  const [feedback, setFeedback] = useState<GameFeedback | null>(null)
   const { saveStatus, setSaveStatus, clearSaveStatus } = useSaveStatus()
 
   const {
@@ -57,6 +63,7 @@ export function EquationBalanceRoute() {
     onReset: () => {
       setSelectedAnswer(null)
       setResult(null)
+      setFeedback(null)
       clearSaveStatus()
     },
   })
@@ -85,6 +92,7 @@ export function EquationBalanceRoute() {
     const completion = { answer: selectedAnswer }
     const validation = validate(level, completion)
     setResult(validation.completed ? 'correct' : 'wrong')
+    setFeedback(validation.feedback ?? null)
 
     const res = await runServerAction(
       () =>
@@ -112,6 +120,11 @@ export function EquationBalanceRoute() {
         ? 'eb.mode.oneStep'
         : 'eb.mode.twoStep'
   const modeLabel = t(modeKey)
+
+  // Misconception-targeted message for a wrong answer, falling back to the
+  // generic "try again" when the level provides no structured feedback.
+  const wrongMessage =
+    formatGameFeedback(locale, feedback) ?? t('game.tryAgain')
 
   return (
     <>
@@ -195,9 +208,7 @@ export function EquationBalanceRoute() {
                     result === 'correct' ? 'text-success' : 'text-destructive'
                   }`}
                 >
-                  {result === 'correct'
-                    ? t('stats.solved')
-                    : t('game.tryAgain')}
+                  {result === 'correct' ? t('stats.solved') : wrongMessage}
                 </p>
                 {saveStatus && (
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -310,7 +321,7 @@ export function EquationBalanceRoute() {
             {result === 'wrong' && selectedAnswer !== null ? (
               <span className="font-mono inline-flex items-center gap-1.5 rounded-full border border-line-incorrect/25 bg-line-incorrect/[0.08] px-3 py-1.5 text-[0.6875rem] font-medium text-line-incorrect">
                 <span>✗</span>
-                <span>{t('game.tryAgain')}</span>
+                <span>{wrongMessage}</span>
               </span>
             ) : result === 'correct' ? (
               <span className="font-mono inline-flex items-center gap-1.5 rounded-full border border-line-correct/30 bg-line-correct/10 px-3 py-1.5 text-[0.6875rem] font-medium text-line-correct">
@@ -378,6 +389,7 @@ export function EquationBalanceRoute() {
               onClick={() => {
                 setSelectedAnswer(null)
                 setResult(null)
+                setFeedback(null)
               }}
               className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background text-[0.8125rem] font-medium text-foreground"
             >

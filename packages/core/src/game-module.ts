@@ -71,6 +71,13 @@ export type GameFeedback =
   | { kind: "ai-forced-win"; finalMove: number }
   | { kind: "collision"; pieceId: string; collidingWith: string }
   | { kind: "out-of-bounds"; pieceId: string }
+  // Misconception-targeted feedback: a localizable key (+ params) instead of a
+  // raw English string, so item logic stays string-free and en/vi parity holds.
+  | {
+      kind: "misconception";
+      labelKey: string;
+      params?: Readonly<Record<string, string | number>>;
+    }
   | { kind: "generic"; message: string };
 
 export interface GameModule<

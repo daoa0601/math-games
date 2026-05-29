@@ -30,8 +30,8 @@ export function validate(
       completed: false,
       moves: 1,
       feedback: {
-        kind: "generic",
-        message: "Denominator cannot be zero.",
+        kind: "misconception",
+        labelKey: "fb.feedback.zero_denominator",
       },
     };
   }
@@ -44,8 +44,9 @@ export function validate(
           completed: false,
           moves: 1,
           feedback: {
-            kind: "generic",
-            message: `${n}/${d} does not equal ${targetN}/${targetD}.`,
+            kind: "misconception",
+            labelKey: "fb.feedback.not_equal",
+            params: { n, d, targetN, targetD },
           },
         };
       }
@@ -60,8 +61,9 @@ export function validate(
           completed: false,
           moves: 1,
           feedback: {
-            kind: "generic",
-            message: `${n}/${d} is not equivalent to ${targetN}/${targetD}.`,
+            kind: "misconception",
+            labelKey: "fb.feedback.not_equivalent",
+            params: { n, d, targetN, targetD },
           },
         };
       }
@@ -71,8 +73,9 @@ export function validate(
           completed: false,
           moves: 1,
           feedback: {
-            kind: "generic",
-            message: `${n}/${d} can be simplified further (divide by ${g}).`,
+            kind: "misconception",
+            labelKey: "fb.feedback.not_simplified",
+            params: { n, d, divisor: g },
           },
         };
       }
@@ -94,12 +97,19 @@ export function validate(
 
       const correct = completion.compareAnswer === correctAnswer;
       if (!correct) {
+        const labelKey =
+          correctAnswer === "left"
+            ? "fb.feedback.compare_greater"
+            : correctAnswer === "right"
+              ? "fb.feedback.compare_less"
+              : "fb.feedback.compare_equal";
         return {
           completed: false,
           moves: 1,
           feedback: {
-            kind: "generic",
-            message: `Incorrect. ${targetN}/${targetD} is ${correctAnswer === "left" ? "greater than" : correctAnswer === "right" ? "less than" : "equal to"} ${compN}/${compD}.`,
+            kind: "misconception",
+            labelKey,
+            params: { targetN, targetD, compN, compD },
           },
         };
       }

@@ -1,7 +1,12 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
-import { formatAchievementName, formatDifficulty } from '@/i18n-format'
+import {
+  formatAchievementName,
+  formatDifficulty,
+  formatGameFeedback,
+} from '@/i18n-format'
+import type { GameFeedback } from '@math-games/core'
 import {
   Confetti,
   GameDesktopShell,
@@ -40,6 +45,7 @@ export function FractionBuilderRoute() {
   const [denominator, setDenominator] = useState<number | null>(null)
   const [compareAnswer, setCompareAnswer] = useState<string | null>(null)
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
+  const [feedback, setFeedback] = useState<GameFeedback | null>(null)
   const { saveStatus, setSaveStatus, clearSaveStatus } = useSaveStatus()
 
   const {
@@ -70,11 +76,17 @@ export function FractionBuilderRoute() {
     label: formatDifficulty(locale, value),
   }))
 
+  // Misconception-targeted message for a wrong answer, falling back to the
+  // generic "try again" when the level provides no structured feedback.
+  const wrongMessage =
+    formatGameFeedback(locale, feedback) ?? t('game.tryAgain')
+
   function resetState() {
     setNumerator(null)
     setDenominator(null)
     setCompareAnswer(null)
     setResult(null)
+    setFeedback(null)
     clearSaveStatus()
   }
 
@@ -91,6 +103,7 @@ export function FractionBuilderRoute() {
 
     const validation = validate(level, completion)
     setResult(validation.completed ? 'correct' : 'wrong')
+    setFeedback(validation.feedback ?? null)
 
     const res = await runServerAction(
       () =>
@@ -259,9 +272,7 @@ export function FractionBuilderRoute() {
                     result === 'correct' ? 'text-success' : 'text-destructive'
                   }`}
                 >
-                  {result === 'correct'
-                    ? t('stats.solved')
-                    : t('game.tryAgain')}
+                  {result === 'correct' ? t('stats.solved') : wrongMessage}
                 </p>
                 {saveStatus && (
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -427,6 +438,10 @@ export function FractionBuilderRoute() {
               {result === 'correct' ? (
                 <span className="font-mono inline-flex items-center gap-1.5 rounded-full border border-line-correct/30 bg-line-correct/10 px-2.5 py-1 text-[0.6875rem] font-medium text-line-correct">
                   ✓ {t('stats.solved')}
+                </span>
+              ) : result === 'wrong' ? (
+                <span className="font-mono inline-flex items-center gap-1.5 rounded-full border border-line-incorrect/25 bg-line-incorrect/[0.08] px-2.5 py-1 text-[0.6875rem] font-medium text-line-incorrect">
+                  ✗ {wrongMessage}
                 </span>
               ) : null}
             </section>
