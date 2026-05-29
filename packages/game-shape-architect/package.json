@@ -8,12 +8,17 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./forge": {
+      "types": "./dist/solution-forge.d.ts",
+      "default": "./dist/solution-forge.js"
+    },
     "./src/*": {
       "types": "./src/*",
       "default": "./src/*"
     }
   },
   "scripts": {
+    "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint"
@@ -24,9 +29,11 @@
     "three": "0.184.0"
   },
   "devDependencies": {
+    "@types/node": "22.19.19",
     "@types/react": "19.2.14",
     "@types/three": "0.184.1",
     "react": "19.2.6",
+    "tsup": "8.5.0",
     "typescript": "6.0.3",
     "vitest": "4.1.6"
   }

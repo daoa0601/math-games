@@ -5,8 +5,8 @@ import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
 import {
   buildPracticePoolSpecs,
   forgePracticePool,
-} from "@math-games/game-shape-architect/src/solution-forge.ts";
-import type { ForgeKv } from "@math-games/game-shape-architect/src/solution-forge.ts";
+} from "@math-games/game-shape-architect/forge";
+import type { ForgeKv } from "@math-games/game-shape-architect/forge";
 
 import { Cache } from "./resources.ts";
 
