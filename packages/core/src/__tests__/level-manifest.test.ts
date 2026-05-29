@@ -2,7 +2,9 @@ import { Schema } from "effect";
 import { describe, expect, it } from "vitest";
 
 import { createGameModule } from "../game-module";
+import { buildAttemptDiagnostics } from "../index";
 import type {
+  AttemptDiagnostics,
   GradeBandType,
   HintStep,
   LevelManifest,
@@ -83,5 +85,60 @@ describe("LevelManifest contract", () => {
     expect(module.getCatalog().config.manifest?.skillTags).toEqual([
       "demo_skill",
     ]);
+  });
+});
+
+describe("buildAttemptDiagnostics", () => {
+  it("returns null when the level has no manifest", () => {
+    expect(buildAttemptDiagnostics(undefined)).toBeNull();
+  });
+
+  it("projects only the diagnostic tags; omits absent optional fields", () => {
+    const diagnostics = buildAttemptDiagnostics({
+      skillTags: ["constraint_propagation"],
+    });
+
+    expect(diagnostics).toEqual({ skillTags: ["constraint_propagation"] });
+    // Absent optional fields are omitted, not present-as-undefined, so the
+    // persisted JSON stays minimal.
+    expect(diagnostics && "misconceptionTags" in diagnostics).toBe(false);
+    expect(diagnostics && "difficultyFeatures" in diagnostics).toBe(false);
+  });
+
+  it("carries skill, misconception, and difficulty signals when present", () => {
+    const diagnostics = buildAttemptDiagnostics({
+      skillTags: ["constraint_propagation", "additive_structure"],
+      misconceptionTags: ["ignores_overlapping_line"],
+      difficultyFeatures: { lineCount: 3, hasParityConstraint: true },
+    });
+
+    expect(diagnostics).toEqual({
+      skillTags: ["constraint_propagation", "additive_structure"],
+      misconceptionTags: ["ignores_overlapping_line"],
+      difficultyFeatures: { lineCount: 3, hasParityConstraint: true },
+    });
+  });
+
+  it("never leaks the answer-bearing solutionTrace / hintPath into an attempt row", () => {
+    const step: SolutionStep = { labelKey: "mg.trace.fill_forced_cell" };
+    const hint: HintStep = { labelKey: "mg.hint.most_constrained", level: 1 };
+
+    const diagnostics = buildAttemptDiagnostics({
+      skillTags: ["constraint_propagation"],
+      solutionTrace: [step],
+      hintPath: [hint],
+    });
+
+    expect(diagnostics).toEqual({ skillTags: ["constraint_propagation"] });
+    expect(diagnostics && "solutionTrace" in diagnostics).toBe(false);
+    expect(diagnostics && "hintPath" in diagnostics).toBe(false);
+  });
+
+  it("satisfies the AttemptDiagnostics shape", () => {
+    const diagnostics: AttemptDiagnostics | null = buildAttemptDiagnostics({
+      skillTags: ["demo_skill"],
+    });
+
+    expect(diagnostics?.skillTags).toEqual(["demo_skill"]);
   });
 });

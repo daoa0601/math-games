@@ -70,6 +70,45 @@ export function toClientManifest(manifest: LevelManifest): LevelManifest {
 }
 
 /**
+ * Diagnostic projection of a level's manifest, persisted alongside each
+ * attempt (in `game_attempts.completion_json`) so attempts are keyed to the
+ * skills and misconceptions the level exercised. This is the substrate for
+ * skill-mastery achievements and teacher-facing misconception summaries.
+ *
+ * Outcome signals (completed/score/moves) already have dedicated attempt
+ * columns; this carries only the pedagogical dimension that has no column.
+ * The answer-bearing `solutionTrace`/`hintPath` are deliberately excluded.
+ */
+export interface AttemptDiagnostics {
+  readonly skillTags: readonly string[];
+  readonly misconceptionTags?: readonly string[];
+  readonly difficultyFeatures?: Readonly<
+    Record<string, number | boolean | string>
+  >;
+}
+
+/**
+ * Project a level's manifest into the {@link AttemptDiagnostics} record to log
+ * with an attempt. Returns `null` for an un-tagged level so its
+ * `completion_json` stays null rather than an empty object. Optional fields are
+ * omitted when absent, keeping the persisted JSON minimal.
+ */
+export function buildAttemptDiagnostics(
+  manifest: LevelManifest | undefined,
+): AttemptDiagnostics | null {
+  if (!manifest) return null;
+  return {
+    skillTags: manifest.skillTags,
+    ...(manifest.misconceptionTags
+      ? { misconceptionTags: manifest.misconceptionTags }
+      : {}),
+    ...(manifest.difficultyFeatures
+      ? { difficultyFeatures: manifest.difficultyFeatures }
+      : {}),
+  };
+}
+
+/**
  * Map every config in a catalog through {@link toClientManifest}, so no level
  * served to the client carries its solution. Shape-preserving.
  */

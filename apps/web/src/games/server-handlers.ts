@@ -31,7 +31,7 @@ import {
 } from '@math-games/effect-game'
 import { runServerEffect } from '@/services/run-server-effect'
 
-import { toClientCatalog } from '@math-games/core'
+import { buildAttemptDiagnostics, toClientCatalog } from '@math-games/core'
 import type { GameModule, GameProgressRequest } from '@math-games/core'
 
 const CATALOG_CACHE_TTL = 3600
@@ -96,6 +96,14 @@ export function createRecordProgressPipeline<TModule extends GameModule<any>>(
       ...result,
     })
 
+    // Log the level's diagnostic tags (skills/misconceptions it exercises),
+    // resolved server-side from the manifest, so attempts are keyed to skills
+    // for mastery achievements and teacher misconception summaries. The level
+    // is known to resolve here — validateAndComputeScore just used it.
+    const diagnostics = buildAttemptDiagnostics(
+      module.resolveLevelConfig(data.levelId)?.manifest,
+    )
+
     const attemptsService = yield* GameAttemptsService
     yield* attemptsService.record({
       playerId,
@@ -105,7 +113,7 @@ export function createRecordProgressPipeline<TModule extends GameModule<any>>(
       completed: result.completed,
       moves: result.moves,
       mode: data.challengeDate ? 'daily' : 'practice',
-      completionJson: JSON.stringify(data.completion),
+      completionJson: diagnostics ? JSON.stringify(diagnostics) : undefined,
     })
 
     const analytics = yield* AnalyticsService
