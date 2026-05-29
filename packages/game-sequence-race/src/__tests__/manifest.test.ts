@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { getSequenceRaceCatalog } from "../catalog";
+import { applyMove, createGameState } from "../logic";
 import type { GameConfig } from "../logic";
-import { buildSequenceRaceManifest } from "../manifest";
+import {
+  buildSequenceRaceManifest,
+  deriveSequenceRaceTrace,
+} from "../manifest";
 import { sequenceRaceModule } from "../module";
 
 function tinyRace(): GameConfig {
@@ -37,6 +41,32 @@ describe("buildSequenceRaceManifest", () => {
     for (const config of getSequenceRaceCatalog().configs) {
       expect(config.manifest?.skillTags).toContain("functional_thinking");
     }
+  });
+});
+
+describe("deriveSolutionTrace", () => {
+  it("emits a keyed optimal-play line that replays to game over", () => {
+    const config = tinyRace();
+    const trace = deriveSequenceRaceTrace(config);
+
+    expect(trace.length).toBeGreaterThan(0);
+    expect(trace[0]?.labelKey).toBe("trace.optimalMove");
+
+    // Replay the trace: each step must be a valid move, ending at game over.
+    let state = createGameState(config);
+    for (const step of trace) {
+      const stepValue = step.data?.["step"];
+      expect(typeof stepValue).toBe("number");
+      const before = state;
+      state = applyMove(state, stepValue as number);
+      expect(state).not.toBe(before); // move was valid (state advanced)
+    }
+    expect(state.gameOver).toBe(true);
+  });
+
+  it("includes the trace in the built manifest", () => {
+    const m = buildSequenceRaceManifest(tinyRace());
+    expect(m.solutionTrace?.length ?? 0).toBeGreaterThan(0);
   });
 });
 
