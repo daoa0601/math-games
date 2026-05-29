@@ -15,8 +15,8 @@ import {
   SOLUTION_CACHE_TTL,
   solutionCacheKey,
   solveLevelToSolution,
-} from "./logic";
-import type { LevelConfig } from "./logic";
+} from "./logic/solution";
+import type { LevelConfig } from "./logic/types";
 import {
   getShapeArchitectCatalog,
   getShapeArchitectPracticeConfig,

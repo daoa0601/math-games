@@ -1,6 +1,7 @@
 import { createSeededRandom } from "@math-games/core";
 
-import { generateGuaranteedSolvableWithRetry, presetLevels } from "./logic";
+import { generateGuaranteedSolvableWithRetry } from "./logic/seededGenerator";
+import { presetLevels } from "./logic/presets";
 
 export type ShapeArchitectPracticeDifficulty = "easy" | "medium" | "hard";
 
