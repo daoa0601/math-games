@@ -31,8 +31,7 @@ import {
 } from '@math-games/effect-game'
 import { runServerEffect } from '@/services/run-server-effect'
 
-import type { GameProgressRequest } from './game-progress.schema'
-import type { GameModule } from './game-module'
+import type { GameModule, GameProgressRequest } from '@math-games/core'
 
 const CATALOG_CACHE_TTL = 3600
 
@@ -103,6 +102,7 @@ export function createRecordProgressPipeline<TModule extends GameModule<any>>(
       completed: result.completed,
       moves: result.moves,
       mode: data.challengeDate ? 'daily' : 'practice',
+      completionJson: JSON.stringify(data.completion),
     })
 
     const analytics = yield* AnalyticsService

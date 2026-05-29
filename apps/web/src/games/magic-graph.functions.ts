@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { Schema } from 'effect'
 
-import { GameProgressRequest } from '@/games/game-progress.schema'
+import { GameProgressRequest } from '@math-games/core'
 import {
   createGetCatalogHandler,
   createRecordProgressPipeline,

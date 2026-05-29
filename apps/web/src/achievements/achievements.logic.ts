@@ -1,4 +1,4 @@
-import type { Achievement, AchievementContext } from '@/games/game-module'
+import type { Achievement, AchievementContext } from '@math-games/core'
 import { GAME_IDS, GAME_MODULES, registry } from '@/games/registry'
 import type { GameId } from '@/games/registry'
 
@@ -7,7 +7,7 @@ export type {
   AchievementCategory,
   AchievementContext,
   AchievementRarity,
-} from '@/games/game-module'
+} from '@math-games/core'
 export type { GameId } from '@/games/registry'
 
 const GLOBAL_ACHIEVEMENTS: readonly Achievement[] = [

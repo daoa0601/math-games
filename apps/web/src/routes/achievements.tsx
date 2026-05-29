@@ -14,7 +14,7 @@ import {
   Wordmark,
 } from '@math-games/ui'
 import { getPlayerProfileOverview } from '@/player/profile.functions'
-import type { AchievementRarity } from '@/games/game-module'
+import type { AchievementRarity } from '@math-games/core'
 import { RouteErrorFallback } from '@/routes/-route-error'
 import { RoutePending } from '@/routes/-route-pending'
 
