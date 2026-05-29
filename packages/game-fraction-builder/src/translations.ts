@@ -17,6 +17,8 @@ export const fractionBuilderTranslations = {
     "fb.numerator": "Numerator",
     "fb.denominator": "Denominator",
     "fb.pickOne": "pick 1",
+    "fb.practiceDescription":
+      "Generate endless build, simplify, and compare problems — easy to master.",
     "achievement.fb_first_fraction.name": "First Fraction",
     "achievement.fb_first_fraction.description":
       "Complete a Fraction Builder level.",
@@ -44,6 +46,8 @@ export const fractionBuilderTranslations = {
     "fb.numerator": "Tử số",
     "fb.denominator": "Mẫu số",
     "fb.pickOne": "chọn 1",
+    "fb.practiceDescription":
+      "Tạo vô số bài lắp ghép, rút gọn và so sánh — từ dễ đến bậc thầy.",
     "achievement.fb_first_fraction.name": "Phân Số Đầu Tiên",
     "achievement.fb_first_fraction.description":
       "Hoàn thành một cấp Xây Dựng Phân Số.",

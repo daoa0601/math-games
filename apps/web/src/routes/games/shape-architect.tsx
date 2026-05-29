@@ -60,6 +60,7 @@ import { getShapeArchitectPracticeConfig } from '@math-games/game-shape-architec
 import type { ShapeArchitectPracticeDifficulty } from '@math-games/game-shape-architect'
 import {
   getShapeArchitectLevel,
+  getShapeArchitectSolution,
   recordShapeArchitectProgress,
   validateShapeArchitectMove,
 } from '@/games/shape-architect.functions'
@@ -111,7 +112,6 @@ function ShapeArchitectRoute() {
       setSelectedPieceId(null)
       setPlacementRotation(DEFAULT_ROTATION)
       setErrorPopup(null)
-      setViewMode('2d')
       setPendingPosition(null)
       clearSaveStatus()
       solvedProgressKeyRef.current = null
@@ -136,6 +136,10 @@ function ShapeArchitectRoute() {
   const validationSeqRef = useRef(0)
   const solvedProgressKeyRef = useRef<string | null>(null)
   const solver = useSolverWorker()
+  const fetchGuidedSolution = useServerFn(getShapeArchitectSolution)
+  const [guidedSteps, setGuidedSteps] = useState<PlacedPiece[] | null>(null)
+  const [guidedLoading, setGuidedLoading] = useState(false)
+  const guidedFallbackRef = useRef(false)
 
   const serverGrid = useMemo(
     () => gridFromState(serverState.grid),
@@ -144,14 +148,36 @@ function ShapeArchitectRoute() {
   const grid = optimisticGrid ?? serverGrid
   const placedPieces = placements
 
+  // The next solution step the player hasn't placed yet. Derived from current
+  // placements so it stays correct through undo/redo without an extra counter.
+  const guidedStep = useMemo(() => {
+    if (!guidedSteps) return null
+    return (
+      guidedSteps.find(
+        (step) => !placedPieces.some((p) => p.pieceId === step.pieceId),
+      ) ?? null
+    )
+  }, [guidedSteps, placedPieces])
+
   useEffect(() => {
     if (!solver.result) return
     const result = solver.result
 
     if (!result.solvable || !result.solution) {
+      guidedFallbackRef.current = false
+      setGuidedLoading(false)
       setSaveStatus(
         result.timedOut ? t('status.solverTimedOut') : t('status.noSolution'),
       )
+      return
+    }
+
+    // Guided mode asked the client solver to stand in for a cache miss: load
+    // the steps for a walkthrough rather than auto-filling the board.
+    if (guidedFallbackRef.current) {
+      guidedFallbackRef.current = false
+      setGuidedLoading(false)
+      setGuidedSteps(buildPlacedPieces(config, result.solution))
       return
     }
 
@@ -295,6 +321,45 @@ function ShapeArchitectRoute() {
     session.resetSession()
   }
 
+  async function startGuided() {
+    if (session.timedOut) return
+    setGuidedLoading(true)
+
+    // Walk the solution from an empty board.
+    const emptyGrid = initializeGrid(config)
+    void validatePlacements([], { action: 'reset', optimisticGrid: emptyGrid })
+    setSelectedPieceId(null)
+    setPlacementRotation(DEFAULT_ROTATION)
+    setPendingPosition(null)
+    solvedProgressKeyRef.current = null
+    clearSaveStatus()
+
+    const result = await runServerAction(
+      () => fetchGuidedSolution({ data: { levelId: config.id } }),
+      t('status.noSolution'),
+    )
+
+    if (result.ok && result.value && result.value.steps.length > 0) {
+      setGuidedSteps(result.value.steps)
+      setGuidedLoading(false)
+      return
+    }
+
+    // Cache miss or error — fall back to solving in the browser.
+    guidedFallbackRef.current = true
+    solver.solve(config)
+  }
+
+  function stopGuided() {
+    setGuidedSteps(null)
+    setGuidedLoading(false)
+    guidedFallbackRef.current = false
+    setSelectedPieceId(null)
+    setPlacementRotation(DEFAULT_ROTATION)
+    setPendingPosition(null)
+    clearSaveStatus()
+  }
+
   function selectPiece(piece: Piece) {
     if (session.timedOut) return
     if (pieceIsPlaced(placedPieces, piece)) return
@@ -420,6 +485,84 @@ function ShapeArchitectRoute() {
     })
   }
 
+  // Keyboard placement controls — identical in 2D and 3D. Read the latest
+  // handlers through a ref so the listener mounts once and never goes stale.
+  const placementActionsRef = useRef({
+    rotate: (_axis: RotationAxis) => {},
+    place: () => {},
+    cancelOrDeselect: () => {},
+    hasSelection: false,
+    is3D: false,
+  })
+  placementActionsRef.current = {
+    rotate: rotateSelectedPiece,
+    place: confirmPlacement,
+    cancelOrDeselect: () => {
+      if (pendingPosition !== null) cancelPlacement()
+      else setSelectedPieceId(null)
+    },
+    hasSelection: selectedPiece !== null && !session.timedOut,
+    is3D: config.type === '3D',
+  }
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const target = e.target
+      if (
+        target instanceof HTMLElement &&
+        /^(input|textarea|select)$/i.test(target.tagName)
+      ) {
+        return
+      }
+
+      const actions = placementActionsRef.current
+      if (!actions.hasSelection) return
+
+      switch (e.key.toLowerCase()) {
+        case 'r':
+        case 'z':
+          actions.rotate('z')
+          break
+        case 'x':
+          if (!actions.is3D) return
+          actions.rotate('x')
+          break
+        case 'y':
+          if (!actions.is3D) return
+          actions.rotate('y')
+          break
+        case 'enter':
+          actions.place()
+          break
+        case 'escape':
+          actions.cancelOrDeselect()
+          break
+        default:
+          return
+      }
+      e.preventDefault()
+    }
+
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  // Guided mode: pre-select the next solution piece and ghost it at its target
+  // so the player just confirms each step.
+  useEffect(() => {
+    if (!guidedStep || pendingAction !== null || session.timedOut) return
+    setSelectedPieceId(guidedStep.pieceId)
+    setPlacementRotation(guidedStep.rotation)
+    setPendingPosition(guidedStep.position)
+  }, [guidedStep, pendingAction, session.timedOut])
+
+  // Leave guided mode when the level changes.
+  useEffect(() => {
+    setGuidedSteps(null)
+    setGuidedLoading(false)
+    guidedFallbackRef.current = false
+  }, [config.id])
+
   function generatePracticeLevel(seed: string, difficulty: string) {
     const nextConfig = getShapeArchitectPracticeConfig(
       seed,
@@ -474,6 +617,17 @@ function ShapeArchitectRoute() {
                   >
                     {t('game.timed')}
                   </Button>
+                  <Button
+                    size="sm"
+                    variant={guidedSteps !== null ? 'default' : 'outline'}
+                    onClick={() =>
+                      guidedSteps !== null ? stopGuided() : void startGuided()
+                    }
+                    disabled={guidedLoading || session.timedOut}
+                    type="button"
+                  >
+                    {guidedLoading ? t('game.guidedLoading') : t('game.guided')}
+                  </Button>
                 </div>
                 <Badge variant={session.timedOut ? 'destructive' : 'secondary'}>
                   {session.mode === 'timed'
@@ -499,6 +653,40 @@ function ShapeArchitectRoute() {
                 </ToggleGroup>
               </div>
             </div>
+
+            {guidedSteps !== null ? (
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/[0.06] px-3 py-2">
+                <span className="text-sm font-medium text-primary">
+                  {guidedStep
+                    ? `${t('game.guidedNext')} ${formatLevelName(
+                        locale,
+                        config.pieces.find((p) => p.id === guidedStep.pieceId)
+                          ?.name ?? '',
+                      )} (${placedPieces.length + 1}/${guidedSteps.length})`
+                    : t('game.guidedDone')}
+                </span>
+                <div className="flex gap-2">
+                  {guidedStep ? (
+                    <Button
+                      size="sm"
+                      onClick={confirmPlacement}
+                      disabled={pendingAction !== null}
+                      type="button"
+                    >
+                      {t('game.placePiece')}
+                    </Button>
+                  ) : null}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={stopGuided}
+                    type="button"
+                  >
+                    {t('game.exitGuided')}
+                  </Button>
+                </div>
+              </div>
+            ) : null}
 
             {viewMode === '3d' ? (
               <div className="relative mt-4 overflow-x-auto">
@@ -605,6 +793,45 @@ function ShapeArchitectRoute() {
                 )
               })}
             </div>
+
+            {selectedPiece ? (
+              <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span>
+                  <kbd className="rounded border border-border px-1 font-mono">
+                    R
+                  </kbd>{' '}
+                  {t('game.rotatePiece')}
+                </span>
+                {config.type === '3D' ? (
+                  <span>
+                    <kbd className="rounded border border-border px-1 font-mono">
+                      X
+                    </kbd>
+                    /
+                    <kbd className="rounded border border-border px-1 font-mono">
+                      Y
+                    </kbd>
+                    /
+                    <kbd className="rounded border border-border px-1 font-mono">
+                      Z
+                    </kbd>{' '}
+                    {t('game.rotatePieceAxis')}
+                  </span>
+                ) : null}
+                <span>
+                  <kbd className="rounded border border-border px-1 font-mono">
+                    ↵
+                  </kbd>{' '}
+                  {t('game.placePiece')}
+                </span>
+                <span>
+                  <kbd className="rounded border border-border px-1 font-mono">
+                    Esc
+                  </kbd>{' '}
+                  {t('game.cancelPlacement')}
+                </span>
+              </p>
+            ) : null}
 
             <div className="mt-4 flex gap-2">
               <Button

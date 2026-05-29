@@ -1,6 +1,7 @@
 export { shapeArchitectModule } from "./module";
 export * from "./logic";
 export * from "./catalog";
+export * from "./solution-forge";
 export { ShapeArchitectCompletion } from "./schema";
 export { useSolverWorker } from "./logic/useSolverWorker";
 export * from "./rendering/three-scene";

@@ -3,6 +3,7 @@ import { Effect } from 'effect'
 import {
   GameProgressValidationError,
   HeaderService,
+  KvCacheService,
   OriginGuardService,
   RateLimitService,
 } from '@math-games/effect-infra'
@@ -13,6 +14,7 @@ import {
   checkSolved,
   initializeGrid,
   placePiece,
+  solveLevelToSolution,
 } from '@math-games/game-shape-architect'
 import type {
   LevelConfig,
@@ -20,7 +22,14 @@ import type {
   ShapeArchitectGameState,
 } from '@math-games/game-shape-architect'
 import { shapeArchitectModule } from '@math-games/game-shape-architect'
-import type { ShapeArchitectMoveRequest } from './shape-architect.schema'
+import type {
+  ShapeArchitectMoveRequest,
+  ShapeArchitectSolutionRequest,
+} from './shape-architect.schema'
+import {
+  readCachedSolution,
+  writeCachedSolution,
+} from './shape-architect-solution-cache'
 
 function createGameState(
   level: LevelConfig,
@@ -128,6 +137,31 @@ function replayPlacements(
     moveCount: placedPieces.length,
     accepted: true,
   }
+}
+
+export function createSolveLevelEffect(
+  data: Pick<ShapeArchitectSolutionRequest, 'levelId'>,
+) {
+  return Effect.gen(function* () {
+    const level = shapeArchitectModule.resolveLevelConfig(data.levelId)
+    if (!level) {
+      return yield* new GameProgressValidationError({
+        reason: `Unknown level: ${data.levelId}`,
+      })
+    }
+
+    const cache = yield* KvCacheService
+
+    const cached = yield* readCachedSolution(cache, data.levelId)
+    if (cached) return cached
+
+    const solution = solveLevelToSolution(level)
+    if (solution) {
+      yield* writeCachedSolution(cache, solution)
+    }
+
+    return solution
+  })
 }
 
 export function createValidateMoveEffect(data: ShapeArchitectMoveRequest) {

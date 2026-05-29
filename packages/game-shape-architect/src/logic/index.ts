@@ -81,5 +81,16 @@ export {
 // DLX Solver
 export { solvePuzzleDLX } from "./dlx-solver";
 
+// Canonical level solution (shared by solver, server cache, guided mode)
+export {
+  solveLevelToSolution,
+  solutionStepsToPlacedPieces,
+  solutionCacheKey,
+  SOLUTION_CACHE_TTL,
+  type LevelSolution,
+  type LevelSolutionMetrics,
+  type SolveLevelOptions,
+} from "./solution";
+
 // Bitboard
 export { VoxelBitboard } from "./voxel-bitboard";

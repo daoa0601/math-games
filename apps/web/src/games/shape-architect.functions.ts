@@ -9,8 +9,14 @@ import {
 import { runServerEffect } from '@/services/run-server-effect'
 
 import { shapeArchitectModule } from '@math-games/game-shape-architect'
-import { ShapeArchitectMoveRequest } from './shape-architect.schema'
-import { createValidateMoveEffect } from './shape-architect.server'
+import {
+  ShapeArchitectMoveRequest,
+  ShapeArchitectSolutionRequest,
+} from './shape-architect.schema'
+import {
+  createSolveLevelEffect,
+  createValidateMoveEffect,
+} from './shape-architect.server'
 
 export const getShapeArchitectLevel = createServerFn({ method: 'GET' }).handler(
   createGetCatalogHandler(shapeArchitectModule),
@@ -25,3 +31,7 @@ export const recordShapeArchitectProgress = createServerFn({ method: 'POST' })
 export const validateShapeArchitectMove = createServerFn({ method: 'POST' })
   .inputValidator(Schema.decodeUnknownSync(ShapeArchitectMoveRequest))
   .handler(({ data }) => runServerEffect(createValidateMoveEffect(data)))
+
+export const getShapeArchitectSolution = createServerFn({ method: 'GET' })
+  .inputValidator(Schema.decodeUnknownSync(ShapeArchitectSolutionRequest))
+  .handler(({ data }) => runServerEffect(createSolveLevelEffect(data)))

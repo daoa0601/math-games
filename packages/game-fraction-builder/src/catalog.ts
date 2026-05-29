@@ -1,8 +1,10 @@
 export type FractionMode = "build" | "simplify" | "compare";
 
+export type Difficulty = "easy" | "medium" | "hard" | "expert" | "master";
+
 export interface FractionConfig {
   id: string;
-  difficulty: "easy" | "medium" | "hard";
+  difficulty: Difficulty;
   mode: FractionMode;
   /** Target fraction as [numerator, denominator] */
   target: readonly [number, number];
@@ -160,4 +162,10 @@ export const catalog: readonly FractionConfig[] = [
 
 export { gcd, isSimplified };
 
-export const difficulties = ["easy", "medium", "hard"] as const;
+export const difficulties = [
+  "easy",
+  "medium",
+  "hard",
+  "expert",
+  "master",
+] as const;

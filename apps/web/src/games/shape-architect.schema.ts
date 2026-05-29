@@ -37,3 +37,9 @@ export class ShapeArchitectMoveRequest extends Schema.Class<ShapeArchitectMoveRe
     Schema.check(Schema.isMaxLength(64, { message: 'Too many placements' })),
   ),
 }) {}
+
+export class ShapeArchitectSolutionRequest extends Schema.Class<ShapeArchitectSolutionRequest>(
+  'ShapeArchitectSolutionRequest',
+)({
+  levelId: Schema.NonEmptyString,
+}) {}

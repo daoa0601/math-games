@@ -16,11 +16,15 @@ import { Button } from '@math-games/ui'
 import { Card, CardContent, CardHeader } from '@math-games/ui'
 import { useT } from '@math-games/ui'
 import { LevelGrid } from '@/games/level-grid'
+import { PracticeGeneratorSection } from '@/games/practice-generator-section'
 import { validateLevelSearch } from '@/games/level-search'
 import {
   validate,
   formatEquationTokens,
+  difficulties,
 } from '@math-games/game-equation-balance'
+import type { Difficulty } from '@math-games/game-equation-balance'
+import { getEquationBalancePracticeConfig } from '@math-games/game-equation-balance'
 import {
   getEquationBalanceCatalog,
   recordEquationBalanceProgress,
@@ -57,6 +61,7 @@ function EquationBalanceRoute() {
     configIndex: levelIndex,
     availableConfigs,
     selectLevel: selectLevelRaw,
+    addAndSelectConfig,
   } = useLevelSelection({
     configs,
     initialConfigId,
@@ -74,6 +79,17 @@ function EquationBalanceRoute() {
     const next = availableConfigs[levelIndex + 1] ?? availableConfigs[0]
     selectLevelRaw(next)
   }
+
+  function generatePracticeLevel(seed: string, difficulty: string) {
+    addAndSelectConfig(
+      getEquationBalancePracticeConfig(seed, difficulty as Difficulty),
+    )
+  }
+
+  const difficultyOptions = difficulties.map((value) => ({
+    value,
+    label: formatDifficulty(locale, value),
+  }))
 
   async function handleSubmit() {
     if (selectedAnswer === null) return
@@ -124,19 +140,6 @@ function EquationBalanceRoute() {
           />
         }
       >
-        <LevelGrid
-          items={availableConfigs.map((c) => ({
-            id: c.id,
-            name: c.mode === 'fill' ? 'Fill' : c.mode,
-            subtitle: formatDifficulty(locale, c.difficulty),
-          }))}
-          selectedId={level.id}
-          onSelect={(id) => {
-            const config = availableConfigs.find((c) => c.id === id)
-            if (config) selectLevelRaw(config)
-          }}
-        />
-
         <div className="relative">
           <Confetti active={result === 'correct'} />
         </div>
@@ -145,7 +148,9 @@ function EquationBalanceRoute() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <Badge variant="outline">{modeLabel}</Badge>
-              <Badge variant="secondary">{level.difficulty}</Badge>
+              <Badge variant="secondary">
+                {formatDifficulty(locale, level.difficulty)}
+              </Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -218,6 +223,33 @@ function EquationBalanceRoute() {
             )}
           </CardContent>
         </Card>
+
+        <PracticeGeneratorSection
+          title={t('game.levels')}
+          description={t('eb.practiceDescription')}
+          difficulties={difficultyOptions}
+          defaultDifficulty="medium"
+          onGenerate={generatePracticeLevel}
+        >
+          <LevelGrid
+            items={availableConfigs.map((c) => ({
+              id: c.id,
+              name: t(
+                c.mode === 'fill'
+                  ? 'eb.mode.fill'
+                  : c.mode === 'one-step'
+                    ? 'eb.mode.oneStep'
+                    : 'eb.mode.twoStep',
+              ),
+              subtitle: formatDifficulty(locale, c.difficulty),
+            }))}
+            selectedId={level.id}
+            onSelect={(id) => {
+              const config = availableConfigs.find((c) => c.id === id)
+              if (config) selectLevelRaw(config)
+            }}
+          />
+        </PracticeGeneratorSection>
       </GameDesktopShell>
 
       {/* ── MOBILE LAYOUT (< md) ─────────────────────────────── */}

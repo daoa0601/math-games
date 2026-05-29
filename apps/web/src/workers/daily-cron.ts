@@ -3,10 +3,16 @@ import { drizzle } from 'drizzle-orm/d1'
 
 import { schema as dbSchema } from '@math-games/db'
 import { planDailyChallenge } from '../daily/daily.logic'
+import { forgeShapeArchitectSolutions } from '../games/shape-architect-solution-forge'
+
+interface ServiceBinding {
+  fetch(input: string, init?: { method?: string }): Promise<unknown>
+}
 
 interface Env {
   DB: D1Database
   CACHE: KVNamespace
+  LEVEL_FORGE: ServiceBinding
 }
 
 function dateKey(date: Date): string {
@@ -97,6 +103,25 @@ async function purgeOldChallenges(env: Env) {
     .where(lt(dbSchema.dailyChallenges.challengeDate, cutoffKey))
 }
 
+async function pretsolveShapeArchitect(env: Env) {
+  await forgeShapeArchitectSolutions({
+    get: (key) => env.CACHE.get(key, 'text'),
+    put: (key, value, options) => env.CACHE.put(key, value, options),
+  })
+}
+
+// Kick the durable level-forge workflow to pre-warm the larger practice pool.
+// Best-effort: a workflow hiccup must not break the catalog pre-warm above.
+async function triggerLevelForge(env: Env) {
+  try {
+    await env.LEVEL_FORGE.fetch('https://level-forge/start', {
+      method: 'POST',
+    })
+  } catch {
+    // ignore — the catalog is already warmed and the pool retries tomorrow
+  }
+}
+
 export default {
   async scheduled(
     _controller: ScheduledController,
@@ -104,6 +129,8 @@ export default {
     _ctx: ExecutionContext,
   ) {
     await pregenerate(env)
+    await pretsolveShapeArchitect(env)
+    await triggerLevelForge(env)
     await purgeOldChallenges(env)
   },
 } satisfies ExportedHandler<Env>

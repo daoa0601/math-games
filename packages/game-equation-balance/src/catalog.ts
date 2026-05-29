@@ -2,9 +2,11 @@ export type EquationMode = "fill" | "one-step" | "two-step";
 
 export type Operator = "+" | "-" | "*";
 
+export type Difficulty = "easy" | "medium" | "hard" | "expert" | "master";
+
 export interface EquationConfig {
   id: string;
-  difficulty: "easy" | "medium" | "hard";
+  difficulty: Difficulty;
   mode: EquationMode;
   /** Left side terms: numbers or "?" for the unknown */
   leftTerms: readonly (number | "?")[];
@@ -206,4 +208,10 @@ export const catalog: readonly EquationConfig[] = [
   },
 ];
 
-export const difficulties = ["easy", "medium", "hard"] as const;
+export const difficulties = [
+  "easy",
+  "medium",
+  "hard",
+  "expert",
+  "master",
+] as const;

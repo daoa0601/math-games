@@ -4,6 +4,9 @@ import * as Drizzle from "alchemy/Drizzle";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 
+import { Cache } from "./resources.ts";
+import LevelForgeWorker from "./level-forge.worker.ts";
+
 export default Alchemy.Stack(
   "math-games",
   {
@@ -18,9 +21,7 @@ export default Alchemy.Stack(
       primaryLocationHint: "wnam",
     });
 
-    const cache = yield* Cloudflare.KVNamespace("CACHE", {
-      title: "math-games-cache",
-    });
+    const cache = yield* Cache;
 
     const analytics = yield* Cloudflare.AnalyticsEngineDataset("ANALYTICS", {
       dataset: "math-games-events",
@@ -60,6 +61,8 @@ export default Alchemy.Stack(
       },
     });
 
+    const levelForge = yield* LevelForgeWorker;
+
     const cronWorker = yield* Cloudflare.Worker("daily-cron", {
       name: "math-games-daily-cron",
       main: "../apps/web/src/workers/daily-cron.ts",
@@ -71,6 +74,7 @@ export default Alchemy.Stack(
       bindings: {
         DB: database,
         CACHE: cache,
+        LEVEL_FORGE: levelForge,
       },
     });
 
@@ -81,6 +85,7 @@ export default Alchemy.Stack(
       assetsBucketName: assets.bucketName,
       workerUrl: worker.url,
       cronWorkerName: cronWorker.workerName,
+      levelForgeWorkerName: levelForge.workerName,
     };
   }),
 );

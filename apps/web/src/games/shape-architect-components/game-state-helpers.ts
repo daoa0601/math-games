@@ -1,6 +1,7 @@
 import {
   initializeGrid,
   placePiece,
+  solutionStepsToPlacedPieces,
   VoxelGrid,
 } from '@math-games/game-shape-architect'
 import type {
@@ -23,16 +24,7 @@ export function buildPlacedPieces(
   config: LevelConfig,
   solution: SolutionStep[],
 ): PlacedPiece[] {
-  return solution.flatMap((step) => {
-    const piece = config.pieces.find((c) => c.id === step.pieceId)
-    if (!piece) return []
-    return {
-      pieceId: step.pieceId,
-      position: step.position,
-      rotation: step.rotation,
-      color: piece.color,
-    }
-  })
+  return solutionStepsToPlacedPieces(config, solution)
 }
 
 export function pieceIsPlaced(placedPieces: PlacedPiece[], piece: Piece) {

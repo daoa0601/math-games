@@ -16,8 +16,11 @@ import { Button } from '@math-games/ui'
 import { Card, CardContent, CardHeader } from '@math-games/ui'
 import { useT } from '@math-games/ui'
 import { LevelGrid } from '@/games/level-grid'
+import { PracticeGeneratorSection } from '@/games/practice-generator-section'
 import { validateLevelSearch } from '@/games/level-search'
-import { validate } from '@math-games/game-fraction-builder'
+import { validate, difficulties } from '@math-games/game-fraction-builder'
+import type { Difficulty } from '@math-games/game-fraction-builder'
+import { getFractionBuilderPracticeConfig } from '@math-games/game-fraction-builder'
 import {
   getFractionBuilderCatalog,
   recordFractionBuilderProgress,
@@ -56,6 +59,7 @@ function FractionBuilderRoute() {
     configIndex: levelIndex,
     availableConfigs,
     selectLevel: selectLevelRaw,
+    addAndSelectConfig,
   } = useLevelSelection({
     configs,
     initialConfigId,
@@ -66,6 +70,17 @@ function FractionBuilderRoute() {
   })
 
   const progressLabels = { unlocked: t('status.unlocked') }
+
+  function generatePracticeLevel(seed: string, difficulty: string) {
+    addAndSelectConfig(
+      getFractionBuilderPracticeConfig(seed, difficulty as Difficulty),
+    )
+  }
+
+  const difficultyOptions = difficulties.map((value) => ({
+    value,
+    label: formatDifficulty(locale, value),
+  }))
 
   function resetState() {
     setNumerator(null)
@@ -131,19 +146,6 @@ function FractionBuilderRoute() {
           />
         }
       >
-        <LevelGrid
-          items={availableConfigs.map((c) => ({
-            id: c.id,
-            name: c.mode,
-            subtitle: formatDifficulty(locale, c.difficulty),
-          }))}
-          selectedId={level.id}
-          onSelect={(id) => {
-            const config = availableConfigs.find((c) => c.id === id)
-            if (config) selectLevelRaw(config)
-          }}
-        />
-
         <div className="relative">
           <Confetti active={result === 'correct'} />
         </div>
@@ -152,7 +154,9 @@ function FractionBuilderRoute() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <Badge variant="outline">{modeLabel}</Badge>
-              <Badge variant="secondary">{level.difficulty}</Badge>
+              <Badge variant="secondary">
+                {formatDifficulty(locale, level.difficulty)}
+              </Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -283,6 +287,33 @@ function FractionBuilderRoute() {
             )}
           </CardContent>
         </Card>
+
+        <PracticeGeneratorSection
+          title={t('game.levels')}
+          description={t('fb.practiceDescription')}
+          difficulties={difficultyOptions}
+          defaultDifficulty="medium"
+          onGenerate={generatePracticeLevel}
+        >
+          <LevelGrid
+            items={availableConfigs.map((c) => ({
+              id: c.id,
+              name: t(
+                c.mode === 'build'
+                  ? 'fb.mode.build'
+                  : c.mode === 'simplify'
+                    ? 'fb.mode.simplify'
+                    : 'fb.mode.compare',
+              ),
+              subtitle: formatDifficulty(locale, c.difficulty),
+            }))}
+            selectedId={level.id}
+            onSelect={(id) => {
+              const config = availableConfigs.find((c) => c.id === id)
+              if (config) selectLevelRaw(config)
+            }}
+          />
+        </PracticeGeneratorSection>
       </GameDesktopShell>
 
       {/* ── MOBILE LAYOUT (< md) ─────────────────────────────── */}

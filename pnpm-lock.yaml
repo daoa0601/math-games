@@ -193,6 +193,9 @@ importers:
       '@effect/sql-pg':
         specifier: 4.0.0-beta.66
         version: 4.0.0-beta.66(effect@4.0.0-beta.66)
+      '@math-games/game-shape-architect':
+        specifier: workspace:*
+        version: link:../packages/game-shape-architect
       alchemy:
         specifier: 2.0.0-beta.38
         version: 2.0.0-beta.38(@effect/platform-node@4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1))(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@types/react@19.2.14)(drizzle-kit@1.0.0-rc.2)(drizzle-orm@1.0.0-rc.2(@effect/sql-pg@4.0.0-beta.66(effect@4.0.0-beta.66))(@libsql/client@0.17.3)(effect@4.0.0-beta.66)(pg@8.20.0)(zod@3.25.76))(effect@4.0.0-beta.66)(typescript@6.0.3)(vite@8.0.12(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@4.1.6)(workerd@1.20260516.1)(ws@8.20.1)
