@@ -11,6 +11,8 @@ export interface AchievementUnlockCondition {
   difficulty?: string;
   isOptimalSolution?: boolean;
   wasWinner?: boolean;
+  /** Unlock only when the played level exercises this skill (manifest skillTag). */
+  skillTag?: string;
 }
 
 export interface Achievement {
@@ -31,6 +33,8 @@ export interface AchievementContext {
   isOptimalSolution?: boolean;
   wasWinner?: boolean;
   gamesPlayedByType?: Record<string, number>;
+  /** Skills the played level exercises (from its manifest), for skill-gated achievements. */
+  skillTags?: readonly string[];
 }
 
 export interface ScoreContext {
@@ -197,6 +201,8 @@ function evaluateAchievementsByCondition(
       )
         return false;
       if (c.wasWinner !== undefined && ctx.wasWinner !== c.wasWinner)
+        return false;
+      if (c.skillTag !== undefined && !ctx.skillTags?.includes(c.skillTag))
         return false;
       return true;
     })

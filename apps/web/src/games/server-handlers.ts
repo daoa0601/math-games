@@ -89,20 +89,23 @@ export function createRecordProgressPipeline<TModule extends GameModule<any>>(
       data.completion,
     )
 
+    // Resolve the level's manifest once — the level is known to resolve here,
+    // validateAndComputeScore just used it. It feeds both skill-gated
+    // achievements (skillTags) and the attempt diagnostics below.
+    const manifest = module.resolveLevelConfig(data.levelId)?.manifest
+
     const progress = yield* recordGameProgress({
       playerId,
       gameId: module.id,
       levelId: data.levelId,
+      skillTags: manifest?.skillTags,
       ...result,
     })
 
-    // Log the level's diagnostic tags (skills/misconceptions it exercises),
-    // resolved server-side from the manifest, so attempts are keyed to skills
-    // for mastery achievements and teacher misconception summaries. The level
-    // is known to resolve here — validateAndComputeScore just used it.
-    const diagnostics = buildAttemptDiagnostics(
-      module.resolveLevelConfig(data.levelId)?.manifest,
-    )
+    // Log the level's diagnostic tags (skills/misconceptions it exercises) so
+    // attempts are keyed to skills for mastery achievements and teacher
+    // misconception summaries.
+    const diagnostics = buildAttemptDiagnostics(manifest)
 
     const attemptsService = yield* GameAttemptsService
     yield* attemptsService.record({

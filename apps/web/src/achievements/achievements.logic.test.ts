@@ -49,6 +49,25 @@ describe('checkAchievements (single-sourced contract)', () => {
     expect(unlocked).toContain('eb_first_equation')
   })
 
+  it('threads skillTags through to the declarative engine without affecting non-skill gates', () => {
+    // 4b: the AchievementContext carries the played level's manifest skillTags so
+    // core's unlockWhen engine can gate on skill. No registry game gates on skill
+    // yet (the gate behavior is proven in core/achievement-conditions.test.ts);
+    // this pins that supplying skillTags is accepted and non-breaking — existing
+    // completed/difficulty unlocks are unchanged.
+    const ctx: AchievementContext = {
+      gameId: 'equation-balance',
+      completed: true,
+      difficulty: 'hard',
+      skillTags: ['equality_as_invariant', 'inverse_operations'],
+    }
+
+    const unlocked = checkAchievements(ctx, [])
+
+    expect(unlocked).toContain('eb_first_equation')
+    expect(unlocked).toContain('eb_hard_solver')
+  })
+
   it('pins that the app-facing Achievement type is the core contract (carries unlockWhen)', () => {
     // Before single-sourcing, this object literal failed tsc with an excess-property
     // error because the local mirror's Achievement had no `unlockWhen` field.
