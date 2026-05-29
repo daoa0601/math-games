@@ -1,6 +1,7 @@
 import { Effect, Schema } from "effect";
 
 import { GameProgressValidationError } from "./errors";
+import type { LevelManifest } from "./level-manifest";
 
 export type AchievementCategory = "global" | string;
 export type AchievementRarity = "common" | "rare" | "epic" | "legendary";
@@ -69,10 +70,11 @@ export type GameFeedback =
   | { kind: "generic"; message: string };
 
 export interface GameModule<
-  TConfig extends { id: string; difficulty: string } = {
-    id: string;
-    difficulty: string;
-  },
+  TConfig extends { id: string; difficulty: string; manifest?: LevelManifest } =
+    {
+      id: string;
+      difficulty: string;
+    },
 > {
   readonly id: string;
   readonly route: string;
@@ -118,7 +120,7 @@ export interface GameModule<
 }
 
 export function createValidateAndComputeScore<
-  TConfig extends { id: string; difficulty: string },
+  TConfig extends { id: string; difficulty: string; manifest?: LevelManifest },
 >(parts: {
   completionSchema: Schema.Decoder<unknown>;
   resolveLevelConfig: (levelId: string) => TConfig | null;
@@ -208,7 +210,7 @@ type GameValidationResult = {
 } | null;
 
 export interface GameModuleInput<
-  TConfig extends { id: string; difficulty: string },
+  TConfig extends { id: string; difficulty: string; manifest?: LevelManifest },
 > {
   id: string;
   route: string;
@@ -240,7 +242,7 @@ export interface GameModuleInput<
 }
 
 export function createGameModule<
-  TConfig extends { id: string; difficulty: string },
+  TConfig extends { id: string; difficulty: string; manifest?: LevelManifest },
   const TId extends string,
   const TRoute extends string,
 >(
