@@ -1,3 +1,5 @@
+import type { LevelManifest } from "@math-games/core";
+
 export type EquationMode = "fill" | "one-step" | "two-step";
 
 export type Operator = "+" | "-" | "*";
@@ -18,6 +20,8 @@ export interface EquationConfig {
   answer: number;
   /** Choices to pick from */
   choices: readonly number[];
+  /** Pedagogical metadata (skills, misconceptions, difficulty signals). */
+  manifest?: LevelManifest;
 }
 
 function evaluate(terms: readonly number[], ops: readonly Operator[]): number {

@@ -49,7 +49,7 @@ function getDailyPick(hash: number): DailyChallengePick {
 }
 
 function resolveLevelConfig(levelId: string): GameConfig | null {
-  const preset = presetGames.find((c) => c.id === levelId);
+  const preset = cachedCatalog.configs.find((c) => c.id === levelId);
   if (preset) return preset;
 
   const match = levelId.match(practiceIdPattern);

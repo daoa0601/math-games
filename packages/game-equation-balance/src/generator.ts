@@ -4,6 +4,7 @@ import { createDailyRandom, createSeededRandom } from "@math-games/core";
 import { catalog } from "./catalog";
 import type { Difficulty, EquationConfig, Operator } from "./catalog";
 import { substituteAndEvaluate } from "./logic";
+import { buildEquationBalanceManifest } from "./manifest";
 
 // Difficulty is parameterised in code (not just bigger numbers): higher tiers
 // add a coefficient on the unknown and extra constant terms, so "expert" and
@@ -143,14 +144,21 @@ const generatedCatalogSeeds: ReadonlyArray<readonly [Difficulty, string]> = [
 ];
 
 export function getEquationBalanceCatalog() {
-  const generated = generatedCatalogSeeds.map(([difficulty, seed]) => ({
-    ...generateEquation(
-      createSeededRandom(`equation-balance-catalog-${difficulty}-${seed}`),
-      difficulty,
-    ),
-    id: `eb-${difficulty}-${seed}`,
+  const curated = catalog.map((base) => ({
+    ...base,
+    manifest: buildEquationBalanceManifest(base),
   }));
-  const configs = [...catalog, ...generated];
+  const generated = generatedCatalogSeeds.map(([difficulty, seed]) => {
+    const base: EquationConfig = {
+      ...generateEquation(
+        createSeededRandom(`equation-balance-catalog-${difficulty}-${seed}`),
+        difficulty,
+      ),
+      id: `eb-${difficulty}-${seed}`,
+    };
+    return { ...base, manifest: buildEquationBalanceManifest(base, seed) };
+  });
+  const configs: EquationConfig[] = [...curated, ...generated];
   const config = configs[0];
 
   return { config, configs, initialConfigId: config.id };
@@ -161,7 +169,7 @@ export function getEquationBalancePracticeConfig(
   difficulty: Difficulty,
 ): EquationConfig {
   const normalized = normalizeSeed(seed);
-  return {
+  const base: EquationConfig = {
     ...generateEquation(
       createSeededRandom(
         `equation-balance-practice-${difficulty}-${normalized}`,
@@ -170,14 +178,16 @@ export function getEquationBalancePracticeConfig(
     ),
     id: `practice_${difficulty}_${normalized}`,
   };
+  return { ...base, manifest: buildEquationBalanceManifest(base, normalized) };
 }
 
 export function getDailyEquationBalanceLevel(date?: string): EquationConfig {
   const dateStr = date ?? new Date().toISOString().split("T")[0];
   const rng = createDailyRandom(dateStr, "equation-balance");
   const difficulty = rng.pick(["medium", "hard", "expert"] as const);
-  return {
+  const base: EquationConfig = {
     ...generateEquation(rng, difficulty),
     id: `daily_${difficulty}_${dateStr}`,
   };
+  return { ...base, manifest: buildEquationBalanceManifest(base, dateStr) };
 }

@@ -1,3 +1,7 @@
+import type { LevelManifest } from "@math-games/core";
+
+import { buildPatternDetectiveManifest } from "./manifest";
+
 export interface PatternConfig {
   id: string;
   difficulty: "easy" | "medium" | "hard";
@@ -12,9 +16,10 @@ export interface PatternConfig {
   answer: number;
   distractors: readonly number[];
   hint?: string;
+  manifest?: LevelManifest;
 }
 
-export const catalog: readonly PatternConfig[] = [
+const patternEntries: readonly PatternConfig[] = [
   // --- Easy: arithmetic sequences ---
   {
     id: "pd-easy-add2",
@@ -184,5 +189,9 @@ export const catalog: readonly PatternConfig[] = [
     distractors: [8, 10, 21],
   },
 ];
+
+export const catalog: readonly PatternConfig[] = patternEntries.map(
+  (entry) => ({ ...entry, manifest: buildPatternDetectiveManifest(entry) }),
+);
 
 export const difficulties = ["easy", "medium", "hard"] as const;
