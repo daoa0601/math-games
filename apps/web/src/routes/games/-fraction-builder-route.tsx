@@ -38,7 +38,7 @@ export function FractionBuilderRoute() {
   const { locale } = useLocale()
   const navigate = useNavigate()
   const { configs, initialConfigId } = routeApi.useLoaderData()
-  const { level: searchLevel } = routeApi.useSearch()
+  const { level: searchLevel, daily } = routeApi.useSearch()
   const recordProgress = useServerFn(recordFractionBuilderProgress)
 
   const [numerator, setNumerator] = useState<number | null>(null)
@@ -111,6 +111,7 @@ export function FractionBuilderRoute() {
           data: {
             levelId: level.id,
             completion,
+            ...(daily ? { challengeDate: daily } : {}),
           },
         }),
       t('status.progressSaveFailed'),

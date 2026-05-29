@@ -56,7 +56,7 @@ export function SequenceRaceRoute() {
   const navigate = useNavigate()
   const { configs, initialConfigId } = routeApi.useLoaderData()
   const sequenceInfoByType = SEQUENCE_INFO
-  const { level: searchLevel } = routeApi.useSearch()
+  const { level: searchLevel, daily } = routeApi.useSearch()
   const recordProgress = useServerFn(recordSequenceRaceProgress)
   const { saveStatus, setSaveStatus, clearSaveStatus } = useSaveStatus()
 
@@ -115,6 +115,7 @@ export function SequenceRaceRoute() {
                   step: entry.step,
                 })),
               },
+              ...(daily ? { challengeDate: daily } : {}),
             },
           }),
         t('status.progressSaveFailed'),

@@ -197,3 +197,25 @@ export const dailyChallenges = sqliteTable(
   },
   (table) => [uniqueIndex("daily_challenges_seed_idx").on(table.seed)],
 );
+
+// Per-player daily challenge selection, pinned on first load so a player's daily
+// stays stable across reloads/devices for the day (their skill stats change as
+// they play, which would otherwise drift the pick). No seed unique index — per
+// -player seeds collide across players by design.
+export const playerDailySelections = sqliteTable(
+  "player_daily_selections",
+  {
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    challengeDate: text("challenge_date").notNull(),
+    gameId: text("game_id").notNull(),
+    levelId: text("level_id").notNull(),
+    seed: text("seed").notNull(),
+    configJson: text("config_json").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [primaryKey({ columns: [table.playerId, table.challengeDate] })],
+);

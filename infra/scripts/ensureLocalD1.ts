@@ -4,6 +4,11 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const dbBinding = "DB";
+// A representative subset that answers "is the local schema bootstrapped?" —
+// NOT the full table list. Do not add freshly-introduced tables here: on a
+// stale local DB that would fail the probe and re-apply every migration,
+// conflicting on already-existing tables. Fresh DBs (CI/e2e) still get new
+// tables via the full migration loop below.
 const requiredTables = [
   "players",
   "game_progress",

@@ -55,6 +55,16 @@ export interface DailyChallengePick {
   difficulty: string;
 }
 
+/**
+ * Input to a game's daily pick: a deterministic per-player seed and an optional
+ * difficulty hint from the skill-aware planner. The module picks a concrete
+ * level, preferring the hinted difficulty and falling back to its full catalog.
+ */
+export interface DailyPickInput {
+  seed: number;
+  difficulty?: string;
+}
+
 export interface GameCatalog<TConfig> {
   config: TConfig;
   configs: TConfig[];
@@ -98,7 +108,7 @@ export interface GameModule<
   readonly levelCount: number;
   readonly translations: GameTranslations;
   readonly getCatalog: () => GameCatalog<TConfig>;
-  readonly getDailyPick: (hash: number) => DailyChallengePick;
+  readonly getDailyPick: (opts: DailyPickInput) => DailyChallengePick;
   readonly computeScore: (ctx: ScoreContext) => number;
   readonly evaluateAchievements: (
     ctx: AchievementContext,
@@ -245,7 +255,7 @@ export interface GameModuleInput<
   ) => string[];
   getCatalog?: () => GameCatalog<TConfig>;
   levelCount?: number;
-  getDailyPick?: (hash: number) => DailyChallengePick;
+  getDailyPick?: (opts: DailyPickInput) => DailyChallengePick;
   resolveLevelConfig?: (levelId: string) => TConfig | null;
   validateGameState?: (level: TConfig, raw: unknown) => GameValidationResult;
   progressExtras?: (input: GameProgressInput) => {
@@ -277,8 +287,12 @@ export function createGameModule<
 
   const getDailyPick =
     input.getDailyPick ??
-    ((hash: number) => {
-      const level = catalog[hash % catalog.length];
+    (({ seed, difficulty }: DailyPickInput) => {
+      const pool = difficulty
+        ? catalog.filter((c) => c.difficulty === difficulty)
+        : catalog;
+      const list = pool.length > 0 ? pool : catalog;
+      const level = list[seed % list.length];
       return {
         levelId: level.id,
         title: level.id,

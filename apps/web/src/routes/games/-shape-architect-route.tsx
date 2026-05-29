@@ -79,7 +79,7 @@ export function ShapeArchitectRoute() {
   const t = useT()
   const { locale } = useLocale()
   const { configs, initialConfigId } = routeApi.useLoaderData()
-  const { level: searchLevel } = routeApi.useSearch()
+  const { level: searchLevel, daily } = routeApi.useSearch()
   const recordProgress = useServerFn(recordShapeArchitectProgress)
   const validateMove = useServerFn(validateShapeArchitectMove)
   const { saveStatus, setSaveStatus, clearSaveStatus } = useSaveStatus()
@@ -209,6 +209,7 @@ export function ShapeArchitectRoute() {
           data: {
             levelId: config.id,
             completion: { placements: confirmedPlacements },
+            ...(daily ? { challengeDate: daily } : {}),
           },
         }),
       t('status.progressSaveFailed'),

@@ -35,7 +35,10 @@ export function DailyRoute() {
   const t = useT()
   const { locale } = useLocale()
   const navigate = useNavigate()
-  const playSearch = { level: challenge.levelId }
+  const playSearch = {
+    level: challenge.levelId,
+    daily: challenge.challengeDate,
+  }
   const module = registry[challenge.gameId as keyof typeof registry]
   const playRoute = module.route
   const gameId = challenge.gameId as GameGlyphId

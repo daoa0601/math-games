@@ -52,7 +52,7 @@ export function MagicGraphRoute() {
   const { locale } = useLocale()
   const navigate = useNavigate()
   const { configs, initialConfigId } = routeApi.useLoaderData()
-  const { level: searchLevel } = routeApi.useSearch()
+  const { level: searchLevel, daily } = routeApi.useSearch()
   const recordProgress = useServerFn(recordMagicGraphProgress)
 
   const [values, setValues] = useState<NodeValues>(() =>
@@ -131,6 +131,7 @@ export function MagicGraphRoute() {
           data: {
             levelId: config.id,
             completion: { nodeValues: submission },
+            ...(daily ? { challengeDate: daily } : {}),
           },
         }),
       t('status.progressSaveFailed'),

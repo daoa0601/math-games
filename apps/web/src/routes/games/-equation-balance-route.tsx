@@ -42,7 +42,7 @@ export function EquationBalanceRoute() {
   const { locale } = useLocale()
   const navigate = useNavigate()
   const { configs, initialConfigId } = routeApi.useLoaderData()
-  const { level: searchLevel } = routeApi.useSearch()
+  const { level: searchLevel, daily } = routeApi.useSearch()
   const recordProgress = useServerFn(recordEquationBalanceProgress)
 
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
@@ -100,6 +100,7 @@ export function EquationBalanceRoute() {
           data: {
             levelId: level.id,
             completion,
+            ...(daily ? { challengeDate: daily } : {}),
           },
         }),
       t('status.progressSaveFailed'),

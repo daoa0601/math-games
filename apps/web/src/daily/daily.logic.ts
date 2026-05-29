@@ -1,6 +1,13 @@
 import { dailyGameRotation, registry } from '@/games/registry'
 import { Schema } from 'effect'
 
+import {
+  frontierWeightedStrategy,
+  seedHash,
+  type DailySelectionStrategy,
+  type PerGameStat,
+} from './daily.strategy'
+
 export class DailyChallengeConfig extends Schema.Class<DailyChallengeConfig>(
   'DailyChallengeConfig',
 )({
@@ -14,38 +21,53 @@ export class DailyChallengeConfig extends Schema.Class<DailyChallengeConfig>(
 const DailyChallengeConfigJson = Schema.fromJsonString(DailyChallengeConfig)
 
 export interface PlannedDailyChallenge extends DailyChallengeConfig {
+  playerId: string
   challengeDate: string
   seed: string
   configJson: string
 }
 
-async function hashDate(value: string): Promise<number> {
-  const encoded = new TextEncoder().encode(value)
-  const digest = await crypto.subtle.digest('SHA-256', encoded)
-  return new DataView(digest).getUint32(0)
-}
-
-export async function planDailyChallenge(
+/**
+ * Plan a player's daily challenge for a date. Synchronous and pure given the
+ * player's per-game stats: the {@link DailySelectionStrategy} chooses the game
+ * (+ difficulty hint) from their skill history, the chosen module picks a
+ * concrete level, and the per-player seed makes the result reproducible.
+ */
+export function planDailyChallenge(
   dateKey: string,
-): Promise<PlannedDailyChallenge> {
-  const hash = await hashDate(dateKey)
-  const gameId = dailyGameRotation[hash % dailyGameRotation.length]
-  const module = registry[gameId]
-  const pick = module.getDailyPick(hash)
+  playerId: string,
+  perGameStats: readonly PerGameStat[],
+  strategy: DailySelectionStrategy = frontierWeightedStrategy,
+): PlannedDailyChallenge {
+  const decision = strategy.select({
+    dateKey,
+    playerId,
+    perGameStats,
+    publishedGameIds: dailyGameRotation,
+    rotation: dailyGameRotation,
+  })
+
+  const module = registry[decision.gameId as keyof typeof registry]
+  const seed = seedHash(`${dateKey}:${playerId}:${decision.gameId}`)
+  const pick = module.getDailyPick({
+    seed,
+    difficulty: decision.difficultyHint,
+  })
 
   const config: DailyChallengeConfig = {
-    gameId,
+    gameId: decision.gameId,
     levelId: pick.levelId,
     title: pick.title,
     route: module.route,
     difficulty: pick.difficulty,
   }
-  const seed = `${dateKey}:${gameId}:${pick.levelId}`
+  const challengeSeed = `${dateKey}:${playerId}:${decision.gameId}:${pick.levelId}`
 
   return {
     ...config,
+    playerId,
     challengeDate: dateKey,
-    seed,
+    seed: challengeSeed,
     configJson: JSON.stringify(config),
   }
 }

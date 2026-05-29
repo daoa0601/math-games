@@ -105,3 +105,50 @@ describe("GameAttemptsService.record", () => {
     expect(harness.insertedValues[0].completionJson).toBeUndefined();
   });
 });
+
+function createStatsHarness(
+  rows: Array<{ gameId: string; attempts: number; completedCount: number }>,
+) {
+  const dbLayer = Layer.succeed(DbService, {
+    db: {
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            groupBy: () => Promise.resolve(rows),
+          }),
+        }),
+      }),
+    } as never,
+  });
+
+  const layer = GameAttemptsServiceLive.pipe(Layer.provide(dbLayer));
+
+  return (playerId: string) =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        const service = yield* GameAttemptsService;
+        return yield* service.getPerGameStats(playerId);
+      }).pipe(Effect.provide(layer)),
+    );
+}
+
+describe("GameAttemptsService.getPerGameStats", () => {
+  it("maps grouped rows to per-game attempts + completion rate", async () => {
+    const getPerGameStats = createStatsHarness([
+      { gameId: "magic-graph", attempts: 10, completedCount: 7 },
+      { gameId: "equation-balance", attempts: 4, completedCount: 0 },
+    ]);
+
+    const stats = await getPerGameStats("player-1");
+
+    expect(stats).toEqual([
+      { gameId: "magic-graph", attempts: 10, completionRate: 0.7 },
+      { gameId: "equation-balance", attempts: 4, completionRate: 0 },
+    ]);
+  });
+
+  it("returns an empty array when the player has no attempts", async () => {
+    const getPerGameStats = createStatsHarness([]);
+    expect(await getPerGameStats("player-1")).toEqual([]);
+  });
+});

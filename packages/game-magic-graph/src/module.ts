@@ -1,6 +1,7 @@
 import type {
   AchievementContext,
   DailyChallengePick,
+  DailyPickInput,
   GameFeedback,
   GameProgressInput,
 } from "@math-games/core";
@@ -35,9 +36,16 @@ export interface MagicGraphCompletion {
 
 const cachedCatalog = getMagicGraphCatalog();
 
-function getDailyPick(hash: number): DailyChallengePick {
+function getDailyPick({
+  seed,
+  difficulty,
+}: DailyPickInput): DailyChallengePick {
   const { configs } = cachedCatalog;
-  const config = configs[hash % configs.length];
+  const pool = difficulty
+    ? configs.filter((c) => c.difficulty === difficulty)
+    : configs;
+  const list = pool.length > 0 ? pool : configs;
+  const config = list[seed % list.length];
   return {
     levelId: config.id,
     title: config.name,

@@ -6,7 +6,12 @@ export { DbService, DbServiceLive } from "./db";
 export type { DbShape } from "./db";
 export { GameLayer } from "./game-layer";
 export { GameAttemptsService, GameAttemptsServiceLive } from "./game-attempts";
-export type { GameAttemptsShape, GameStats } from "./game-attempts";
+export type {
+  AttemptInput,
+  GameAttemptsShape,
+  GameStats,
+  PerGameStatRow,
+} from "./game-attempts";
 export type { PlayerIdentity } from "./identity.server";
 export {
   createPlayerIdentity,

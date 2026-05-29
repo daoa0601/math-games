@@ -1,5 +1,5 @@
 import { createGameModule } from "@math-games/core";
-import type { DailyChallengePick } from "@math-games/core";
+import type { DailyChallengePick, DailyPickInput } from "@math-games/core";
 
 import { difficulties } from "./catalog";
 import type { Difficulty } from "./catalog";
@@ -15,9 +15,16 @@ const practiceIdPattern = /^practice_(easy|medium|hard|expert|master)_(.+)$/;
 
 const cachedCatalog = getFractionBuilderCatalog();
 
-function getDailyPick(hash: number): DailyChallengePick {
+function getDailyPick({
+  seed,
+  difficulty,
+}: DailyPickInput): DailyChallengePick {
   const { configs } = cachedCatalog;
-  const config = configs[hash % configs.length];
+  const pool = difficulty
+    ? configs.filter((c) => c.difficulty === difficulty)
+    : configs;
+  const list = pool.length > 0 ? pool : configs;
+  const config = list[seed % list.length];
   return {
     levelId: config.id,
     title: config.id,

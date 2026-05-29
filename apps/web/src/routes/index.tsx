@@ -132,7 +132,10 @@ function Home() {
           <div className="mt-6 flex flex-wrap gap-2">
             <Link
               className={buttonVariants()}
-              search={{ level: dailyChallenge.levelId }}
+              search={{
+                level: dailyChallenge.levelId,
+                daily: dailyChallenge.challengeDate,
+              }}
               to={dailyTo}
             >
               {t('home.start')} →
@@ -246,6 +249,7 @@ function Home() {
             title={formatLevelName(locale, dailyChallenge.title)}
             to={dailyTo}
             levelId={dailyChallenge.levelId}
+            daily={dailyChallenge.challengeDate}
           />
 
           {/* Quick Stats */}
@@ -341,18 +345,20 @@ function DailyHeroCard({
   title,
   to,
   levelId,
+  daily,
 }: {
   gameId: GameGlyphId
   title: string
   to: string
   levelId: string
+  daily: string
 }) {
   const t = useT()
 
   return (
     <Link
       to={to}
-      search={{ level: levelId }}
+      search={{ level: levelId, daily }}
       className={`theme-${gameId} block`}
     >
       <article

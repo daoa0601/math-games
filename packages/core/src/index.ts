@@ -5,6 +5,7 @@ export type {
   AchievementRarity,
   AchievementUnlockCondition,
   DailyChallengePick,
+  DailyPickInput,
   GameCatalog,
   GameFeedback,
   GameModule,

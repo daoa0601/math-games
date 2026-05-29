@@ -31,7 +31,7 @@ export function PatternDetectiveRoute() {
   const t = useT()
   const { locale } = useLocale()
   const { configs, initialConfigId } = routeApi.useLoaderData()
-  const { level: searchLevel } = routeApi.useSearch()
+  const { level: searchLevel, daily } = routeApi.useSearch()
   const recordProgress = useServerFn(recordPatternDetectiveProgress)
 
   const [selected, setSelected] = useState<number | null>(null)
@@ -72,6 +72,7 @@ export function PatternDetectiveRoute() {
           data: {
             levelId: level.id,
             completion: { selectedAnswer: answer },
+            ...(daily ? { challengeDate: daily } : {}),
           },
         }),
       t('status.progressSaveFailed'),
