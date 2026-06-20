@@ -1,4 +1,4 @@
-import { Schema } from "effect";
+import { Effect, Schema } from "effect";
 import { describe, expect, it } from "vitest";
 
 import { createGameModule } from "../game-module";
@@ -52,7 +52,7 @@ describe("LevelManifest contract", () => {
     expect(full.gradeBand).toBe("middle");
   });
 
-  it("attaches to a level config and round-trips through the GameModule contract", () => {
+  it("attaches to a level config and round-trips through the GameModule contract", async () => {
     type DemoConfig = {
       id: string;
       difficulty: string;
@@ -85,6 +85,11 @@ describe("LevelManifest contract", () => {
     expect(module.getCatalog().config.manifest?.skillTags).toEqual([
       "demo_skill",
     ]);
+    await expect(
+      Effect.runPromise(module.validateAndComputeScore("demo-1", {})),
+    ).resolves.toMatchObject({
+      manifest: { skillTags: ["demo_skill"] },
+    });
   });
 });
 

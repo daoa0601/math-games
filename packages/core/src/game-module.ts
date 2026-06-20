@@ -132,6 +132,7 @@ export interface GameModule<
       moves: number;
       score: number;
       difficulty: string;
+      manifest?: LevelManifest;
       isOptimalSolution?: boolean;
       wasWinner?: boolean;
       feedback?: GameFeedback;
@@ -193,6 +194,7 @@ export function createValidateAndComputeScore<
         moves: validation.moves,
         score,
         difficulty: level.difficulty,
+        ...(level.manifest ? { manifest: level.manifest } : {}),
         feedback: validation.feedback,
         ...extras,
       };

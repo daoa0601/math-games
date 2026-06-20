@@ -1,4 +1,4 @@
-import { eq } from '@math-games/db'
+import { and, eq } from '@math-games/db'
 import { Effect } from 'effect'
 
 import { schema } from '@math-games/db'
@@ -12,6 +12,8 @@ import type {
   PlayerProfileInput,
 } from '@/player/profile.schema'
 import {
+  ClockService,
+  DailyChallengeError,
   HeaderService,
   KvCacheService,
   OriginGuardService,
@@ -31,7 +33,11 @@ import {
 } from '@math-games/effect-game'
 import { runServerEffect } from '@/services/run-server-effect'
 
-import { buildAttemptDiagnostics, toClientCatalog } from '@math-games/core'
+import {
+  buildAttemptDiagnostics,
+  GameProgressValidationError,
+  toClientCatalog,
+} from '@math-games/core'
 import type { GameModule, GameProgressRequest } from '@math-games/core'
 
 const CATALOG_CACHE_TTL = 3600
@@ -89,17 +95,24 @@ export function createRecordProgressPipeline<TModule extends GameModule<any>>(
       data.completion,
     )
 
-    // Resolve the level's manifest once — the level is known to resolve here,
-    // validateAndComputeScore just used it. It feeds both skill-gated
-    // achievements (skillTags) and the attempt diagnostics below.
-    const manifest = module.resolveLevelConfig(data.levelId)?.manifest
+    const dailyChallengeDate = data.challengeDate
+    if (dailyChallengeDate) {
+      yield* assertDailySelection({
+        playerId,
+        challengeDate: dailyChallengeDate,
+        gameId: module.id,
+        levelId: data.levelId,
+      })
+    }
+
+    const { feedback, manifest, ...progressResult } = result
 
     const progress = yield* recordGameProgress({
       playerId,
       gameId: module.id,
       levelId: data.levelId,
       skillTags: manifest?.skillTags,
-      ...result,
+      ...progressResult,
     })
 
     // Log the level's diagnostic tags (skills/misconceptions it exercises) so
@@ -115,7 +128,7 @@ export function createRecordProgressPipeline<TModule extends GameModule<any>>(
       score: result.score,
       completed: result.completed,
       moves: result.moves,
-      mode: data.challengeDate ? 'daily' : 'practice',
+      mode: dailyChallengeDate ? 'daily' : 'practice',
       completionJson: diagnostics ? JSON.stringify(diagnostics) : undefined,
     })
 
@@ -131,11 +144,11 @@ export function createRecordProgressPipeline<TModule extends GameModule<any>>(
       yield* analytics.trackAchievement({ gameId: module.id, achievementId })
     }
 
-    if (data.challengeDate) {
+    if (dailyChallengeDate) {
       const streakService = yield* DailyStreakService
       yield* streakService.recordDailyCompletion({
         playerId,
-        challengeDate: data.challengeDate,
+        challengeDate: dailyChallengeDate,
         gameId: module.id,
         levelId: data.levelId,
         score: result.score,
@@ -163,7 +176,54 @@ export function createRecordProgressPipeline<TModule extends GameModule<any>>(
       moves: result.moves,
     })
 
-    return { ...progress, feedback: result.feedback, rankUp }
+    return { ...progress, feedback, rankUp }
+  })
+}
+
+function assertDailySelection(input: {
+  playerId: string
+  challengeDate: string
+  gameId: string
+  levelId: string
+}) {
+  return Effect.gen(function* () {
+    const today = yield* (yield* ClockService).dateKey()
+    if (input.challengeDate !== today) {
+      return yield* new GameProgressValidationError({
+        reason: "Daily challenge submissions must use today's assigned level.",
+      })
+    }
+
+    const { db } = yield* DbService
+    const rows = yield* withD1Retry(
+      Effect.tryPromise({
+        try: () =>
+          db
+            .select({
+              gameId: schema.playerDailySelections.gameId,
+              levelId: schema.playerDailySelections.levelId,
+            })
+            .from(schema.playerDailySelections)
+            .where(
+              and(
+                eq(schema.playerDailySelections.playerId, input.playerId),
+                eq(
+                  schema.playerDailySelections.challengeDate,
+                  input.challengeDate,
+                ),
+              ),
+            )
+            .limit(1),
+        catch: (cause) => new DailyChallengeError({ cause }),
+      }),
+    )
+
+    const row = rows.at(0)
+    if (!row || row.gameId !== input.gameId || row.levelId !== input.levelId) {
+      return yield* new GameProgressValidationError({
+        reason: "Daily challenge does not match today's assigned level.",
+      })
+    }
   })
 }
 
@@ -175,9 +235,6 @@ function recordLeaderboardEntries(entry: {
   moves: number
 }) {
   return Effect.gen(function* () {
-    const leaderboard = yield* LeaderboardService
-    yield* leaderboard.recordEntry({ ...entry, scope: 'personal' })
-
     const { db } = yield* DbService
     const classroomRows = yield* withD1Retry(
       Effect.tryPromise({
@@ -189,9 +246,15 @@ function recordLeaderboardEntries(entry: {
         catch: (cause) => new ProgressWriteError({ cause }),
       }),
     )
-    for (const row of classroomRows) {
-      yield* leaderboard.recordEntry({ ...entry, scope: row.classroomId })
-    }
+
+    // One atomic batch: personal scope + every classroom the player belongs
+    // to. Replaces the prior personal-then-per-classroom loop (N+1 round
+    // trips, non-atomic).
+    const leaderboard = yield* LeaderboardService
+    yield* leaderboard.recordEntries([
+      { ...entry, scope: 'personal' },
+      ...classroomRows.map((row) => ({ ...entry, scope: row.classroomId })),
+    ])
   })
 }
 

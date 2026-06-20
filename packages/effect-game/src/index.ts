@@ -7,6 +7,7 @@ export type { DbShape } from "./db";
 export { GameLayer } from "./game-layer";
 export { GameAttemptsService, GameAttemptsServiceLive } from "./game-attempts";
 export type {
+  Attempt,
   AttemptInput,
   GameAttemptsShape,
   GameStats,

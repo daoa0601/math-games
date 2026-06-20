@@ -90,6 +90,35 @@ test.describe('level navigation', () => {
     expectNoRuntimeErrors(errors)
   })
 
+  test('magic-graph: board starts empty on first load', async ({ page }) => {
+    const errors = collectRuntimeErrors(page)
+
+    await page.goto('/games/magic-graph')
+    await expectHydrated(page)
+
+    const nodes = page.locator('button[aria-label^="Node "]:visible')
+    await expect(nodes.first()).toBeVisible()
+
+    // Board state must be initialized from the resolved level, not configs[0]:
+    // a mismatch leaves nodes styled as filled (bg-primary) while holding no
+    // number, and the first tap clears instead of placing.
+    const filledNodes = page.locator('button[aria-label^="Node "].bg-primary')
+    await expect(filledNodes).toHaveCount(0)
+
+    // Guard the selector against rot: placing a number must produce a
+    // filled-styled node.
+    await page
+      .locator('main')
+      .getByRole('button', { name: '1', exact: true })
+      .locator('visible=true')
+      .first()
+      .click()
+    await nodes.first().click()
+    await expect(filledNodes.first()).toBeVisible()
+
+    expectNoRuntimeErrors(errors)
+  })
+
   test('magic-graph: level nav is present and functional', async ({ page }) => {
     const errors = collectRuntimeErrors(page)
 

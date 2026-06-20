@@ -136,6 +136,10 @@ export function ShapeArchitectRoute() {
     [serverState.grid],
   )
   const grid = optimisticGrid ?? serverGrid
+  // ShapeArchitect3D rebuilds the whole three.js scene whenever this prop
+  // changes identity, and the session timer re-renders this route every
+  // second — serialize once per actual grid change, not per render.
+  const gridState3d = useMemo(() => grid.toNestedArray(), [grid])
   const placedPieces = placements
 
   // The next solution step the player hasn't placed yet. Derived from current
@@ -682,7 +686,7 @@ export function ShapeArchitectRoute() {
             {viewMode === '3d' ? (
               <div className="relative mt-4 overflow-x-auto">
                 <ShapeArchitect3D
-                  gridState={grid.toNestedArray()}
+                  gridState={gridState3d}
                   config={config}
                   placedPieces={placedPieces}
                   selectedPiece={selectedPiece}

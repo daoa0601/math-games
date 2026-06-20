@@ -8,6 +8,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./three-scene": {
+      "types": "./src/rendering/three-scene.ts",
+      "default": "./src/rendering/three-scene.ts"
+    },
     "./forge": {
       "types": "./dist/solution-forge.d.ts",
       "default": "./dist/solution-forge.js"

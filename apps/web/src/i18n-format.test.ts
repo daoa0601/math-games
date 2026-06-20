@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { GameFeedback } from '@math-games/core'
 
-import { formatGameFeedback } from './i18n-format'
+import { formatGameFeedback, formatGameTitle } from './i18n-format'
 
 describe('formatGameFeedback', () => {
   const fb: GameFeedback = {
@@ -38,5 +38,18 @@ describe('formatGameFeedback', () => {
     })
     expect(partial).toContain('Substituting 4')
     expect(partial).toContain('{result}')
+  })
+})
+
+describe('formatGameTitle', () => {
+  it('formats every translated game id without a local allow-list', () => {
+    expect(formatGameTitle('vi', 'fraction-builder')).toBe('Xây Dựng Phân Số')
+    expect(formatGameTitle('vi', 'equation-balance')).toBe(
+      'Cân Bằng Phương Trình',
+    )
+  })
+
+  it('falls back to the id when no translation exists', () => {
+    expect(formatGameTitle('en', 'unknown-game')).toBe('unknown-game')
   })
 })

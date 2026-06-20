@@ -7,6 +7,7 @@ import { DbService } from "../db";
 import {
   GameAttemptsService,
   GameAttemptsServiceLive,
+  type Attempt,
   type AttemptInput,
 } from "../game-attempts";
 
@@ -103,6 +104,68 @@ describe("GameAttemptsService.record", () => {
     });
 
     expect(harness.insertedValues[0].completionJson).toBeUndefined();
+  });
+});
+
+function createHistoryHarness(rows: Attempt[]) {
+  const dbLayer = Layer.succeed(DbService, {
+    db: {
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            orderBy: () => ({
+              limit: () => Promise.resolve(rows),
+            }),
+          }),
+        }),
+      }),
+    } as never,
+  });
+
+  const layer = GameAttemptsServiceLive.pipe(Layer.provide(dbLayer));
+
+  return (playerId: string, gameId: string, levelId: string) =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        const service = yield* GameAttemptsService;
+        return yield* service.getHistory(playerId, gameId, levelId);
+      }).pipe(Effect.provide(layer)),
+    );
+}
+
+describe("GameAttemptsService.getHistory", () => {
+  it("returns the diagnostic completionJson with attempt history", async () => {
+    const completionJson = JSON.stringify({
+      skillTags: ["fraction_equivalence"],
+      difficultyFeatures: { denominatorCount: 3 },
+    });
+    const getHistory = createHistoryHarness([
+      {
+        id: "attempt-1",
+        score: 80,
+        completed: true,
+        moves: 5,
+        durationMs: null,
+        mode: "daily",
+        completionJson,
+        createdAt: null,
+      },
+    ]);
+
+    await expect(
+      getHistory("player-1", "fraction-builder", "fb-1"),
+    ).resolves.toEqual([
+      {
+        id: "attempt-1",
+        score: 80,
+        completed: true,
+        moves: 5,
+        durationMs: null,
+        mode: "daily",
+        completionJson,
+        createdAt: null,
+      },
+    ]);
   });
 });
 

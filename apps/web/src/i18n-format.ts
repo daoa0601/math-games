@@ -1,15 +1,4 @@
 import type { AchievementRarity, GameFeedback } from '@math-games/core'
-import { magicGraphModule } from '@math-games/game-magic-graph'
-import { patternDetectiveModule } from '@math-games/game-pattern-detective'
-import { sequenceRaceModule } from '@math-games/game-sequence-race'
-import { shapeArchitectModule } from '@math-games/game-shape-architect'
-
-const GAME_MODULES = [
-  magicGraphModule,
-  sequenceRaceModule,
-  shapeArchitectModule,
-  patternDetectiveModule,
-] as const
 
 import { t, tx } from './i18n-translations'
 import type { Locale } from '@math-games/ui'
@@ -17,14 +6,6 @@ import type { Locale } from '@math-games/ui'
 function toCamel(kebab: string) {
   return kebab.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
 }
-
-const gameTitleKeys: Record<string, string> = Object.fromEntries(
-  GAME_MODULES.map((m) => [m.id, `gameTitle.${toCamel(m.id)}`]),
-)
-
-const gameDescriptionKeys: Record<string, string> = Object.fromEntries(
-  GAME_MODULES.map((m) => [m.id, `gameDescription.${toCamel(m.id)}`]),
-)
 
 const levelNameKeys = new Map<string, string>([
   ['Line of Three', 'level.lineOfThree'],
@@ -83,13 +64,11 @@ export function formatDifficulty(locale: Locale, difficulty: string) {
 }
 
 export function formatGameTitle(locale: Locale, gameId: string) {
-  const key = gameTitleKeys[gameId]
-  return key ? tx(locale, key, gameId) : gameId
+  return tx(locale, `gameTitle.${toCamel(gameId)}`, gameId)
 }
 
 export function formatGameDescription(locale: Locale, gameId: string) {
-  const key = gameDescriptionKeys[gameId]
-  return key ? tx(locale, key, '') : ''
+  return tx(locale, `gameDescription.${toCamel(gameId)}`, '')
 }
 
 export function formatAchievementName(locale: Locale, achievementId: string) {

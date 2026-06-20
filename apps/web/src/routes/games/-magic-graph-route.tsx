@@ -55,9 +55,6 @@ export function MagicGraphRoute() {
   const { level: searchLevel, daily } = routeApi.useSearch()
   const recordProgress = useServerFn(recordMagicGraphProgress)
 
-  const [values, setValues] = useState<NodeValues>(() =>
-    createInitialValues(configs[0]),
-  )
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null)
   const [errorPopup, setErrorPopup] = useState<string | null>(null)
   const [levelAttempts, setLevelAttempts] = useState(0)
@@ -81,6 +78,13 @@ export function MagicGraphRoute() {
       setLevelAttempts(0)
     },
   })
+
+  // Initialize from the resolved level (initialConfigId / ?level=), not
+  // configs[0] — they differ, and a mismatched key set renders empty nodes
+  // as filled.
+  const [values, setValues] = useState<NodeValues>(() =>
+    createInitialValues(config),
+  )
 
   const nodeValues = useMemo(() => createNodeValueMap(values), [values])
   const nodeLookup = useMemo(

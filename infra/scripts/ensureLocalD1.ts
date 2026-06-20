@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -107,7 +107,23 @@ function migrationFiles() {
     .sort();
 }
 
+// server-entry.ts caches anonymous GET HTML in caches.default, and miniflare
+// persists that cache in .wrangler/state across dev-server restarts — so a
+// fresh e2e run can serve HTML rendered from pre-edit code (stale pages plus
+// hydration-mismatch console errors). D1/KV state is seeded deliberately; the
+// page cache is incidental, so drop it before each run.
+function purgePersistedPageCache() {
+  const cacheDir = join(process.cwd(), ".wrangler", "state", "v3", "cache");
+
+  if (existsSync(cacheDir)) {
+    rmSync(cacheDir, { recursive: true, force: true });
+    console.log("Purged persisted Workers page cache.");
+  }
+}
+
 export function ensureLocalD1() {
+  purgePersistedPageCache();
+
   if (localSchemaExists()) {
     console.log("Local D1 schema is ready.");
 

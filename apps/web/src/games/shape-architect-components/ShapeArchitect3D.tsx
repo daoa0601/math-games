@@ -13,7 +13,7 @@ import {
   getPieceWorldPositions,
   VoxelGrid,
 } from '@math-games/game-shape-architect'
-import type { ThreeScene } from '@math-games/game-shape-architect'
+import type { ThreeScene } from '@math-games/game-shape-architect/three-scene'
 
 interface GhostPiece {
   positions: Position3D[]
@@ -89,18 +89,22 @@ export function ShapeArchitect3D({
 
     let disposed = false
 
-    import('@math-games/game-shape-architect').then(({ createThreeScene }) => {
-      if (disposed) return
-      const threeScene = createThreeScene(canvas)
-      sceneRef.current = threeScene
-      setReady(true)
+    // Subpath import keeps three.js out of the statically-imported barrel —
+    // this is what makes the chunk split actually happen.
+    import('@math-games/game-shape-architect/three-scene').then(
+      ({ createThreeScene }) => {
+        if (disposed) return
+        const threeScene = createThreeScene(canvas)
+        sceneRef.current = threeScene
+        setReady(true)
 
-      const container = containerRef.current
-      if (container) {
-        const rect = container.getBoundingClientRect()
-        threeScene.resize(rect.width, Math.max(320, rect.width * 0.66))
-      }
-    })
+        const container = containerRef.current
+        if (container) {
+          const rect = container.getBoundingClientRect()
+          threeScene.resize(rect.width, Math.max(320, rect.width * 0.66))
+        }
+      },
+    )
 
     return () => {
       disposed = true

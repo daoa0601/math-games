@@ -3,28 +3,39 @@ import { describe, expect, it } from "vitest";
 
 import {
   ClockService,
-  KvCacheService,
+  KvCacheServiceLive,
   RateLimitError,
   RateLimitService,
   RateLimitServiceLive,
 } from "../index";
+import { createFakeWorkerEnv } from "./fake-worker-env";
+
+function fakeClockLayer(getCurrentTime: () => number) {
+  return Layer.succeed(ClockService, {
+    now: () => Effect.succeed(new Date(getCurrentTime())),
+    dateKey: () =>
+      Effect.succeed(new Date(getCurrentTime()).toISOString().slice(0, 10)),
+  });
+}
 
 function createRateLimitHarness(now: number) {
   let currentTime = now;
 
-  const clockLayer = Layer.succeed(ClockService, {
-    now: () => Effect.succeed(new Date(currentTime)),
-    dateKey: () =>
-      Effect.succeed(new Date(currentTime).toISOString().slice(0, 10)),
-  });
-  const kvLayer = Layer.succeed(KvCacheService, {
-    get: () => Effect.succeed(null),
-    put: () => Effect.void,
-    delete: () => Effect.void,
-  });
+  // Real KvCacheServiceLive over an in-memory KV, so the counter takes the
+  // same serialization path it takes in production. `assert` ignores KV, so
+  // routing it through the real layer here is harmless and keeps a single
+  // seam for both code paths under test.
+  const kvLayer = KvCacheServiceLive.pipe(
+    Layer.provide(createFakeWorkerEnv().layer),
+  );
   const runtime = ManagedRuntime.make(
     RateLimitServiceLive.pipe(
-      Layer.provide(Layer.mergeAll(clockLayer, kvLayer)),
+      Layer.provide(
+        Layer.mergeAll(
+          fakeClockLayer(() => currentTime),
+          kvLayer,
+        ),
+      ),
     ),
   );
 
@@ -35,6 +46,15 @@ function createRateLimitHarness(now: number) {
       return runtime.runPromise(
         Effect.gen(function* () {
           yield* (yield* RateLimitService).assert(key);
+        }),
+      );
+    },
+    assertHourly: (key: string, max: number, nextTime?: number) => {
+      if (nextTime !== undefined) currentTime = nextTime;
+
+      return runtime.runPromise(
+        Effect.gen(function* () {
+          yield* (yield* RateLimitService).assertHourlyLimit(key, max);
         }),
       );
     },
@@ -116,5 +136,51 @@ describe("RateLimitService", () => {
       RateLimitError,
     );
     await expect(rateLimit.assert(key, 5_000_502)).resolves.toBeUndefined();
+  });
+});
+
+describe("RateLimitService.assertHourlyLimit", () => {
+  const HOUR_MS = 3_600_000;
+  // Aligned to a bucket boundary so advancing within the test stays in-bucket.
+  const T0 = 100 * HOUR_MS;
+
+  it("rejects once the hourly cap is exceeded", async () => {
+    const rateLimit = createRateLimitHarness(T0);
+    const key = "hourly-cap";
+
+    await expect(rateLimit.assertHourly(key, 3)).resolves.toBeUndefined();
+    await expect(rateLimit.assertHourly(key, 3)).resolves.toBeUndefined();
+    await expect(rateLimit.assertHourly(key, 3)).resolves.toBeUndefined();
+
+    await expect(rateLimit.assertHourly(key, 3)).rejects.toBeInstanceOf(
+      RateLimitError,
+    );
+  });
+
+  it("resets the count in the next hour bucket", async () => {
+    const rateLimit = createRateLimitHarness(T0);
+    const key = "hourly-reset";
+
+    await rateLimit.assertHourly(key, 2);
+    await rateLimit.assertHourly(key, 2);
+    await expect(rateLimit.assertHourly(key, 2)).rejects.toBeInstanceOf(
+      RateLimitError,
+    );
+
+    await expect(
+      rateLimit.assertHourly(key, 2, T0 + HOUR_MS),
+    ).resolves.toBeUndefined();
+  });
+
+  it("tracks hourly counts per key", async () => {
+    const rateLimit = createRateLimitHarness(T0);
+
+    await rateLimit.assertHourly("hourly-a", 1);
+    await expect(rateLimit.assertHourly("hourly-a", 1)).rejects.toBeInstanceOf(
+      RateLimitError,
+    );
+    await expect(
+      rateLimit.assertHourly("hourly-b", 1),
+    ).resolves.toBeUndefined();
   });
 });

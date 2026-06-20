@@ -26,6 +26,7 @@ export interface Attempt {
   moves: number;
   durationMs: number | null;
   mode: string;
+  completionJson: string | null;
   createdAt: Date | null;
 }
 
@@ -110,6 +111,7 @@ export const GameAttemptsServiceLive = Layer.effect(
                 moves: schema.gameAttempts.moves,
                 durationMs: schema.gameAttempts.durationMs,
                 mode: schema.gameAttempts.mode,
+                completionJson: schema.gameAttempts.completionJson,
                 createdAt: schema.gameAttempts.createdAt,
               })
               .from(schema.gameAttempts)
