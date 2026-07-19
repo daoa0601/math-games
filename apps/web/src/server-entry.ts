@@ -51,7 +51,15 @@ export default {
     const cache = caches.default
     const cacheKey = new Request(request.url, { method: 'GET' })
 
-    const cached = await cache.match(cacheKey)
+    // The edge cache (miniflare in dev, Cloudflare in prod) can throw
+    // transient internal errors. Treat the cache as best-effort: a cache
+    // failure must never 500 the page, just fall through to the handler.
+    let cached: Response | undefined
+    try {
+      cached = await cache.match(cacheKey)
+    } catch {
+      cached = undefined
+    }
     if (cached) {
       const response = new Response(cached.body, cached)
       response.headers.set('x-cache', 'HIT')
@@ -68,7 +76,11 @@ export default {
       cloned.headers.set('cache-control', `public, max-age=${ttl}`)
       cloned.headers.set('x-cache', 'MISS')
 
-      ctx.waitUntil(cache.put(cacheKey, cloned.clone()))
+      try {
+        ctx.waitUntil(cache.put(cacheKey, cloned.clone()))
+      } catch {
+        // Best-effort cache write; ignore failures.
+      }
 
       return cloned
     }

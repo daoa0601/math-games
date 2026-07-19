@@ -279,6 +279,23 @@ export function SequenceRaceRoute() {
                   </Button>
                 ))}
               </div>
+
+              {game.gameOver && game.winner ? (
+                <div
+                  className={`mt-4 rounded-lg border p-4 text-center ${
+                    game.winner === 'player' || game.winner === 'player1'
+                      ? 'border-success/40 bg-success/[0.05]'
+                      : 'border-destructive/40 bg-destructive/[0.05]'
+                  }`}
+                >
+                  <p className="text-lg font-semibold">
+                    {formatActor(locale, game.winner)} {t('game.wins')}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {t('game.reset')}
+                  </p>
+                </div>
+              ) : null}
             </CardContent>
           </Card>
 

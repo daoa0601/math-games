@@ -191,7 +191,49 @@ const patternEntries: readonly PatternConfig[] = [
 ];
 
 export const catalog: readonly PatternConfig[] = patternEntries.map(
-  (entry) => ({ ...entry, manifest: buildPatternDetectiveManifest(entry) }),
+  (entry) => ({
+    ...entry,
+    // Replace the curated distractors with tighter ones — see
+    // tightenDistractors. The original distractors were often too far from
+    // the answer, making catalog levels trivially guessable.
+    distractors: tightenDistractors(entry.answer, entry.difficulty),
+    manifest: buildPatternDetectiveManifest(entry),
+  }),
 );
 
 export const difficulties = ["easy", "medium", "hard"] as const;
+
+/**
+ * Tighten distractors so they sit within ±2..±4 of the answer (closest-first),
+ * with one further "trap" distractor. The original curated distractors were
+ * often far enough from the answer that the correct choice was visually
+ * obvious on first glance — observed during playtesting where every catalog
+ * level was solved on the first guess. Tighter distractors force the player
+ * to actually compute the missing term.
+ *
+ * Pure: deterministic per (answer, difficulty). Exported for the catalog
+ * builder and tests.
+ */
+export function tightenDistractors(
+  answer: number,
+  difficulty: "easy" | "medium" | "hard",
+): number[] {
+  // Harder tiers allow a wider trap window.
+  const spread = difficulty === "easy" ? 2 : difficulty === "medium" ? 3 : 4;
+  const candidates: number[] = [];
+  for (let off = 1; off <= spread; off++) {
+    if (answer - off > 0) candidates.push(answer - off);
+    candidates.push(answer + off);
+  }
+  // Shuffle deterministically by answer so the same level always presents
+  // the same distractor set, then keep the first 3.
+  const seed = (answer * 2654435761) >>> 0;
+  const shuffled = [...candidates];
+  let s = seed;
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    const j = s % (i + 1);
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, 3);
+}

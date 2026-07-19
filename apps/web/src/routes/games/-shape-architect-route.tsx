@@ -134,6 +134,12 @@ export function ShapeArchitectRoute() {
   const [guidedSteps, setGuidedSteps] = useState<PlacedPiece[] | null>(null)
   const [guidedLoading, setGuidedLoading] = useState(false)
   const guidedFallbackRef = useRef(false)
+  // Prefetched guided solution, warmed on hover/focus of the Guided button so
+  // the click is instant instead of paying a 2-5s server solve on first press.
+  const prefetchedGuidedRef = useRef<{
+    levelId: string
+    promise: Promise<PlacedPiece[] | null>
+  } | null>(null)
 
   const serverGrid = useMemo(
     () => gridFromState(serverState.grid),
@@ -320,6 +326,26 @@ export function ShapeArchitectRoute() {
     session.resetSession()
   }
 
+  // Warm the guided solution for the current level. Returns a promise of the
+  // steps (or null on miss). Idempotent per level id — hovering the Guided
+  // button multiple times reuses the same in-flight request.
+  function prefetchGuidedSolution(): Promise<PlacedPiece[] | null> {
+    const levelId = config.id
+    const cached = prefetchedGuidedRef.current
+    if (cached && cached.levelId === levelId) return cached.promise
+
+    const promise = runServerAction(
+      () => fetchGuidedSolution({ data: { levelId } }),
+      t('status.noSolution'),
+    ).then((result) =>
+      result.ok && result.value && result.value.steps.length > 0
+        ? result.value.steps
+        : null,
+    )
+    prefetchedGuidedRef.current = { levelId, promise }
+    return promise
+  }
+
   async function startGuided() {
     if (session.timedOut) return
     setGuidedLoading(true)
@@ -333,13 +359,12 @@ export function ShapeArchitectRoute() {
     solvedProgressKeyRef.current = null
     clearSaveStatus()
 
-    const result = await runServerAction(
-      () => fetchGuidedSolution({ data: { levelId: config.id } }),
-      t('status.noSolution'),
-    )
-
-    if (result.ok && result.value && result.value.steps.length > 0) {
-      setGuidedSteps(result.value.steps)
+    // Use the prefetched solution if it's already in flight (hover), else
+    // fetch now. Either way, the click no longer pays the full solve latency
+    // when the player hovered first.
+    const steps = await prefetchGuidedSolution()
+    if (steps && steps.length > 0) {
+      setGuidedSteps(steps)
       setGuidedLoading(false)
       return
     }
@@ -560,6 +585,9 @@ export function ShapeArchitectRoute() {
     setGuidedSteps(null)
     setGuidedLoading(false)
     guidedFallbackRef.current = false
+    // Invalidate the prefetched solution so a stale one from a different level
+    // is never reused.
+    prefetchedGuidedRef.current = null
   }, [config.id])
 
   // Auto-flip into 3D view for 3D levels (cube / tower). The 2D isometric
@@ -629,6 +657,8 @@ export function ShapeArchitectRoute() {
                     onClick={() =>
                       guidedSteps !== null ? stopGuided() : void startGuided()
                     }
+                    onMouseEnter={() => void prefetchGuidedSolution()}
+                    onFocus={() => void prefetchGuidedSolution()}
                     disabled={guidedLoading || session.timedOut}
                     type="button"
                   >
