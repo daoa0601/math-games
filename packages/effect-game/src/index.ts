@@ -33,3 +33,17 @@ export {
 export type { PlayerIdentityShape } from "./player-identity";
 export { RankService, RankServiceLive } from "./rank";
 export type { RankShape, RankDelta } from "./rank";
+export {
+  ClientMetricsService,
+  ClientMetricsServiceLive,
+  HealthService,
+  HealthServiceLive,
+} from "./metrics";
+export type {
+  ClientMetricInput,
+  ClientMetricKind,
+  ClientMetricsAggregate,
+  ClientMetricsShape,
+  HealthShape,
+  HealthSnapshot,
+} from "./metrics";

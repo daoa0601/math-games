@@ -1,4 +1,5 @@
 import {
+  buildOptimisticGrid as buildOptimisticGridImpl,
   initializeGrid,
   placePiece,
   solutionStepsToPlacedPieces,
@@ -48,14 +49,9 @@ export function gridFromState(gridState: CellState[][][]): VoxelGrid {
   return VoxelGrid.fromNestedArray(gridState)
 }
 
-export function buildOptimisticGrid(
-  config: LevelConfig,
-  placements: PlacedPiece[],
-): VoxelGrid {
-  return placements.reduce((grid, placement) => {
-    const piece = config.pieces.find((c) => c.id === placement.pieceId)
-    return piece
-      ? placePiece(grid, piece, placement.position, placement.rotation)
-      : grid
-  }, initializeGrid(config))
-}
+/**
+ * Optimistic-grid derivation is owned by the game package
+ * (`buildOptimisticGrid` in logic/placement.ts). Re-export so existing imports
+ * in the route keep working from a single source of truth.
+ */
+export const buildOptimisticGrid = buildOptimisticGridImpl

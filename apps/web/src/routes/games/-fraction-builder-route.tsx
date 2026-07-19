@@ -11,6 +11,7 @@ import {
   Confetti,
   GameDesktopShell,
   GameMobileShell,
+  LearnSection,
   LevelNav,
   useLevelSelection,
   useSaveStatus,
@@ -314,6 +315,8 @@ export function FractionBuilderRoute() {
             }}
           />
         </PracticeGeneratorSection>
+
+        <LearnSection gameId="fraction-builder" />
       </GameDesktopShell>
 
       {/* ── MOBILE LAYOUT (< md) ─────────────────────────────── */}

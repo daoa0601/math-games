@@ -12,9 +12,11 @@ import type {
 } from '@math-games/effect-infra'
 import type {
   AnalyticsShape,
+  ClientMetricsShape,
   DbShape,
   DailyStreakShape,
   GameAttemptsShape,
+  HealthShape,
   LeaderboardShape,
   PlayerIdentityShape,
   RankShape,
@@ -49,8 +51,10 @@ export type AppServices =
   | AnalyticsShape
   | AssignmentShape
   | ClassroomShape
+  | ClientMetricsShape
   | DailyStreakShape
   | GameAttemptsShape
+  | HealthShape
   | LeaderboardShape
   | DbShape
   | OriginGuardShape

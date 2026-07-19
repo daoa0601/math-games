@@ -427,7 +427,7 @@ export function generateConstructivePuzzle(
 
     return {
       id: `cohesive_${rng.seed}`,
-      name: `Constructive ${difficulty} (${candidate.pieces.length} pieces)`,
+      name: describeShape(candidate.targetVoxels, candidate.pieces.length),
       type: "2D",
       gridSize: gridSizeFor(candidate.targetVoxels),
       targetVoxels: candidate.targetVoxels,
@@ -437,6 +437,37 @@ export function generateConstructivePuzzle(
   }
 
   return null;
+}
+
+/**
+ * Give a generated level a descriptive name based on its bounding-box aspect,
+ * so "Workshop: Wide Slab (8)" reads as a real shape rather than "Constructive
+ * hard (8 pieces)". The shapes are constructive (grown by actually placing
+ * real pieces edge-to-edge), so the silhouette is meaningful — surfacing it
+ * helps the player read the puzzle.
+ */
+function describeShape(target: Position3D[], pieceCount: number): string {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  for (const v of target) {
+    if (v.x < minX) minX = v.x;
+    if (v.x > maxX) maxX = v.x;
+    if (v.y < minY) minY = v.y;
+    if (v.y > maxY) maxY = v.y;
+  }
+  const w = maxX - minX + 1;
+  const h = maxY - minY + 1;
+  const ratio = w / h;
+  let silhouette: string;
+  if (Math.abs(ratio - 1) < 0.15) silhouette = "Block";
+  else if (ratio > 2.5) silhouette = "Wide Slab";
+  else if (ratio < 0.4) silhouette = "Tall Tower";
+  else if (ratio > 1.4) silhouette = "Wide Bar";
+  else if (ratio < 0.7) silhouette = "Pillar";
+  else silhouette = "Slab";
+  return `${silhouette} · ${pieceCount} pieces`;
 }
 
 export const PUZZLE_ENGINE_CONSTANTS = {

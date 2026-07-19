@@ -22,7 +22,7 @@ describe("PatternDetective validation", () => {
     expect(result.feedback).toBeUndefined();
   });
 
-  test("wrong answer returns feedback", () => {
+  test("wrong answer returns targeted misconception feedback", () => {
     const level: PatternConfig = {
       id: "test",
       difficulty: "easy",
@@ -36,7 +36,45 @@ describe("PatternDetective validation", () => {
     const result = validate(level, { selectedAnswer: 7 });
     expect(result.completed).toBe(false);
     expect(result.feedback).toBeDefined();
-    expect(result.feedback?.kind).toBe("generic");
+    expect(result.feedback?.kind).toBe("misconception");
+    if (result.feedback?.kind === "misconception") {
+      expect(result.feedback.labelKey).toMatch(/^pd\.feedback\./);
+      expect(result.feedback.params).toHaveProperty("selected", 7);
+    }
+  });
+
+  test("too-large guess gets the too_large label", () => {
+    const level: PatternConfig = {
+      id: "test",
+      difficulty: "easy",
+      patternType: "arithmetic",
+      sequence: [2, 4, 6, -1, 10],
+      missingIndex: 3,
+      answer: 8,
+      distractors: [7, 9, 12],
+    };
+    const result = validate(level, { selectedAnswer: 12 });
+    expect(result.feedback?.kind).toBe("misconception");
+    if (result.feedback?.kind === "misconception") {
+      expect(result.feedback.labelKey).toBe("pd.feedback.too_large");
+    }
+  });
+
+  test("too-small guess gets the too_small label", () => {
+    const level: PatternConfig = {
+      id: "test",
+      difficulty: "easy",
+      patternType: "arithmetic",
+      sequence: [2, 4, 6, -1, 10],
+      missingIndex: 3,
+      answer: 8,
+      distractors: [7, 9, 12],
+    };
+    const result = validate(level, { selectedAnswer: 5 });
+    expect(result.feedback?.kind).toBe("misconception");
+    if (result.feedback?.kind === "misconception") {
+      expect(result.feedback.labelKey).toBe("pd.feedback.too_small");
+    }
   });
 
   test("string answer matching number works", () => {

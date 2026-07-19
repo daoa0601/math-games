@@ -119,7 +119,11 @@ export function ShapeArchitectRoute() {
     useState<Rotation3D>(DEFAULT_ROTATION)
   const [errorPopup, setErrorPopup] = useState<string | null>(null)
   const [levelAttempts, setLevelAttempts] = useState(0)
-  const [viewMode, setViewMode] = useState<ViewMode>('2d')
+  // 3D levels read much better in 3D — default to it for `cube_2x2x2` and
+  // `tower_2x2x3` rather than stranding the player in the 2D isometric view.
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    config.type === '3D' ? '3d' : '2d',
+  )
   const [pendingPosition, setPendingPosition] = useState<Position3D | null>(
     null,
   )
@@ -557,6 +561,13 @@ export function ShapeArchitectRoute() {
     setGuidedLoading(false)
     guidedFallbackRef.current = false
   }, [config.id])
+
+  // Auto-flip into 3D view for 3D levels (cube / tower). The 2D isometric
+  // projection collapses the z axis and makes stacked cells ambiguous; the
+  // player can still toggle back manually.
+  useEffect(() => {
+    if (config.type === '3D') setViewMode('3d')
+  }, [config.type])
 
   function generatePracticeLevel(seed: string, difficulty: string) {
     const nextConfig = getShapeArchitectPracticeConfig(

@@ -85,6 +85,9 @@ export function MagicGraphRoute() {
   const [values, setValues] = useState<NodeValues>(() =>
     createInitialValues(config),
   )
+  // Mobile hint cycler — the bottom-bar Hint button advances through hints
+  // instead of being a dead control. Resets when the level changes.
+  const [hintIndex, setHintIndex] = useState(0)
 
   const nodeValues = useMemo(() => createNodeValueMap(values), [values])
   const nodeLookup = useMemo(
@@ -606,7 +609,7 @@ export function MagicGraphRoute() {
                 className="leading-snug text-foreground"
                 style={{ fontSize: '0.75rem', lineHeight: 1.45 }}
               >
-                {hints[0]}
+                {hints[hintIndex % hints.length]}
               </p>
             </div>
           ) : null}
@@ -670,6 +673,7 @@ export function MagicGraphRoute() {
               <button
                 type="button"
                 disabled={hints.length === 0}
+                onClick={() => setHintIndex((i) => i + 1)}
                 className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background text-[0.8125rem] font-medium text-foreground disabled:opacity-50"
               >
                 {t('game.hint')} · {hints.length}

@@ -11,6 +11,8 @@ import {
   Confetti,
   GameDesktopShell,
   GameMobileShell,
+  getHints,
+  LearnSection,
   LevelNav,
   useLevelSelection,
   useSaveStatus,
@@ -48,6 +50,10 @@ export function EquationBalanceRoute() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
   const [feedback, setFeedback] = useState<GameFeedback | null>(null)
+  // Mobile hint button now has somewhere to go: LearnSection tips are wired
+  // in via getHints. Tapping the chip cycles through them.
+  const [hintIndex, setHintIndex] = useState(0)
+  const hints = getHints('equation-balance', locale)
   const { saveStatus, setSaveStatus, clearSaveStatus } = useSaveStatus()
 
   const {
@@ -250,6 +256,8 @@ export function EquationBalanceRoute() {
             }}
           />
         </PracticeGeneratorSection>
+
+        <LearnSection gameId="equation-balance" />
       </GameDesktopShell>
 
       {/* ── MOBILE LAYOUT (< md) ─────────────────────────────── */}
@@ -383,6 +391,23 @@ export function EquationBalanceRoute() {
             </p>
           ) : null}
 
+          {hints.length > 0 ? (
+            <div className="mx-4 mt-3.5 mb-1.5 flex items-start gap-2.5 rounded-2xl border border-primary/15 bg-primary/[0.05] px-3.5 py-3">
+              <div
+                className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/15 font-display font-medium text-primary"
+                style={{ fontSize: '0.875rem' }}
+              >
+                ?
+              </div>
+              <p
+                className="leading-snug text-foreground"
+                style={{ fontSize: '0.75rem', lineHeight: 1.45 }}
+              >
+                {hints[hintIndex % hints.length]}
+              </p>
+            </div>
+          ) : null}
+
           {/* Bottom actions */}
           <div className="mt-auto grid grid-cols-3 gap-2 border-t border-border bg-card/60 px-4 pt-3.5 pb-4">
             <button
@@ -398,10 +423,12 @@ export function EquationBalanceRoute() {
             </button>
             <button
               type="button"
-              disabled
+              disabled={hints.length === 0}
+              onClick={() => setHintIndex((i) => i + 1)}
               className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background text-[0.8125rem] font-medium text-foreground disabled:opacity-50"
             >
               {t('game.hint')}
+              {hints.length > 0 ? ` · ${hints.length}` : ''}
             </button>
             {result === 'correct' ? (
               <button

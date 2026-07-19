@@ -80,63 +80,45 @@ function buildRows(level: LevelConfig): PlacementRow[] {
     const uniqueLayouts = getUniqueRotatedLayouts(piece, rotations);
 
     for (const { layout, rotation } of uniqueLayouts) {
-      // For each cell in the rotated layout, try each target as anchor
+      // Exact-cover anchor optimization: every cell of a valid placement must
+      // land on a target, so layout[0] must land on some target T. That gives
+      // a unique translation per T (position = T - layout[0]); each candidate
+      // is generated exactly once, so no dedup is needed. The previous loop
+      // tried every (target, cell) pair as anchor and deduped with rows.some,
+      // which was O(targets × cells) work plus an O(rows) scan per candidate.
+      const anchor = layout[0];
       for (const target of level.targetVoxels) {
+        const originX = target.x - anchor.x;
+        const originY = target.y - anchor.y;
+        const originZ = target.z - anchor.z;
+
+        // All cells must be in bounds and cover targets.
+        const coveredTargets: number[] = [];
+        let valid = true;
         for (const cell of layout) {
-          const position: Position3D = {
-            x: target.x - cell.x,
-            y: target.y - cell.y,
-            z: target.z - cell.z,
-          };
-
-          // Check all cells of the piece in world space
-          const worldCells = layout.map((c) => ({
-            x: position.x + c.x,
-            y: position.y + c.y,
-            z: position.z + c.z,
-          }));
-
-          // All cells must be in bounds
-          if (!worldCells.every((c) => isInBounds(c, level.gridSize))) continue;
-
-          // Collect which target cells are covered
-          const coveredTargets: number[] = [];
-
-          for (const wc of worldCells) {
-            const key = `${wc.x},${wc.y},${wc.z}`;
-            const idx = targetIndexMap.get(key);
-            if (idx !== undefined) {
-              coveredTargets.push(idx);
-            }
+          const wx = originX + cell.x;
+          const wy = originY + cell.y;
+          const wz = originZ + cell.z;
+          if (!isInBounds({ x: wx, y: wy, z: wz }, level.gridSize)) {
+            valid = false;
+            break;
           }
-
-          // For exact cover: every cell of the piece must cover a target
-          // (no overhangs allowed in DLX formulation)
-          if (coveredTargets.length !== layout.length) continue;
-
-          // Deduplicate: same piece+position+rotation from different anchors
-          if (
-            rows.some(
-              (r) =>
-                r.pieceIndex === pieceIndex &&
-                r.position.x === position.x &&
-                r.position.y === position.y &&
-                r.position.z === position.z &&
-                r.rotation.x === rotation.x &&
-                r.rotation.y === rotation.y &&
-                r.rotation.z === rotation.z,
-            )
-          )
-            continue;
-
-          rows.push({
-            pieceId: piece.id,
-            position,
-            rotation,
-            coveredTargets,
-            pieceIndex,
-          });
+          const idx = targetIndexMap.get(`${wx},${wy},${wz}`);
+          if (idx === undefined) {
+            valid = false;
+            break;
+          }
+          coveredTargets.push(idx);
         }
+        if (!valid) continue;
+
+        rows.push({
+          pieceId: piece.id,
+          position: { x: originX, y: originY, z: originZ },
+          rotation,
+          coveredTargets,
+          pieceIndex,
+        });
       }
     }
   }

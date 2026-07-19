@@ -244,3 +244,45 @@ export const playerDailySelections = sqliteTable(
   },
   (table) => [primaryKey({ columns: [table.playerId, table.challengeDate] })],
 );
+
+// Client-side performance and health events (FPS, frame-time percentiles,
+// web-vitals, render-mode, errors). Append-only, written from the browser
+// via the recordClientMetric server fn and aggregated by the admin health
+// dashboard. Kept narrow so high-cardinality fields stay in a JSON blob.
+export const clientMetrics = sqliteTable(
+  "client_metrics",
+  {
+    id: text("id").primaryKey(),
+    playerId: text("player_id").references(() => players.id, {
+      onDelete: "cascade",
+    }),
+    // Coarse event class: perf | vitals | error | usage
+    kind: text("kind").notNull(),
+    // Stable event name within the class: "shape-architect.frame",
+    // "web-vitals.lcp", "render.error", etc.
+    name: text("name").notNull(),
+    // Game id when applicable (nullable for app-wide events).
+    gameId: text("game_id"),
+    levelId: text("level_id"),
+    // Numeric metric value in the event's natural unit (ms, fps, count).
+    value: integer("value"),
+    // Snapshot/payload — percentiles, userAgent, session id, tags.
+    payloadJson: text("payload_json"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [
+    // Health dashboard: "WHERE kind = ? AND name = ? AND created_at >= ?".
+    index("client_metrics_kind_name_created_idx").on(
+      table.kind,
+      table.name,
+      table.createdAt,
+    ),
+    // Per-player drill-down: "WHERE player_id = ? ORDER BY created_at DESC".
+    index("client_metrics_player_created_idx").on(
+      table.playerId,
+      table.createdAt,
+    ),
+  ],
+);

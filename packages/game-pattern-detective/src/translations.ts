@@ -9,6 +9,12 @@ export const patternDetectiveTranslations = {
     "achievement.pd_hard_streak.name": "Master Detective",
     "achievement.pd_hard_streak.description":
       "Solve a hard Pattern Detective puzzle.",
+    "pd.feedback.wrong_substitution":
+      "{selected} is not the missing number. Look at the gap between neighbours.",
+    "pd.feedback.not_in_pattern":
+      "{selected} breaks the pattern. Try a smaller step between terms.",
+    "pd.feedback.too_large": "{selected} is too large for this position.",
+    "pd.feedback.too_small": "{selected} is too small for this position.",
   },
   vi: {
     "gameTitle.patternDetective": "Thám Tử Quy Luật",
@@ -19,5 +25,11 @@ export const patternDetectiveTranslations = {
     "achievement.pd_hard_streak.name": "Thám Tử Bậc Thầy",
     "achievement.pd_hard_streak.description":
       "Giải một câu đố Thám Tử Quy Luật cấp khó.",
+    "pd.feedback.wrong_substitution":
+      "{selected} không phải là số còn thiếu. Hãy xem khoảng cách giữa các số.",
+    "pd.feedback.not_in_pattern":
+      "{selected} làm hỏng quy luật. Thử bước nhỏ hơn giữa các số.",
+    "pd.feedback.too_large": "{selected} quá lớn cho vị trí này.",
+    "pd.feedback.too_small": "{selected} quá nhỏ cho vị trí này.",
   },
 } as const;

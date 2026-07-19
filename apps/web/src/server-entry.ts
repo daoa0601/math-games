@@ -5,6 +5,8 @@ import {
 import type { RequestOptions } from '@tanstack/react-start/server'
 import type { Register } from '@tanstack/react-router'
 
+import { handleHealthRequest, isHealthRequest } from './health-handler'
+
 const handler = createStartHandler(defaultStreamHandler)
 
 const CACHEABLE_PATTERNS = [/^\/$/, /^\/daily$/, /^\/games\//]
@@ -36,6 +38,12 @@ export default {
     env: RequestOptions<Register>,
     ctx: ExecutionContext,
   ) {
+    // Health probe — bypass the SSR pipeline and edge cache. Always returns
+    // fresh; never cached.
+    if (isHealthRequest(request)) {
+      return handleHealthRequest()
+    }
+
     if (!isCacheable(request)) {
       return handler(request, env)
     }

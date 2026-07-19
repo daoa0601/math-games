@@ -12,6 +12,14 @@
       "types": "./src/rendering/three-scene.ts",
       "default": "./src/rendering/three-scene.ts"
     },
+    "./perf-monitor": {
+      "types": "./src/rendering/perf-monitor.ts",
+      "default": "./src/rendering/perf-monitor.ts"
+    },
+    "./picking": {
+      "types": "./src/rendering/picking.ts",
+      "default": "./src/rendering/picking.ts"
+    },
     "./forge": {
       "types": "./dist/solution-forge.d.ts",
       "default": "./dist/solution-forge.js"
@@ -25,7 +33,8 @@
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "eslint"
+    "lint": "eslint",
+    "bench": "tsx scripts/benchmark.ts"
   },
   "dependencies": {
     "@math-games/core": "workspace:*",

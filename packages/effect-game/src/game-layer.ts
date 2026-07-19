@@ -5,6 +5,7 @@ import { DailyStreakServiceLive } from "./daily-streak";
 import { DbServiceLive } from "./db";
 import { GameAttemptsServiceLive } from "./game-attempts";
 import { LeaderboardServiceLive } from "./leaderboard";
+import { ClientMetricsServiceLive, HealthServiceLive } from "./metrics";
 import { PlayerIdentityServiceLive } from "./player-identity";
 import { RankServiceLive } from "./rank";
 
@@ -16,6 +17,8 @@ const ServiceLayer = Layer.mergeAll(
   GameAttemptsServiceLive,
   LeaderboardServiceLive,
   RankServiceLive,
+  ClientMetricsServiceLive,
+  HealthServiceLive,
 ).pipe(Layer.provide(DataLayer));
 
 export const GameLayer = Layer.mergeAll(ServiceLayer, DataLayer);

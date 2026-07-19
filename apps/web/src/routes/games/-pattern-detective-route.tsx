@@ -7,9 +7,11 @@ const routeApi = getRouteApi('/games/pattern-detective')
 import type { TranslationKey } from '@/i18n-translations'
 import { formatAchievementName, formatDifficulty } from '@/i18n-format'
 import { LevelGrid } from '@/games/level-grid'
+import { PracticeGeneratorSection } from '@/games/practice-generator-section'
 import {
   Confetti,
   GameChrome,
+  LearnSection,
   LevelNav,
   useLevelSelection,
   useSaveStatus,
@@ -21,7 +23,9 @@ import { Card, CardContent, CardHeader } from '@math-games/ui'
 import { useT } from '@math-games/ui'
 import type { PatternConfig } from '@math-games/game-pattern-detective'
 import { recordPatternDetectiveProgress } from '@/games/pattern-detective.functions'
+import { getPatternDetectivePracticeConfig } from '@math-games/game-pattern-detective'
 import { shuffleChoices } from '@math-games/game-pattern-detective'
+import type { PatternDetectivePracticeDifficulty } from '@math-games/game-pattern-detective'
 import {
   formatSavedProgress,
   runServerAction,
@@ -43,6 +47,7 @@ export function PatternDetectiveRoute() {
     configIndex: levelIndex,
     availableConfigs,
     selectLevel: selectLevelRaw,
+    addAndSelectConfig,
   } = useLevelSelection({
     configs,
     initialConfigId,
@@ -91,6 +96,14 @@ export function PatternDetectiveRoute() {
     selectLevelRaw(next)
   }
 
+  function generatePracticeLevel(seed: string, difficulty: string) {
+    const nextConfig = getPatternDetectivePracticeConfig(
+      seed,
+      difficulty as PatternDetectivePracticeDifficulty,
+    )
+    addAndSelectConfig(nextConfig)
+  }
+
   return (
     <main className="theme-pattern-detective mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-6 md:gap-10 md:px-6 md:py-10">
       <GameChrome
@@ -119,6 +132,20 @@ export function PatternDetectiveRoute() {
         }}
       />
 
+      <PracticeGeneratorSection
+        title={t('game.puzzles')}
+        description={t('game.templatesDescription')}
+        difficulties={[
+          { value: 'easy', label: t('diff.easy') },
+          { value: 'medium', label: t('diff.medium') },
+          { value: 'hard', label: t('diff.hard') },
+        ]}
+        defaultDifficulty="medium"
+        onGenerate={generatePracticeLevel}
+      >
+        {null}
+      </PracticeGeneratorSection>
+
       <div className="relative">
         <Confetti active={result === 'correct'} />
       </div>
@@ -141,6 +168,8 @@ export function PatternDetectiveRoute() {
           t={t}
         />
       )}
+
+      <LearnSection gameId="pattern-detective" />
     </main>
   )
 }
