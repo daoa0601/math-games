@@ -100,7 +100,7 @@ describe("Preset Level Validation", () => {
 
   describe("Solution Verification", () => {
     // Test a few key levels to ensure solution quality
-    const testLevels = ["easy_1", "med_1", "hard_2"];
+    const testLevels = ["easy_1", "med_1", "hard_v2_1"];
 
     testLevels.forEach((levelId) => {
       const level = presetLevels.find((l) => l.id === levelId);
