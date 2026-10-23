@@ -24,6 +24,10 @@ export const PlayerIdentityServiceLive = Layer.effect(
   Effect.gen(function* () {
     const headers = yield* HeaderService;
     const random = yield* RandomService;
+    // A cookieless first visit runs several loaders in parallel (e.g. /daily's
+    // challenge + profile). They must share one minted player, or rows get
+    // written for one id while the browser keeps the cookie of another.
+    const mintedByRequest = new WeakMap<object, PlayerIdentity>();
 
     const resolve = () =>
       Effect.gen(function* () {
@@ -32,15 +36,26 @@ export const PlayerIdentityServiceLive = Layer.effect(
 
         if (existingId) return createPlayerIdentity(existingId);
 
+        const request = yield* headers.currentRequest();
         const uuid = yield* random.uuid();
-        const playerId = createPlayerId(() => uuid);
+        // Lookup and insert in one synchronous step so concurrent fibers
+        // cannot both miss.
+        const minted = yield* Effect.sync(() => {
+          const existing = mintedByRequest.get(request);
+          if (existing) return { identity: existing, isNew: false };
+          const identity = createPlayerIdentity(createPlayerId(() => uuid));
+          mintedByRequest.set(request, identity);
+          return { identity, isNew: true };
+        });
+        if (!minted.isNew) return minted.identity;
+
         const host = yield* headers.getRequest("host");
         yield* headers.setResponse(
           "set-cookie",
-          serializePlayerIdCookie(playerId, host ?? undefined),
+          serializePlayerIdCookie(minted.identity.id, host ?? undefined),
         );
 
-        return createPlayerIdentity(playerId);
+        return minted.identity;
       });
 
     return {

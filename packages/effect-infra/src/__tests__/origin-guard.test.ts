@@ -12,6 +12,7 @@ function runGuard(headers: Record<string, string>) {
   const headerLayer = Layer.succeed(HeaderService, {
     getRequest: (name: string) => Effect.succeed(headers[name] ?? null),
     setResponse: () => Effect.void,
+    currentRequest: () => Effect.succeed({}),
   });
 
   return Effect.runPromise(
