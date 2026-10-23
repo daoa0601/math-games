@@ -14,7 +14,7 @@ const GameIdInput = Schema.Struct({
 })
 
 export const getCompletionRates = createServerFn({ method: 'GET' })
-  .inputValidator(Schema.decodeUnknownSync(DateRangeInput))
+  .validator(Schema.decodeUnknownSync(DateRangeInput))
   .handler(({ data }) =>
     runServerEffect(
       Effect.gen(function* () {
@@ -25,7 +25,7 @@ export const getCompletionRates = createServerFn({ method: 'GET' })
   )
 
 export const getLevelDifficulty = createServerFn({ method: 'GET' })
-  .inputValidator(Schema.decodeUnknownSync(GameIdInput))
+  .validator(Schema.decodeUnknownSync(GameIdInput))
   .handler(({ data }) =>
     runServerEffect(
       Effect.gen(function* () {
@@ -36,7 +36,7 @@ export const getLevelDifficulty = createServerFn({ method: 'GET' })
   )
 
 export const getRetention = createServerFn({ method: 'GET' })
-  .inputValidator(Schema.decodeUnknownSync(DateRangeInput))
+  .validator(Schema.decodeUnknownSync(DateRangeInput))
   .handler(({ data }) =>
     runServerEffect(
       Effect.gen(function* () {

@@ -15,7 +15,7 @@ export const getFractionBuilderCatalog = createServerFn({
 }).handler(createGetCatalogHandler(fractionBuilderModule))
 
 export const recordFractionBuilderProgress = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(GameProgressRequest))
+  .validator(Schema.decodeUnknownSync(GameProgressRequest))
   .handler(({ data }) =>
     runServerEffect(createRecordProgressPipeline(fractionBuilderModule, data)),
   )

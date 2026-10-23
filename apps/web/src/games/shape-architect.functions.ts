@@ -23,15 +23,15 @@ export const getShapeArchitectLevel = createServerFn({ method: 'GET' }).handler(
 )
 
 export const recordShapeArchitectProgress = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(GameProgressRequest))
+  .validator(Schema.decodeUnknownSync(GameProgressRequest))
   .handler(({ data }) =>
     runServerEffect(createRecordProgressPipeline(shapeArchitectModule, data)),
   )
 
 export const validateShapeArchitectMove = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(ShapeArchitectMoveRequest))
+  .validator(Schema.decodeUnknownSync(ShapeArchitectMoveRequest))
   .handler(({ data }) => runServerEffect(createValidateMoveEffect(data)))
 
 export const getShapeArchitectSolution = createServerFn({ method: 'GET' })
-  .inputValidator(Schema.decodeUnknownSync(ShapeArchitectSolutionRequest))
+  .validator(Schema.decodeUnknownSync(ShapeArchitectSolutionRequest))
   .handler(({ data }) => runServerEffect(createSolveLevelEffect(data)))

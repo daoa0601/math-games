@@ -15,7 +15,7 @@ export const getEquationBalanceCatalog = createServerFn({
 }).handler(createGetCatalogHandler(equationBalanceModule))
 
 export const recordEquationBalanceProgress = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(GameProgressRequest))
+  .validator(Schema.decodeUnknownSync(GameProgressRequest))
   .handler(({ data }) =>
     runServerEffect(createRecordProgressPipeline(equationBalanceModule, data)),
   )

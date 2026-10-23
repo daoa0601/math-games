@@ -28,7 +28,7 @@ const ClientMetricRequest = Schema.Struct({
 })
 
 export const recordClientMetric = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(ClientMetricRequest))
+  .validator(Schema.decodeUnknownSync(ClientMetricRequest))
   .handler(({ data }) =>
     runServerEffect(
       Effect.gen(function* () {

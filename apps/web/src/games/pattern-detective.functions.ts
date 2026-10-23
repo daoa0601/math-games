@@ -15,7 +15,7 @@ export const getPatternDetectiveCatalog = createServerFn({
 }).handler(createGetCatalogHandler(patternDetectiveModule))
 
 export const recordPatternDetectiveProgress = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(GameProgressRequest))
+  .validator(Schema.decodeUnknownSync(GameProgressRequest))
   .handler(({ data }) =>
     runServerEffect(createRecordProgressPipeline(patternDetectiveModule, data)),
   )

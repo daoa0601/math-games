@@ -16,11 +16,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "effect": "4.0.0-beta.66"
+    "effect": "4.0.6"
   },
   "devDependencies": {
     "tsup": "8.5.0",
     "typescript": "6.0.3",
-    "vitest": "4.1.6"
+    "vitest": "5.0.5"
   }
 }

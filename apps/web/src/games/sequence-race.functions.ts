@@ -15,7 +15,7 @@ export const getSequenceRaceLevel = createServerFn({ method: 'GET' }).handler(
 )
 
 export const recordSequenceRaceProgress = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(GameProgressRequest))
+  .validator(Schema.decodeUnknownSync(GameProgressRequest))
   .handler(({ data }) =>
     runServerEffect(createRecordProgressPipeline(sequenceRaceModule, data)),
   )

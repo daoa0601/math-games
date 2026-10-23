@@ -15,7 +15,7 @@ export const getMagicGraphLevel = createServerFn({ method: 'GET' }).handler(
 )
 
 export const recordMagicGraphProgress = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(GameProgressRequest))
+  .validator(Schema.decodeUnknownSync(GameProgressRequest))
   .handler(({ data }) =>
     runServerEffect(createRecordProgressPipeline(magicGraphModule, data)),
   )
