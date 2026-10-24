@@ -82,6 +82,44 @@ describe("createPerfMonitor", () => {
   });
 });
 
+describe("idle ticks", () => {
+  function render(perf: ReturnType<typeof createPerfMonitor>, now: number) {
+    perf.endFrame(perf.beginFrame(now));
+  }
+
+  it("count no frames, so an idle window publishes a zero-frame snapshot", () => {
+    const snapshots: PerfSnapshot[] = [];
+    const perf = createPerfMonitor({
+      windowMs: 500,
+      reportMs: 100,
+      onSnapshot: (s) => snapshots.push(s),
+    });
+
+    for (let t = 0; t <= 240; t += 16) render(perf, t);
+    for (let t = 256; t <= 2_000; t += 16) perf.idle(t);
+
+    expect(perf.size()).toBe(0);
+    expect(snapshots.at(-1)?.frames).toBe(0);
+    expect(snapshots.at(-1)?.fps).toBe(0);
+  });
+
+  it("let the first frame after idling measure one tick, not the idle gap", () => {
+    const snapshots: PerfSnapshot[] = [];
+    const perf = createPerfMonitor({
+      windowMs: 100,
+      reportMs: 0,
+      onSnapshot: (s) => snapshots.push(s),
+    });
+
+    render(perf, 0);
+    for (let t = 16; t <= 1_600; t += 16) perf.idle(t);
+    render(perf, 1_616);
+
+    expect(snapshots.at(-1)?.frames).toBe(1);
+    expect(snapshots.at(-1)?.maxFrameMs).toBe(16);
+  });
+});
+
 describe("formatPerfLine", () => {
   it("renders a placeholder when no frames were sampled", () => {
     expect(

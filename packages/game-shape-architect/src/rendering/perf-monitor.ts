@@ -86,6 +86,12 @@ export function createPerfMonitor(options: PerfMonitorOptions = {}) {
     return sortedAsc[Math.max(0, idx)];
   }
 
+  function publishOnCadence(now: number): void {
+    if (now - lastReport < reportMs) return;
+    lastReport = now;
+    publish(now);
+  }
+
   function publish(now: number): void {
     if (!onSnapshot) return;
     if (samples.length === 0) {
@@ -135,10 +141,19 @@ export function createPerfMonitor(options: PerfMonitorOptions = {}) {
       samples.push({ frameMs: token.frameMs, workMs, at: now });
 
       prune(now);
-      if (now - lastReport >= reportMs) {
-        lastReport = now;
-        publish(now);
-      }
+      publishOnCadence(now);
+    },
+
+    /**
+     * Advance the clock on a tick that rendered nothing. Records no sample, but
+     * old samples still age out and snapshots keep publishing, so an idle
+     * render-on-demand loop reports zero-frame windows. Also keeps the next
+     * frame's frameMs to one tick instead of the whole idle gap.
+     */
+    idle(now: number): void {
+      lastFrameTime = now;
+      prune(now);
+      publishOnCadence(now);
     },
 
     /** Current sample count (for tests). */

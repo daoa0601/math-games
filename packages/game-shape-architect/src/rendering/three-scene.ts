@@ -190,6 +190,7 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     const existing = cache.get(key);
     if (existing && existing.capacity >= needed) {
       existing.count = needed;
+      existing.mesh.count = needed;
       return existing;
     }
 
@@ -322,6 +323,7 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
       const mesh = new THREE.InstancedMesh(cubeGeometry, material, capacity);
       mesh.castShadow = false;
       mesh.receiveShadow = false;
+      mesh.count = positions.length;
       mesh.frustumCulled = false;
       ghostGroup.add(mesh);
       ghostPool = { mesh, capacity, count: positions.length };
@@ -420,20 +422,19 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   // ---- The render-on-demand loop ----
   // Runs continuously at rAF cadence but only does renderer.render when
   // pendingFrames > 0. When idle (no interaction, no pending updates), each
-  // frame is essentially free: we still sample frameMs so the HUD can show
-  // "0 fps while idle, 60 fps while interacting" honestly.
+  // tick is essentially free and counts as no frame, so the HUD and metrics
+  // show "0 fps while idle, 60 fps while interacting" honestly.
   function animate(now: number) {
     rafId = requestAnimationFrame(animate);
-    const token = perf.beginFrame(now);
-
-    const shouldRender = pendingFrames > 0;
     controls.update();
-    if (shouldRender) {
+    if (pendingFrames > 0) {
+      const token = perf.beginFrame(now);
       renderer.render(scene, camera);
       pendingFrames--;
+      perf.endFrame(token);
+    } else {
+      perf.idle(now);
     }
-
-    perf.endFrame(token);
   }
 
   fitToGrid(currentGridSize);
