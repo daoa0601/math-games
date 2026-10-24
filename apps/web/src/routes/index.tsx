@@ -19,9 +19,8 @@ import {
   useT,
   Wordmark,
 } from '@math-games/ui'
-import { getDailyChallenge } from '@/daily/daily.functions'
+import { getDailyChallengeAndOverview } from '@/daily/daily.functions'
 import { publishedGameModules, registry } from '@/games/registry'
-import { getPlayerProfileOverview } from '@/player/profile.functions'
 import type { PlayerProgressSummary } from '@/player/profile.server'
 import { RouteErrorFallback } from '@/routes/-route-error'
 import { RoutePending } from '@/routes/-route-pending'
@@ -37,10 +36,8 @@ const GAME_PATTERN: Record<string, PatternType> = {
 
 export const Route = createFileRoute('/')({
   loader: async () => {
-    const [overview, dailyChallenge] = await Promise.all([
-      getPlayerProfileOverview(),
-      getDailyChallenge(),
-    ])
+    const { challenge: dailyChallenge, overview } =
+      await getDailyChallengeAndOverview()
 
     return {
       dailyChallenge,
