@@ -33,7 +33,7 @@ test.describe('pattern-detective gameplay', () => {
     await expectHydrated(page)
 
     const main = page.locator('main')
-    await main.getByRole('button', { name: '12', exact: true }).click()
+    await main.getByRole('button', { name: '7', exact: true }).click()
 
     await expect(main.getByText('Try Again')).toBeVisible()
     await expect(main.getByText(/The answer is/)).toBeVisible()
@@ -203,13 +203,13 @@ test.describe('language toggle', () => {
     await expectHydrated(page)
 
     await expect(
-      page.getByRole('heading', { name: 'Pattern Detective' }),
+      page.getByRole('heading', { name: 'Pattern Detective', exact: true }),
     ).toBeVisible()
 
     await page.getByRole('button', { name: /Switch to Vietnamese/i }).click()
 
     await expect(
-      page.getByRole('heading', { name: 'Thám Tử Quy Luật' }),
+      page.getByRole('heading', { name: 'Thám Tử Quy Luật', exact: true }),
     ).toBeVisible()
 
     expectNoRuntimeErrors(errors)
@@ -223,7 +223,7 @@ test.describe('language toggle', () => {
 
     await page.getByRole('button', { name: /Switch to Vietnamese/i }).click()
 
-    await page.getByRole('button', { name: '12', exact: true }).click()
+    await page.getByRole('button', { name: '7', exact: true }).click()
 
     await expect(page.getByText('Thử Lại')).toBeVisible()
     await expect(page.getByText(/Đáp án là/)).toBeVisible()

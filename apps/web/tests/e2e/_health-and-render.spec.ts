@@ -12,6 +12,8 @@
 
 import { expect, test } from '@playwright/test'
 
+import { expectHydrated } from './_helpers'
+
 const SHOTS = 'test-results/health-shots'
 
 const gamesList = [
@@ -42,8 +44,9 @@ for (const game of gamesList) {
     })
 
     await page.goto(`/games/${game.id}`, { waitUntil: 'domcontentloaded' })
-    // Give client fns + React hydration a beat to resolve.
-    await page.waitForTimeout(1500)
+    // Screenshot only after hydration: Playwright hides the caret by styling
+    // inputs, which React reports as a hydration mismatch if it lands first.
+    await expectHydrated(page)
 
     await page.screenshot({
       path: `${SHOTS}/${game.id}.png`,

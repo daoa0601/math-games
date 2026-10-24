@@ -3,7 +3,9 @@
 // piece count, then guided-solve it to verify the full placement loop works
 // on the new silhouettes.
 
-import { test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+
+import { expectHydrated } from './_helpers'
 
 const NEW_HARD = [
   { name: 'Crucible', pieces: 7 },
@@ -21,42 +23,33 @@ for (const level of NEW_HARD) {
         errors.push(`console: ${m.text().slice(0, 200)}`)
     })
 
-    await page.goto('http://localhost:3000/games/shape-architect', {
+    await page.goto('/games/shape-architect', {
       waitUntil: 'domcontentloaded',
     })
-    await page.waitForTimeout(1200)
+    // Clicks before hydration are dropped, which a cold CI server makes likely.
+    await expectHydrated(page)
 
-    // Select the level by name.
+    // Select the level by name and confirm it loaded.
     await page.locator(`button:has-text("${level.name}")`).first().click()
-    await page.waitForTimeout(1000)
+    await expect(page.locator('body')).toContainText(level.name)
 
-    // Confirm the level loaded: the header should show the level name.
-    const body = await page.evaluate(() => document.body.innerText)
-    if (!body.includes(level.name)) {
-      throw new Error(`${level.name} did not load into the header`)
-    }
-
-    // Guided solve.
+    // Guided solve. Wait for the walkthrough (a server-side solve) instead of
+    // a fixed delay, then place each step.
     await page.locator('button:has-text("Guided")').first().click()
-    await page.waitForTimeout(3000)
 
-    let solved = false
+    const place = page.locator('button:has-text("Place piece")').first()
+    const done = page.getByText(/Walkthrough complete/i)
     for (let i = 0; i < level.pieces + 2; i++) {
-      const btn = page.locator('button:has-text("Place piece")').first()
-      const visible = await btn.isVisible().catch(() => false)
-      if (!visible) break
-      await btn.click()
+      await expect(place.or(done).first()).toBeVisible({ timeout: 15_000 })
+      if (await done.isVisible()) break
+      await place.click()
+      // Let the placement settle before the next step.
       await page.waitForTimeout(1000)
-      const after = await page.evaluate(() => document.body.innerText)
-      if (/Walkthrough complete/i.test(after)) {
-        solved = true
-        break
-      }
     }
-
-    if (!solved) {
-      throw new Error(`${level.name} did not reach Walkthrough complete`)
-    }
+    await expect(
+      done,
+      `${level.name} did not reach Walkthrough complete`,
+    ).toBeVisible()
 
     // Tolerate only the known cache/font noise.
     const real = errors.filter(
