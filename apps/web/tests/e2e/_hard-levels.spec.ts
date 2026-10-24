@@ -17,7 +17,8 @@ for (const level of NEW_HARD) {
     const errors: string[] = []
     page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`))
     page.on('console', (m) => {
-      if (m.type() === 'error') errors.push(`console: ${m.text().slice(0, 200)}`)
+      if (m.type() === 'error')
+        errors.push(`console: ${m.text().slice(0, 200)}`)
     })
 
     await page.goto('http://localhost:3000/games/shape-architect', {
