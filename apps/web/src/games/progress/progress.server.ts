@@ -17,6 +17,8 @@ export interface RecordGameProgressInput {
   difficulty?: string
   isOptimalSolution?: boolean
   wasWinner?: boolean
+  /** Skills the played level exercises (from its manifest), for skill-gated achievements. */
+  skillTags?: readonly string[]
 }
 
 export interface GameProgressRecord {
@@ -89,6 +91,7 @@ export function recordGameProgress(input: RecordGameProgressInput) {
         isOptimalSolution: input.isOptimalSolution,
         wasWinner: input.wasWinner,
         gamesPlayedByType,
+        skillTags: input.skillTags,
       },
       existingAchievements.map((row) => row.achievementId),
     )

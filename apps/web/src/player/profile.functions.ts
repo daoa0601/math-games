@@ -20,11 +20,11 @@ export const getPlayerProfileOverview = createServerFn({
 })
 
 export const updatePlayerProfile = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(PlayerProfileInput))
+  .validator(Schema.decodeUnknownSync(PlayerProfileInput))
   .handler(({ data }) => runServerEffect(createUpdateProfilePipeline(data)))
 
 export const importPlayerAchievementBackup = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(AchievementImportInput))
+  .validator(Schema.decodeUnknownSync(AchievementImportInput))
   .handler(({ data }) =>
     runServerEffect(createImportAchievementsPipeline(data)),
   )

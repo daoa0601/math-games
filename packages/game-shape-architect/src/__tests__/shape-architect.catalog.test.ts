@@ -16,7 +16,7 @@ describe("Shape Architect catalog", () => {
         "easy_1",
         "easy_4",
         "med_1",
-        "hard_4",
+        "hard_v2_1",
         "expert_2",
       ]),
     );

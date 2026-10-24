@@ -24,6 +24,10 @@ export const shapeArchitectTranslations = {
     "level.ultimate": "Ultimate",
     "level.pentominoRectangle": "Pentomino Rectangle",
     "level.wideGrid": "Wide Grid",
+    "level.crucible": "Crucible",
+    "level.outpost": "Outpost",
+    "level.cascade": "Cascade",
+    "level.bastion": "Bastion",
   },
   vi: {
     "gameTitle.shapeArchitect": "Kiến Trúc Hình Khối",
@@ -50,5 +54,9 @@ export const shapeArchitectTranslations = {
     "level.ultimate": "Tối Thượng",
     "level.pentominoRectangle": "Hình Chữ Nhật Pentomino",
     "level.wideGrid": "Lưới Rộng",
+    "level.crucible": "Thế Giới Khó",
+    "level.outpost": "Trạm Gác",
+    "level.cascade": "Thác Nước",
+    "level.bastion": "Pháo Đài",
   },
 } as const;

@@ -19,6 +19,18 @@ export const fractionBuilderTranslations = {
     "fb.pickOne": "pick 1",
     "fb.practiceDescription":
       "Generate endless build, simplify, and compare problems — easy to master.",
+    "fb.feedback.zero_denominator": "The denominator cannot be zero.",
+    "fb.feedback.not_equal": "{n}/{d} does not equal {targetN}/{targetD}.",
+    "fb.feedback.not_equivalent":
+      "{n}/{d} is not equivalent to {targetN}/{targetD}.",
+    "fb.feedback.not_simplified":
+      "{n}/{d} can be simplified further — divide both by {divisor}.",
+    "fb.feedback.compare_greater":
+      "{targetN}/{targetD} is greater than {compN}/{compD}.",
+    "fb.feedback.compare_less":
+      "{targetN}/{targetD} is less than {compN}/{compD}.",
+    "fb.feedback.compare_equal":
+      "{targetN}/{targetD} is equal to {compN}/{compD}.",
     "achievement.fb_first_fraction.name": "First Fraction",
     "achievement.fb_first_fraction.description":
       "Complete a Fraction Builder level.",
@@ -48,6 +60,16 @@ export const fractionBuilderTranslations = {
     "fb.pickOne": "chọn 1",
     "fb.practiceDescription":
       "Tạo vô số bài lắp ghép, rút gọn và so sánh — từ dễ đến bậc thầy.",
+    "fb.feedback.zero_denominator": "Mẫu số không thể bằng không.",
+    "fb.feedback.not_equal": "{n}/{d} không bằng {targetN}/{targetD}.",
+    "fb.feedback.not_equivalent":
+      "{n}/{d} không tương đương với {targetN}/{targetD}.",
+    "fb.feedback.not_simplified":
+      "{n}/{d} vẫn rút gọn được — chia cả hai cho {divisor}.",
+    "fb.feedback.compare_greater":
+      "{targetN}/{targetD} lớn hơn {compN}/{compD}.",
+    "fb.feedback.compare_less": "{targetN}/{targetD} nhỏ hơn {compN}/{compD}.",
+    "fb.feedback.compare_equal": "{targetN}/{targetD} bằng {compN}/{compD}.",
     "achievement.fb_first_fraction.name": "Phân Số Đầu Tiên",
     "achievement.fb_first_fraction.description":
       "Hoàn thành một cấp Xây Dựng Phân Số.",

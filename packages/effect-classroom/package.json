@@ -19,13 +19,13 @@
     "@math-games/db": "workspace:*",
     "@math-games/effect-infra": "workspace:*",
     "@math-games/effect-game": "workspace:*",
-    "effect": "4.0.0-beta.66",
+    "effect": "4.0.6",
     "drizzle-orm": "1.0.0-rc.2"
   },
   "devDependencies": {
     "@types/node": "22.19.19",
     "tsup": "8.5.0",
     "typescript": "6.0.3",
-    "vitest": "4.1.6"
+    "vitest": "5.0.5"
   }
 }

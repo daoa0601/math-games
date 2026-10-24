@@ -8,6 +8,8 @@ export const gameRoutes: readonly SmokeRoute[] = [
   { path: "/games/sequence-race", expectedText: ["Race Line"] },
   { path: "/games/shape-architect", expectedText: ["Blueprint"] },
   { path: "/games/pattern-detective", expectedText: ["Pattern Detective"] },
+  { path: "/games/fraction-builder", expectedText: ["Fraction"] },
+  { path: "/games/equation-balance", expectedText: ["Equation"] },
 ];
 
 export const blockedOldRootPaths = [

@@ -1,3 +1,5 @@
+import type { LevelManifest } from "@math-games/core";
+
 export type FractionMode = "build" | "simplify" | "compare";
 
 export type Difficulty = "easy" | "medium" | "hard" | "expert" | "master";
@@ -12,6 +14,8 @@ export interface FractionConfig {
   choices: readonly number[];
   /** For compare mode: the second fraction to compare against */
   compareTo?: readonly [number, number];
+  /** Pedagogical metadata; attached where configs are produced. */
+  manifest?: LevelManifest;
 }
 
 function gcd(a: number, b: number): number {

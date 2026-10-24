@@ -9,16 +9,15 @@ import type {
   Rotation3D,
 } from '@math-games/game-shape-architect'
 import {
-  findNearestValidPosition,
-  getPieceWorldPositions,
+  resolveGhostPiece,
+  type GhostPiece,
   VoxelGrid,
 } from '@math-games/game-shape-architect'
-import type { ThreeScene } from '@math-games/game-shape-architect'
+import type { ThreeScene } from '@math-games/game-shape-architect/three-scene'
+import type { PerfSnapshot } from '@math-games/game-shape-architect/three-scene'
+import { formatPerfLine } from '@math-games/game-shape-architect/perf-monitor'
 
-interface GhostPiece {
-  positions: Position3D[]
-  isValid: boolean
-}
+import { useThrottledMetricReporter } from '@/games/use-client-metrics'
 
 interface ShapeArchitect3DProps {
   gridState: CellState[][][]
@@ -51,29 +50,26 @@ export function ShapeArchitect3D({
   const sceneRef = useRef<ThreeScene | null>(null)
   const [ready, setReady] = useState(false)
   const [hoveredCell3D, setHoveredCell3D] = useState<Position3D | null>(null)
+  const [perfLine, setPerfLine] = useState<string>('')
+
+  // Flush a perf snapshot to the client_metrics table at most once every 30s,
+  // and only when we've actually rendered frames (skip idle "0 fps" windows
+  // so the table doesn't fill with noise while the player is reading hints).
+  const reportPerf = useThrottledMetricReporter({
+    intervalMs: 30_000,
+    shouldReport: (value) => value !== undefined && value > 0,
+  })
 
   const grid = useMemo(() => VoxelGrid.fromNestedArray(gridState), [gridState])
 
   const ghostPiece = useMemo((): GhostPiece | null => {
-    const source = hoveredCell3D ?? pendingPosition
-    if (!selectedPiece || !source) return null
-
-    const position = findNearestValidPosition(
+    return resolveGhostPiece({
       grid,
-      selectedPiece,
-      source,
-      placementRotation,
+      piece: selectedPiece,
+      source: hoveredCell3D ?? pendingPosition,
+      rotation: placementRotation,
       gridSize,
-    )
-
-    return {
-      positions: getPieceWorldPositions(
-        selectedPiece,
-        position ?? source,
-        placementRotation,
-      ),
-      isValid: position !== null,
-    }
+    })
   }, [
     selectedPiece,
     hoveredCell3D,
@@ -89,18 +85,44 @@ export function ShapeArchitect3D({
 
     let disposed = false
 
-    import('@math-games/game-shape-architect').then(({ createThreeScene }) => {
-      if (disposed) return
-      const threeScene = createThreeScene(canvas)
-      sceneRef.current = threeScene
-      setReady(true)
+    // Subpath import keeps three.js out of the statically-imported barrel —
+    // this is what makes the chunk split actually happen.
+    import('@math-games/game-shape-architect/three-scene').then(
+      ({ createThreeScene }) => {
+        if (disposed) return
+        const threeScene = createThreeScene(canvas)
+        sceneRef.current = threeScene
+        setReady(true)
 
-      const container = containerRef.current
-      if (container) {
-        const rect = container.getBoundingClientRect()
-        threeScene.resize(rect.width, Math.max(320, rect.width * 0.66))
-      }
-    })
+        threeScene.onPerf((snapshot: PerfSnapshot) => {
+          setPerfLine(formatPerfLine(snapshot))
+          // value = median frame ms (lower is better); only meaningful when
+          // frames were sampled (the render-on-demand loop reports 0 frames
+          // while idle).
+          if (snapshot.frames > 0) {
+            reportPerf({
+              kind: 'perf',
+              name: 'shape-architect.frame',
+              gameId: 'shape-architect',
+              value: Math.round(snapshot.medianFrameMs * 100) / 100,
+              payloadJson: JSON.stringify({
+                fps: Math.round(snapshot.fps),
+                median: snapshot.medianFrameMs,
+                p95: snapshot.p95FrameMs,
+                max: snapshot.maxFrameMs,
+                frames: snapshot.frames,
+              }),
+            })
+          }
+        })
+
+        const container = containerRef.current
+        if (container) {
+          const rect = container.getBoundingClientRect()
+          threeScene.resize(rect.width, Math.max(320, rect.width * 0.66))
+        }
+      },
+    )
 
     return () => {
       disposed = true
@@ -162,15 +184,34 @@ export function ShapeArchitect3D({
     const canvas = canvasRef.current
     if (!canvas) return
 
+    // Throttle mousemove picking with rAF so a fast sweep over the canvas does
+    // not raycast once per event (Chrome can fire 200+ events/sec on a Mac
+    // trackpad). One in-flight pick at a time is enough for the ghost.
+    let pending = false
+    let lastEvent: MouseEvent | null = null
+
+    function schedule() {
+      if (pending) return
+      pending = true
+      requestAnimationFrame(() => {
+        pending = false
+        const event = lastEvent
+        if (!event) return
+        const position = sceneRef.current?.pickGridCell(
+          event.clientX,
+          event.clientY,
+        )
+        setHoveredCell3D(position ?? null)
+      })
+    }
+
     function handleMove(event: MouseEvent) {
-      const position = sceneRef.current?.pickGridCell(
-        event.clientX,
-        event.clientY,
-      )
-      setHoveredCell3D(position ?? null)
+      lastEvent = event
+      schedule()
     }
 
     function handleLeave() {
+      lastEvent = null
       setHoveredCell3D(null)
     }
 
@@ -183,14 +224,22 @@ export function ShapeArchitect3D({
   }, [])
 
   return (
-    <div ref={containerRef} className="max-w-[640px]">
+    <div ref={containerRef} className="relative max-w-[640px]">
       <canvas
         ref={canvasRef}
         className="w-full"
-        style={{ minHeight: 320, cursor: selectedPiece ? 'crosshair' : 'grab' }}
+        style={{
+          minHeight: 320,
+          cursor: selectedPiece ? 'crosshair' : 'grab',
+        }}
         aria-label={labels.view}
         role="img"
       />
+      {perfLine && (
+        <div className="pointer-events-none absolute right-2 top-2 rounded bg-background/80 px-2 py-1 font-mono text-[10px] tabular-nums text-muted-foreground">
+          {perfLine}
+        </div>
+      )}
       {!ready && (
         <div className="flex h-[320px] items-center justify-center text-sm text-neutral-500">
           {labels.loading}

@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { Schema } from 'effect'
 
-import { GameProgressRequest } from '@/games/game-progress.schema'
+import { GameProgressRequest } from '@math-games/core'
 import {
   createGetCatalogHandler,
   createRecordProgressPipeline,
@@ -15,7 +15,7 @@ export const getFractionBuilderCatalog = createServerFn({
 }).handler(createGetCatalogHandler(fractionBuilderModule))
 
 export const recordFractionBuilderProgress = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(GameProgressRequest))
+  .validator(Schema.decodeUnknownSync(GameProgressRequest))
   .handler(({ data }) =>
     runServerEffect(createRecordProgressPipeline(fractionBuilderModule, data)),
   )

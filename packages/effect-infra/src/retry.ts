@@ -1,7 +1,7 @@
 import { Effect, Schedule } from "effect";
 
 export const d1RetryPolicy = Schedule.exponential("50 millis").pipe(
-  Schedule.both(Schedule.recurs(3)),
+  Schedule.upTo({ times: 3 }),
   Schedule.jittered,
 );
 

@@ -5,6 +5,7 @@ export type {
   AchievementRarity,
   AchievementUnlockCondition,
   DailyChallengePick,
+  DailyPickInput,
   GameCatalog,
   GameFeedback,
   GameModule,
@@ -16,6 +17,18 @@ export type {
 export { createGameModule, createValidateAndComputeScore } from "./game-module";
 
 export { GameProgressRequest } from "./game-progress.schema";
+
+export type {
+  AttemptDiagnostics,
+  HintStep,
+  LevelManifest,
+  SolutionStep,
+} from "./level-manifest";
+export {
+  buildAttemptDiagnostics,
+  toClientCatalog,
+  toClientManifest,
+} from "./level-manifest";
 
 export {
   AuthorizationError,

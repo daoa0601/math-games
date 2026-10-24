@@ -9,33 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as DailyRouteImport } from './routes/daily'
-import { Route as ClassroomRouteImport } from './routes/classroom'
-import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as GamesShapeArchitectRouteImport } from './routes/games/shape-architect'
-import { Route as GamesSequenceRaceRouteImport } from './routes/games/sequence-race'
-import { Route as GamesPatternDetectiveRouteImport } from './routes/games/pattern-detective'
-import { Route as GamesMagicGraphRouteImport } from './routes/games/magic-graph'
-import { Route as GamesFractionBuilderRouteImport } from './routes/games/fraction-builder'
-import { Route as GamesEquationBalanceRouteImport } from './routes/games/equation-balance'
-import { Route as DevDesignCanvasRouteImport } from './routes/dev/design-canvas'
+import { Route as AchievementsRouteImport } from './routes/achievements'
+import { Route as ClassroomRouteImport } from './routes/classroom'
+import { Route as DailyRouteImport } from './routes/daily'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
+import { Route as DevDesignCanvasRouteImport } from './routes/dev/design-canvas'
+import { Route as GamesEquationBalanceRouteImport } from './routes/games/equation-balance'
+import { Route as GamesFractionBuilderRouteImport } from './routes/games/fraction-builder'
+import { Route as GamesMagicGraphRouteImport } from './routes/games/magic-graph'
+import { Route as GamesPatternDetectiveRouteImport } from './routes/games/pattern-detective'
+import { Route as GamesSequenceRaceRouteImport } from './routes/games/sequence-race'
+import { Route as GamesShapeArchitectRouteImport } from './routes/games/shape-architect'
 
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DailyRoute = DailyRouteImport.update({
-  id: '/daily',
-  path: '/daily',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClassroomRoute = ClassroomRouteImport.update({
-  id: '/classroom',
-  path: '/classroom',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AchievementsRoute = AchievementsRouteImport.update({
@@ -43,39 +33,24 @@ const AchievementsRoute = AchievementsRouteImport.update({
   path: '/achievements',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ClassroomRoute = ClassroomRouteImport.update({
+  id: '/classroom',
+  path: '/classroom',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GamesShapeArchitectRoute = GamesShapeArchitectRouteImport.update({
-  id: '/games/shape-architect',
-  path: '/games/shape-architect',
+const DailyRoute = DailyRouteImport.update({
+  id: '/daily',
+  path: '/daily',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GamesSequenceRaceRoute = GamesSequenceRaceRouteImport.update({
-  id: '/games/sequence-race',
-  path: '/games/sequence-race',
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GamesPatternDetectiveRoute = GamesPatternDetectiveRouteImport.update({
-  id: '/games/pattern-detective',
-  path: '/games/pattern-detective',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesMagicGraphRoute = GamesMagicGraphRouteImport.update({
-  id: '/games/magic-graph',
-  path: '/games/magic-graph',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesFractionBuilderRoute = GamesFractionBuilderRouteImport.update({
-  id: '/games/fraction-builder',
-  path: '/games/fraction-builder',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesEquationBalanceRoute = GamesEquationBalanceRouteImport.update({
-  id: '/games/equation-balance',
-  path: '/games/equation-balance',
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/admin/analytics',
+  path: '/admin/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevDesignCanvasRoute = DevDesignCanvasRouteImport.update({
@@ -83,9 +58,34 @@ const DevDesignCanvasRoute = DevDesignCanvasRouteImport.update({
   path: '/dev/design-canvas',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
-  id: '/admin/analytics',
-  path: '/admin/analytics',
+const GamesEquationBalanceRoute = GamesEquationBalanceRouteImport.update({
+  id: '/games/equation-balance',
+  path: '/games/equation-balance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesFractionBuilderRoute = GamesFractionBuilderRouteImport.update({
+  id: '/games/fraction-builder',
+  path: '/games/fraction-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesMagicGraphRoute = GamesMagicGraphRouteImport.update({
+  id: '/games/magic-graph',
+  path: '/games/magic-graph',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesPatternDetectiveRoute = GamesPatternDetectiveRouteImport.update({
+  id: '/games/pattern-detective',
+  path: '/games/pattern-detective',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesSequenceRaceRoute = GamesSequenceRaceRouteImport.update({
+  id: '/games/sequence-race',
+  path: '/games/sequence-race',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesShapeArchitectRoute = GamesShapeArchitectRouteImport.update({
+  id: '/games/shape-architect',
+  path: '/games/shape-architect',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -201,25 +201,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/daily': {
-      id: '/daily'
-      path: '/daily'
-      fullPath: '/daily'
-      preLoaderRoute: typeof DailyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/classroom': {
-      id: '/classroom'
-      path: '/classroom'
-      fullPath: '/classroom'
-      preLoaderRoute: typeof ClassroomRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/achievements': {
@@ -229,53 +215,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AchievementsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/classroom': {
+      id: '/classroom'
+      path: '/classroom'
+      fullPath: '/classroom'
+      preLoaderRoute: typeof ClassroomRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/games/shape-architect': {
-      id: '/games/shape-architect'
-      path: '/games/shape-architect'
-      fullPath: '/games/shape-architect'
-      preLoaderRoute: typeof GamesShapeArchitectRouteImport
+    '/daily': {
+      id: '/daily'
+      path: '/daily'
+      fullPath: '/daily'
+      preLoaderRoute: typeof DailyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/games/sequence-race': {
-      id: '/games/sequence-race'
-      path: '/games/sequence-race'
-      fullPath: '/games/sequence-race'
-      preLoaderRoute: typeof GamesSequenceRaceRouteImport
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/games/pattern-detective': {
-      id: '/games/pattern-detective'
-      path: '/games/pattern-detective'
-      fullPath: '/games/pattern-detective'
-      preLoaderRoute: typeof GamesPatternDetectiveRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games/magic-graph': {
-      id: '/games/magic-graph'
-      path: '/games/magic-graph'
-      fullPath: '/games/magic-graph'
-      preLoaderRoute: typeof GamesMagicGraphRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games/fraction-builder': {
-      id: '/games/fraction-builder'
-      path: '/games/fraction-builder'
-      fullPath: '/games/fraction-builder'
-      preLoaderRoute: typeof GamesFractionBuilderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games/equation-balance': {
-      id: '/games/equation-balance'
-      path: '/games/equation-balance'
-      fullPath: '/games/equation-balance'
-      preLoaderRoute: typeof GamesEquationBalanceRouteImport
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev/design-canvas': {
@@ -285,11 +250,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevDesignCanvasRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/analytics': {
-      id: '/admin/analytics'
-      path: '/admin/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AdminAnalyticsRouteImport
+    '/games/equation-balance': {
+      id: '/games/equation-balance'
+      path: '/games/equation-balance'
+      fullPath: '/games/equation-balance'
+      preLoaderRoute: typeof GamesEquationBalanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/fraction-builder': {
+      id: '/games/fraction-builder'
+      path: '/games/fraction-builder'
+      fullPath: '/games/fraction-builder'
+      preLoaderRoute: typeof GamesFractionBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/magic-graph': {
+      id: '/games/magic-graph'
+      path: '/games/magic-graph'
+      fullPath: '/games/magic-graph'
+      preLoaderRoute: typeof GamesMagicGraphRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/pattern-detective': {
+      id: '/games/pattern-detective'
+      path: '/games/pattern-detective'
+      fullPath: '/games/pattern-detective'
+      preLoaderRoute: typeof GamesPatternDetectiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/sequence-race': {
+      id: '/games/sequence-race'
+      path: '/games/sequence-race'
+      fullPath: '/games/sequence-race'
+      preLoaderRoute: typeof GamesSequenceRaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/shape-architect': {
+      id: '/games/shape-architect'
+      path: '/games/shape-architect'
+      fullPath: '/games/shape-architect'
+      preLoaderRoute: typeof GamesShapeArchitectRouteImport
       parentRoute: typeof rootRouteImport
     }
   }

@@ -5,6 +5,11 @@ export default defineConfig({
   plugins: [viteReact()],
   test: {
     environment: "jsdom",
+    environmentOptions: {
+      jsdom: {
+        url: "http://localhost/",
+      },
+    },
     testTimeout: 5000,
     setupFiles: ["./src/__tests__/setup.ts"],
   },

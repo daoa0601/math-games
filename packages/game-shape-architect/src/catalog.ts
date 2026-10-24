@@ -2,6 +2,8 @@ import { createSeededRandom } from "@math-games/core";
 
 import { generateGuaranteedSolvableWithRetry } from "./logic/seededGenerator";
 import { presetLevels } from "./logic/presets";
+import type { LevelConfig } from "./logic/types";
+import { buildShapeArchitectManifest } from "./manifest";
 
 export type ShapeArchitectPracticeDifficulty = "easy" | "medium" | "hard";
 
@@ -32,8 +34,10 @@ export function getShapeArchitectCatalog() {
       name: `Workshop: ${config.name}`,
     };
   });
-  const configs = [...generatedConfigs, ...presetLevels];
-  const config = generatedConfigs[0] ?? presetLevels[0];
+  const configs: LevelConfig[] = [...generatedConfigs, ...presetLevels].map(
+    (c) => ({ ...c, manifest: buildShapeArchitectManifest(c) }),
+  );
+  const config = configs[0];
 
   return {
     config,
@@ -52,9 +56,10 @@ export function getShapeArchitectPracticeConfig(
     difficulty,
   );
 
-  return {
+  const base: LevelConfig = {
     ...config,
     id: `practice_${difficulty}_${normalizedSeed}`,
     name: `Practice: ${config.name}`,
   };
+  return { ...base, manifest: buildShapeArchitectManifest(base) };
 }

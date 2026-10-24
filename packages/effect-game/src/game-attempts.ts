@@ -26,6 +26,7 @@ export interface Attempt {
   moves: number;
   durationMs: number | null;
   mode: string;
+  completionJson: string | null;
   createdAt: Date | null;
 }
 
@@ -35,6 +36,13 @@ export interface GameStats {
   averageScore: number;
   averageMoves: number;
   bestScoreByLevel: Record<string, number>;
+}
+
+export interface PerGameStatRow {
+  gameId: string;
+  attempts: number;
+  /** 0..1 completed/attempts for this game. */
+  completionRate: number;
 }
 
 export interface GameAttemptsShape {
@@ -52,6 +60,10 @@ export interface GameAttemptsShape {
     playerId: string,
     gameId: string,
   ) => Effect.Effect<GameStats, GameAttemptsError>;
+
+  readonly getPerGameStats: (
+    playerId: string,
+  ) => Effect.Effect<PerGameStatRow[], GameAttemptsError>;
 }
 
 export const GameAttemptsService = Context.Service<GameAttemptsShape>(
@@ -99,6 +111,7 @@ export const GameAttemptsServiceLive = Layer.effect(
                 moves: schema.gameAttempts.moves,
                 durationMs: schema.gameAttempts.durationMs,
                 mode: schema.gameAttempts.mode,
+                completionJson: schema.gameAttempts.completionJson,
                 createdAt: schema.gameAttempts.createdAt,
               })
               .from(schema.gameAttempts)
@@ -167,5 +180,31 @@ export const GameAttemptsServiceLive = Layer.effect(
           ),
         };
       }),
+
+    getPerGameStats: (playerId) =>
+      withD1Retry(
+        Effect.tryPromise({
+          try: () =>
+            db
+              .select({
+                gameId: schema.gameAttempts.gameId,
+                attempts: count(),
+                completedCount: sql<number>`sum(case when ${schema.gameAttempts.completed} then 1 else 0 end)`,
+              })
+              .from(schema.gameAttempts)
+              .where(eq(schema.gameAttempts.playerId, playerId))
+              .groupBy(schema.gameAttempts.gameId),
+          catch: (cause) => new GameAttemptsError({ cause }),
+        }),
+      ).pipe(
+        Effect.map((rows) =>
+          rows.map((r) => ({
+            gameId: r.gameId,
+            attempts: r.attempts,
+            completionRate:
+              r.attempts > 0 ? Number(r.completedCount) / r.attempts : 0,
+          })),
+        ),
+      ),
   })),
 );

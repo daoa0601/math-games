@@ -37,7 +37,7 @@ export const getMyClassrooms = createServerFn({ method: 'GET' }).handler(() =>
 )
 
 export const createClassroom = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(CreateClassroomInput))
+  .validator(Schema.decodeUnknownSync(CreateClassroomInput))
   .handler(({ data }) =>
     runServerEffect(
       Effect.gen(function* () {
@@ -52,7 +52,7 @@ export const createClassroom = createServerFn({ method: 'POST' })
   )
 
 export const joinClassroom = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(JoinClassroomInput))
+  .validator(Schema.decodeUnknownSync(JoinClassroomInput))
   .handler(({ data }) =>
     runServerEffect(
       Effect.gen(function* () {
@@ -67,7 +67,7 @@ export const joinClassroom = createServerFn({ method: 'POST' })
   )
 
 export const getClassroomMembers = createServerFn({ method: 'GET' })
-  .inputValidator(
+  .validator(
     Schema.decodeUnknownSync(
       Schema.Struct({ classroomId: Schema.NonEmptyString }),
     ),
@@ -82,7 +82,7 @@ export const getClassroomMembers = createServerFn({ method: 'GET' })
   )
 
 export const getClassroomAssignments = createServerFn({ method: 'GET' })
-  .inputValidator(
+  .validator(
     Schema.decodeUnknownSync(
       Schema.Struct({ classroomId: Schema.NonEmptyString }),
     ),
@@ -97,7 +97,7 @@ export const getClassroomAssignments = createServerFn({ method: 'GET' })
   )
 
 export const createAssignment = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(CreateAssignmentInput))
+  .validator(Schema.decodeUnknownSync(CreateAssignmentInput))
   .handler(({ data }) =>
     runServerEffect(
       Effect.gen(function* () {

@@ -2,6 +2,7 @@
 // Shape Architect - Type Definitions
 // ========================================
 
+import type { LevelManifest } from "@math-games/core";
 import type { VoxelGrid } from "./voxel-grid";
 
 export type CellState = 0 | 1 | 2;
@@ -66,6 +67,8 @@ export interface LevelConfig {
   targetVoxels: Position3D[];
   pieces: Piece[];
   difficulty: Difficulty;
+  /** Pedagogical metadata (spatial skills + structural difficulty signals). */
+  manifest?: LevelManifest;
 }
 
 /** Interaction mode for the game */

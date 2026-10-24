@@ -33,7 +33,7 @@ test.describe('pattern-detective gameplay', () => {
     await expectHydrated(page)
 
     const main = page.locator('main')
-    await main.getByRole('button', { name: '12', exact: true }).click()
+    await main.getByRole('button', { name: '7', exact: true }).click()
 
     await expect(main.getByText('Try Again')).toBeVisible()
     await expect(main.getByText(/The answer is/)).toBeVisible()
@@ -86,6 +86,35 @@ test.describe('level navigation', () => {
     await page.getByRole('button', { name: 'Previous Level' }).click()
 
     await expect(page.getByText('1/18')).toBeVisible()
+
+    expectNoRuntimeErrors(errors)
+  })
+
+  test('magic-graph: board starts empty on first load', async ({ page }) => {
+    const errors = collectRuntimeErrors(page)
+
+    await page.goto('/games/magic-graph')
+    await expectHydrated(page)
+
+    const nodes = page.locator('button[aria-label^="Node "]:visible')
+    await expect(nodes.first()).toBeVisible()
+
+    // Board state must be initialized from the resolved level, not configs[0]:
+    // a mismatch leaves nodes styled as filled (bg-primary) while holding no
+    // number, and the first tap clears instead of placing.
+    const filledNodes = page.locator('button[aria-label^="Node "].bg-primary')
+    await expect(filledNodes).toHaveCount(0)
+
+    // Guard the selector against rot: placing a number must produce a
+    // filled-styled node.
+    await page
+      .locator('main')
+      .getByRole('button', { name: '1', exact: true })
+      .locator('visible=true')
+      .first()
+      .click()
+    await nodes.first().click()
+    await expect(filledNodes.first()).toBeVisible()
 
     expectNoRuntimeErrors(errors)
   })
@@ -174,13 +203,13 @@ test.describe('language toggle', () => {
     await expectHydrated(page)
 
     await expect(
-      page.getByRole('heading', { name: 'Pattern Detective' }),
+      page.getByRole('heading', { name: 'Pattern Detective', exact: true }),
     ).toBeVisible()
 
     await page.getByRole('button', { name: /Switch to Vietnamese/i }).click()
 
     await expect(
-      page.getByRole('heading', { name: 'Thám Tử Quy Luật' }),
+      page.getByRole('heading', { name: 'Thám Tử Quy Luật', exact: true }),
     ).toBeVisible()
 
     expectNoRuntimeErrors(errors)
@@ -194,7 +223,7 @@ test.describe('language toggle', () => {
 
     await page.getByRole('button', { name: /Switch to Vietnamese/i }).click()
 
-    await page.getByRole('button', { name: '12', exact: true }).click()
+    await page.getByRole('button', { name: '7', exact: true }).click()
 
     await expect(page.getByText('Thử Lại')).toBeVisible()
     await expect(page.getByText(/Đáp án là/)).toBeVisible()

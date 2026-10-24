@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { Schema } from 'effect'
 
-import { GameProgressRequest } from '@/games/game-progress.schema'
+import { GameProgressRequest } from '@math-games/core'
 import {
   createGetCatalogHandler,
   createRecordProgressPipeline,
@@ -15,7 +15,7 @@ export const getMagicGraphLevel = createServerFn({ method: 'GET' }).handler(
 )
 
 export const recordMagicGraphProgress = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(GameProgressRequest))
+  .validator(Schema.decodeUnknownSync(GameProgressRequest))
   .handler(({ data }) =>
     runServerEffect(createRecordProgressPipeline(magicGraphModule, data)),
   )

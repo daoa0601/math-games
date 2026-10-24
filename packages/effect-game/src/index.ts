@@ -6,7 +6,13 @@ export { DbService, DbServiceLive } from "./db";
 export type { DbShape } from "./db";
 export { GameLayer } from "./game-layer";
 export { GameAttemptsService, GameAttemptsServiceLive } from "./game-attempts";
-export type { GameAttemptsShape, GameStats } from "./game-attempts";
+export type {
+  Attempt,
+  AttemptInput,
+  GameAttemptsShape,
+  GameStats,
+  PerGameStatRow,
+} from "./game-attempts";
 export type { PlayerIdentity } from "./identity.server";
 export {
   createPlayerIdentity,
@@ -27,3 +33,17 @@ export {
 export type { PlayerIdentityShape } from "./player-identity";
 export { RankService, RankServiceLive } from "./rank";
 export type { RankShape, RankDelta } from "./rank";
+export {
+  ClientMetricsService,
+  ClientMetricsServiceLive,
+  HealthService,
+  HealthServiceLive,
+} from "./metrics";
+export type {
+  ClientMetricInput,
+  ClientMetricKind,
+  ClientMetricsAggregate,
+  ClientMetricsShape,
+  HealthShape,
+  HealthSnapshot,
+} from "./metrics";

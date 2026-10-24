@@ -1,6 +1,7 @@
 import type {
   AchievementContext,
   DailyChallengePick,
+  DailyPickInput,
   GameFeedback,
   GameProgressInput,
 } from "@math-games/core";
@@ -39,8 +40,15 @@ export interface SequenceRaceCompletion {
 
 const cachedCatalog = getSequenceRaceCatalog();
 
-function getDailyPick(hash: number): DailyChallengePick {
-  const config = presetGames[hash % presetGames.length];
+function getDailyPick({
+  seed,
+  difficulty,
+}: DailyPickInput): DailyChallengePick {
+  const pool = difficulty
+    ? presetGames.filter((c) => c.difficulty === difficulty)
+    : presetGames;
+  const list = pool.length > 0 ? pool : presetGames;
+  const config = list[seed % list.length];
   return {
     levelId: config.id,
     title: config.name,
@@ -49,7 +57,7 @@ function getDailyPick(hash: number): DailyChallengePick {
 }
 
 function resolveLevelConfig(levelId: string): GameConfig | null {
-  const preset = presetGames.find((c) => c.id === levelId);
+  const preset = cachedCatalog.configs.find((c) => c.id === levelId);
   if (preset) return preset;
 
   const match = levelId.match(practiceIdPattern);

@@ -8,6 +8,18 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./three-scene": {
+      "types": "./src/rendering/three-scene.ts",
+      "default": "./src/rendering/three-scene.ts"
+    },
+    "./perf-monitor": {
+      "types": "./src/rendering/perf-monitor.ts",
+      "default": "./src/rendering/perf-monitor.ts"
+    },
+    "./picking": {
+      "types": "./src/rendering/picking.ts",
+      "default": "./src/rendering/picking.ts"
+    },
     "./forge": {
       "types": "./dist/solution-forge.d.ts",
       "default": "./dist/solution-forge.js"
@@ -21,11 +33,12 @@
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "eslint"
+    "lint": "eslint",
+    "bench": "tsx scripts/benchmark.ts"
   },
   "dependencies": {
     "@math-games/core": "workspace:*",
-    "effect": "4.0.0-beta.66",
+    "effect": "4.0.6",
     "three": "0.184.0"
   },
   "devDependencies": {
@@ -35,6 +48,6 @@
     "react": "19.2.6",
     "tsup": "8.5.0",
     "typescript": "6.0.3",
-    "vitest": "4.1.6"
+    "vitest": "5.0.5"
   }
 }

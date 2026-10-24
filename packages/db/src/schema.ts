@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  index,
   integer,
   primaryKey,
   sqliteTable,
@@ -87,23 +88,35 @@ export const dailyPlayerResults = sqliteTable(
   (table) => [primaryKey({ columns: [table.playerId, table.challengeDate] })],
 );
 
-export const gameAttempts = sqliteTable("game_attempts", {
-  id: text("id").primaryKey(),
-  playerId: text("player_id")
-    .notNull()
-    .references(() => players.id, { onDelete: "cascade" }),
-  gameId: text("game_id").notNull(),
-  levelId: text("level_id").notNull(),
-  score: integer("score").notNull(),
-  completed: integer("completed", { mode: "boolean" }).notNull(),
-  moves: integer("moves").notNull(),
-  durationMs: integer("duration_ms"),
-  mode: text("mode").notNull().default("practice"),
-  completionJson: text("completion_json"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-});
+export const gameAttempts = sqliteTable(
+  "game_attempts",
+  {
+    id: text("id").primaryKey(),
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    gameId: text("game_id").notNull(),
+    levelId: text("level_id").notNull(),
+    score: integer("score").notNull(),
+    completed: integer("completed", { mode: "boolean" }).notNull(),
+    moves: integer("moves").notNull(),
+    durationMs: integer("duration_ms"),
+    mode: text("mode").notNull().default("practice"),
+    completionJson: text("completion_json"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  // Left-prefix (player_id, game_id) serves per-game stats, history, and the
+  // classroom getMembers correlated subquery.
+  (table) => [
+    index("game_attempts_player_game_created_idx").on(
+      table.playerId,
+      table.gameId,
+      table.createdAt,
+    ),
+  ],
+);
 
 export const classrooms = sqliteTable("classrooms", {
   id: text("id").primaryKey(),
@@ -133,7 +146,11 @@ export const classroomMembers = sqliteTable(
       .notNull()
       .default(sql`(unixepoch())`),
   },
-  (table) => [primaryKey({ columns: [table.classroomId, table.playerId] })],
+  (table) => [
+    primaryKey({ columns: [table.classroomId, table.playerId] }),
+    // Per-submission `WHERE player_id` lookup; player_id is not the leading PK column.
+    index("classroom_members_player_idx").on(table.playerId),
+  ],
 );
 
 export const assignments = sqliteTable("assignments", {
@@ -181,6 +198,14 @@ export const leaderboardEntries = sqliteTable(
     primaryKey({
       columns: [table.playerId, table.gameId, table.levelId, table.scope],
     }),
+    // Classroom leaderboard `WHERE scope = ? AND game_id = ? AND level_id = ? ORDER BY score DESC LIMIT 50`;
+    // PK leads with player_id, so it cannot serve this. ASC index scanned backwards covers ORDER BY score DESC.
+    index("leaderboard_scope_game_level_score_idx").on(
+      table.scope,
+      table.gameId,
+      table.levelId,
+      table.score,
+    ),
   ],
 );
 
@@ -196,4 +221,68 @@ export const dailyChallenges = sqliteTable(
       .default(sql`(unixepoch())`),
   },
   (table) => [uniqueIndex("daily_challenges_seed_idx").on(table.seed)],
+);
+
+// Per-player daily challenge selection, pinned on first load so a player's daily
+// stays stable across reloads/devices for the day (their skill stats change as
+// they play, which would otherwise drift the pick). No seed unique index — per
+// -player seeds collide across players by design.
+export const playerDailySelections = sqliteTable(
+  "player_daily_selections",
+  {
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    challengeDate: text("challenge_date").notNull(),
+    gameId: text("game_id").notNull(),
+    levelId: text("level_id").notNull(),
+    seed: text("seed").notNull(),
+    configJson: text("config_json").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [primaryKey({ columns: [table.playerId, table.challengeDate] })],
+);
+
+// Client-side performance and health events (FPS, frame-time percentiles,
+// web-vitals, render-mode, errors). Append-only, written from the browser
+// via the recordClientMetric server fn and aggregated by the admin health
+// dashboard. Kept narrow so high-cardinality fields stay in a JSON blob.
+export const clientMetrics = sqliteTable(
+  "client_metrics",
+  {
+    id: text("id").primaryKey(),
+    playerId: text("player_id").references(() => players.id, {
+      onDelete: "cascade",
+    }),
+    // Coarse event class: perf | vitals | error | usage
+    kind: text("kind").notNull(),
+    // Stable event name within the class: "shape-architect.frame",
+    // "web-vitals.lcp", "render.error", etc.
+    name: text("name").notNull(),
+    // Game id when applicable (nullable for app-wide events).
+    gameId: text("game_id"),
+    levelId: text("level_id"),
+    // Numeric metric value in the event's natural unit (ms, fps, count).
+    value: integer("value"),
+    // Snapshot/payload — percentiles, userAgent, session id, tags.
+    payloadJson: text("payload_json"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [
+    // Health dashboard: "WHERE kind = ? AND name = ? AND created_at >= ?".
+    index("client_metrics_kind_name_created_idx").on(
+      table.kind,
+      table.name,
+      table.createdAt,
+    ),
+    // Per-player drill-down: "WHERE player_id = ? ORDER BY created_at DESC".
+    index("client_metrics_player_created_idx").on(
+      table.playerId,
+      table.createdAt,
+    ),
+  ],
 );

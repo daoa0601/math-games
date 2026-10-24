@@ -1,7 +1,9 @@
 export { cn } from "./cn";
 
-export { Badge, badgeVariants } from "./ui/badge";
-export { Button, buttonVariants } from "./ui/button";
+export { Badge } from "./ui/badge";
+export { badgeVariants } from "./ui/badge-variants";
+export { Button } from "./ui/button";
+export { buttonVariants } from "./ui/button-variants";
 export {
   Card,
   CardContent,
@@ -18,7 +20,8 @@ export {
 export { Progress } from "./ui/progress";
 export { Separator } from "./ui/separator";
 export { Skeleton } from "./ui/skeleton";
-export { Toggle, toggleVariants } from "./ui/toggle";
+export { Toggle } from "./ui/toggle";
+export { toggleVariants } from "./ui/toggle-variants";
 export { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
 export { AnimatedCounter } from "./animated-counter";

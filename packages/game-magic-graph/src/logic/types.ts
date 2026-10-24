@@ -2,6 +2,8 @@
 // Magic Graph - Type Definitions
 // ========================================
 
+import type { LevelManifest } from "@math-games/core";
+
 export interface Position {
   x: number;
   y: number;
@@ -33,6 +35,8 @@ export interface PuzzleConfig {
   difficulty: Difficulty;
   /** Whether this puzzle has a valid solution (default: true) */
   isSolvable?: boolean;
+  /** Pedagogical metadata: skills, difficulty features, server-only solution trace. */
+  manifest?: LevelManifest;
 }
 
 export interface PuzzleState {

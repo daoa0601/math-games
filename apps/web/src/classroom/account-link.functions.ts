@@ -15,7 +15,7 @@ const VerifyLinkInput = Schema.Struct({
 })
 
 export const requestAccountLink = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(RequestLinkInput))
+  .validator(Schema.decodeUnknownSync(RequestLinkInput))
   .handler(({ data }) =>
     runServerEffect(
       Effect.gen(function* () {
@@ -32,7 +32,7 @@ export const requestAccountLink = createServerFn({ method: 'POST' })
   )
 
 export const verifyAccountLink = createServerFn({ method: 'POST' })
-  .inputValidator(Schema.decodeUnknownSync(VerifyLinkInput))
+  .validator(Schema.decodeUnknownSync(VerifyLinkInput))
   .handler(({ data }) =>
     runServerEffect(
       Effect.gen(function* () {

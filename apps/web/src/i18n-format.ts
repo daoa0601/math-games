@@ -1,15 +1,4 @@
-import type { AchievementRarity } from '@math-games/core'
-import { magicGraphModule } from '@math-games/game-magic-graph'
-import { patternDetectiveModule } from '@math-games/game-pattern-detective'
-import { sequenceRaceModule } from '@math-games/game-sequence-race'
-import { shapeArchitectModule } from '@math-games/game-shape-architect'
-
-const GAME_MODULES = [
-  magicGraphModule,
-  sequenceRaceModule,
-  shapeArchitectModule,
-  patternDetectiveModule,
-] as const
+import type { AchievementRarity, GameFeedback } from '@math-games/core'
 
 import { t, tx } from './i18n-translations'
 import type { Locale } from '@math-games/ui'
@@ -17,14 +6,6 @@ import type { Locale } from '@math-games/ui'
 function toCamel(kebab: string) {
   return kebab.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
 }
-
-const gameTitleKeys: Record<string, string> = Object.fromEntries(
-  GAME_MODULES.map((m) => [m.id, `gameTitle.${toCamel(m.id)}`]),
-)
-
-const gameDescriptionKeys: Record<string, string> = Object.fromEntries(
-  GAME_MODULES.map((m) => [m.id, `gameDescription.${toCamel(m.id)}`]),
-)
 
 const levelNameKeys = new Map<string, string>([
   ['Line of Three', 'level.lineOfThree'],
@@ -83,13 +64,11 @@ export function formatDifficulty(locale: Locale, difficulty: string) {
 }
 
 export function formatGameTitle(locale: Locale, gameId: string) {
-  const key = gameTitleKeys[gameId]
-  return key ? tx(locale, key, gameId) : gameId
+  return tx(locale, `gameTitle.${toCamel(gameId)}`, gameId)
 }
 
 export function formatGameDescription(locale: Locale, gameId: string) {
-  const key = gameDescriptionKeys[gameId]
-  return key ? tx(locale, key, '') : ''
+  return tx(locale, `gameDescription.${toCamel(gameId)}`, '')
 }
 
 export function formatAchievementName(locale: Locale, achievementId: string) {
@@ -116,6 +95,27 @@ export function formatRankName(locale: Locale, rankName: string) {
 
 export function formatActor(locale: Locale, actor: string) {
   return tx(locale, `actor.${actor}`, actor)
+}
+
+const FEEDBACK_PLACEHOLDER = /\{(\w+)\}/g
+
+/**
+ * Localize a structured GameFeedback for display. Only the keyed
+ * `misconception` channel is rendered — its labelKey resolves in the merged
+ * game translations and {param} placeholders are interpolated. Other kinds
+ * return null so callers fall back to a generic message.
+ */
+export function formatGameFeedback(
+  locale: Locale,
+  feedback: GameFeedback | null | undefined,
+): string | null {
+  if (!feedback || feedback.kind !== 'misconception') return null
+  const template = tx(locale, feedback.labelKey, feedback.labelKey)
+  const { params } = feedback
+  if (!params) return template
+  return template.replace(FEEDBACK_PLACEHOLDER, (match, key: string) =>
+    key in params ? String(params[key]) : match,
+  )
 }
 
 export function formatLevelName(locale: Locale, name: string): string {

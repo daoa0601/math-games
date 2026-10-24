@@ -2,6 +2,8 @@
 // Sequence Sprinter - Type Definitions
 // ========================================
 
+import type { LevelManifest } from "@math-games/core";
+
 export type SequenceType =
   | "arithmetic"
   | "geometric"
@@ -48,4 +50,6 @@ export interface GameConfig {
   mode?: GameMode;
   /** If true, AI moves first (player has second-mover advantage) */
   aiMovesFirst?: boolean;
+  /** Pedagogical metadata (skills, misconceptions, difficulty signals). */
+  manifest?: LevelManifest;
 }

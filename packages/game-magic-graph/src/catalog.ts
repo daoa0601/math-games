@@ -3,6 +3,7 @@ import { createSeededRandom } from "@math-games/core";
 import { puzzleTemplates } from "./logic";
 import type { PuzzleConfig } from "./logic";
 import { generateSeededPuzzle } from "./logic/seededGenerator";
+import { buildMagicGraphManifest } from "./manifest";
 
 export type MagicGraphPracticeDifficulty = "easy" | "medium" | "hard";
 
@@ -19,10 +20,13 @@ function normalizePracticeSeed(seed: string) {
 }
 
 export function getMagicGraphCatalog() {
-  const configs: PuzzleConfig[] = puzzleTemplates.map((template) => ({
-    ...template,
-    id: createMagicGraphPuzzleId(template.name),
-  }));
+  const configs: PuzzleConfig[] = puzzleTemplates.map((template) => {
+    const base: PuzzleConfig = {
+      ...template,
+      id: createMagicGraphPuzzleId(template.name),
+    };
+    return { ...base, manifest: buildMagicGraphManifest(base) };
+  });
   const config =
     configs.find((candidate) => candidate.id === "magic-triangle") ??
     configs[0];
@@ -44,9 +48,10 @@ export function getMagicGraphPracticeConfig(
     difficulty,
   );
 
-  return {
+  const base: PuzzleConfig = {
     ...config,
     id: `practice_${difficulty}_${normalizedSeed}`,
     name: `Practice: ${config.name}`,
   };
+  return { ...base, manifest: buildMagicGraphManifest(base, normalizedSeed) };
 }

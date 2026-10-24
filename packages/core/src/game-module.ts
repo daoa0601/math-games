@@ -1,6 +1,7 @@
 import { Effect, Schema } from "effect";
 
 import { GameProgressValidationError } from "./errors";
+import type { LevelManifest } from "./level-manifest";
 
 export type AchievementCategory = "global" | string;
 export type AchievementRarity = "common" | "rare" | "epic" | "legendary";
@@ -10,6 +11,8 @@ export interface AchievementUnlockCondition {
   difficulty?: string;
   isOptimalSolution?: boolean;
   wasWinner?: boolean;
+  /** Unlock only when the played level exercises this skill (manifest skillTag). */
+  skillTag?: string;
 }
 
 export interface Achievement {
@@ -30,6 +33,8 @@ export interface AchievementContext {
   isOptimalSolution?: boolean;
   wasWinner?: boolean;
   gamesPlayedByType?: Record<string, number>;
+  /** Skills the played level exercises (from its manifest), for skill-gated achievements. */
+  skillTags?: readonly string[];
 }
 
 export interface ScoreContext {
@@ -50,6 +55,16 @@ export interface DailyChallengePick {
   difficulty: string;
 }
 
+/**
+ * Input to a game's daily pick: a deterministic per-player seed and an optional
+ * difficulty hint from the skill-aware planner. The module picks a concrete
+ * level, preferring the hinted difficulty and falling back to its full catalog.
+ */
+export interface DailyPickInput {
+  seed: number;
+  difficulty?: string;
+}
+
 export interface GameCatalog<TConfig> {
   config: TConfig;
   configs: TConfig[];
@@ -66,13 +81,21 @@ export type GameFeedback =
   | { kind: "ai-forced-win"; finalMove: number }
   | { kind: "collision"; pieceId: string; collidingWith: string }
   | { kind: "out-of-bounds"; pieceId: string }
+  // Misconception-targeted feedback: a localizable key (+ params) instead of a
+  // raw English string, so item logic stays string-free and en/vi parity holds.
+  | {
+      kind: "misconception";
+      labelKey: string;
+      params?: Readonly<Record<string, string | number>>;
+    }
   | { kind: "generic"; message: string };
 
 export interface GameModule<
-  TConfig extends { id: string; difficulty: string } = {
-    id: string;
-    difficulty: string;
-  },
+  TConfig extends { id: string; difficulty: string; manifest?: LevelManifest } =
+    {
+      id: string;
+      difficulty: string;
+    },
 > {
   readonly id: string;
   readonly route: string;
@@ -85,7 +108,7 @@ export interface GameModule<
   readonly levelCount: number;
   readonly translations: GameTranslations;
   readonly getCatalog: () => GameCatalog<TConfig>;
-  readonly getDailyPick: (hash: number) => DailyChallengePick;
+  readonly getDailyPick: (opts: DailyPickInput) => DailyChallengePick;
   readonly computeScore: (ctx: ScoreContext) => number;
   readonly evaluateAchievements: (
     ctx: AchievementContext,
@@ -109,6 +132,7 @@ export interface GameModule<
       moves: number;
       score: number;
       difficulty: string;
+      manifest?: LevelManifest;
       isOptimalSolution?: boolean;
       wasWinner?: boolean;
       feedback?: GameFeedback;
@@ -118,7 +142,7 @@ export interface GameModule<
 }
 
 export function createValidateAndComputeScore<
-  TConfig extends { id: string; difficulty: string },
+  TConfig extends { id: string; difficulty: string; manifest?: LevelManifest },
 >(parts: {
   completionSchema: Schema.Decoder<unknown>;
   resolveLevelConfig: (levelId: string) => TConfig | null;
@@ -170,6 +194,7 @@ export function createValidateAndComputeScore<
         moves: validation.moves,
         score,
         difficulty: level.difficulty,
+        ...(level.manifest ? { manifest: level.manifest } : {}),
         feedback: validation.feedback,
         ...extras,
       };
@@ -196,6 +221,8 @@ function evaluateAchievementsByCondition(
         return false;
       if (c.wasWinner !== undefined && ctx.wasWinner !== c.wasWinner)
         return false;
+      if (c.skillTag !== undefined && !ctx.skillTags?.includes(c.skillTag))
+        return false;
       return true;
     })
     .map((a) => a.id);
@@ -208,7 +235,7 @@ type GameValidationResult = {
 } | null;
 
 export interface GameModuleInput<
-  TConfig extends { id: string; difficulty: string },
+  TConfig extends { id: string; difficulty: string; manifest?: LevelManifest },
 > {
   id: string;
   route: string;
@@ -230,7 +257,7 @@ export interface GameModuleInput<
   ) => string[];
   getCatalog?: () => GameCatalog<TConfig>;
   levelCount?: number;
-  getDailyPick?: (hash: number) => DailyChallengePick;
+  getDailyPick?: (opts: DailyPickInput) => DailyChallengePick;
   resolveLevelConfig?: (levelId: string) => TConfig | null;
   validateGameState?: (level: TConfig, raw: unknown) => GameValidationResult;
   progressExtras?: (input: GameProgressInput) => {
@@ -240,7 +267,7 @@ export interface GameModuleInput<
 }
 
 export function createGameModule<
-  TConfig extends { id: string; difficulty: string },
+  TConfig extends { id: string; difficulty: string; manifest?: LevelManifest },
   const TId extends string,
   const TRoute extends string,
 >(
@@ -262,8 +289,12 @@ export function createGameModule<
 
   const getDailyPick =
     input.getDailyPick ??
-    ((hash: number) => {
-      const level = catalog[hash % catalog.length];
+    (({ seed, difficulty }: DailyPickInput) => {
+      const pool = difficulty
+        ? catalog.filter((c) => c.difficulty === difficulty)
+        : catalog;
+      const list = pool.length > 0 ? pool : catalog;
+      const level = list[seed % list.length];
       return {
         levelId: level.id,
         title: level.id,

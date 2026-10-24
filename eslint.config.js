@@ -27,6 +27,9 @@ export default [
       "**/vite.config.ts",
       "**/playwright.config.ts",
       "**/eslint.config.js",
+      // Benchmarks and one-off scripts live outside the package tsconfig
+      // `include`, so the typed parser can't resolve them.
+      "**/scripts/**",
     ],
   },
 ];

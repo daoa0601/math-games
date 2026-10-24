@@ -25,9 +25,7 @@ export const KvCacheServiceLive = Layer.effect(
           try {
             const raw = await kv.get(key, "text");
             if (raw === null) return null;
-            const parsed: unknown = JSON.parse(raw);
-            if (parsed === null || typeof parsed !== "object") return null;
-            return parsed as T;
+            return JSON.parse(raw) as T;
           } catch {
             return null;
           }

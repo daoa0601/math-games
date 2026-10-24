@@ -12,8 +12,16 @@ import { playerCookieName } from "../identity.server";
 const FIXED_UUID = "550e8400-e29b-41d4-a716-446655440000";
 const VALID_PLAYER_ID = `player_${FIXED_UUID}`;
 
-function buildLayer(headers: Record<string, string>) {
+function buildLayer(
+  headers: Record<string, string>,
+  options: {
+    readonly uuids?: ReadonlyArray<string>;
+    readonly currentRequest?: () => object;
+  } = {},
+) {
   const setCookies: Array<{ name: string; value: string }> = [];
+  const request = {};
+  const uuids = [...(options.uuids ?? [])];
 
   const headerLayer = Layer.succeed(HeaderService, {
     getRequest: (name: string) => Effect.succeed(headers[name] ?? null),
@@ -21,10 +29,12 @@ function buildLayer(headers: Record<string, string>) {
       setCookies.push({ name, value });
       return Effect.void;
     },
+    currentRequest: () =>
+      Effect.sync(() => options.currentRequest?.() ?? request),
   });
 
   const randomLayer = Layer.succeed(RandomService, {
-    uuid: () => Effect.succeed(FIXED_UUID),
+    uuid: () => Effect.sync(() => uuids.shift() ?? FIXED_UUID),
   });
 
   const layer = PlayerIdentityServiceLive.pipe(
@@ -83,6 +93,58 @@ describe("PlayerIdentityService", () => {
 
     expect(identity.id).toBe(VALID_PLAYER_ID);
     expect(setCookies.length).toBe(1);
+  });
+
+  it("shares one new player across concurrent resolves in a request", async () => {
+    const { layer, setCookies } = buildLayer(
+      { host: "math-games.example.com" },
+      {
+        uuids: [
+          "11111111-1111-4111-8111-111111111111",
+          "22222222-2222-4222-8222-222222222222",
+        ],
+      },
+    );
+
+    const [daily, profile] = await Effect.runPromise(
+      Effect.gen(function* () {
+        const service = yield* PlayerIdentityService;
+        return yield* Effect.all([service.resolveId(), service.resolveId()], {
+          concurrency: "unbounded",
+        });
+      }).pipe(Effect.provide(layer)),
+    );
+
+    expect(profile).toBe(daily);
+    expect(setCookies).toHaveLength(1);
+    expect(setCookies[0].value).toContain(daily);
+  });
+
+  it("mints separate players for separate cookieless requests", async () => {
+    let request = {};
+    const { layer, setCookies } = buildLayer(
+      { host: "math-games.example.com" },
+      {
+        uuids: [
+          "11111111-1111-4111-8111-111111111111",
+          "22222222-2222-4222-8222-222222222222",
+        ],
+        currentRequest: () => request,
+      },
+    );
+
+    const [first, second] = await Effect.runPromise(
+      Effect.gen(function* () {
+        const service = yield* PlayerIdentityService;
+        const first = yield* service.resolveId();
+        request = {};
+        const second = yield* service.resolveId();
+        return [first, second] as const;
+      }).pipe(Effect.provide(layer)),
+    );
+
+    expect(second).not.toBe(first);
+    expect(setCookies).toHaveLength(2);
   });
 
   it("resolveId returns just the id string", async () => {

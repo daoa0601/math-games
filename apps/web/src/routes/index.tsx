@@ -19,9 +19,8 @@ import {
   useT,
   Wordmark,
 } from '@math-games/ui'
-import { getDailyChallenge } from '@/daily/daily.functions'
+import { getDailyChallengeAndOverview } from '@/daily/daily.functions'
 import { publishedGameModules, registry } from '@/games/registry'
-import { getPlayerProfileOverview } from '@/player/profile.functions'
 import type { PlayerProgressSummary } from '@/player/profile.server'
 import { RouteErrorFallback } from '@/routes/-route-error'
 import { RoutePending } from '@/routes/-route-pending'
@@ -37,10 +36,8 @@ const GAME_PATTERN: Record<string, PatternType> = {
 
 export const Route = createFileRoute('/')({
   loader: async () => {
-    const [overview, dailyChallenge] = await Promise.all([
-      getPlayerProfileOverview(),
-      getDailyChallenge(),
-    ])
+    const { challenge: dailyChallenge, overview } =
+      await getDailyChallengeAndOverview()
 
     return {
       dailyChallenge,
@@ -132,7 +129,10 @@ function Home() {
           <div className="mt-6 flex flex-wrap gap-2">
             <Link
               className={buttonVariants()}
-              search={{ level: dailyChallenge.levelId }}
+              search={{
+                level: dailyChallenge.levelId,
+                daily: dailyChallenge.challengeDate,
+              }}
               to={dailyTo}
             >
               {t('home.start')} →
@@ -246,6 +246,7 @@ function Home() {
             title={formatLevelName(locale, dailyChallenge.title)}
             to={dailyTo}
             levelId={dailyChallenge.levelId}
+            daily={dailyChallenge.challengeDate}
           />
 
           {/* Quick Stats */}
@@ -341,18 +342,20 @@ function DailyHeroCard({
   title,
   to,
   levelId,
+  daily,
 }: {
   gameId: GameGlyphId
   title: string
   to: string
   levelId: string
+  daily: string
 }) {
   const t = useT()
 
   return (
     <Link
       to={to}
-      search={{ level: levelId }}
+      search={{ level: levelId, daily }}
       className={`theme-${gameId} block`}
     >
       <article

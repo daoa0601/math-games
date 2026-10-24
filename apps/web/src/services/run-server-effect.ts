@@ -12,9 +12,11 @@ import type {
 } from '@math-games/effect-infra'
 import type {
   AnalyticsShape,
+  ClientMetricsShape,
   DbShape,
   DailyStreakShape,
   GameAttemptsShape,
+  HealthShape,
   LeaderboardShape,
   PlayerIdentityShape,
   RankShape,
@@ -49,8 +51,10 @@ export type AppServices =
   | AnalyticsShape
   | AssignmentShape
   | ClassroomShape
+  | ClientMetricsShape
   | DailyStreakShape
   | GameAttemptsShape
+  | HealthShape
   | LeaderboardShape
   | DbShape
   | OriginGuardShape
@@ -128,7 +132,13 @@ export function runServerEffect<TResult, TError extends ServerError>(
 ): Promise<TResult> {
   return getRuntime().runPromise(
     effect.pipe(
-      Effect.tapError((e) => Effect.log(`Server error [${e._tag}]`)),
+      // Log the full error object at ERROR level (not just the _tag at INFO,
+      // which hid the actionable detail — e.g. a GameProgressValidationError's
+      // `reason` or a ProgressWriteError's nested cause). tapError sees typed
+      // errors only, so uncaught defects still bypass this; a cause-level
+      // handler (catchAllCause) would close that gap if this Effect build
+      // exposes it.
+      Effect.tapError((e) => Effect.logError('Server function failed', e)),
       Effect.mapError(toUserFacingError),
     ),
   )

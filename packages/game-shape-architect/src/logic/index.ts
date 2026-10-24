@@ -94,3 +94,13 @@ export {
 
 // Bitboard
 export { VoxelBitboard } from "./voxel-bitboard";
+
+// Placement state machine (pure; extracted from the React route)
+export {
+  buildOptimisticGrid,
+  resolveGhostPiece,
+  attemptPlacement,
+  groupCellsByColor,
+  type GhostPiece,
+  type PlacementOutcome,
+} from "./placement";

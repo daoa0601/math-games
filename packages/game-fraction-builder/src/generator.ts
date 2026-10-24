@@ -3,6 +3,7 @@ import { createDailyRandom, createSeededRandom } from "@math-games/core";
 
 import { catalog, gcd } from "./catalog";
 import type { Difficulty, FractionConfig, FractionMode } from "./catalog";
+import { buildFractionBuilderManifest } from "./manifest";
 
 // Unlike the curated catalog (where difficulty is pinned 1:1 to a mode),
 // generated and practice levels decouple the two: each tier can serve any of
@@ -131,7 +132,10 @@ export function getFractionBuilderCatalog() {
     ),
     id: `fb-${difficulty}-${seed}`,
   }));
-  const configs = [...catalog, ...generated];
+  const configs: FractionConfig[] = [...catalog, ...generated].map((base) => ({
+    ...base,
+    manifest: buildFractionBuilderManifest(base),
+  }));
   const config = configs[0];
 
   return { config, configs, initialConfigId: config.id };
@@ -142,7 +146,7 @@ export function getFractionBuilderPracticeConfig(
   difficulty: Difficulty,
 ): FractionConfig {
   const normalized = normalizeSeed(seed);
-  return {
+  const base: FractionConfig = {
     ...generateFraction(
       createSeededRandom(
         `fraction-builder-practice-${difficulty}-${normalized}`,
@@ -151,14 +155,16 @@ export function getFractionBuilderPracticeConfig(
     ),
     id: `practice_${difficulty}_${normalized}`,
   };
+  return { ...base, manifest: buildFractionBuilderManifest(base, normalized) };
 }
 
 export function getDailyFractionBuilderLevel(date?: string): FractionConfig {
   const dateStr = date ?? new Date().toISOString().split("T")[0];
   const rng = createDailyRandom(dateStr, "fraction-builder");
   const difficulty = rng.pick(["medium", "hard", "expert"] as const);
-  return {
+  const base: FractionConfig = {
     ...generateFraction(rng, difficulty),
     id: `daily_${difficulty}_${dateStr}`,
   };
+  return { ...base, manifest: buildFractionBuilderManifest(base, dateStr) };
 }
